@@ -3,7 +3,9 @@ import {
   X, ChevronDown, ChevronRight,
   Menu, AlignCenter, Layout, Columns, Star, LayoutTemplate,
   Grid3x3, Grid, Image as ImageIcon, BarChart, Quote, Grid2x2,
-  Megaphone, HelpCircle,
+  Megaphone, HelpCircle, FileText, Sparkles, MonitorPlay,
+  ListOrdered, CreditCard, MessageSquareQuote, Users, TrendingUp,
+  ArrowRightCircle, Zap, ShoppingCart, Puzzle, BookOpen, PanelBottom,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { TemplateBlockType, LayoutVariant } from "./types";
@@ -12,6 +14,24 @@ interface TemplateItem { type: TemplateBlockType; label: string; Icon: LucideIco
 interface Group { name: string; items: TemplateItem[] }
 
 const GROUPS: Group[] = [
+  { name: "Salescode Branded", items: [
+    { type: "hero-salescode", label: "Hero — Salescode", Icon: Sparkles },
+    { type: "impact-salescode", label: "Impact Stats", Icon: TrendingUp },
+    { type: "clients-salescode", label: "Client Logos", Icon: Grid2x2 },
+    { type: "security-salescode", label: "Security Banner", Icon: Zap },
+    { type: "experience-video-salescode", label: "Experience Video", Icon: MonitorPlay },
+    { type: "cta-salescode", label: "CTA — Salescode", Icon: Megaphone },
+    { type: "navbar-salescode-slot", label: "Navbar", Icon: LayoutTemplate },
+    { type: "product-selection-slot", label: "Product Selection", Icon: ShoppingCart },
+    { type: "platform-features-slot", label: "Platform Features", Icon: Grid2x2 },
+    { type: "integrations-slot", label: "Integrations Grid", Icon: Puzzle },
+    { type: "blogs-section-slot", label: "Featured Blogs", Icon: BookOpen },
+    { type: "footer-salescode-slot", label: "Footer", Icon: PanelBottom },
+    { type: "about-page-slot", label: "About Page", Icon: FileText },
+    { type: "clients-page-slot", label: "Clients Page", Icon: Users },
+    { type: "contact-page-slot", label: "Contact Us Page", Icon: Megaphone },
+    { type: "blog-page-slot", label: "Blog Page", Icon: FileText },
+  ]},
   { name: "Navigation", items: [
     { type: "nav-simple", label: "Nav Simple", Icon: Menu },
     { type: "nav-centered", label: "Nav Centered", Icon: AlignCenter },
@@ -23,18 +43,43 @@ const GROUPS: Group[] = [
   { name: "Hero", items: [
     { type: "hero-centered", label: "Hero Centered", Icon: Star },
     { type: "hero-split", label: "Hero Split", Icon: LayoutTemplate },
+    { type: "hero-gradient", label: "Hero Gradient", Icon: Sparkles },
+    { type: "hero-centered-image", label: "Hero + Image", Icon: MonitorPlay },
   ]},
   { name: "Features", items: [
     { type: "features-3col", label: "Features 3 Column", Icon: Grid3x3 },
     { type: "features-4col", label: "Features 4 Column", Icon: Grid },
+    { type: "features-alternating", label: "Features Alternating", Icon: ListOrdered },
+    { type: "features-icon-cards", label: "Features Icon Cards", Icon: Zap },
+  ]},
+  { name: "Pricing", items: [
+    { type: "pricing-modern", label: "Pricing Modern", Icon: CreditCard },
+  ]},
+  { name: "Social Proof", items: [
+    { type: "testimonials", label: "Testimonials", Icon: Quote },
+    { type: "testimonials-wall", label: "Testimonials Wall", Icon: MessageSquareQuote },
+  ]},
+  { name: "Team", items: [
+    { type: "team-grid", label: "Team Grid", Icon: Users },
+  ]},
+  { name: "Stats", items: [
+    { type: "stats-bar", label: "Stats Bar", Icon: BarChart },
+    { type: "stats-bold", label: "Stats Bold", Icon: TrendingUp },
+  ]},
+  { name: "Process", items: [
+    { type: "steps-process", label: "Steps Process", Icon: ArrowRightCircle },
   ]},
   { name: "Content", items: [
     { type: "text-image", label: "Text + Image", Icon: ImageIcon },
-    { type: "stats-bar", label: "Stats Bar", Icon: BarChart },
-    { type: "testimonials", label: "Testimonials", Icon: Quote },
     { type: "logo-grid", label: "Logo Grid", Icon: Grid2x2 },
-    { type: "cta-banner", label: "CTA Banner", Icon: Megaphone },
     { type: "faq", label: "FAQ", Icon: HelpCircle },
+  ]},
+  { name: "CTA", items: [
+    { type: "cta-banner", label: "CTA Banner", Icon: Megaphone },
+    { type: "cta-banner-gradient", label: "CTA Gradient", Icon: Sparkles },
+  ]},
+  { name: "Blog", items: [
+    { type: "blog-preview", label: "Blog Preview", Icon: FileText },
   ]},
 ];
 
@@ -63,7 +108,7 @@ export function AddSectionDrawer({
   return (
     <aside
       data-builder-panel
-      className="absolute top-0 right-0 bottom-0 w-[400px] z-30 flex flex-col text-white border-l border-slate-800 shadow-2xl pb-transition"
+      className="absolute top-0 right-0 bottom-0 w-[320px] z-30 flex flex-col text-white border-l border-slate-800 shadow-2xl pb-transition"
       style={{ background: "#0f172a" }}
     >
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 shrink-0">

@@ -1,19 +1,23 @@
 import { useState } from "react";
 import { ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
 import { WidgetEditor } from "./WidgetEditor";
-import { WidgetPicker } from "./WidgetPicker";
 import { defaultWidget, WIDGET_REGISTRY, type Widget, type WidgetType } from "./widgets";
 import type { Block, LayoutVariant } from "./types";
 
 const COL_COUNT: Record<LayoutVariant, number> = { "1": 1, "2": 2, "3": 3, "1-2": 2, "2-1": 2, "4": 4 };
 
-export function LayoutEditor({ block, update }: { block: Block; update: (patch: Record<string, unknown>) => void }) {
+export function LayoutEditor({
+  block, update, openWidgetPicker,
+}: {
+  block: Block;
+  update: (patch: Record<string, unknown>) => void;
+  openWidgetPicker: (col: number, onPick: (t: WidgetType) => void) => void;
+}) {
   const variant: LayoutVariant = block.layout ?? "2";
   const nCols = COL_COUNT[variant];
   const cols = ensureColumns((block.fields as { columns?: Widget[][] }).columns, nCols);
 
   const [openWidget, setOpenWidget] = useState<{ col: number; id: string } | null>(null);
-  const [pickerCol, setPickerCol] = useState<number | null>(null);
   const [dragRef, setDragRef] = useState<{ col: number; id: string } | null>(null);
 
   const setCols = (next: Widget[][]) => update({ columns: next });
@@ -99,14 +103,14 @@ export function LayoutEditor({ block, update }: { block: Block; update: (patch: 
                   </div>
                   {isOpen && (
                     <div className="p-3 border-t border-slate-700 bg-slate-900/60">
-                      <WidgetEditor widget={w} update={(props) => updateWidget(colIdx, w.id, props)} />
+                      <WidgetEditor widget={w} update={(props) => updateWidget(colIdx, w.id, props)} openWidgetPicker={openWidgetPicker} />
                     </div>
                   )}
                 </div>
               );
             })}
             <button
-              onClick={() => setPickerCol(colIdx)}
+              onClick={() => openWidgetPicker(colIdx, (t) => addWidget(colIdx, t))}
               className="mt-1 w-full flex items-center justify-center gap-1.5 text-xs text-slate-300 hover:text-white border border-dashed border-slate-700 hover:border-slate-500 rounded-md py-2 pb-transition"
             >
               <Plus size={12} /> Add widget
@@ -114,12 +118,6 @@ export function LayoutEditor({ block, update }: { block: Block; update: (patch: 
           </div>
         </div>
       ))}
-
-      <WidgetPicker
-        open={pickerCol !== null}
-        onClose={() => setPickerCol(null)}
-        onPick={(t) => pickerCol !== null && addWidget(pickerCol, t)}
-      />
     </div>
   );
 }

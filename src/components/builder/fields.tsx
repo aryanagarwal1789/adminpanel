@@ -132,6 +132,8 @@ export function ButtonEditor({ label, value, onChange }: { label: string; value:
       <TextInput label="Button label" value={v.label} onChange={(x) => onChange({ ...v, label: x })} />
       <TextInput label="URL" value={v.url} onChange={(x) => onChange({ ...v, url: x })} />
       <Select label="Variant" value={v.variant} onChange={(x) => onChange({ ...v, variant: x })} options={VARIANTS} />
+      <ColorPicker label="Background color" value={v.color ?? ""} onChange={(x) => onChange({ ...v, color: x || undefined })} />
+      <ColorPicker label="Text color" value={v.textColor ?? ""} onChange={(x) => onChange({ ...v, textColor: x || undefined })} />
     </div>
   );
 }

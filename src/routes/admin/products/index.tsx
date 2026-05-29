@@ -1,0 +1,280 @@
+import { createFileRoute } from '@tanstack/react-router';
+import { useEffect, useMemo, useState } from 'react';
+
+export const Route = createFileRoute('/admin/products/')({ component: ProductsPage });
+
+const BACKEND = 'http://localhost:1337';
+
+interface Product {
+  productId: string;
+  name: string;
+  description: string;
+  image: string;
+  category: string;
+  status: string;
+  highlight: string;
+  enabled: boolean;
+  order: number;
+}
+
+const CATEGORIES = [
+  { id: 'applications', label: 'Applications' },
+  { id: 'ai-agents', label: 'AI Agents' },
+  { id: 'trade-solutions', label: 'Trade Solutions' },
+  { id: 'image-recognition', label: 'Image Recognition' },
+  { id: 'plugins', label: 'Plugins' },
+  { id: 'integrations', label: 'Integrations' },
+] as const;
+
+type CategoryId = typeof CATEGORIES[number]['id'];
+
+const BLANK_NEW: Omit<Product, 'order'> = {
+  productId: '', name: '', description: '', image: '', category: 'applications', status: '', highlight: '', enabled: true,
+};
+
+type Toast = { type: 'success' | 'error'; message: string } | null;
+
+const inp: React.CSSProperties = {
+  background: '#0f172a', border: '1px solid #334155', color: '#f1f5f9',
+  borderRadius: 6, padding: '8px 12px', width: '100%', boxSizing: 'border-box', fontSize: 13,
+};
+const textareaStyle: React.CSSProperties = { ...inp, resize: 'vertical', minHeight: 60 };
+const selectStyle: React.CSSProperties = { ...inp };
+const lbl: React.CSSProperties = { color: '#94a3b8', fontSize: 13, marginBottom: 6, display: 'block' };
+const saveBtn: React.CSSProperties = { background: '#3b82f6', color: '#fff', padding: '8px 16px', borderRadius: 6, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 };
+const secBtn: React.CSSProperties = { background: 'transparent', color: '#94a3b8', padding: '6px 12px', borderRadius: 6, border: '1px solid #334155', cursor: 'pointer', fontSize: 13 };
+const dangerBtn: React.CSSProperties = { ...secBtn, color: '#ef4444', borderColor: '#ef4444' };
+
+function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<Toast>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newProduct, setNewProduct] = useState<Omit<Product, 'order'>>({ ...BLANK_NEW });
+  const [addSaving, setAddSaving] = useState(false);
+
+  const showToast = (t: Toast) => {
+    setToast(t);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  useEffect(() => {
+    fetch(`${BACKEND}/site/products`)
+      .then((r) => r.json())
+      .then((d: { products?: Product[] }) => setProducts(d.products ?? []))
+      .catch(() => showToast({ type: 'error', message: 'Failed to load products' }))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const grouped = useMemo(() => {
+    const bucket: Record<string, Product[]> = Object.fromEntries(CATEGORIES.map((c) => [c.id, []]));
+    for (const p of products) {
+      const key = bucket[p.category] ? p.category : 'applications';
+      bucket[key].push(p);
+    }
+    for (const key of Object.keys(bucket)) {
+      bucket[key].sort((a, b) => a.order - b.order);
+    }
+    return bucket as Record<CategoryId, Product[]>;
+  }, [products]);
+
+  const toggleEnabled = async (p: Product) => {
+    const nextEnabled = !p.enabled;
+    setProducts((prev) => prev.map((x) => x.productId === p.productId ? { ...x, enabled: nextEnabled } : x));
+    try {
+      const res = await fetch(`${BACKEND}/site/products/${p.productId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: nextEnabled }),
+      });
+      if (!res.ok) throw new Error(`${res.status}`);
+    } catch {
+      setProducts((prev) => prev.map((x) => x.productId === p.productId ? { ...x, enabled: p.enabled } : x));
+      showToast({ type: 'error', message: 'Update failed' });
+    }
+  };
+
+  const handleDelete = async (productId: string) => {
+    if (!window.confirm(`Delete product "${productId}"?`)) return;
+    try {
+      const res = await fetch(`${BACKEND}/site/products/${productId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`${res.status}`);
+      setProducts((prev) => prev.filter((p) => p.productId !== productId));
+      showToast({ type: 'success', message: 'Product deleted' });
+    } catch {
+      showToast({ type: 'error', message: 'Delete failed' });
+    }
+  };
+
+  const handleAddProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProduct.productId.trim() || !newProduct.name.trim()) return;
+    setAddSaving(true);
+    try {
+      const payload = {
+        ...newProduct,
+        productId: newProduct.productId.trim().toLowerCase().replace(/\s+/g, '-'),
+        name: newProduct.name.trim(),
+        description: newProduct.description.trim(),
+        highlight: newProduct.highlight.trim(),
+        status: newProduct.status || null,
+      };
+      const res = await fetch(`${BACKEND}/site/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = (await res.json()) as { product?: Product };
+      if (data.product) setProducts((prev) => [...prev, data.product!]);
+      setShowAddModal(false);
+      setNewProduct({ ...BLANK_NEW });
+      showToast({ type: 'success', message: 'Product created' });
+      window.location.href = `/admin/products/${payload.productId}`;
+    } catch {
+      showToast({ type: 'error', message: 'Failed to create product' });
+    } finally {
+      setAddSaving(false);
+    }
+  };
+
+  return (
+    <div>
+      {toast && (
+        <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 999, background: toast.type === 'success' ? '#16a34a' : '#dc2626', color: '#fff', padding: '10px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600 }}>
+          {toast.message}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <div>
+          <h1 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 700, margin: 0 }}>Products</h1>
+          <p style={{ color: '#94a3b8', fontSize: 13, margin: '4px 0 0' }}>All products grouped by category. Toggle visibility or click Edit to configure details.</p>
+        </div>
+        <button style={saveBtn} onClick={() => { setNewProduct({ ...BLANK_NEW }); setShowAddModal(true); }}>
+          + Add Product
+        </button>
+      </div>
+
+      {loading ? (
+        <div style={{ color: '#94a3b8', padding: 40, textAlign: 'center' }}>Loading…</div>
+      ) : products.length === 0 ? (
+        <div style={{ color: '#64748b', fontSize: 14, padding: 32, textAlign: 'center' }}>
+          No products found. Click <strong style={{ color: '#f1f5f9' }}>+ Add Product</strong> to create one.
+        </div>
+      ) : (
+        <div>
+          {CATEGORIES.map((cat) => {
+            const items = grouped[cat.id];
+            if (!items || items.length === 0) return null;
+            return (
+              <div key={cat.id} style={{ marginBottom: 28 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                  <div style={{ width: 3, height: 16, background: '#3b82f6', borderRadius: 2 }} />
+                  <span style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{cat.label}</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>
+                  {items.map((p) => (
+                    <div key={p.productId} style={{
+                      background: '#1e293b', borderRadius: 8, padding: 14, border: '1px solid #334155',
+                      opacity: p.enabled ? 1 : 0.55, display: 'flex', flexDirection: 'column', gap: 10
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        {p.image ? (
+                          <img src={p.image} alt="" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 6, border: '1px solid #334155', background: '#0f172a', padding: 4 }} />
+                        ) : (
+                          <div style={{ width: 36, height: 36, borderRadius: 6, border: '1px solid #334155', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#64748b' }}>
+                            {(p.name || p.productId).charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ color: '#f1f5f9', fontSize: 14, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name || p.productId}</div>
+                          {p.description && (
+                            <div style={{ color: '#64748b', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.description}</div>
+                          )}
+                        </div>
+                      </div>
+                      {p.status && (
+                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 12, border: '1px solid #334155', color: '#94a3b8', width: 'fit-content' }}>{p.status}</span>
+                      )}
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#94a3b8', fontSize: 12, flex: 1 }}>
+                          <input type="checkbox" checked={p.enabled} onChange={() => toggleEnabled(p)} />
+                          Visible
+                        </label>
+                        <a
+                          href={`/admin/products/${p.productId}`}
+                          style={{ ...secBtn, textDecoration: 'none', display: 'inline-block' }}
+                        >
+                          Edit
+                        </a>
+                        <button style={dangerBtn} onClick={() => handleDelete(p.productId)}>Delete</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Add Modal */}
+      {showAddModal && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => setShowAddModal(false)}
+        >
+          <div
+            style={{ background: '#1e293b', borderRadius: 12, padding: '28px 32px', width: 480, maxWidth: '95vw', boxShadow: '0 8px 40px rgba(0,0,0,0.4)', maxHeight: '90vh', overflowY: 'auto' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700, color: '#f1f5f9' }}>Add New Product</h3>
+            <form onSubmit={handleAddProduct}>
+              <div style={{ marginBottom: 14 }}>
+                <label style={lbl}>Product ID <span style={{ color: '#ef4444' }}>*</span></label>
+                <input style={inp} value={newProduct.productId} onChange={(e) => setNewProduct((p) => ({ ...p, productId: e.target.value }))} placeholder="e.g. sfa-rural (slug, no spaces)" required autoFocus />
+                <span style={{ fontSize: 11, color: '#64748b', marginTop: 3, display: 'block' }}>Unique identifier used in URLs. Cannot be changed later.</span>
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={lbl}>Name <span style={{ color: '#ef4444' }}>*</span></label>
+                <input style={inp} value={newProduct.name} onChange={(e) => setNewProduct((p) => ({ ...p, name: e.target.value }))} placeholder="e.g. NextGen SFA Rural" required />
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={lbl}>Description</label>
+                <textarea style={textareaStyle} value={newProduct.description} onChange={(e) => setNewProduct((p) => ({ ...p, description: e.target.value }))} placeholder="Short line shown under the product title" rows={2} />
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={lbl}>Category</label>
+                <select style={selectStyle} value={newProduct.category} onChange={(e) => setNewProduct((p) => ({ ...p, category: e.target.value }))}>
+                  {CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+                </select>
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={lbl}>Status</label>
+                <select style={selectStyle} value={newProduct.status} onChange={(e) => setNewProduct((p) => ({ ...p, status: e.target.value }))}>
+                  <option value="">None</option>
+                  <option value="live">Live</option>
+                  <option value="beta">Beta</option>
+                  <option value="upcoming">Coming Soon</option>
+                </select>
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={lbl}>Highlight badge</label>
+                <input style={inp} value={newProduct.highlight} onChange={(e) => setNewProduct((p) => ({ ...p, highlight: e.target.value }))} placeholder="e.g. +22% Coverage" />
+              </div>
+              <div style={{ marginBottom: 14, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <label style={{ ...lbl, margin: 0 }}>Visible on site</label>
+                <input type="checkbox" checked={newProduct.enabled} onChange={(e) => setNewProduct((p) => ({ ...p, enabled: e.target.checked }))} />
+              </div>
+              <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                <button type="submit" style={{ ...saveBtn, flex: 1 }} disabled={addSaving}>{addSaving ? 'Creating…' : 'Create Product'}</button>
+                <button type="button" style={secBtn} onClick={() => setShowAddModal(false)} disabled={addSaving}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

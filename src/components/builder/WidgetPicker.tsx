@@ -3,11 +3,12 @@ import { X, ChevronDown, ChevronRight, Search } from "lucide-react";
 import { WIDGET_CATEGORIES, WIDGET_REGISTRY, type WidgetType } from "./widgets";
 
 export function WidgetPicker({
-  open, onClose, onPick,
+  open, onClose, onPick, onDragStart,
 }: {
   open: boolean;
   onClose: () => void;
   onPick: (t: WidgetType) => void;
+  onDragStart?: (t: WidgetType, e: React.MouseEvent) => void;
 }) {
   const [search, setSearch] = useState("");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -28,11 +29,7 @@ export function WidgetPicker({
   if (!open) return null;
 
   return (
-    <aside
-      data-builder-panel
-      className="absolute top-0 right-0 bottom-0 w-[360px] z-40 flex flex-col text-white border-l border-slate-800 shadow-2xl"
-      style={{ background: "#0f172a" }}
-    >
+    <div className="flex flex-col flex-1 min-h-0 text-white">
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 shrink-0">
         <div className="text-sm font-semibold">Add widget</div>
         <button onClick={onClose} className="p-1 rounded hover:bg-slate-800 pb-transition"><X size={14} /></button>
@@ -75,8 +72,9 @@ export function WidgetPicker({
                       <button
                         key={`${cat.key}-${t}`}
                         onClick={() => { onPick(t); onClose(); }}
+                        onMouseDown={(e) => { e.preventDefault(); onDragStart?.(t, e); }}
                         className="group flex flex-col items-center justify-center gap-1 p-2 rounded-md bg-slate-800/40 hover:bg-slate-700 hover:ring-1 hover:ring-blue-500 pb-transition"
-                        title={meta.label}
+                        title={`${meta.label} — drag to canvas or click to add`}
                       >
                         <div className="flex gap-0.5 mb-0.5 opacity-30">
                           {Array.from({ length: 6 }).map((_, i) => (
@@ -96,6 +94,6 @@ export function WidgetPicker({
           );
         })}
       </div>
-    </aside>
+    </div>
   );
 }

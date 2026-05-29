@@ -4,7 +4,7 @@ import {
   Tag, BarChart3, LayoutGrid, MessageSquare, CheckSquare, Hash, Bookmark,
   Menu, Languages, Filter, AlignLeft, Search, Layers, Clock, Layout as LayoutIcon,
   Volume2, FolderOpen, Images, Play, Mail, FileText, Rss, Calendar,
-  Wallet, Package, GripHorizontal,
+  Wallet, Package, GripHorizontal, Columns,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ButtonField } from "./defaults";
@@ -23,6 +23,7 @@ export interface WidgetMeta {
 }
 
 export const WIDGET_REGISTRY: Record<string, WidgetMeta> = {
+  row: { label: "Row (horizontal)", Icon: Columns },
   heading: { label: "Heading", Icon: Heading1 },
   paragraph: { label: "Paragraph", Icon: Type },
   text: { label: "Text", Icon: Type },
@@ -77,13 +78,13 @@ export interface WidgetCategory { key: string; name: string; types: WidgetType[]
 
 export const WIDGET_CATEGORIES: WidgetCategory[] = [
   { key: "theme", name: "Theme", types: [
-    "accordion","anchor","button","card","countdown","feature-list","heading",
+    "row","accordion","anchor","button","card","countdown","feature-list","heading",
     "horizontal-menu","language-switcher","navigation-menu","post-filter","rich-text",
     "search-input","section-header","spacer","tabs","text","video",
   ]},
   { key: "text", name: "Text", types: ["heading","metrics","rich-text","section-heading"] },
   { key: "design", name: "Design", types: [
-    "accordion","card","divider","horizontal-menu","horizontal-spacer",
+    "row","accordion","card","divider","horizontal-menu","horizontal-spacer",
     "image-text","pricing-card","site-header","tabs",
   ]},
   { key: "functionality", name: "Functionality", types: ["anchor","site-search-input","site-search-results"] },
@@ -101,15 +102,23 @@ export const WIDGET_CATEGORIES: WidgetCategory[] = [
 
 // Editable types — anything else inserts a placeholder.
 export const EDITABLE_TYPES = new Set<string>([
+  "row",
   "heading","paragraph","text","rich-text","section-heading","section-header",
   "image","button","divider","spacer","icon","card","video","video-embed",
   "form","list","accordion","pricing-card","metrics","image-grid",
   "testimonial-slider","feature-list","logo",
+  // new widgets
+  "countdown","tabs","horizontal-spacer","anchor","image-text",
+  "horizontal-menu","navigation-menu","logo-grid","gallery","image-slider",
+  "search-input","recent-blog-posts","post-listing","blog-email-subscription",
+  "language-switcher","audio-player","site-header","post-filter",
+  "rss-listing","meetings","payment","product",
 ]);
 
 const defaultButton: ButtonField = { label: "Click me", url: "#", variant: "primary" };
 
 export const WIDGET_DEFAULTS: Record<string, Record<string, unknown>> = {
+  row: { cols: [[], []], weights: [1, 1], gap: 16 },
   heading: { text: "Heading", level: "h2", align: "left", color: "#0f172a" },
   "section-heading": { text: "Section heading", level: "h2", align: "left", color: "#0f172a" },
   "section-header": { text: "Section header", level: "h2", align: "left", color: "#0f172a" },
@@ -161,6 +170,123 @@ export const WIDGET_DEFAULTS: Record<string, Record<string, unknown>> = {
     ],
   },
   logo: { src: "", alt: "Logo", link: "#", width: 120 },
+  countdown: {
+    targetDate: (() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().slice(0, 16); })(),
+    label: "Offer ends in",
+    bgColor: "#1e3a8a",
+    textColor: "#ffffff",
+    labelColor: "#93c5fd",
+  },
+  tabs: {
+    items: [
+      { title: "Tab 1", content: "Content for tab 1." },
+      { title: "Tab 2", content: "Content for tab 2." },
+    ],
+    activeColor: "#3b82f6",
+    inactiveColor: "#64748b",
+  },
+  "horizontal-spacer": { height: 1, color: "#e2e8f0", width: 100 },
+  anchor: { id: "section-1", label: "" },
+  "image-text": {
+    image: "",
+    heading: "Heading",
+    text: "Add your description here.",
+    layout: "left",
+    ctaLabel: "Learn more",
+    ctaUrl: "#",
+  },
+  "horizontal-menu": {
+    items: [{ label: "Home", url: "#" }, { label: "About", url: "#" }, { label: "Contact", url: "#" }],
+    align: "left",
+    gap: 24,
+    color: "#0f172a",
+    hoverColor: "#3b82f6",
+    fontSize: 14,
+  },
+  "navigation-menu": {
+    items: [{ label: "Home", url: "#" }, { label: "About", url: "#" }, { label: "Contact", url: "#" }],
+    align: "left",
+    gap: 24,
+    color: "#0f172a",
+    hoverColor: "#3b82f6",
+    fontSize: 14,
+  },
+  "logo-grid": {
+    logos: [{ src: "", alt: "Logo 1", url: "#" }, { src: "", alt: "Logo 2", url: "#" }],
+    columns: 4,
+    grayscale: false,
+  },
+  gallery: {
+    images: [{ src: "", alt: "" }, { src: "", alt: "" }, { src: "", alt: "" }],
+    columns: 3,
+    gap: 8,
+    radius: 4,
+  },
+  "image-slider": {
+    images: [{ src: "", alt: "" }],
+    aspect: "16:9",
+    radius: 8,
+  },
+  "search-input": {
+    placeholder: "Search...",
+    buttonLabel: "Search",
+    bgColor: "#ffffff",
+    borderColor: "#e2e8f0",
+  },
+  "recent-blog-posts": { count: 3, title: "Recent Posts", columns: 3 },
+  "post-listing": { title: "All Posts", columns: 3 },
+  "blog-email-subscription": {
+    title: "Subscribe to our newsletter",
+    subtitle: "Get the latest posts",
+    placeholder: "Your email",
+    buttonLabel: "Subscribe",
+    bgColor: "#eff6ff",
+    accentColor: "#3b82f6",
+  },
+  "language-switcher": {
+    languages: [{ code: "en", label: "English" }, { code: "es", label: "Español" }],
+    current: "en",
+  },
+  "audio-player": { src: "", title: "Audio", bgColor: "#1e293b", textColor: "#ffffff" },
+  "site-header": {
+    logoText: "Site",
+    logoImage: "",
+    links: [{ label: "Home", url: "#" }, { label: "About", url: "#" }],
+    ctaLabel: "Get started",
+    ctaUrl: "#",
+    bgColor: "#0f172a",
+    textColor: "#ffffff",
+  },
+  "post-filter": {
+    tags: [{ label: "All" }, { label: "News" }, { label: "Tutorial" }],
+    activeColor: "#3b82f6",
+  },
+  "rss-listing": { feedUrl: "", title: "RSS Feed", count: 5 },
+  meetings: {
+    embedUrl: "",
+    title: "Book a Meeting",
+    buttonLabel: "Schedule",
+    buttonUrl: "#",
+    bgColor: "#f8fafc",
+  },
+  payment: {
+    title: "Complete Purchase",
+    amount: "$29",
+    description: "",
+    buttonLabel: "Pay now",
+    bgColor: "#ffffff",
+    accentColor: "#22c55e",
+  },
+  product: {
+    name: "Product Name",
+    price: "$49",
+    image: "",
+    description: "",
+    ctaLabel: "Buy now",
+    ctaUrl: "#",
+    badge: "",
+    bgColor: "#ffffff",
+  },
 };
 
 export function defaultWidget(type: WidgetType): Widget {

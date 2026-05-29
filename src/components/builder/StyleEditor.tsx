@@ -1,6 +1,12 @@
 import type { BlockStyle, BorderStyle, ShadowSize } from "./types";
 import { ColorPicker, ImageField, NumberInput, Select, Toggle } from "./fields";
 
+const ALIGN_OPTS = [
+  { value: "left",   label: "Left" },
+  { value: "center", label: "Center" },
+  { value: "right",  label: "Right" },
+];
+
 const BORDER_OPTS: { value: BorderStyle; label: string }[] = [
   { value: "none", label: "None" },
   { value: "solid", label: "Solid" },
@@ -84,8 +90,19 @@ export function StyleEditor({
         <Select label="Shadow" value={(style.shadow ?? "none") as ShadowSize} onChange={(v) => update({ shadow: v })} options={SHADOW_OPTS} />
       </Section>
 
+      <Section title="Text colors">
+        <ColorPicker label="Heading color" value={style.headingColor ?? ""} onChange={(v) => update({ headingColor: v || undefined })} />
+        <ColorPicker label="Body / subtext color" value={style.textColor ?? ""} onChange={(v) => update({ textColor: v || undefined })} />
+      </Section>
+
       {showTypography && (
         <Section title="Typography">
+          <Select<string>
+            label="Text align"
+            value={style.textAlign ?? "left"}
+            onChange={(v) => update({ textAlign: v as BlockStyle['textAlign'] })}
+            options={ALIGN_OPTS}
+          />
           <NumberInput label="Font size (px)" value={style.fontSize ?? 16} onChange={(v) => update({ fontSize: v })} />
           <Select<string>
             label="Font weight"

@@ -21,7 +21,12 @@ function Btn({ b }: { b?: ButtonField }) {
   if (!b || !b.label) return null;
   const v = b.variant ?? "primary";
   const { className, style } = btnClass(v);
-  return <button data-pb-btn={v} className={className} style={style}>{b.label}</button>;
+  const customStyle = {
+    ...style,
+    ...(b.color     ? { background: b.color, borderColor: b.color } : {}),
+    ...(b.textColor ? { color: b.textColor } : {}),
+  };
+  return <button data-pb-btn={v} className={className} style={customStyle}>{b.label}</button>;
 }
 
 function Logo({ image, text, dark }: { image?: string; text?: string; dark?: boolean }) {
@@ -39,7 +44,10 @@ export function BlockRenderer({ block }: { block: Block }) {
           <div className="flex gap-8 text-white text-sm">
             {((f.links as LinkField[]) ?? []).map((l, i) => <a key={i}>{l.label}</a>)}
           </div>
-          <Btn b={f.cta as ButtonField} />
+          <div className="flex items-center gap-2">
+            <Btn b={f.ctaSecondary as ButtonField} />
+            <Btn b={f.cta as ButtonField} />
+          </div>
         </nav>
       );
     case "nav-centered":
@@ -199,6 +207,45 @@ export function BlockRenderer({ block }: { block: Block }) {
                 <div className="text-sm text-slate-500 mt-1">{q.answer}</div>
               </div>
             ))}
+          </div>
+        </section>
+      );
+    }
+    case "blog-preview": {
+      const count = Math.max(1, Math.min(6, (f.count as number) ?? 3));
+      const mockPosts = Array.from({ length: count }, (_, i) => ({
+        title: ["How we built our product", "10 tips for better UX", "The future of web design"][i % 3],
+        excerpt: "A short summary of this blog post is shown here in the card.",
+        date: "May 2025",
+        tag: ["Product", "Design", "Engineering"][i % 3],
+      }));
+      return (
+        <section className="py-20 px-10 bg-white">
+          <div className="max-w-6xl mx-auto">
+            {(f.title as string) && (
+              <h2 className="text-3xl font-bold text-slate-900 mb-2">{f.title as string}</h2>
+            )}
+            {(f.subtitle as string) && (
+              <p className="text-slate-500 mb-10">{f.subtitle as string}</p>
+            )}
+            <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${Math.min(count, 3)}, minmax(0, 1fr))` }}>
+              {mockPosts.map((p, i) => (
+                <div key={i} className="border border-slate-200 rounded-xl overflow-hidden">
+                  <div className="h-40 bg-slate-100 flex items-center justify-center text-slate-300 text-3xl">📝</div>
+                  <div className="p-4">
+                    <span className="text-xs text-blue-500 font-medium">{p.tag}</span>
+                    <h3 className="font-semibold text-slate-900 mt-1 mb-1">{p.title}</h3>
+                    <p className="text-xs text-slate-500 mb-2">{p.excerpt}</p>
+                    <span className="text-xs text-slate-400">{p.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {(f.ctaLabel as string) && (
+              <div className="mt-8 text-center">
+                <a className="text-sm text-blue-600 font-medium">{f.ctaLabel as string} →</a>
+              </div>
+            )}
           </div>
         </section>
       );
