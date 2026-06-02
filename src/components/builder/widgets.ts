@@ -78,7 +78,7 @@ export interface WidgetCategory { key: string; name: string; types: WidgetType[]
 
 export const WIDGET_CATEGORIES: WidgetCategory[] = [
   { key: "theme", name: "Theme", types: [
-    "row","accordion","anchor","button","card","countdown","feature-list","heading",
+    "row","accordion","anchor","button","card","countdown","heading",
     "horizontal-menu","language-switcher","navigation-menu","post-filter","rich-text",
     "search-input","section-header","spacer","tabs","text","video",
   ]},
@@ -137,8 +137,9 @@ export const WIDGET_DEFAULTS: Record<string, Record<string, unknown>> = {
   list: { items: [{ text: "Item 1" }, { text: "Item 2" }, { text: "Item 3" }], style: "bullet" },
   accordion: {
     items: [
-      { title: "Item 1", body: "Body 1" },
-      { title: "Item 2", body: "Body 2" },
+      { title: "What is included?", body: "Everything you need to get started in minutes." },
+      { title: "How does billing work?", body: "" },
+      { title: "Can I cancel anytime?", body: "" },
     ],
     allowMultiple: false,
   },
@@ -165,8 +166,9 @@ export const WIDGET_DEFAULTS: Record<string, Record<string, unknown>> = {
   },
   "feature-list": {
     items: [
-      { icon: "✓", text: "Feature one" },
-      { icon: "✓", text: "Feature two" },
+      { icon: "⚡", text: "Lightning fast performance" },
+      { icon: "🔒", text: "Secure by default" },
+      { icon: "✨", text: "Delightful experience" },
     ],
   },
   logo: { src: "", alt: "Logo", link: "#", width: 120 },

@@ -1,9 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
+import { UploadInput } from './upload-input';
 
 export const Route = createFileRoute('/admin/seo')({ component: SeoPage });
 
-const BACKEND = 'http://localhost:1337';
+const BACKEND = 'https://salescode-marketplace.salescode.ai';
 
 const PAGE_TABS = [
   { key: 'landing', label: 'Landing' },
@@ -255,7 +256,7 @@ function SeoPage() {
               <textarea style={textareaStyle} value={seo.ogDescription} onChange={(e) => update({ ogDescription: e.target.value })} placeholder="Description shown when shared" />
             </Field>
             <Field lbl="OG Image URL">
-              <input style={inp} value={seo.ogImage} onChange={(e) => update({ ogImage: e.target.value })} placeholder="https://…" />
+              <UploadInput value={seo.ogImage} onChange={(ogImage) => update({ ogImage })} accept="image/*" />
             </Field>
           </div>
 
@@ -269,7 +270,7 @@ function SeoPage() {
               <textarea style={textareaStyle} value={seo.twitterDescription} onChange={(e) => update({ twitterDescription: e.target.value })} />
             </Field>
             <Field lbl="Twitter Image URL">
-              <input style={inp} value={seo.twitterImage} onChange={(e) => update({ twitterImage: e.target.value })} placeholder="https://…" />
+              <UploadInput value={seo.twitterImage} onChange={(twitterImage) => update({ twitterImage })} accept="image/*" />
             </Field>
           </div>
 
@@ -332,7 +333,7 @@ function SeoPage() {
               <Field lbl="Name"><input style={inp} value={org.name} onChange={(e) => updateSchema('organization', { name: e.target.value })} placeholder="Salescode" /></Field>
               <Field lbl="URL"><input style={inp} value={org.url} onChange={(e) => updateSchema('organization', { url: e.target.value })} placeholder="https://salescode.ai" /></Field>
             </div>
-            <Field lbl="Logo URL"><input style={inp} value={org.logo} onChange={(e) => updateSchema('organization', { logo: e.target.value })} placeholder="https://…" /></Field>
+            <Field lbl="Logo URL"><UploadInput value={org.logo} onChange={(logo) => updateSchema('organization', { logo })} accept="image/*" preview={false} /></Field>
             <Field lbl="Description"><textarea style={textareaStyle} value={org.description} onChange={(e) => updateSchema('organization', { description: e.target.value })} placeholder="What the organization does" /></Field>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
               <Field lbl="LinkedIn"><input style={inp} value={org.linkedIn} onChange={(e) => updateSchema('organization', { linkedIn: e.target.value })} placeholder="https://linkedin.com/company/…" /></Field>

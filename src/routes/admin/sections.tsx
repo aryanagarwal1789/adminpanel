@@ -1,9 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useAdminPreview } from './preview-context';
+import { UploadInput } from './upload-input';
 
 export const Route = createFileRoute('/admin/sections')({ component: SectionsPage });
 
-const BACKEND = 'http://localhost:1337';
+const BACKEND = 'https://salescode-marketplace.salescode.ai';
 
 interface SectionItem {
   id: string;
@@ -39,6 +41,8 @@ const label: React.CSSProperties = { color: '#94a3b8', fontSize: 12, marginBotto
 const saveBtn: React.CSSProperties = { background: '#3b82f6', color: '#fff', padding: '8px 16px', borderRadius: 6, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13 };
 const secBtn: React.CSSProperties = { background: 'transparent', color: '#94a3b8', padding: '6px 12px', borderRadius: 6, border: '1px solid #334155', cursor: 'pointer', fontSize: 13 };
 const dangerBtn: React.CSSProperties = { ...secBtn, color: '#ef4444', borderColor: '#ef4444' };
+const arrowBtn: React.CSSProperties = { background: 'transparent', color: '#64748b', border: 'none', cursor: 'pointer', padding: '2px 4px', fontSize: 12, lineHeight: 1 };
+const arrowBtnDisabled: React.CSSProperties = { ...arrowBtn, color: '#1e293b', cursor: 'default' };
 
 const KIND_LABELS: Record<string, string> = { image: 'Images', video: 'Videos', card: 'Cards', blog: 'Blogs' };
 
@@ -51,19 +55,37 @@ function newItemForKind(kind: string, url = ''): SectionItem {
   return { id: `blog-${Date.now()}-${rand()}`, blogId: '', order: 0 };
 }
 
-function ItemEditor({ kind, item, onChange, onRemove }: {
+function ItemEditor({ kind, item, onChange, onRemove, onMoveUp, onMoveDown, isFirst, isLast }: {
   kind: string;
   item: SectionItem;
   onChange: (patch: Partial<SectionItem>) => void;
   onRemove: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  isFirst: boolean;
+  isLast: boolean;
 }) {
   return (
     <div style={{ background: '#0f172a', borderRadius: 6, padding: 12, marginBottom: 8, border: '1px solid #334155' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4, marginBottom: 8 }}>
+        <button
+          style={isFirst ? arrowBtnDisabled : arrowBtn}
+          onClick={onMoveUp}
+          disabled={isFirst}
+          title="Move up"
+        >↑</button>
+        <button
+          style={isLast ? arrowBtnDisabled : arrowBtn}
+          onClick={onMoveDown}
+          disabled={isLast}
+          title="Move down"
+        >↓</button>
+      </div>
       {kind === 'image' && (
         <>
           <div style={{ marginBottom: 8 }}>
             <label style={label}>Image URL</label>
-            <input style={inp} value={item.url ?? ''} onChange={(e) => onChange({ url: e.target.value })} placeholder="https://…" />
+            <UploadInput value={item.url ?? ''} onChange={(url) => onChange({ url })} accept="image/*" />
           </div>
           <div style={{ marginBottom: 8 }}>
             <label style={label}>Alt text</label>
@@ -75,7 +97,7 @@ function ItemEditor({ kind, item, onChange, onRemove }: {
         <>
           <div style={{ marginBottom: 8 }}>
             <label style={label}>Video URL</label>
-            <input style={inp} value={item.url ?? ''} onChange={(e) => onChange({ url: e.target.value })} placeholder="https://…" />
+            <UploadInput value={item.url ?? ''} onChange={(url) => onChange({ url })} accept="video/*" />
           </div>
           <div style={{ marginBottom: 8 }}>
             <label style={label}>Title</label>
@@ -83,7 +105,7 @@ function ItemEditor({ kind, item, onChange, onRemove }: {
           </div>
           <div style={{ marginBottom: 8 }}>
             <label style={label}>Thumbnail URL</label>
-            <input style={inp} value={item.thumbnail ?? ''} onChange={(e) => onChange({ thumbnail: e.target.value })} placeholder="https://…" />
+            <UploadInput value={item.thumbnail ?? ''} onChange={(thumbnail) => onChange({ thumbnail })} accept="image/*" />
           </div>
         </>
       )}
@@ -103,7 +125,7 @@ function ItemEditor({ kind, item, onChange, onRemove }: {
           </div>
           <div style={{ marginBottom: 8 }}>
             <label style={label}>Image URL</label>
-            <input style={inp} value={item.image ?? ''} onChange={(e) => onChange({ image: e.target.value })} placeholder="https://…" />
+            <UploadInput value={item.image ?? ''} onChange={(image) => onChange({ image })} accept="image/*" />
           </div>
         </>
       )}
@@ -115,23 +137,42 @@ function ItemEditor({ kind, item, onChange, onRemove }: {
   );
 }
 
-function SectionCard({ section, sIdx, updateSection, updateItem, removeItem, addItem, removeSection }: {
+function SectionCard({ section, sIdx, totalSections, updateSection, updateItem, removeItem, addItem, removeSection, moveSection, moveItem }: {
   section: Section;
   sIdx: number;
+  totalSections: number;
   updateSection: (sIdx: number, patch: Partial<Section>) => void;
   updateItem: (sIdx: number, iIdx: number, patch: Partial<SectionItem>) => void;
   removeItem: (sIdx: number, iIdx: number) => void;
   addItem: (sIdx: number) => void;
   removeSection: (sIdx: number) => void;
+  moveSection: (sIdx: number, dir: 'up' | 'down') => void;
+  moveItem: (sIdx: number, iIdx: number, dir: 'up' | 'down') => void;
 }) {
   const [open, setOpen] = useState(false);
   const enabled = section.enabled !== false;
   const kindLabel = KIND_LABELS[section.kind] ?? 'Items';
+  const isFirst = sIdx === 0;
+  const isLast = sIdx === totalSections - 1;
 
   return (
     <div style={{ background: '#1e293b', borderRadius: 8, marginBottom: 10, border: '1px solid #334155', opacity: enabled ? 1 : 0.6 }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <button
+            style={isFirst ? arrowBtnDisabled : arrowBtn}
+            onClick={() => moveSection(sIdx, 'up')}
+            disabled={isFirst}
+            title="Move section up"
+          >▲</button>
+          <button
+            style={isLast ? arrowBtnDisabled : arrowBtn}
+            onClick={() => moveSection(sIdx, 'down')}
+            disabled={isLast}
+            title="Move section down"
+          >▼</button>
+        </div>
         <button onClick={() => setOpen((o) => !o)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 13, padding: 0 }}>
           {open ? '▼' : '▶'}
         </button>
@@ -161,6 +202,10 @@ function SectionCard({ section, sIdx, updateSection, updateItem, removeItem, add
               item={item}
               onChange={(patch) => updateItem(sIdx, iIdx, patch)}
               onRemove={() => removeItem(sIdx, iIdx)}
+              onMoveUp={() => moveItem(sIdx, iIdx, 'up')}
+              onMoveDown={() => moveItem(sIdx, iIdx, 'down')}
+              isFirst={iIdx === 0}
+              isLast={iIdx === section.items.length - 1}
             />
           ))}
           {section.kind !== 'blog' && (
@@ -179,6 +224,8 @@ function SectionsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
+  const { post, onPreviewReady } = useAdminPreview();
+  const sectionsRef = useRef<Section[]>([]);
 
   const showToast = (t: Toast) => {
     setToast(t);
@@ -192,6 +239,27 @@ function SectionsPage() {
       .catch(() => showToast({ type: 'error', message: 'Failed to load sections' }))
       .finally(() => setLoading(false));
   }, []);
+
+  // Keep a ref to latest sections for the PREVIEW_READY callback
+  useEffect(() => { sectionsRef.current = sections; }, [sections]);
+
+  const sendAllToPreview = useCallback((secs: Section[]) => {
+    if (!secs.length) return;
+    post({ type: 'SECTIONS_ORDER', order: secs.map(s => ({ id: s.id, enabled: s.enabled !== false, label: s.label ?? '' })) });
+    for (const s of secs) {
+      post({ type: 'SECTION_UPDATE', sectionId: s.id, items: s.items ?? [], label: s.label ?? '' });
+    }
+  }, [post]);
+
+  // Re-send all data when preview iframe (re)connects
+  useEffect(() => {
+    return onPreviewReady(() => sendAllToPreview(sectionsRef.current));
+  }, [onPreviewReady, sendAllToPreview]);
+
+  // Send live preview updates whenever sections state changes
+  useEffect(() => {
+    sendAllToPreview(sections);
+  }, [sections]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateSection = (sIdx: number, patch: Partial<Section>) =>
     setSections((prev) => prev.map((s, i) => (i === sIdx ? { ...s, ...patch } : s)));
@@ -214,6 +282,28 @@ function SectionsPage() {
   const removeSection = (sIdx: number) => {
     if (!window.confirm('Remove this section and all its items?')) return;
     setSections((prev) => prev.filter((_, i) => i !== sIdx));
+  };
+
+  const moveSection = (idx: number, dir: 'up' | 'down') => {
+    setSections(prev => {
+      const next = [...prev];
+      const swapIdx = dir === 'up' ? idx - 1 : idx + 1;
+      if (swapIdx < 0 || swapIdx >= next.length) return prev;
+      [next[idx], next[swapIdx]] = [next[swapIdx], next[idx]];
+      return next;
+    });
+  };
+
+  const moveItem = (sIdx: number, iIdx: number, dir: 'up' | 'down') => {
+    setSections(prev => {
+      const next = prev.map(s => ({ ...s, items: [...(s.items ?? [])] }));
+      const items = next[sIdx].items;
+      if (!items) return prev;
+      const swapIdx = dir === 'up' ? iIdx - 1 : iIdx + 1;
+      if (swapIdx < 0 || swapIdx >= items.length) return prev;
+      [items[iIdx], items[swapIdx]] = [items[swapIdx], items[iIdx]];
+      return next;
+    });
   };
 
   const save = async () => {
@@ -241,6 +331,13 @@ function SectionsPage() {
       const data = (await res.json()) as { sections?: Section[] };
       setSections(data.sections ?? []);
       showToast({ type: 'success', message: 'Sections saved' });
+
+      // Send live preview updates after saving
+      const saved = data.sections ?? [];
+      post({ type: 'SECTIONS_ORDER', order: saved.map(s => ({ id: s.id, enabled: s.enabled !== false, label: s.label ?? '' })) });
+      for (const s of saved) {
+        post({ type: 'SECTION_UPDATE', sectionId: s.id, items: s.items ?? [], label: s.label ?? '' });
+      }
     } catch {
       showToast({ type: 'error', message: 'Save failed' });
     } finally {
@@ -280,11 +377,14 @@ function SectionsPage() {
               key={section.id}
               section={section}
               sIdx={sIdx}
+              totalSections={sections.length}
               updateSection={updateSection}
               updateItem={updateItem}
               removeItem={removeItem}
               addItem={addItem}
               removeSection={removeSection}
+              moveSection={moveSection}
+              moveItem={moveItem}
             />
           ))}
         </>

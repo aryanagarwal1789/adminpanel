@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
 import type { ButtonField, LinkField } from "./defaults";
 
@@ -33,19 +33,65 @@ export function Textarea({ label, value, onChange, rows = 3 }: { label: string; 
   );
 }
 
+const UPLOAD_URL = "https://salescode-marketplace.salescode.ai/site/upload";
+
 export function ImageField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch(UPLOAD_URL, { method: "POST", body: form });
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json() as { url?: string };
+      if (data.url) onChange(data.url);
+    } catch {
+      setError("Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div>
       <Label>{label}</Label>
-      <input className={fieldBase} style={fieldStyle} value={value ?? ""} placeholder="https://..." onChange={(e) => onChange(e.target.value)} />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="w-full py-2 text-xs rounded-md pb-transition font-medium disabled:opacity-50"
+        style={{ background: "#1e40af", color: "#fff", border: "none", cursor: uploading ? "default" : "pointer" }}
+      >
+        {uploading ? "Uploading…" : value ? "↑ Replace file" : "↑ Upload image / video"}
+      </button>
+      <input ref={inputRef} type="file" accept="image/*,video/*" style={{ display: "none" }} onChange={handleFile} />
+      {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
       <div className="mt-2 h-20 w-full rounded-md overflow-hidden border border-slate-700 bg-slate-800 flex items-center justify-center">
         {value ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={value} alt="" className="h-full w-full object-cover" />
         ) : (
-          <span className="text-xs text-slate-500">No image</span>
+          <span className="text-xs text-slate-500">No file uploaded</span>
         )}
       </div>
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className="mt-1 text-xs text-red-400 hover:text-red-300 pb-transition"
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+        >
+          Remove
+        </button>
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { X, Monitor, Smartphone } from "lucide-react";
 import type { Block, Theme } from "./types";
 
-const RENDERER = "http://localhost:3000";
+const RENDERER = import.meta.env.VITE_RENDERER_URL ?? "https://demo-experience.salescode.ai";
 
 interface PreviewModalProps {
   blocks: Block[];
@@ -41,7 +41,7 @@ export function PreviewModal({ blocks, theme, pageKey, onClose }: PreviewModalPr
   }, [onClose]);
 
   const src = pageKey === 'landing'
-    ? `${RENDERER}/?preview=1`
+    ? `${RENDERER}/landing?preview=1`
     : `${RENDERER}/${pageKey}?preview=1`;
 
   return (

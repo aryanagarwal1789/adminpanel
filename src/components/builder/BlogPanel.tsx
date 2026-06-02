@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { FileText, Plus } from "lucide-react";
 import { toast } from "sonner";
 
-const BACKEND = "http://localhost:1337";
+const BACKEND = "https://salescode-marketplace.salescode.ai";
 
 export interface BlogPost {
   _id?: string;

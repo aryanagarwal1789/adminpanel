@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 export const Route = createFileRoute('/admin/products/')({ component: ProductsPage });
 
-const BACKEND = 'http://localhost:1337';
+const BACKEND = 'https://salescode-marketplace.salescode.ai';
 
 interface Product {
   productId: string;
@@ -17,16 +17,16 @@ interface Product {
   order: number;
 }
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   { id: 'applications', label: 'Applications' },
   { id: 'ai-agents', label: 'AI Agents' },
   { id: 'trade-solutions', label: 'Trade Solutions' },
   { id: 'image-recognition', label: 'Image Recognition' },
   { id: 'plugins', label: 'Plugins' },
   { id: 'integrations', label: 'Integrations' },
-] as const;
+];
 
-type CategoryId = typeof CATEGORIES[number]['id'];
+type CategoryId = typeof DEFAULT_CATEGORIES[number]['id'];
 
 const BLANK_NEW: Omit<Product, 'order'> = {
   productId: '', name: '', description: '', image: '', category: 'applications', status: '', highlight: '', enabled: true,
@@ -47,6 +47,7 @@ const dangerBtn: React.CSSProperties = { ...secBtn, color: '#ef4444', borderColo
 
 function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<Toast>(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -61,13 +62,27 @@ function ProductsPage() {
   useEffect(() => {
     fetch(`${BACKEND}/site/products`)
       .then((r) => r.json())
-      .then((d: { products?: Product[] }) => setProducts(d.products ?? []))
+      .then((d: { products?: Product[] }) => {
+        const loaded = d.products ?? [];
+        setProducts(loaded);
+        // Derive category order from minimum product order — same logic as public page
+        const catMinOrder: Record<string, number> = {};
+        for (const p of loaded) {
+          const key = catMinOrder[p.category] !== undefined ? p.category : p.category;
+          if (catMinOrder[p.category] === undefined || p.order < catMinOrder[p.category]) {
+            catMinOrder[p.category] = p.order;
+          }
+        }
+        setCategories((prev) =>
+          [...prev].sort((a, b) => (catMinOrder[a.id] ?? 999) - (catMinOrder[b.id] ?? 999))
+        );
+      })
       .catch(() => showToast({ type: 'error', message: 'Failed to load products' }))
       .finally(() => setLoading(false));
   }, []);
 
   const grouped = useMemo(() => {
-    const bucket: Record<string, Product[]> = Object.fromEntries(CATEGORIES.map((c) => [c.id, []]));
+    const bucket: Record<string, Product[]> = Object.fromEntries(categories.map((c) => [c.id, []]));
     for (const p of products) {
       const key = bucket[p.category] ? p.category : 'applications';
       bucket[key].push(p);
@@ -76,7 +91,35 @@ function ProductsPage() {
       bucket[key].sort((a, b) => a.order - b.order);
     }
     return bucket as Record<CategoryId, Product[]>;
-  }, [products]);
+  }, [products, categories]);
+
+  // ── Category drag-and-drop ────────────────────────────────────────────────
+  const dragCatItem = useRef<number | null>(null);
+  const [dragOverCat, setDragOverCat] = useState<number | null>(null);
+
+  const handleCatDragStart = (idx: number) => { dragCatItem.current = idx; };
+
+  const handleCatDrop = async (dropIdx: number) => {
+    setDragOverCat(null);
+    if (dragCatItem.current === null || dragCatItem.current === dropIdx) return;
+    const fromIdx = dragCatItem.current;
+    dragCatItem.current = null;
+    const next = [...categories];
+    const [moved] = next.splice(fromIdx, 1);
+    next.splice(dropIdx, 0, moved);
+    setCategories(next);
+    // Reorder all products to reflect new category order
+    const newOrder = next.flatMap((c) => (grouped[c.id as CategoryId] ?? []).map(p => p.productId));
+    try {
+      await fetch(`${BACKEND}/site/products/reorder`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: newOrder }),
+      });
+    } catch {
+      showToast({ type: 'error', message: 'Category reorder failed' });
+    }
+  };
 
   const toggleEnabled = async (p: Product) => {
     const nextEnabled = !p.enabled;
@@ -103,6 +146,39 @@ function ProductsPage() {
       showToast({ type: 'success', message: 'Product deleted' });
     } catch {
       showToast({ type: 'error', message: 'Delete failed' });
+    }
+  };
+
+  // Drag-and-drop state
+  const dragItem = useRef<{ categoryId: string; idx: number } | null>(null);
+  const [dragOverKey, setDragOverKey] = useState<string | null>(null);
+
+  const handleDragStart = (categoryId: string, idx: number) => {
+    dragItem.current = { categoryId, idx };
+  };
+
+  const handleDrop = async (categoryId: string, dropIdx: number) => {
+    setDragOverKey(null);
+    if (!dragItem.current) return;
+    const { categoryId: fromCat, idx: fromIdx } = dragItem.current;
+    dragItem.current = null;
+    // Only reorder within the same category
+    if (fromCat !== categoryId || fromIdx === dropIdx) return;
+    const catItems = [...(grouped[categoryId as CategoryId] ?? [])];
+    const [moved] = catItems.splice(fromIdx, 1);
+    catItems.splice(dropIdx, 0, moved);
+    const otherProducts = products.filter((p) => p.category !== categoryId);
+    const updatedCatItems = catItems.map((p, i) => ({ ...p, order: otherProducts.length + i }));
+    setProducts([...otherProducts, ...updatedCatItems]);
+    try {
+      const res = await fetch(`${BACKEND}/site/products/reorder`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: [...otherProducts.map(p => p.productId), ...catItems.map(p => p.productId)] }),
+      });
+      if (!res.ok) throw new Error(`${res.status}`);
+    } catch {
+      showToast({ type: 'error', message: 'Reorder failed' });
     }
   };
 
@@ -149,7 +225,7 @@ function ProductsPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
           <h1 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 700, margin: 0 }}>Products</h1>
-          <p style={{ color: '#94a3b8', fontSize: 13, margin: '4px 0 0' }}>All products grouped by category. Toggle visibility or click Edit to configure details.</p>
+          <p style={{ color: '#94a3b8', fontSize: 13, margin: '4px 0 0' }}>Drag cards to reorder within a category. Toggle visibility or click Edit to configure details.</p>
         </div>
         <button style={saveBtn} onClick={() => { setNewProduct({ ...BLANK_NEW }); setShowAddModal(true); }}>
           + Add Product
@@ -164,21 +240,54 @@ function ProductsPage() {
         </div>
       ) : (
         <div>
-          {CATEGORIES.map((cat) => {
-            const items = grouped[cat.id];
+          {categories.map((cat, catIdx) => {
+            const items = grouped[cat.id as CategoryId];
             if (!items || items.length === 0) return null;
             return (
-              <div key={cat.id} style={{ marginBottom: 28 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <div
+                key={cat.id}
+                draggable
+                onDragStart={(e) => { e.stopPropagation(); handleCatDragStart(catIdx); }}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDragOverCat(catIdx); }}
+                onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOverCat(null); }}
+                onDrop={(e) => { e.stopPropagation(); handleCatDrop(catIdx); }}
+                onDragEnd={() => { dragCatItem.current = null; setDragOverCat(null); }}
+                style={{
+                  marginBottom: 28,
+                  borderRadius: 8,
+                  border: `2px solid ${dragOverCat === catIdx ? '#3b82f6' : 'transparent'}`,
+                  transition: 'border-color 150ms',
+                  padding: dragOverCat === catIdx ? '8px' : '0',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, cursor: 'grab' }}>
+                  {/* Drag handle */}
+                  <svg width="12" height="16" viewBox="0 0 12 16" fill="none" style={{ flexShrink: 0, opacity: 0.4 }}>
+                    <circle cx="3" cy="3" r="1.5" fill="#94a3b8"/><circle cx="9" cy="3" r="1.5" fill="#94a3b8"/>
+                    <circle cx="3" cy="8" r="1.5" fill="#94a3b8"/><circle cx="9" cy="8" r="1.5" fill="#94a3b8"/>
+                    <circle cx="3" cy="13" r="1.5" fill="#94a3b8"/><circle cx="9" cy="13" r="1.5" fill="#94a3b8"/>
+                  </svg>
                   <div style={{ width: 3, height: 16, background: '#3b82f6', borderRadius: 2 }} />
                   <span style={{ color: '#94a3b8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{cat.label}</span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10 }}>
-                  {items.map((p) => (
-                    <div key={p.productId} style={{
-                      background: '#1e293b', borderRadius: 8, padding: 14, border: '1px solid #334155',
-                      opacity: p.enabled ? 1 : 0.55, display: 'flex', flexDirection: 'column', gap: 10
-                    }}>
+                  {items.map((p, pIdx) => (
+                    <div
+                      key={p.productId}
+                      draggable
+                      onDragStart={() => handleDragStart(cat.id, pIdx)}
+                      onDragOver={(e) => { e.preventDefault(); setDragOverKey(`${cat.id}-${pIdx}`); }}
+                      onDragLeave={() => setDragOverKey(null)}
+                      onDrop={() => handleDrop(cat.id, pIdx)}
+                      onDragEnd={() => { dragItem.current = null; setDragOverKey(null); }}
+                      style={{
+                        background: '#1e293b', borderRadius: 8, padding: 14,
+                        border: `1px solid ${dragOverKey === `${cat.id}-${pIdx}` ? '#3b82f6' : '#334155'}`,
+                        opacity: p.enabled ? 1 : 0.55, display: 'flex', flexDirection: 'column', gap: 10,
+                        cursor: 'grab', transition: 'border-color 150ms',
+                        boxShadow: dragOverKey === `${cat.id}-${pIdx}` ? '0 0 0 2px rgba(59,130,246,0.3)' : 'none',
+                      }}
+                    >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         {p.image ? (
                           <img src={p.image} alt="" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 6, border: '1px solid #334155', background: '#0f172a', padding: 4 }} />
@@ -247,7 +356,7 @@ function ProductsPage() {
               <div style={{ marginBottom: 14 }}>
                 <label style={lbl}>Category</label>
                 <select style={selectStyle} value={newProduct.category} onChange={(e) => setNewProduct((p) => ({ ...p, category: e.target.value }))}>
-                  {CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+                  {DEFAULT_CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
                 </select>
               </div>
               <div style={{ marginBottom: 14 }}>

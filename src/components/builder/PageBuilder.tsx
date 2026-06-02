@@ -146,7 +146,7 @@ const INITIAL_STATE: BuilderState = {
   pageBlocks: { landing: seedLanding(), about: [], pricing: [], contact: [] },
 };
 
-const BACKEND = "http://localhost:1337";
+const BACKEND = "https://salescode-marketplace.salescode.ai";
 
 export function PageBuilder() {
   // History stack
@@ -208,7 +208,7 @@ export function PageBuilder() {
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
   const [blogNewMode, setBlogNewMode] = useState(false);
   const [blogRefreshKey, setBlogRefreshKey] = useState(0);
-  const isBlogMode = activePage === "__blog__";
+  const isBlogMode = activePage === "__blog__" || activePage === "blog";
 
   // Widget picker (lifted out of right-panel overflow context to avoid clipping)
   const [widgetPicker, setWidgetPicker] = useState<{ onPick: (t: WidgetType) => void } | null>(null);
@@ -788,13 +788,17 @@ export function PageBuilder() {
         {/* Preview iframe */}
         <iframe
           ref={iframeRef}
-          src={isBlogMode
-            ? (selectedBlogPost && !blogNewMode
-                ? `http://localhost:3000/blog/${selectedBlogPost.slug}?preview=1`
-                : `http://localhost:3000/blog?preview=1`)
-            : activePage === 'landing'
-            ? `http://localhost:3000/?preview=1`
-            : `http://localhost:3000/${activePage}?preview=1`}
+          src={(() => {
+            const base = import.meta.env.VITE_RENDERER_URL ?? "https://demo-experience.salescode.ai";
+            if (isBlogMode) {
+              return selectedBlogPost && !blogNewMode
+                ? `${base}/blog/${selectedBlogPost.slug}?preview=1`
+                : `${base}/blog?preview=1`;
+            }
+            return activePage === 'landing'
+              ? `${base}/landing?preview=1`
+              : `${base}/${activePage}?preview=1`;
+          })()}
           className="flex-1 border-0 min-h-0"
           title="Page preview"
         />

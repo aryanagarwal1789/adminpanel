@@ -1,9 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useAdminPreview } from './preview-context';
 
 export const Route = createFileRoute('/admin/contact')({ component: ContactPage });
 
-const BACKEND = 'http://localhost:1337';
+const BACKEND = 'https://salescode-marketplace.salescode.ai';
 
 interface ContactData {
   title: string;
@@ -30,6 +31,8 @@ function ContactPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
+  const { post, onPreviewReady } = useAdminPreview();
+  const pageRef = useRef<ContactData>(BLANK);
 
   const showToast = (t: Toast) => {
     setToast(t);
@@ -43,6 +46,18 @@ function ContactPage() {
       .catch(() => showToast({ type: 'error', message: 'Failed to load Contact Us' }))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => { pageRef.current = page; }, [page]);
+
+  const sendToPreview = useCallback(() => {
+    post({ type: 'PAGE_UPDATE', pageId: 'contact-us', page: pageRef.current });
+  }, [post]);
+  useEffect(() => onPreviewReady(sendToPreview), [onPreviewReady, sendToPreview]);
+
+  useEffect(() => {
+    if (loading) return;
+    post({ type: 'PAGE_UPDATE', pageId: 'contact-us', page });
+  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const update = (patch: Partial<ContactData>) => setPage((p) => ({ ...p, ...patch }));
 
@@ -58,6 +73,7 @@ function ContactPage() {
       const data = (await res.json()) as { page?: Partial<ContactData> };
       setPage({ ...BLANK, ...(data.page ?? {}) });
       showToast({ type: 'success', message: 'Contact Us saved' });
+      post({ type: 'RELOAD' });
     } catch {
       showToast({ type: 'error', message: 'Save failed' });
     } finally {

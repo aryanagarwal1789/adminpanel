@@ -1,9 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
+import { UploadInput } from './upload-input';
 
 export const Route = createFileRoute('/admin/products/$productId')({ component: ProductDetailPage });
 
-const BACKEND = 'http://localhost:1337';
+const BACKEND = 'https://salescode-marketplace.salescode.ai';
 
 const CATEGORIES = [
   { id: 'applications', label: 'Applications' },
@@ -265,13 +266,7 @@ function ProductDetailPage() {
         )}
         <div style={{ marginTop: 14 }}>
           <label style={lbl}>Icon / Image URL</label>
-          <input style={inp} value={details.image} onChange={(e) => ud({ image: e.target.value })} placeholder="https://…" />
-          {details.image && (
-            <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
-              <img src={details.image} alt="" style={{ width: 48, height: 48, objectFit: 'contain', borderRadius: 8, border: '1px solid #334155', background: '#0f172a', padding: 4 }} />
-              <button style={dangerBtn} onClick={() => ud({ image: '' })}>Clear</button>
-            </div>
-          )}
+          <UploadInput value={details.image} onChange={(image) => ud({ image })} accept="image/*" />
         </div>
       </div>
 
@@ -299,20 +294,11 @@ function ProductDetailPage() {
         </div>
         <div style={{ marginTop: 14 }}>
           <label style={lbl}>Video URL</label>
-          <input style={inp} value={details.preview.videoUrl} onChange={(e) => udPreview({ videoUrl: e.target.value })} placeholder="https://…" />
-          {details.preview.videoUrl && (
-            <button style={{ ...dangerBtn, marginTop: 6 }} onClick={() => udPreview({ videoUrl: '' })}>Remove video</button>
-          )}
+          <UploadInput value={details.preview.videoUrl} onChange={(videoUrl) => udPreview({ videoUrl })} accept="video/*" />
         </div>
         <div style={{ marginTop: 14 }}>
           <label style={lbl}>Thumbnail image URL</label>
-          <input style={inp} value={details.preview.thumbnail} onChange={(e) => udPreview({ thumbnail: e.target.value })} placeholder="https://…" />
-          {details.preview.thumbnail && (
-            <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
-              <img src={details.preview.thumbnail} alt="" style={{ width: 80, height: 48, objectFit: 'contain', borderRadius: 6, border: '1px solid #334155', background: '#0f172a', padding: 4 }} />
-              <button style={dangerBtn} onClick={() => udPreview({ thumbnail: '' })}>Clear</button>
-            </div>
-          )}
+          <UploadInput value={details.preview.thumbnail} onChange={(thumbnail) => udPreview({ thumbnail })} accept="image/*" />
         </div>
         <div style={{ marginTop: 16, textAlign: 'right' }}>
           <button style={saveBtn} onClick={saveDetails} disabled={savingDetails}>
@@ -369,7 +355,7 @@ function ProductDetailPage() {
                   </div>
                   <div style={{ marginTop: 10 }}>
                     <label style={lbl}>Icon URL (optional)</label>
-                    <input style={inp} value={item.icon} onChange={(e) => updateItem(idx, { icon: e.target.value })} placeholder="https://…" />
+                    <UploadInput value={item.icon} onChange={(icon) => updateItem(idx, { icon })} accept="image/*" preview={false} />
                   </div>
                 </div>
               )}

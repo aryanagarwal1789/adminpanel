@@ -1,9 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useAdminPreview } from './preview-context';
+import { UploadInput } from './upload-input';
 
 export const Route = createFileRoute('/admin/clients')({ component: ClientsPage });
 
-const BACKEND = 'http://localhost:1337';
+const BACKEND = 'https://salescode-marketplace.salescode.ai';
 
 interface ClientImage {
   id: string;
@@ -44,6 +46,8 @@ function ClientsPage() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
   const [newImageUrl, setNewImageUrl] = useState('');
+  const { post, onPreviewReady } = useAdminPreview();
+  const pageRef = useRef<ClientData>(BLANK);
 
   const showToast = (t: Toast) => {
     setToast(t);
@@ -65,6 +69,18 @@ function ClientsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => { pageRef.current = page; }, [page]);
+
+  const sendToPreview = useCallback(() => {
+    post({ type: 'PAGE_UPDATE', pageId: 'client', page: pageRef.current });
+  }, [post]);
+  useEffect(() => onPreviewReady(sendToPreview), [onPreviewReady, sendToPreview]);
+
+  useEffect(() => {
+    if (loading) return;
+    post({ type: 'PAGE_UPDATE', pageId: 'client', page });
+  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const update = (patch: Partial<ClientData>) => setPage((p) => ({ ...p, ...patch }));
 
   const updateImage = (idx: number, patch: Partial<ClientImage>) =>
@@ -77,6 +93,16 @@ function ClientsPage() {
     if (!newImageUrl.trim()) return;
     setPage((p) => ({ ...p, images: [...p.images, blankImage(newImageUrl.trim())] }));
     setNewImageUrl('');
+  };
+
+  const moveImage = (idx: number, dir: 'up' | 'down') => {
+    setPage((p) => {
+      const next = [...p.images];
+      const swap = dir === 'up' ? idx - 1 : idx + 1;
+      if (swap < 0 || swap >= next.length) return p;
+      [next[idx], next[swap]] = [next[swap], next[idx]];
+      return { ...p, images: next };
+    });
   };
 
   const save = async () => {
@@ -97,6 +123,7 @@ function ClientsPage() {
         images: data.page?.images ?? [],
       });
       showToast({ type: 'success', message: 'Client page saved' });
+      post({ type: 'RELOAD' });
     } catch {
       showToast({ type: 'error', message: 'Save failed' });
     } finally {
@@ -138,13 +165,7 @@ function ClientsPage() {
             </div>
             <div style={{ marginBottom: 14 }}>
               <label style={lbl}>Banner Image URL</label>
-              <input style={inp} value={page.bannerImage} onChange={(e) => update({ bannerImage: e.target.value })} placeholder="https://…" />
-              {page.bannerImage && (
-                <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <img src={page.bannerImage} alt="" style={{ height: 64, borderRadius: 6, objectFit: 'cover', border: '1px solid #334155' }} />
-                  <button style={dangerBtn} onClick={() => update({ bannerImage: '' })}>Clear</button>
-                </div>
-              )}
+              <UploadInput value={page.bannerImage} onChange={(bannerImage) => update({ bannerImage })} accept="image/*" />
             </div>
           </div>
 
@@ -171,13 +192,30 @@ function ClientsPage() {
 
             {page.images.map((img, idx) => (
               <div key={img.id} style={{ background: '#0f172a', borderRadius: 6, padding: 12, marginBottom: 8, border: '1px solid #334155', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                {/* Reorder buttons */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0, paddingTop: 2 }}>
+                  <button
+                    onClick={() => moveImage(idx, 'up')}
+                    disabled={idx === 0}
+                    style={{ background: 'none', border: '1px solid #334155', color: idx === 0 ? '#334155' : '#94a3b8', borderRadius: 4, cursor: idx === 0 ? 'default' : 'pointer', padding: '2px 6px', fontSize: 11, lineHeight: 1 }}
+                    title="Move up"
+                  >↑</button>
+                  <button
+                    onClick={() => moveImage(idx, 'down')}
+                    disabled={idx === page.images.length - 1}
+                    style={{ background: 'none', border: '1px solid #334155', color: idx === page.images.length - 1 ? '#334155' : '#94a3b8', borderRadius: 4, cursor: idx === page.images.length - 1 ? 'default' : 'pointer', padding: '2px 6px', fontSize: 11, lineHeight: 1 }}
+                    title="Move down"
+                  >↓</button>
+                  <span style={{ color: '#475569', fontSize: 10, textAlign: 'center' }}>{idx + 1}</span>
+                </div>
+
                 {img.url && (
                   <img src={img.url} alt={img.alt} style={{ width: 60, height: 40, objectFit: 'contain', borderRadius: 4, border: '1px solid #334155', background: '#1e293b', flexShrink: 0 }} />
                 )}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div>
                     <label style={lbl}>Image URL</label>
-                    <input style={inp} value={img.url} onChange={(e) => updateImage(idx, { url: e.target.value })} placeholder="https://…" />
+                    <UploadInput value={img.url} onChange={(url) => updateImage(idx, { url })} accept="image/*" preview={false} />
                   </div>
                   <div>
                     <label style={lbl}>Alt text</label>

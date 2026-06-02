@@ -1,9 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useAdminPreview } from './preview-context';
+import { UploadInput } from './upload-input';
 
 export const Route = createFileRoute('/admin/about')({ component: AboutPage });
 
-const BACKEND = 'http://localhost:1337';
+const BACKEND = 'https://salescode-marketplace.salescode.ai';
 
 interface AboutData {
   title: string;
@@ -31,6 +33,8 @@ function AboutPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
+  const { post, onPreviewReady } = useAdminPreview();
+  const pageRef = useRef<AboutData>(BLANK);
 
   const showToast = (t: Toast) => {
     setToast(t);
@@ -44,6 +48,21 @@ function AboutPage() {
       .catch(() => showToast({ type: 'error', message: 'Failed to load About Us' }))
       .finally(() => setLoading(false));
   }, []);
+
+  // Keep ref in sync for the onPreviewReady callback
+  useEffect(() => { pageRef.current = page; }, [page]);
+
+  // Re-send when iframe (re)connects
+  const sendToPreview = useCallback(() => {
+    post({ type: 'PAGE_UPDATE', pageId: 'about-us', page: pageRef.current });
+  }, [post]);
+  useEffect(() => onPreviewReady(sendToPreview), [onPreviewReady, sendToPreview]);
+
+  // Live update as user types
+  useEffect(() => {
+    if (loading) return;
+    post({ type: 'PAGE_UPDATE', pageId: 'about-us', page });
+  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const update = (patch: Partial<AboutData>) => setPage((p) => ({ ...p, ...patch }));
 
@@ -59,6 +78,7 @@ function AboutPage() {
       const data = (await res.json()) as { page?: Partial<AboutData> };
       setPage({ ...BLANK, ...(data.page ?? {}) });
       showToast({ type: 'success', message: 'About Us saved' });
+      post({ type: 'RELOAD' });
     } catch {
       showToast({ type: 'error', message: 'Save failed' });
     } finally {
@@ -103,23 +123,11 @@ function AboutPage() {
             <div style={{ color: '#f1f5f9', fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Media</div>
             <div style={{ marginBottom: 14 }}>
               <label style={lbl}>Banner Image URL</label>
-              <input style={inp} value={page.bannerImage} onChange={(e) => update({ bannerImage: e.target.value })} placeholder="https://…" />
-              {page.bannerImage && (
-                <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <img src={page.bannerImage} alt="" style={{ height: 80, borderRadius: 6, objectFit: 'cover', border: '1px solid #334155' }} />
-                  <button style={secBtn} onClick={() => update({ bannerImage: '' })}>Clear</button>
-                </div>
-              )}
+              <UploadInput value={page.bannerImage} onChange={(bannerImage) => update({ bannerImage })} accept="image/*" />
             </div>
             <div style={{ marginBottom: 14 }}>
               <label style={lbl}>Video URL</label>
-              <input style={inp} value={page.video} onChange={(e) => update({ video: e.target.value })} placeholder="https://…" />
-              {page.video && (
-                <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <video src={page.video} controls muted style={{ height: 80, borderRadius: 6, border: '1px solid #334155' }} />
-                  <button style={secBtn} onClick={() => update({ video: '' })}>Clear</button>
-                </div>
-              )}
+              <UploadInput value={page.video} onChange={(video) => update({ video })} accept="video/*" />
             </div>
           </div>
 

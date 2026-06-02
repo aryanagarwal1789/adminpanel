@@ -6,6 +6,7 @@ import {
   Megaphone, HelpCircle, FileText, Sparkles, MonitorPlay,
   ListOrdered, CreditCard, MessageSquareQuote, Users, TrendingUp,
   ArrowRightCircle, Zap, ShoppingCart, Puzzle, BookOpen, PanelBottom,
+  List, Tag, MessageSquare, BarChart3, GitBranch,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { TemplateBlockType, LayoutVariant } from "./types";
@@ -31,6 +32,23 @@ const GROUPS: Group[] = [
     { type: "clients-page-slot", label: "Clients Page", Icon: Users },
     { type: "contact-page-slot", label: "Contact Us Page", Icon: Megaphone },
     { type: "blog-page-slot", label: "Blog Page", Icon: FileText },
+  ]},
+  { name: "Slick Blocks", items: [
+    { type: "slick-hero-split", label: "Hero Split Gradient", Icon: Sparkles },
+    { type: "slick-hero-video", label: "Hero Centered Video", Icon: Star },
+    { type: "slick-features-bento", label: "Features Bento Grid", Icon: Grid2x2 },
+    { type: "slick-features-alternating", label: "Features Alternating", Icon: List },
+    { type: "slick-pricing", label: "Pricing Cards", Icon: Tag },
+    { type: "slick-testimonials-carousel", label: "Testimonials Carousel", Icon: MessageSquare },
+    { type: "slick-testimonials-logos", label: "Testimonials Logos", Icon: Star },
+    { type: "slick-stats", label: "Stats Counter", Icon: BarChart3 },
+    { type: "slick-faq", label: "FAQ Accordion", Icon: HelpCircle },
+    { type: "slick-cta-glass", label: "CTA Glass Banner", Icon: Zap },
+    { type: "slick-team", label: "Team Grid", Icon: Users },
+    { type: "slick-integrations", label: "Integrations Cloud", Icon: Grid2x2 },
+    { type: "slick-blog-grid", label: "Blog Post Grid", Icon: BookOpen },
+    { type: "slick-timeline", label: "Timeline Steps", Icon: GitBranch },
+    { type: "slick-footer-complex", label: "Footer Complex", Icon: Layout },
   ]},
   { name: "Navigation", items: [
     { type: "nav-simple", label: "Nav Simple", Icon: Menu },

@@ -39,7 +39,22 @@ export type TemplateBlockType =
   | "about-page-slot"
   | "clients-page-slot"
   | "contact-page-slot"
-  | "blog-page-slot";
+  | "blog-page-slot"
+  | 'slick-hero-split'
+  | 'slick-hero-video'
+  | 'slick-features-bento'
+  | 'slick-features-alternating'
+  | 'slick-pricing'
+  | 'slick-testimonials-carousel'
+  | 'slick-testimonials-logos'
+  | 'slick-stats'
+  | 'slick-faq'
+  | 'slick-cta-glass'
+  | 'slick-team'
+  | 'slick-integrations'
+  | 'slick-blog-grid'
+  | 'slick-timeline'
+  | 'slick-footer-complex';
 
 export type LayoutVariant = "1" | "2" | "3" | "1-2" | "2-1" | "4";
 
@@ -155,5 +170,20 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   "clients-page-slot": "Clients Page",
   "contact-page-slot": "Contact Us Page",
   "blog-page-slot": "Blog Page",
+  'slick-hero-split': 'Hero — Split Gradient',
+  'slick-hero-video': 'Hero — Centered Video',
+  'slick-features-bento': 'Features — Bento Grid',
+  'slick-features-alternating': 'Features — Alternating Rows',
+  'slick-pricing': 'Pricing Cards',
+  'slick-testimonials-carousel': 'Testimonials — Carousel',
+  'slick-testimonials-logos': 'Testimonials — Logos',
+  'slick-stats': 'Stats Counter',
+  'slick-faq': 'FAQ Accordion',
+  'slick-cta-glass': 'CTA — Glass Banner',
+  'slick-team': 'Team Grid',
+  'slick-integrations': 'Integrations Cloud',
+  'slick-blog-grid': 'Blog Post Grid',
+  'slick-timeline': 'Timeline Steps',
+  'slick-footer-complex': 'Footer — Complex',
   layout: "Layout",
 };

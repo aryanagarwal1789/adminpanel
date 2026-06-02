@@ -1,9 +1,56 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FileText, Globe, X, Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import type { BlogPost } from "./BlogPanel";
 
-const BACKEND = "http://localhost:1337";
+const BACKEND = "https://salescode-marketplace.salescode.ai";
+
+const UPLOAD_URL = "https://salescode-marketplace.salescode.ai/site/upload";
+
+function FeaturedImageUpload({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const ref = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true); setError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch(UPLOAD_URL, { method: "POST", body: form });
+      if (!res.ok) throw new Error();
+      const data = await res.json() as { url?: string };
+      if (data.url) onChange(data.url);
+    } catch { setError("Upload failed"); }
+    finally { setUploading(false); }
+  };
+
+  return (
+    <div>
+      <div className="text-xs font-medium text-slate-300 mb-1.5">Featured image</div>
+      <button
+        type="button"
+        onClick={() => ref.current?.click()}
+        disabled={uploading}
+        className="w-full py-1.5 text-xs rounded-md font-medium disabled:opacity-50 pb-transition"
+        style={{ background: "#1e40af", color: "#fff", border: "none", cursor: uploading ? "default" : "pointer" }}
+      >
+        {uploading ? "Uploading…" : value ? "↑ Replace image" : "↑ Upload featured image"}
+      </button>
+      <input ref={ref} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFile} />
+      {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+      {value && (
+        <div className="mt-2 relative">
+          <img src={value} alt="" className="rounded w-full object-cover" style={{ maxHeight: 120 }} />
+          <button type="button" onClick={() => onChange("")} className="absolute top-1 right-1 text-xs bg-black/60 text-white rounded px-1.5 py-0.5 hover:bg-black/80">✕</button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const EMPTY: Omit<BlogPost, "_id"> = {
   slug: "", title: "", excerpt: "", body: "",
@@ -155,7 +202,7 @@ export function BlogPostEditor({ post, onClose, onSaved, onDeleted }: Props) {
         )}
         {!isNew && form.slug && (
           <a
-            href={`http://localhost:3000/blog/${form.slug}?preview=1`}
+            href={`${import.meta.env.VITE_RENDERER_URL ?? "https://demo-experience.salescode.ai"}/blog/${form.slug}?preview=1`}
             target="_blank"
             rel="noreferrer"
             className="ml-auto flex items-center gap-1 text-xs text-slate-400 hover:text-white pb-transition"
@@ -221,13 +268,7 @@ export function BlogPostEditor({ post, onClose, onSaved, onDeleted }: Props) {
             <input className={input} value={form.author} onChange={(e) => set("author", e.target.value)} placeholder="Jane Doe" />
           </div>
 
-          <div>
-            <label className={label}>Featured image URL</label>
-            <input className={input} value={form.featuredImage} onChange={(e) => set("featuredImage", e.target.value)} placeholder="https://…" />
-            {form.featuredImage && (
-              <img src={form.featuredImage} alt="" className="mt-2 rounded w-full object-cover" style={{ maxHeight: 120 }} />
-            )}
-          </div>
+          <FeaturedImageUpload value={form.featuredImage} onChange={(v) => set("featuredImage", v)} />
 
           <div>
             <label className={label}>Tags <span className="text-slate-600">(comma-separated)</span></label>
