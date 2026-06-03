@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
 import type { ButtonField, LinkField } from "./defaults";
 
@@ -200,6 +200,7 @@ export function Repeater<T>({
   newItem,
   itemPreview,
   renderItem,
+  openIndex,
 }: {
   label: string;
   items: T[];
@@ -207,8 +208,12 @@ export function Repeater<T>({
   newItem: () => T;
   itemPreview: (item: T, i: number) => string;
   renderItem: (item: T, update: (next: T) => void) => React.ReactNode;
+  openIndex?: number;
 }) {
-  const [open, setOpen] = useState<number | null>(null);
+  const [open, setOpen] = useState<number | null>(openIndex ?? null);
+  React.useEffect(() => {
+    if (openIndex !== undefined && openIndex !== null) setOpen(openIndex);
+  }, [openIndex]);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
 
   const update = (i: number, next: T) => {

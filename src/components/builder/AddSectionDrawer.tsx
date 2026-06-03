@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
-  X, ChevronDown, ChevronRight,
+  X, ChevronDown, ChevronRight, Search,
   Menu, AlignCenter, Layout, Columns, Star, LayoutTemplate,
   Grid3x3, Grid, Image as ImageIcon, BarChart, Quote, Grid2x2,
   Megaphone, HelpCircle, FileText, Sparkles, MonitorPlay,
@@ -120,6 +120,17 @@ export function AddSectionDrawer({
 }) {
   const [tab, setTab] = useState<"templates" | "layouts">("templates");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [search, setSearch] = useState("");
+
+  const q = search.trim().toLowerCase();
+  const filteredGroups = useMemo(() =>
+    GROUPS.map((g) => ({
+      ...g,
+      items: g.items.filter(({ label, type }) =>
+        !q || label.toLowerCase().includes(q) || type.toLowerCase().includes(q)
+      ),
+    })).filter((g) => g.items.length > 0),
+  [q]);
 
   if (!open) return null;
 
@@ -147,11 +158,28 @@ export function AddSectionDrawer({
         ))}
       </div>
 
+      {tab === "templates" && (
+        <div className="p-3 border-b border-slate-800 shrink-0">
+          <div className="relative">
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search templates..."
+              className="w-full pl-7 pr-2 py-1.5 text-sm rounded-md bg-slate-800 border border-slate-700 text-white placeholder:text-slate-500 outline-none focus:border-blue-500 pb-transition"
+            />
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto">
         {tab === "templates" ? (
           <div className="py-2">
-            {GROUPS.map((g) => {
-              const isCollapsed = collapsed[g.name];
+            {filteredGroups.length === 0 && (
+              <div className="px-4 py-8 text-center text-xs text-slate-400">No templates match "{search}"</div>
+            )}
+            {filteredGroups.map((g) => {
+              const isCollapsed = !q && collapsed[g.name];
               return (
                 <div key={g.name} className="border-b border-slate-800/60 last:border-b-0">
                   <button

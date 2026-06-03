@@ -205,6 +205,9 @@ export function PageBuilder() {
   const [selectedWidgetId, setSelectedWidgetId] = useState<string | null>(null);
   const [widgetTab, setWidgetTab] = useState<"content" | "style">("content");
 
+  // Nested item focus (click on a specific item inside a slick block)
+  const [focusedNestedItem, setFocusedNestedItem] = useState<{ blockId: string; itemKey: string; itemIndex: number } | null>(null);
+
   // Blog state
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
   const [blogNewMode, setBlogNewMode] = useState(false);
@@ -514,9 +517,16 @@ export function PageBuilder() {
         setSelectedWidgetId(widgetId);
         setWidgetTab("content");
         setSelectedBlockId(null);
+      } else if (e.data?.type === "SECTION_NESTED_ITEM_CLICK") {
+        const { blockId, itemKey, itemIndex } = e.data as { blockId: string; itemKey: string; itemIndex: number };
+        setSelectedWidgetId(null);
+        setSelectedBlockId(blockId);
+        setFocusedNestedItem({ blockId, itemKey, itemIndex });
+        setActiveTab("content");
       } else if (e.data?.type === "SECTION_CLICK") {
         setSelectedWidgetId(null);
         setSelectedBlockId(e.data.blockId ?? null);
+        setFocusedNestedItem(null);
       } else if (e.data?.type === "SECTION_SELECT_EDIT") {
         setSelectedWidgetId(null);
         setSelectedBlockId(e.data.blockId ?? null);
@@ -1006,7 +1016,7 @@ export function PageBuilder() {
                 <div className="px-4 pt-4 pb-3 border-b border-slate-800">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs text-slate-500">Contents</span>
-                    <button onClick={() => setSelectedBlockId(null)} className="p-1 rounded hover:bg-slate-700 text-slate-400 pb-transition">
+                    <button onClick={() => { setSelectedBlockId(null); setFocusedNestedItem(null); }} className="p-1 rounded hover:bg-slate-700 text-slate-400 pb-transition">
                       <X size={13} />
                     </button>
                   </div>
@@ -1035,6 +1045,7 @@ export function PageBuilder() {
                       block={selectedBlock}
                       update={(patch) => updateBlockFields(selectedBlock.id, patch)}
                       openWidgetPicker={openWidgetPicker}
+                      focusedItem={focusedNestedItem?.blockId === selectedBlock.id ? focusedNestedItem : null}
                     />
                   ) : (
                     <StyleEditor

@@ -15,6 +15,7 @@ interface Props {
   block: Block;
   update: (patch: FieldsOf) => void;
   openWidgetPicker: (col: number, onPick: (t: WidgetType) => void) => void;
+  focusedItem?: { itemKey: string; itemIndex: number } | null;
 }
 
 const newLink = (): LinkField => ({ label: "New link", url: "#" });
@@ -26,6 +27,7 @@ function renderBlockFields(
   set: (k: string, v: unknown) => void,
   update: (patch: FieldsOf) => void,
   openWidgetPicker: Props["openWidgetPicker"],
+  focusedItem?: { itemKey: string; itemIndex: number } | null,
 ): React.ReactElement | null {
   switch (block.type) {
     case "nav-simple":
@@ -657,6 +659,7 @@ function renderBlockFields(
           <TextInput label="Secondary CTA label" value={f.secondaryCtaLabel as string ?? ''} onChange={(v) => set('secondaryCtaLabel', v)} />
           <TextInput label="Secondary CTA href" value={f.secondaryCtaHref as string ?? ''} onChange={(v) => set('secondaryCtaHref', v)} />
           <ImageField label="Mockup image URL" value={f.mockupImageUrl as string ?? ''} onChange={(v) => set('mockupImageUrl', v)} />
+          <TextInput label="Mockup alt text" value={f.mockupAlt as string ?? ''} onChange={(v) => set('mockupAlt', v)} />
           <TextInput label="Trust label" value={f.trustLabel as string ?? ''} onChange={(v) => set('trustLabel', v)} />
         </div>
       );
@@ -721,6 +724,19 @@ function renderBlockFields(
           <TextInput label="Secondary CTA label" value={f.secondaryCtaLabel as string ?? ''} onChange={(v) => set('secondaryCtaLabel', v)} />
           <ImageField label="Video poster image" value={f.videoPoster as string ?? ''} onChange={(v) => set('videoPoster', v)} />
           <ImageField label="Video (mp4)" value={f.videoSrc as string ?? ''} onChange={(v) => set('videoSrc', v)} />
+          <Repeater<{ value: string; label: string }>
+            label="Metrics"
+            items={(f.metrics as { value: string; label: string }[]) ?? []}
+            onChange={(v) => set('metrics', v)}
+            newItem={() => ({ value: '10K+', label: 'Users' })}
+            itemPreview={(it) => `${it.value} ${it.label}`}
+            renderItem={(it, u) => (
+              <>
+                <TextInput label="Value (e.g. 10K+)" value={it.value} onChange={(x) => u({ ...it, value: x })} />
+                <TextInput label="Label" value={it.label} onChange={(x) => u({ ...it, label: x })} />
+              </>
+            )}
+          />
         </div>
       );
 
@@ -784,11 +800,29 @@ function renderBlockFields(
             onChange={(v) => set('features', v)}
             newItem={() => ({ icon: '✨', title: 'New feature', description: 'Description here.', tone: 'lime', span: 'sm' })}
             itemPreview={(it) => it.title}
+            openIndex={focusedItem?.itemKey === 'features' ? focusedItem.itemIndex : undefined}
             renderItem={(it, u) => (
               <>
                 <TextInput label="Icon (emoji)" value={it.icon} onChange={(x) => u({ ...it, icon: x })} />
                 <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
                 <Textarea label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
+                <div>
+                  <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Card tone</span>
+                  <select value={it.tone ?? 'lime'} onChange={(e) => u({ ...it, tone: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#f1f5f9', borderRadius: 4, padding: '5px 8px', fontSize: 12 }}>
+                    {['lime','violet','amber','pink','sky','ink'].map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Card size</span>
+                  <select value={it.span ?? 'sm'} onChange={(e) => u({ ...it, span: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#f1f5f9', borderRadius: 4, padding: '5px 8px', fontSize: 12 }}>
+                    <option value="sm">Small</option>
+                    <option value="md">Medium</option>
+                    <option value="lg">Large</option>
+                    <option value="tall">Tall</option>
+                  </select>
+                </div>
               </>
             )}
           />
@@ -845,12 +879,13 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <Repeater<{ tag: string; headline: string; headlineAccent: string; description: string; ctaLabel: string; ctaHref: string; imageUrl: string }>
+          <Repeater<{ tag: string; headline: string; headlineAccent: string; description: string; ctaLabel: string; ctaHref: string; imageUrl: string; imageAlt?: string; bullets?: string[] }>
             label="Rows"
-            items={(f.rows as { tag: string; headline: string; headlineAccent: string; description: string; ctaLabel: string; ctaHref: string; imageUrl: string }[]) ?? []}
+            items={(f.rows as { tag: string; headline: string; headlineAccent: string; description: string; ctaLabel: string; ctaHref: string; imageUrl: string; imageAlt?: string; bullets?: string[] }[]) ?? []}
             onChange={(v) => set('rows', v)}
             newItem={() => ({ tag: 'NEW', headline: 'New', headlineAccent: 'feature', description: 'Description.', ctaLabel: 'Learn more →', ctaHref: '#', imageUrl: '' })}
             itemPreview={(it) => `${it.tag}: ${it.headline}`}
+            openIndex={focusedItem?.itemKey === 'rows' ? focusedItem.itemIndex : undefined}
             renderItem={(it, u) => (
               <>
                 <TextInput label="Tag chip" value={it.tag} onChange={(x) => u({ ...it, tag: x })} />
@@ -858,7 +893,19 @@ function renderBlockFields(
                 <TextInput label="Headline accent" value={it.headlineAccent} onChange={(x) => u({ ...it, headlineAccent: x })} />
                 <Textarea label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
                 <TextInput label="CTA label" value={it.ctaLabel} onChange={(x) => u({ ...it, ctaLabel: x })} />
+                <TextInput label="CTA href" value={(it as { ctaHref?: string }).ctaHref ?? ''} onChange={(x) => u({ ...it, ctaHref: x })} />
                 <ImageField label="Image URL" value={it.imageUrl} onChange={(x) => u({ ...it, imageUrl: x })} />
+                <TextInput label="Image alt text" value={(it as { imageAlt?: string }).imageAlt ?? ''} onChange={(x) => u({ ...it, imageAlt: x })} />
+                <Repeater<string>
+                  label="Bullet points"
+                  items={(it as { bullets?: string[] }).bullets ?? []}
+                  newItem={() => 'New bullet point'}
+                  itemPreview={(b) => b}
+                  onChange={(bullets) => u({ ...it, bullets })}
+                  renderItem={(b, onB) => (
+                    <TextInput label="Bullet" value={b} onChange={onB} />
+                  )}
+                />
               </>
             )}
           />
@@ -919,19 +966,35 @@ function renderBlockFields(
           <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
           <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
           <Textarea label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
-          <Repeater<{ name: string; description: string; monthlyPrice: number; annualPrice: number; ctaLabel: string; ctaHref: string; highlighted: boolean; badge: string }>
+          <TextInput label="Currency symbol" value={(f.currency as string) ?? '$'} onChange={(v) => set('currency', v)} />
+          <Repeater<{ name: string; description: string; monthlyPrice: number; annualPrice: number; features: string[]; ctaLabel: string; ctaHref: string; highlighted: boolean; badge: string }>
             label="Plans"
-            items={(f.plans as { name: string; description: string; monthlyPrice: number; annualPrice: number; ctaLabel: string; ctaHref: string; highlighted: boolean; badge: string }[]) ?? []}
+            openIndex={focusedItem?.itemKey === 'plans' ? focusedItem.itemIndex : undefined}
+            items={(f.plans as { name: string; description: string; monthlyPrice: number; annualPrice: number; features: string[]; ctaLabel: string; ctaHref: string; highlighted: boolean; badge: string }[]) ?? []}
             onChange={(v) => set('plans', v)}
-            newItem={() => ({ name: 'New plan', description: 'Plan description.', monthlyPrice: 0, annualPrice: 0, ctaLabel: 'Get started', ctaHref: '#', highlighted: false, badge: '' })}
-            itemPreview={(it) => it.name}
+            newItem={() => ({ name: 'New plan', description: 'Plan description.', monthlyPrice: 29, annualPrice: 19, features: ['Feature one', 'Feature two'], ctaLabel: 'Get started', ctaHref: '#', highlighted: false, badge: '' })}
+            itemPreview={(it) => `${it.name} — $${it.monthlyPrice}/mo`}
             renderItem={(it, u) => (
               <>
                 <TextInput label="Plan name" value={it.name} onChange={(x) => u({ ...it, name: x })} />
                 <Textarea label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
+                <div className="grid grid-cols-2 gap-2">
+                  <NumberInput label="Monthly price" value={it.monthlyPrice ?? 0} onChange={(x) => u({ ...it, monthlyPrice: x })} />
+                  <NumberInput label="Annual price" value={it.annualPrice ?? 0} onChange={(x) => u({ ...it, annualPrice: x })} />
+                </div>
+                <Repeater<string>
+                  label="Features"
+                  items={it.features ?? []}
+                  newItem={() => 'New feature'}
+                  itemPreview={(feat) => feat}
+                  onChange={(features) => u({ ...it, features })}
+                  renderItem={(feat, onFeat) => (
+                    <TextInput label="Feature" value={feat} onChange={onFeat} />
+                  )}
+                />
                 <TextInput label="CTA label" value={it.ctaLabel} onChange={(x) => u({ ...it, ctaLabel: x })} />
                 <TextInput label="CTA href" value={it.ctaHref} onChange={(x) => u({ ...it, ctaHref: x })} />
-                <TextInput label="Badge (e.g. Most popular)" value={it.badge ?? ''} onChange={(x) => u({ ...it, badge: x })} />
+                <TextInput label="Badge (e.g. ★ MOST POPULAR)" value={it.badge ?? ''} onChange={(x) => u({ ...it, badge: x })} />
                 <Toggle label="Highlighted (dark card)" value={it.highlighted} onChange={(x) => u({ ...it, highlighted: x })} />
               </>
             )}
@@ -992,12 +1055,13 @@ function renderBlockFields(
           <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
           <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
           <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Repeater<{ quote: string; name: string; role: string; company: string; avatarUrl: string }>
+          <Repeater<{ quote: string; name: string; role: string; company: string; avatarUrl: string; rating?: number }>
             label="Testimonials"
-            items={(f.testimonials as { quote: string; name: string; role: string; company: string; avatarUrl: string }[]) ?? []}
+            items={(f.testimonials as { quote: string; name: string; role: string; company: string; avatarUrl: string; rating?: number }[]) ?? []}
             onChange={(v) => set('testimonials', v)}
-            newItem={() => ({ quote: 'Add your testimonial here.', name: 'Name', role: 'Role', company: 'Company', avatarUrl: '' })}
+            newItem={() => ({ quote: 'Add your testimonial here.', name: 'Name', role: 'Role', company: 'Company', avatarUrl: '', rating: 5 })}
             itemPreview={(it) => it.name}
+            openIndex={focusedItem?.itemKey === 'testimonials' ? focusedItem.itemIndex : undefined}
             renderItem={(it, u) => (
               <>
                 <Textarea label="Quote" value={it.quote} onChange={(x) => u({ ...it, quote: x })} />
@@ -1005,6 +1069,7 @@ function renderBlockFields(
                 <TextInput label="Role" value={it.role} onChange={(x) => u({ ...it, role: x })} />
                 <TextInput label="Company" value={it.company} onChange={(x) => u({ ...it, company: x })} />
                 <ImageField label="Avatar URL" value={it.avatarUrl} onChange={(x) => u({ ...it, avatarUrl: x })} />
+                <NumberInput label="Rating (1–5)" value={(it as { rating?: number }).rating ?? 5} onChange={(x) => u({ ...it, rating: x })} />
               </>
             )}
           />
@@ -1145,6 +1210,7 @@ function renderBlockFields(
             onChange={(v) => set('stats', v)}
             newItem={() => ({ value: '0', suffix: '+', label: 'Metric' })}
             itemPreview={(it) => `${it.value}${it.suffix} — ${it.label}`}
+            openIndex={focusedItem?.itemKey === 'stats' ? focusedItem.itemIndex : undefined}
             renderItem={(it, u) => (
               <>
                 <TextInput label="Value" value={it.value} onChange={(x) => u({ ...it, value: x })} />
@@ -1211,8 +1277,10 @@ function renderBlockFields(
           <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
           <Textarea label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
           <TextInput label="Contact CTA label" value={f.contactCtaLabel as string ?? ''} onChange={(v) => set('contactCtaLabel', v)} />
+          <TextInput label="Contact CTA href" value={f.contactCtaHref as string ?? ''} onChange={(v) => set('contactCtaHref', v)} />
           <Repeater<{ category: string; question: string; answer: string }>
             label="FAQ items"
+            openIndex={focusedItem?.itemKey === 'items' ? focusedItem.itemIndex : undefined}
             items={(f.items as { category: string; question: string; answer: string }[]) ?? []}
             onChange={(v) => set('items', v)}
             newItem={() => ({ category: 'General', question: 'New question?', answer: 'Answer here.' })}
@@ -1345,6 +1413,7 @@ function renderBlockFields(
           <Textarea label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
           <Repeater<{ name: string; role: string; bio: string; avatarUrl: string; linkedinUrl: string; accent: string }>
             label="Team members"
+            openIndex={focusedItem?.itemKey === 'members' ? focusedItem.itemIndex : undefined}
             items={(f.members as { name: string; role: string; bio: string; avatarUrl: string; linkedinUrl: string; accent: string }[]) ?? []}
             onChange={(v) => set('members', v)}
             newItem={() => ({ name: 'Name', role: 'Role', bio: 'Bio here.', avatarUrl: '', linkedinUrl: '#', accent: 'lime' })}
@@ -1356,6 +1425,13 @@ function renderBlockFields(
                 <Textarea label="Bio" value={it.bio} onChange={(x) => u({ ...it, bio: x })} />
                 <ImageField label="Avatar URL" value={it.avatarUrl} onChange={(x) => u({ ...it, avatarUrl: x })} />
                 <TextInput label="LinkedIn URL" value={it.linkedinUrl ?? ''} onChange={(x) => u({ ...it, linkedinUrl: x })} />
+                <div>
+                  <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Card accent</span>
+                  <select value={it.accent ?? 'lime'} onChange={(e) => u({ ...it, accent: e.target.value })}
+                    style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#f1f5f9', borderRadius: 4, padding: '5px 8px', fontSize: 12 }}>
+                    {['lime','violet','amber','pink'].map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
               </>
             )}
           />
@@ -1490,9 +1566,10 @@ function renderBlockFields(
           <Textarea label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
           <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
           <TextInput label="CTA href" value={f.ctaHref as string ?? ''} onChange={(v) => set('ctaHref', v)} />
-          <Repeater<{ coverUrl: string; tag: string; title: string; excerpt: string; authorName: string; date: string; href: string }>
+          <Repeater<{ coverUrl: string; tag: string; title: string; excerpt: string; authorName: string; authorAvatarUrl?: string; readTime?: string; date: string; href: string }>
             label="Blog posts"
-            items={(f.posts as { coverUrl: string; tag: string; title: string; excerpt: string; authorName: string; date: string; href: string }[]) ?? []}
+            openIndex={focusedItem?.itemKey === 'posts' ? focusedItem.itemIndex : undefined}
+            items={(f.posts as { coverUrl: string; tag: string; title: string; excerpt: string; authorName: string; authorAvatarUrl?: string; readTime?: string; date: string; href: string }[]) ?? []}
             onChange={(v) => set('posts', v)}
             newItem={() => ({ coverUrl: '', tag: 'Engineering', title: 'Post title', excerpt: 'Excerpt here.', authorName: 'Author', date: 'Jan 1, 2025', href: '#' })}
             itemPreview={(it) => it.title}
@@ -1503,6 +1580,8 @@ function renderBlockFields(
                 <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
                 <Textarea label="Excerpt" value={it.excerpt} onChange={(x) => u({ ...it, excerpt: x })} />
                 <TextInput label="Author name" value={it.authorName} onChange={(x) => u({ ...it, authorName: x })} />
+                <ImageField label="Author avatar URL" value={(it as { authorAvatarUrl?: string }).authorAvatarUrl ?? ''} onChange={(x) => u({ ...it, authorAvatarUrl: x })} />
+                <TextInput label="Read time (e.g. 5 min)" value={(it as { readTime?: string }).readTime ?? ''} onChange={(x) => u({ ...it, readTime: x })} />
                 <TextInput label="Date" value={it.date} onChange={(x) => u({ ...it, date: x })} />
                 <TextInput label="Link href" value={it.href} onChange={(x) => u({ ...it, href: x })} />
               </>
@@ -1570,6 +1649,7 @@ function renderBlockFields(
             items={(f.steps as { icon: string; title: string; description: string }[]) ?? []}
             onChange={(v) => set('steps', v)}
             newItem={() => ({ icon: '✅', title: 'New step', description: 'Step description.' })}
+            openIndex={focusedItem?.itemKey === 'steps' ? focusedItem.itemIndex : undefined}
             itemPreview={(it) => it.title}
             renderItem={(it, u) => (
               <>
@@ -1693,6 +1773,7 @@ function renderBlockFields(
           <TextInput label="Newsletter heading" value={f.newsletterHeading as string ?? ''} onChange={(v) => set('newsletterHeading', v)} />
           <TextInput label="Newsletter subtext" value={f.newsletterSubtext as string ?? ''} onChange={(v) => set('newsletterSubtext', v)} />
           <TextInput label="Newsletter CTA label" value={f.newsletterCtaLabel as string ?? ''} onChange={(v) => set('newsletterCtaLabel', v)} />
+          <TextInput label="Newsletter placeholder" value={f.newsletterPlaceholder as string ?? ''} onChange={(v) => set('newsletterPlaceholder', v)} />
           <TextInput label="Copyright" value={f.copyright as string ?? ''} onChange={(v) => set('copyright', v)} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
         </div>
@@ -1705,12 +1786,12 @@ function renderBlockFields(
   }
 }
 
-export function ContentEditor({ block, update, openWidgetPicker }: Props) {
+export function ContentEditor({ block, update, openWidgetPicker, focusedItem }: Props) {
   const f = block.fields as FieldsOf;
   const set = (k: string, v: unknown) => update({ [k]: v });
   const [openWidgetId, setOpenWidgetId] = useState<string | null>(null);
 
-  const mainFields = renderBlockFields(block, f, set, update, openWidgetPicker);
+  const mainFields = renderBlockFields(block, f, set, update, openWidgetPicker, focusedItem);
 
   if (block.type === "layout") return mainFields;
 
