@@ -77,19 +77,20 @@ export const WIDGET_REGISTRY: Record<string, WidgetMeta> = {
 export interface WidgetCategory { key: string; name: string; types: WidgetType[] }
 
 export const WIDGET_CATEGORIES: WidgetCategory[] = [
-  { key: "theme", name: "Theme", types: [
-    "row","accordion","anchor","button","card","countdown","heading",
-    "horizontal-menu","language-switcher","navigation-menu","post-filter","rich-text",
-    "search-input","section-header","spacer","tabs","text","video",
+  { key: "text", name: "Text", types: [
+    "heading","section-heading","section-header","paragraph","text","rich-text","metrics",
   ]},
-  { key: "text", name: "Text", types: ["heading","metrics","rich-text","section-heading"] },
   { key: "design", name: "Design", types: [
-    "row","accordion","card","divider","horizontal-menu","horizontal-spacer",
-    "image-text","pricing-card","site-header","tabs",
+    "row","accordion","card","divider","horizontal-menu","navigation-menu",
+    "horizontal-spacer","image-text","pricing-card","site-header","spacer","tabs",
   ]},
-  { key: "functionality", name: "Functionality", types: ["anchor","site-search-input","site-search-results"] },
+  { key: "functionality", name: "Functionality", types: [
+    "anchor","language-switcher","search-input","site-search-input","site-search-results",
+  ]},
   { key: "forms-buttons", name: "Forms and Buttons", types: ["button","form"] },
-  { key: "body-content", name: "Body Content", types: ["countdown","feature-list","list","testimonial-slider"] },
+  { key: "body-content", name: "Body Content", types: [
+    "countdown","feature-list","list","testimonial-slider",
+  ]},
   { key: "media", name: "Media", types: [
     "audio-player","content-library","icon","image","image-grid","image-slider",
     "logo","logo-grid","video","video-embed","gallery",

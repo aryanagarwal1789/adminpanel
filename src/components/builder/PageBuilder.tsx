@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   Undo2, Redo2, Plus, Eye, EyeOff, Trash2, GripVertical,
-  X, Palette, MousePointer2, Play, FileText, ChevronLeft, PenLine, Paintbrush, Settings,
+  X, Palette, Play, FileText, ChevronLeft, PenLine, Paintbrush, Settings, Layers,
 } from "lucide-react";
 import { defaultBlock } from "./blocks";
 import { AddSectionDrawer } from "./AddSectionDrawer";
@@ -176,6 +176,7 @@ export function PageBuilder() {
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
   const [themeOpen, setThemeOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [leftPanel, setLeftPanel] = useState<null | "pages" | "sections">(null);
 
   // Push a history entry when preview opens so pressing Back closes it
   useEffect(() => {
@@ -667,123 +668,160 @@ export function PageBuilder() {
 
       {/* Body */}
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Left panel */}
-        <aside className="w-[240px] shrink-0 flex flex-col text-white" style={{ background: "#0f172a" }}>
-          <div className="flex-1 min-h-0 flex flex-col border-b border-slate-800">
-            <div className="flex items-center justify-between px-4 py-3">
-              <span className="text-xs uppercase tracking-wider pb-muted font-semibold">Pages</span>
-              <button onClick={onAddPage} className="p-1 rounded hover:bg-slate-800 pb-transition" title="New page"><Plus size={14} /></button>
-            </div>
-            <div className="overflow-y-auto">
-              {pages.map((p) => {
-                const active = p.id === activePage;
-                return (
-                  <div
-                    key={p.id}
-                    className={`group flex items-center justify-between border-l-2 pb-transition ${
-                      active
-                        ? "border-blue-500 bg-slate-800/60"
-                        : "border-transparent hover:bg-slate-800/40"
-                    }`}
-                  >
-                    <button
-                      onClick={() => { setActivePage(p.id); setSelectedBlockId(null); }}
-                      className={`flex-1 text-left px-4 py-2 text-sm ${active ? "text-white" : "text-slate-300"}`}
-                    >
-                      {p.name}
-                    </button>
-                    {p.id !== "__blog__" && (
-                      <button
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          if (!confirm(`Delete page "${p.name}"? This cannot be undone.`)) return;
-                          try {
-                            await fetch(`${BACKEND}/site/builder/pages/${p.id}`, { method: "DELETE" });
-                          } catch { /* ignore */ }
-                          const remaining = pages.filter((pg) => pg.id !== p.id);
-                          const nextActive = activePage === p.id
-                            ? (remaining.find((pg) => pg.id !== "__blog__")?.id ?? "landing")
-                            : activePage;
-                          // Single commit — no double state update
-                          commit({
-                            pages: remaining,
-                            pageBlocks: Object.fromEntries(
-                              Object.entries(pageBlocks).filter(([k]) => k !== p.id)
-                            ),
-                          });
-                          setActivePage(nextActive);
-                          setSelectedBlockId(null);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 p-2 text-slate-500 hover:text-red-400 pb-transition shrink-0"
-                        title={`Delete ${p.name}`}
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+        {/* Narrow icon sidebar — always visible, 48px */}
+        <div className="w-12 shrink-0 flex flex-col items-center py-2 gap-1 border-r border-slate-800" style={{ background: "#0f172a" }}>
+          <button
+            onClick={() => setAddAtIndex(blocks.length)}
+            className="w-9 h-9 flex items-center justify-center rounded hover:bg-slate-700 text-slate-400 hover:text-white pb-transition"
+            title="Add section"
+          >
+            <Plus size={18} />
+          </button>
+          <div className="w-6 h-px bg-slate-700 my-1" />
+          <button
+            onClick={() => setLeftPanel((p) => (p === "sections" ? null : "sections"))}
+            className={`w-9 h-9 flex items-center justify-center rounded pb-transition ${leftPanel === "sections" ? "bg-slate-700 text-white" : "text-slate-400 hover:bg-slate-700/60 hover:text-white"}`}
+            title="Page sections"
+          >
+            <Layers size={18} />
+          </button>
+          <button
+            onClick={() => setLeftPanel((p) => (p === "pages" ? null : "pages"))}
+            className={`w-9 h-9 flex items-center justify-center rounded pb-transition ${leftPanel === "pages" ? "bg-slate-700 text-white" : "text-slate-400 hover:bg-slate-700/60 hover:text-white"}`}
+            title="Pages"
+          >
+            <FileText size={18} />
+          </button>
+        </div>
 
-          {isBlogMode ? (
-            <BlogPanel
-              selectedSlug={blogNewMode ? null : (selectedBlogPost?.slug ?? null)}
-              onSelect={(post) => { setSelectedBlogPost(post); setBlogNewMode(false); }}
-              onNew={() => { setSelectedBlogPost(null); setBlogNewMode(true); }}
-              refreshKey={blogRefreshKey}
-            />
-          ) : (
-            <div className="flex-1 min-h-0 flex flex-col">
-              <div className="flex items-center justify-between px-4 py-3">
-                <span className="text-xs uppercase tracking-wider pb-muted font-semibold">Sections on this page</span>
-                <button
-                  onClick={() => setAddAtIndex(blocks.length)}
-                  className="p-1 rounded hover:bg-slate-800 pb-transition"
-                  title="Add section"
-                >
-                  <Plus size={14} />
+        {/* Left slide panel — opens when icon clicked */}
+        {leftPanel && (
+          <aside className="w-[280px] shrink-0 flex flex-col text-white border-r border-slate-800" style={{ background: "#0f172a" }}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">
+                {leftPanel === "pages" ? "Pages" : isBlogMode ? "Blog Posts" : "Sections"}
+              </span>
+              <div className="flex items-center gap-1">
+                {leftPanel === "sections" && !isBlogMode && (
+                  <button onClick={() => setAddAtIndex(blocks.length)} className="p-1 rounded hover:bg-slate-800 text-slate-400 pb-transition" title="Add section">
+                    <Plus size={14} />
+                  </button>
+                )}
+                {leftPanel === "sections" && isBlogMode && (
+                  <button onClick={() => { setSelectedBlogPost(null); setBlogNewMode(true); }} className="p-1 rounded hover:bg-slate-800 text-slate-400 pb-transition" title="New post">
+                    <Plus size={14} />
+                  </button>
+                )}
+                {leftPanel === "pages" && (
+                  <button onClick={onAddPage} className="p-1 rounded hover:bg-slate-800 text-slate-400 pb-transition" title="New page">
+                    <Plus size={14} />
+                  </button>
+                )}
+                <button onClick={() => setLeftPanel(null)} className="p-1 rounded hover:bg-slate-800 text-slate-400 pb-transition">
+                  <X size={14} />
                 </button>
               </div>
-              <div className="overflow-y-auto px-2 pb-3 space-y-0.5">
-                {blocks.length === 0 && (
-                  <div className="px-2 py-4 text-xs pb-muted">No sections yet.</div>
-                )}
-                {blocks.map((b) => {
-                  const active = b.id === selectedBlockId;
+            </div>
+
+            {leftPanel === "pages" && (
+              <div className="overflow-y-auto flex-1">
+                {pages.map((p) => {
+                  const active = p.id === activePage;
                   return (
                     <div
-                      key={b.id}
-                      draggable
-                      onDragStart={() => setDragId(b.id)}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={() => onReorderDrop(b.id)}
-                      onClick={() => { setSelectedBlockId(b.id); setSelectedWidgetId(null); }}
-                      className={`group flex items-center gap-2 px-2 py-1.5 rounded text-sm pb-transition cursor-pointer ${
-                        active ? "bg-slate-800 text-white" : "text-slate-300 hover:bg-slate-800/60"
+                      key={p.id}
+                      className={`group flex items-center justify-between border-l-2 pb-transition ${
+                        active ? "border-blue-500 bg-slate-800/60" : "border-transparent hover:bg-slate-800/40"
                       }`}
                     >
-                      <GripVertical size={14} className="opacity-50 cursor-grab" />
-                      <span className="flex-1 truncate">{BLOCK_LABELS[b.type]}</span>
                       <button
-                        onClick={(e) => { e.stopPropagation(); toggleHidden(b.id); }}
-                        className="opacity-60 hover:opacity-100"
+                        onClick={() => { setActivePage(p.id); setSelectedBlockId(null); }}
+                        className={`flex-1 text-left px-4 py-2 text-sm ${active ? "text-white" : "text-slate-300"}`}
                       >
-                        {b.hidden ? <EyeOff size={13} /> : <Eye size={13} />}
+                        {p.name}
                       </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); deleteBlock(b.id, true); }}
-                        className="opacity-60 hover:opacity-100 hover:text-red-400"
-                      >
-                        <Trash2 size={13} />
-                      </button>
+                      {p.id !== "__blog__" && (
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if (!confirm(`Delete page "${p.name}"? This cannot be undone.`)) return;
+                            try {
+                              await fetch(`${BACKEND}/site/builder/pages/${p.id}`, { method: "DELETE" });
+                            } catch { /* ignore */ }
+                            const remaining = pages.filter((pg) => pg.id !== p.id);
+                            const nextActive = activePage === p.id
+                              ? (remaining.find((pg) => pg.id !== "__blog__")?.id ?? "landing")
+                              : activePage;
+                            commit({
+                              pages: remaining,
+                              pageBlocks: Object.fromEntries(
+                                Object.entries(pageBlocks).filter(([k]) => k !== p.id)
+                              ),
+                            });
+                            setActivePage(nextActive);
+                            setSelectedBlockId(null);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-2 text-slate-500 hover:text-red-400 pb-transition shrink-0"
+                          title={`Delete ${p.name}`}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      )}
                     </div>
                   );
                 })}
               </div>
-            </div>
-          )}
-        </aside>
+            )}
+
+            {leftPanel === "sections" && (
+              isBlogMode ? (
+                <BlogPanel
+                  selectedSlug={blogNewMode ? null : (selectedBlogPost?.slug ?? null)}
+                  onSelect={(post) => { setSelectedBlogPost(post); setBlogNewMode(false); }}
+                  onNew={() => { setSelectedBlogPost(null); setBlogNewMode(true); }}
+                  refreshKey={blogRefreshKey}
+                />
+              ) : (
+                <div className="overflow-y-auto flex-1 px-2 pb-3 pt-1 space-y-0.5">
+                  {blocks.length === 0 && (
+                    <div className="px-2 py-4 text-xs text-slate-500">No sections yet.</div>
+                  )}
+                  {blocks.map((b) => {
+                    const isActive = b.id === selectedBlockId;
+                    return (
+                      <div
+                        key={b.id}
+                        draggable
+                        onDragStart={() => setDragId(b.id)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => onReorderDrop(b.id)}
+                        onClick={() => { setSelectedBlockId(b.id); setSelectedWidgetId(null); }}
+                        className={`group flex items-center gap-2 px-2 py-1.5 rounded text-sm pb-transition cursor-pointer ${
+                          isActive ? "bg-slate-800 text-white" : "text-slate-300 hover:bg-slate-800/60"
+                        }`}
+                      >
+                        <GripVertical size={14} className="opacity-50 cursor-grab" />
+                        <span className="flex-1 truncate">{BLOCK_LABELS[b.type]}</span>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleHidden(b.id); }}
+                          className="opacity-60 hover:opacity-100"
+                        >
+                          {b.hidden ? <EyeOff size={13} /> : <Eye size={13} />}
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); deleteBlock(b.id, true); }}
+                          className="opacity-60 hover:opacity-100 hover:text-red-400"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )
+            )}
+          </aside>
+        )}
 
         {/* Preview iframe */}
         <iframe
@@ -803,54 +841,177 @@ export function PageBuilder() {
           title="Page preview"
         />
 
-        {/* Right panel */}
-        <aside
-          data-builder-panel
-          className="w-[320px] shrink-0 flex flex-col text-white border-l border-slate-800 pb-transition"
-          style={{ background: "#0f172a" }}
-        >
-          {isBlogMode ? (
-            (blogNewMode || selectedBlogPost) ? (
-              <BlogPostEditor
-                post={blogNewMode ? null : selectedBlogPost}
-                onClose={() => { setBlogNewMode(false); setSelectedBlogPost(null); }}
-                onSaved={(saved) => { setSelectedBlogPost(saved); setBlogNewMode(false); setBlogRefreshKey((k) => k + 1); }}
-                onDeleted={(_slug) => { setSelectedBlogPost(null); setBlogNewMode(false); setBlogRefreshKey((k) => k + 1); }}
-              />
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-400 px-6">
-                <FileText size={36} className="mb-3 opacity-50" />
-                <div className="text-sm">Select a post to edit</div>
-                <div className="text-xs mt-1 opacity-60">or click + to create a new one</div>
-              </div>
-            )
-          ) : selectedWidgetId ? (() => {
-            const selWidget = findWidgetById(blocks, selectedWidgetId);
-            if (!selWidget) return (
-              <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-400 px-6">
-                <div className="text-sm">Widget not found</div>
-              </div>
-            );
-            const widgetLabel = WIDGET_REGISTRY[selWidget.type]?.label ?? selWidget.type;
-            return (
+        {/* Right panel slot — AddSection drawer takes priority, then content editor */}
+        {addAtIndex !== null ? (
+          <AddSectionDrawer
+            open
+            onClose={() => setAddAtIndex(null)}
+            onPickTemplate={(t) => addAtIndex !== null && addBlock(t, addAtIndex)}
+            onPickLayout={(l) => addAtIndex !== null && addBlock("layout", addAtIndex, l)}
+          />
+        ) : (selectedWidgetId !== null || selectedBlock !== null || (isBlogMode && (blogNewMode || selectedBlogPost !== null))) && (
+          <aside
+            data-builder-panel
+            className="w-[320px] shrink-0 flex flex-col text-white border-l border-slate-800"
+            style={{ background: "#0f172a" }}
+          >
+            {isBlogMode ? (
+              (blogNewMode || selectedBlogPost) ? (
+                <BlogPostEditor
+                  post={blogNewMode ? null : selectedBlogPost}
+                  onClose={() => { setBlogNewMode(false); setSelectedBlogPost(null); }}
+                  onSaved={(saved) => { setSelectedBlogPost(saved); setBlogNewMode(false); setBlogRefreshKey((k) => k + 1); }}
+                  onDeleted={(_slug) => { setSelectedBlogPost(null); setBlogNewMode(false); setBlogRefreshKey((k) => k + 1); }}
+                />
+              ) : null
+            ) : selectedWidgetId ? (() => {
+              const selWidget = findWidgetById(blocks, selectedWidgetId);
+              if (!selWidget) return (
+                <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-400 px-6">
+                  <div className="text-sm">Widget not found</div>
+                </div>
+              );
+              const widgetLabel = WIDGET_REGISTRY[selWidget.type]?.label ?? selWidget.type;
+              return (
+                <>
+                  <div className="px-4 pt-4 pb-3 border-b border-slate-800">
+                    <div className="flex items-center justify-between mb-2">
+                      <button
+                        onClick={() => setSelectedWidgetId(null)}
+                        className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 pb-transition"
+                      >
+                        <ChevronLeft size={11} />
+                        Contents
+                      </button>
+                      <button onClick={() => setSelectedWidgetId(null)} className="p-1 rounded hover:bg-slate-700 text-slate-400 pb-transition">
+                        <X size={13} />
+                      </button>
+                    </div>
+                    <div className="text-base font-semibold text-white leading-tight">{widgetLabel}</div>
+                  </div>
+                  <div className="flex border-b border-slate-800">
+                    {([
+                      { key: "content" as const, label: "Content", Icon: PenLine },
+                      { key: "style"   as const, label: "Styles",  Icon: Paintbrush },
+                    ]).map(({ key, label, Icon }) => (
+                      <button
+                        key={key}
+                        onClick={() => setWidgetTab(key)}
+                        className={`flex-1 py-2.5 text-xs flex items-center justify-center gap-1.5 pb-transition border-b-2 ${
+                          widgetTab === key ? "border-blue-500 text-white" : "border-transparent text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        <Icon size={12} />
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <div key={selWidget.id + widgetTab} className="flex-1 overflow-y-auto p-4 pb-fade-in">
+                    {widgetTab === "content" ? (
+                      <WidgetEditor
+                        widget={selWidget}
+                        update={(props) => {
+                          const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, props);
+                          setBlocks(nextBlocks);
+                        }}
+                        openWidgetPicker={openWidgetPicker}
+                      />
+                    ) : (
+                      <div className="space-y-4">
+                        <label className="flex flex-col gap-1.5">
+                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Background</span>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={(selWidget.props.bgColor as string) || "#ffffff"}
+                              onChange={(e) => {
+                                const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, bgColor: e.target.value });
+                                setBlocks(nextBlocks);
+                              }}
+                              className="h-8 w-10 rounded cursor-pointer border border-slate-700 bg-transparent shrink-0"
+                            />
+                            <input
+                              type="text"
+                              value={(selWidget.props.bgColor as string) || ""}
+                              placeholder="#ffffff"
+                              onChange={(e) => {
+                                const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, bgColor: e.target.value });
+                                setBlocks(nextBlocks);
+                              }}
+                              className="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white font-mono"
+                            />
+                          </div>
+                        </label>
+                        <label className="flex flex-col gap-1.5">
+                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Text Color</span>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={(selWidget.props.textColor as string) || "#000000"}
+                              onChange={(e) => {
+                                const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, textColor: e.target.value });
+                                setBlocks(nextBlocks);
+                              }}
+                              className="h-8 w-10 rounded cursor-pointer border border-slate-700 bg-transparent shrink-0"
+                            />
+                            <input
+                              type="text"
+                              value={(selWidget.props.textColor as string) || ""}
+                              placeholder="#000000"
+                              onChange={(e) => {
+                                const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, textColor: e.target.value });
+                                setBlocks(nextBlocks);
+                              }}
+                              className="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white font-mono"
+                            />
+                          </div>
+                        </label>
+                        <label className="flex flex-col gap-1.5">
+                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Padding</span>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="range" min={0} max={80}
+                              value={(selWidget.props.padding as number) ?? 0}
+                              onChange={(e) => {
+                                const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, padding: Number(e.target.value) });
+                                setBlocks(nextBlocks);
+                              }}
+                              className="flex-1 accent-blue-500"
+                            />
+                            <span className="text-xs text-slate-300 w-8 text-right">{(selWidget.props.padding as number) ?? 0}px</span>
+                          </div>
+                        </label>
+                        <label className="flex flex-col gap-1.5">
+                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Border Radius</span>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="range" min={0} max={40}
+                              value={(selWidget.props.borderRadius as number) ?? 0}
+                              onChange={(e) => {
+                                const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, borderRadius: Number(e.target.value) });
+                                setBlocks(nextBlocks);
+                              }}
+                              className="flex-1 accent-blue-500"
+                            />
+                            <span className="text-xs text-slate-300 w-8 text-right">{(selWidget.props.borderRadius as number) ?? 0}px</span>
+                          </div>
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                </>
+              );
+            })() : selectedBlock ? (
               <>
-                {/* HubSpot-style header: breadcrumb + title + close */}
                 <div className="px-4 pt-4 pb-3 border-b border-slate-800">
                   <div className="flex items-center justify-between mb-2">
-                    <button
-                      onClick={() => setSelectedWidgetId(null)}
-                      className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 pb-transition"
-                    >
-                      <ChevronLeft size={11} />
-                      Contents
-                    </button>
-                    <button onClick={() => setSelectedWidgetId(null)} className="p-1 rounded hover:bg-slate-700 text-slate-400 pb-transition">
+                    <span className="text-xs text-slate-500">Contents</span>
+                    <button onClick={() => setSelectedBlockId(null)} className="p-1 rounded hover:bg-slate-700 text-slate-400 pb-transition">
                       <X size={13} />
                     </button>
                   </div>
-                  <div className="text-base font-semibold text-white leading-tight">{widgetLabel}</div>
+                  <div className="text-base font-semibold text-white leading-tight">{BLOCK_LABELS[selectedBlock.type]}</div>
                 </div>
-                {/* Tabs with icons */}
                 <div className="flex border-b border-slate-800">
                   {([
                     { key: "content" as const, label: "Content", Icon: PenLine },
@@ -858,9 +1019,9 @@ export function PageBuilder() {
                   ]).map(({ key, label, Icon }) => (
                     <button
                       key={key}
-                      onClick={() => setWidgetTab(key)}
+                      onClick={() => setActiveTab(key)}
                       className={`flex-1 py-2.5 text-xs flex items-center justify-center gap-1.5 pb-transition border-b-2 ${
-                        widgetTab === key ? "border-blue-500 text-white" : "border-transparent text-slate-400 hover:text-white"
+                        activeTab === key ? "border-blue-500 text-white" : "border-transparent text-slate-400 hover:text-white"
                       }`}
                     >
                       <Icon size={12} />
@@ -868,159 +1029,25 @@ export function PageBuilder() {
                     </button>
                   ))}
                 </div>
-                <div key={selWidget.id + widgetTab} className="flex-1 overflow-y-auto p-4 pb-fade-in">
-                  {widgetTab === "content" ? (
-                    <WidgetEditor
-                      widget={selWidget}
-                      update={(props) => {
-                        const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, props);
-                        setBlocks(nextBlocks);
-                      }}
+                <div key={selectedBlock.id + activeTab} className="flex-1 overflow-y-auto p-4 pb-fade-in">
+                  {activeTab === "content" ? (
+                    <ContentEditor
+                      block={selectedBlock}
+                      update={(patch) => updateBlockFields(selectedBlock.id, patch)}
                       openWidgetPicker={openWidgetPicker}
                     />
                   ) : (
-                    <div className="space-y-4">
-                      <label className="flex flex-col gap-1.5">
-                        <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Background</span>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="color"
-                            value={(selWidget.props.bgColor as string) || "#ffffff"}
-                            onChange={(e) => {
-                              const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, bgColor: e.target.value });
-                              setBlocks(nextBlocks);
-                            }}
-                            className="h-8 w-10 rounded cursor-pointer border border-slate-700 bg-transparent shrink-0"
-                          />
-                          <input
-                            type="text"
-                            value={(selWidget.props.bgColor as string) || ""}
-                            placeholder="#ffffff"
-                            onChange={(e) => {
-                              const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, bgColor: e.target.value });
-                              setBlocks(nextBlocks);
-                            }}
-                            className="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white font-mono"
-                          />
-                        </div>
-                      </label>
-                      <label className="flex flex-col gap-1.5">
-                        <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Text Color</span>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="color"
-                            value={(selWidget.props.textColor as string) || "#000000"}
-                            onChange={(e) => {
-                              const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, textColor: e.target.value });
-                              setBlocks(nextBlocks);
-                            }}
-                            className="h-8 w-10 rounded cursor-pointer border border-slate-700 bg-transparent shrink-0"
-                          />
-                          <input
-                            type="text"
-                            value={(selWidget.props.textColor as string) || ""}
-                            placeholder="#000000"
-                            onChange={(e) => {
-                              const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, textColor: e.target.value });
-                              setBlocks(nextBlocks);
-                            }}
-                            className="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white font-mono"
-                          />
-                        </div>
-                      </label>
-                      <label className="flex flex-col gap-1.5">
-                        <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Padding</span>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="range"
-                            min={0}
-                            max={80}
-                            value={(selWidget.props.padding as number) ?? 0}
-                            onChange={(e) => {
-                              const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, padding: Number(e.target.value) });
-                              setBlocks(nextBlocks);
-                            }}
-                            className="flex-1 accent-blue-500"
-                          />
-                          <span className="text-xs text-slate-300 w-8 text-right">{(selWidget.props.padding as number) ?? 0}px</span>
-                        </div>
-                      </label>
-                      <label className="flex flex-col gap-1.5">
-                        <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Border Radius</span>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="range"
-                            min={0}
-                            max={40}
-                            value={(selWidget.props.borderRadius as number) ?? 0}
-                            onChange={(e) => {
-                              const nextBlocks = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, borderRadius: Number(e.target.value) });
-                              setBlocks(nextBlocks);
-                            }}
-                            className="flex-1 accent-blue-500"
-                          />
-                          <span className="text-xs text-slate-300 w-8 text-right">{(selWidget.props.borderRadius as number) ?? 0}px</span>
-                        </div>
-                      </label>
-                    </div>
+                    <StyleEditor
+                      style={selectedBlock.style}
+                      update={(patch) => updateBlockStyle(selectedBlock.id, patch)}
+                      showTypography
+                    />
                   )}
                 </div>
               </>
-            );
-          })() : selectedBlock ? (
-            <>
-              {/* HubSpot-style header: breadcrumb "Contents" + block name + close */}
-              <div className="px-4 pt-4 pb-3 border-b border-slate-800">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-slate-500">Contents</span>
-                  <button onClick={() => setSelectedBlockId(null)} className="p-1 rounded hover:bg-slate-700 text-slate-400 pb-transition">
-                    <X size={13} />
-                  </button>
-                </div>
-                <div className="text-base font-semibold text-white leading-tight">{BLOCK_LABELS[selectedBlock.type]}</div>
-              </div>
-              {/* Tabs with icons */}
-              <div className="flex border-b border-slate-800">
-                {([
-                  { key: "content" as const, label: "Content", Icon: PenLine },
-                  { key: "style"   as const, label: "Styles",  Icon: Paintbrush },
-                ]).map(({ key, label, Icon }) => (
-                  <button
-                    key={key}
-                    onClick={() => setActiveTab(key)}
-                    className={`flex-1 py-2.5 text-xs flex items-center justify-center gap-1.5 pb-transition border-b-2 ${
-                      activeTab === key ? "border-blue-500 text-white" : "border-transparent text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    <Icon size={12} />
-                    {label}
-                  </button>
-                ))}
-              </div>
-              <div key={selectedBlock.id + activeTab} className="flex-1 overflow-y-auto p-4 pb-fade-in">
-                {activeTab === "content" ? (
-                  <ContentEditor
-                    block={selectedBlock}
-                    update={(patch) => updateBlockFields(selectedBlock.id, patch)}
-                    openWidgetPicker={openWidgetPicker}
-                  />
-                ) : (
-                  <StyleEditor
-                    style={selectedBlock.style}
-                    update={(patch) => updateBlockStyle(selectedBlock.id, patch)}
-                    showTypography
-                  />
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center text-slate-400 px-6">
-              <MousePointer2 size={36} className="mb-3 opacity-50" />
-              <div className="text-sm">Select a section to edit</div>
-              <div className="text-xs mt-1 opacity-60">or click + to add one</div>
-            </div>
-          )}
-        </aside>
+            ) : null}
+          </aside>
+        )}
 
         {/* Widget picker — absolute overlay on the right panel, escaped from overflow clipping */}
         {widgetPicker && (
@@ -1060,13 +1087,6 @@ export function PageBuilder() {
             + {dragRef.current.label}
           </div>
         )}
-
-        <AddSectionDrawer
-          open={addAtIndex !== null}
-          onClose={() => setAddAtIndex(null)}
-          onPickTemplate={(t) => addAtIndex !== null && addBlock(t, addAtIndex)}
-          onPickLayout={(l) => addAtIndex !== null && addBlock("layout", addAtIndex, l)}
-        />
 
         <ThemePanel open={themeOpen} onClose={() => setThemeOpen(false)} theme={theme} onChange={onThemeChange} />
       </div>

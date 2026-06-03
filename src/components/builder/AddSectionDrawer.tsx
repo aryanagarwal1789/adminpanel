@@ -126,7 +126,7 @@ export function AddSectionDrawer({
   return (
     <aside
       data-builder-panel
-      className="absolute top-0 right-0 bottom-0 w-[320px] z-30 flex flex-col text-white border-l border-slate-800 shadow-2xl pb-transition"
+      className="w-[320px] shrink-0 flex flex-col text-white border-l border-slate-800"
       style={{ background: "#0f172a" }}
     >
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 shrink-0">

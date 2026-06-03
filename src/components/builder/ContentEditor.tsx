@@ -1631,14 +1631,70 @@ function renderBlockFields(
             </div>
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
-          <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
           <TextInput label="Brand name" value={f.brandName as string ?? ''} onChange={(v) => set('brandName', v)} />
           <Textarea label="Tagline" value={f.tagline as string ?? ''} onChange={(v) => set('tagline', v)} />
+          <TextInput label="Giant background word" value={f.giantBrandWord as string ?? ''} onChange={(v) => set('giantBrandWord', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
+          <div>
+            <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#475569', display: 'block', marginBottom: 8 }}>Link Columns</span>
+            <Repeater<{ title: string; links: { label: string; href: string }[] }>
+              label="Columns"
+              items={(f.columns as { title: string; links: { label: string; href: string }[] }[]) ?? []}
+              newItem={() => ({ title: 'Column', links: [{ label: 'Link', href: '#' }] })}
+              itemPreview={(col) => col.title}
+              onChange={(v) => set('columns', v)}
+              renderItem={(col, onChange) => (
+                <div className="space-y-2">
+                  <TextInput label="Column title" value={col.title} onChange={(v) => onChange({ ...col, title: v })} />
+                  <Repeater<{ label: string; href: string }>
+                    label="Links"
+                    items={col.links}
+                    newItem={() => ({ label: 'Link', href: '#' })}
+                    itemPreview={(link) => link.label}
+                    onChange={(links) => onChange({ ...col, links })}
+                    renderItem={(link, onLinkChange) => (
+                      <div className="space-y-1">
+                        <TextInput label="Label" value={link.label} onChange={(v) => onLinkChange({ ...link, label: v })} />
+                        <TextInput label="URL" value={link.href} onChange={(v) => onLinkChange({ ...link, href: v })} />
+                      </div>
+                    )}
+                  />
+                </div>
+              )}
+            />
+          </div>
+          <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
+          <div>
+            <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#475569', display: 'block', marginBottom: 8 }}>Social Links</span>
+            <Repeater<{ name: string; href: string }>
+              label="Socials"
+              items={(f.socials as { name: string; href: string }[]) ?? []}
+              newItem={() => ({ name: 'twitter', href: '#' })}
+              itemPreview={(s) => s.name}
+              onChange={(v) => set('socials', v)}
+              renderItem={(social, onChange) => (
+                <div className="space-y-1">
+                  <div>
+                    <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Platform</span>
+                    <select value={social.name} onChange={(e) => onChange({ ...social, name: e.target.value })}
+                      style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#f1f5f9', borderRadius: 4, padding: '5px 8px', fontSize: 12 }}>
+                      <option value="twitter">Twitter / X</option>
+                      <option value="github">GitHub</option>
+                      <option value="linkedin">LinkedIn</option>
+                      <option value="youtube">YouTube</option>
+                    </select>
+                  </div>
+                  <TextInput label="URL" value={social.href} onChange={(v) => onChange({ ...social, href: v })} />
+                </div>
+              )}
+            />
+          </div>
+          <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Newsletter heading" value={f.newsletterHeading as string ?? ''} onChange={(v) => set('newsletterHeading', v)} />
           <TextInput label="Newsletter subtext" value={f.newsletterSubtext as string ?? ''} onChange={(v) => set('newsletterSubtext', v)} />
           <TextInput label="Newsletter CTA label" value={f.newsletterCtaLabel as string ?? ''} onChange={(v) => set('newsletterCtaLabel', v)} />
           <TextInput label="Copyright" value={f.copyright as string ?? ''} onChange={(v) => set('copyright', v)} />
-          <TextInput label="Giant background word" value={f.giantBrandWord as string ?? ''} onChange={(v) => set('giantBrandWord', v)} />
+          <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
         </div>
       );
 
