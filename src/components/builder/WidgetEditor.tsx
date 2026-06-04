@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
 import {
-  ButtonEditor, ColorPicker, ImageField, NumberInput, Repeater, Select,
+  ButtonEditor, ColorPicker, ImageField, VideoField, NumberInput, Repeater, Select,
   Slider, TextInput, Textarea, Toggle,
 } from "./fields";
 import type { ButtonField } from "./defaults";
@@ -191,7 +191,24 @@ export function WidgetEditor({
     case "video-embed":
       return (
         <div className="space-y-3">
-          <TextInput label="Embed URL (YouTube or Vimeo)" value={p.url as string} onChange={(v) => set("url", v)} />
+          <div style={{ marginBottom: 4 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#475569' }}>Source</span>
+          </div>
+          <VideoField
+            label="Upload video file (mp4, webm…)"
+            value={/\.(mp4|webm|ogg|mov)(\?.*)?$/i.test((p.url as string) ?? '') ? (p.url as string) ?? '' : ''}
+            onChange={(v) => set("url", v)}
+          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 0' }}>
+            <div style={{ flex: 1, height: 1, background: '#1e293b' }} />
+            <span style={{ fontSize: 11, color: '#475569', flexShrink: 0 }}>or embed URL</span>
+            <div style={{ flex: 1, height: 1, background: '#1e293b' }} />
+          </div>
+          <TextInput
+            label="YouTube / Vimeo URL"
+            value={/\.(mp4|webm|ogg|mov)(\?.*)?$/i.test((p.url as string) ?? '') ? '' : (p.url as string) ?? ''}
+            onChange={(v) => set("url", v)}
+          />
           <Select label="Aspect ratio" value={(p.aspect as "16:9") || "16:9"} onChange={(v) => set("aspect", v)} options={[{ value: "16:9", label: "16:9" }, { value: "4:3", label: "4:3" }, { value: "1:1", label: "1:1" }] as { value: "16:9"; label: string }[]} />
         </div>
       );

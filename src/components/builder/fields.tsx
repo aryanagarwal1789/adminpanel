@@ -35,6 +35,70 @@ export function Textarea({ label, value, onChange, rows = 3 }: { label: string; 
 
 const UPLOAD_URL = "https://salescode-marketplace.salescode.ai/site/upload";
 
+export function VideoField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploading(true);
+    setError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch(UPLOAD_URL, { method: "POST", body: form });
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json() as { url?: string };
+      if (data.url) onChange(data.url);
+    } catch {
+      setError("Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const isVideo = value && /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(value);
+
+  return (
+    <div>
+      <Label>{label}</Label>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="w-full py-2 text-xs rounded-md pb-transition font-medium disabled:opacity-50"
+        style={{ background: "#7c3aed", color: "#fff", border: "none", cursor: uploading ? "default" : "pointer" }}
+      >
+        {uploading ? "Uploading…" : value ? "↑ Replace video" : "↑ Upload video"}
+      </button>
+      <input ref={inputRef} type="file" accept="video/*" style={{ display: "none" }} onChange={handleFile} />
+      {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+      <div className="mt-2 w-full rounded-md overflow-hidden border border-slate-700 bg-slate-800 flex items-center justify-center" style={{ aspectRatio: "16/9" }}>
+        {value && isVideo ? (
+          <video src={value} className="w-full h-full object-cover" controls />
+        ) : value ? (
+          <span className="text-xs text-slate-400 px-2 text-center break-all">{value}</span>
+        ) : (
+          <span className="text-xs text-slate-500">No video uploaded</span>
+        )}
+      </div>
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className="mt-1 text-xs text-red-400 hover:text-red-300 pb-transition"
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+        >
+          Remove
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function ImageField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
