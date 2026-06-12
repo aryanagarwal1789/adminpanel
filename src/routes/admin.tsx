@@ -18,7 +18,7 @@ const NAV = [
 const RENDERER_BASE = import.meta.env.VITE_RENDERER_URL ?? "https://demo-experience.salescode.ai";
 
 function getPreviewUrl(pathname: string): string | null {
-  if (pathname.startsWith('/admin/sections') || pathname === '/admin/' || pathname === '/admin' || pathname.startsWith('/admin/seo'))
+  if (pathname.startsWith('/admin/sections') || pathname === '/admin/' || pathname === '/admin')
     return `${RENDERER_BASE}/`;
   if (pathname.startsWith('/admin/about'))   return `${RENDERER_BASE}/about`;
   if (pathname.startsWith('/admin/clients')) return `${RENDERER_BASE}/clients`;

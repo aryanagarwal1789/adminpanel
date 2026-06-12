@@ -11,4 +11,17 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 export default defineConfig({
   // Disable Cloudflare Workers adapter — deployed as a static site on Render
   cloudflare: false,
+  vite: {
+    server: {
+      proxy: {
+        // Proxies /renderer-proxy/* → demo-experience.salescode.ai/* in local dev,
+        // bypassing CORS. Production uses the real URL directly.
+        '/renderer-proxy': {
+          target: 'https://demo-experience.salescode.ai',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/renderer-proxy/, '') || '/',
+        },
+      },
+    },
+  },
 });
