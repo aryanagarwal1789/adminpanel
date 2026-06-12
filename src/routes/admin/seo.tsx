@@ -279,6 +279,138 @@ function computeContentChecks(content: PageContent, kp: string): SeoCheck[] {
   ];
 }
 
+// ─── PageSpeed Insights ────────────────────────────────────────────────────
+const PAGESPEED_KEY = import.meta.env.VITE_PAGESPEED_KEY ?? '';
+
+interface PageSpeedData {
+  performance:   number;
+  seo:           number;
+  accessibility: number;
+  bestPractices: number;
+  lcp: string;
+  cls: string;
+  tbt: string;
+}
+
+async function fetchPageSpeed(url: string, strategy: 'mobile' | 'desktop'): Promise<PageSpeedData> {
+  const endpoint = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=${strategy}&key=${PAGESPEED_KEY}&category=performance&category=seo&category=accessibility&category=best_practices`;
+  const res  = await fetch(endpoint);
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  const json = await res.json() as {
+    lighthouseResult?: {
+      categories?: Record<string, { score?: number }>;
+      audits?:    Record<string, { displayValue?: string }>;
+    };
+  };
+  const cats   = json.lighthouseResult?.categories ?? {};
+  const audits = json.lighthouseResult?.audits     ?? {};
+  return {
+    performance:   Math.round((cats['performance']?.score    ?? 0) * 100),
+    seo:           Math.round((cats['seo']?.score            ?? 0) * 100),
+    accessibility: Math.round((cats['accessibility']?.score  ?? 0) * 100),
+    bestPractices: Math.round((cats['best-practices']?.score ?? 0) * 100),
+    lcp: audits['largest-contentful-paint']?.displayValue ?? '–',
+    cls: audits['cumulative-layout-shift']?.displayValue  ?? '–',
+    tbt: audits['total-blocking-time']?.displayValue      ?? '–',
+  };
+}
+
+function scoreColor(s: number) {
+  return s >= 90 ? C.good : s >= 50 ? C.ok : C.bad;
+}
+
+function ScoreCircle({ label, score }: { label: string; score: number }) {
+  const color = scoreColor(score);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+      <div style={{ width: 44, height: 44, borderRadius: '50%', border: `3px solid ${color}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ fontSize: 12, fontWeight: 800, color }}>{score}</span>
+      </div>
+      <span style={{ fontSize: 10, color: C.subtle, textAlign: 'center', lineHeight: 1.3 }}>{label}</span>
+    </div>
+  );
+}
+
+function PageSpeedCard({ pageKey, canonicalUrl }: { pageKey: PageKey; canonicalUrl: string }) {
+  const [strategy, setStrategy] = useState<'mobile' | 'desktop'>('mobile');
+  const [data,     setData]     = useState<PageSpeedData | null>(null);
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState<string | null>(null);
+
+  const targetUrl = canonicalUrl || `https://demo-experience.salescode.ai${RENDERER_PATHS[pageKey]}`;
+
+  useEffect(() => { setData(null); setError(null); }, [strategy]);
+
+  function run() {
+    if (!PAGESPEED_KEY) { setError('Add VITE_PAGESPEED_KEY to your .env file.'); return; }
+    setLoading(true); setError(null);
+    fetchPageSpeed(targetUrl, strategy)
+      .then(d => setData(d))
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)))
+      .finally(() => setLoading(false));
+  }
+
+  return (
+    <div style={CARD}>
+      <div style={{ padding: '14px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ color: C.text, fontSize: 13, fontWeight: 700 }}>Google PageSpeed</span>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {(['mobile', 'desktop'] as const).map(m => (
+            <button key={m} onClick={() => setStrategy(m)} style={{ padding: '3px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: `1px solid ${strategy === m ? C.blue : C.border}`, background: strategy === m ? 'rgba(59,130,246,0.15)' : 'transparent', color: strategy === m ? C.blue : C.muted }}>
+              {m === 'mobile' ? '📱' : '🖥'} {m}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div style={{ padding: 16 }}>
+        {!data && !loading && !error && (
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ color: C.subtle, fontSize: 12, margin: '0 0 12px', lineHeight: 1.5 }}>
+              Runs Google Lighthouse on the live page.<br />Takes ~5 seconds.
+            </p>
+            <button onClick={run} style={{ background: C.blue, color: '#fff', border: 'none', padding: '7px 18px', borderRadius: 5, cursor: 'pointer', fontWeight: 600, fontSize: 12 }}>
+              Run Analysis
+            </button>
+          </div>
+        )}
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '8px 0' }}>
+            <div style={{ width: 24, height: 24, border: `3px solid ${C.border}`, borderTopColor: C.blue, borderRadius: '50%', animation: 'spin 0.7s linear infinite', margin: '0 auto 8px' }} />
+            <span style={{ fontSize: 12, color: C.subtle }}>Running Lighthouse…</span>
+          </div>
+        )}
+        {error && !loading && (
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ color: C.bad, fontSize: 12, margin: '0 0 10px' }}>{error}</p>
+            <button onClick={run} style={{ background: C.blue, color: '#fff', border: 'none', padding: '6px 14px', borderRadius: 5, cursor: 'pointer', fontWeight: 600, fontSize: 12 }}>Retry</button>
+          </div>
+        )}
+        {data && !loading && (
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 14 }}>
+              <ScoreCircle label="Performance"  score={data.performance}   />
+              <ScoreCircle label="SEO"          score={data.seo}           />
+              <ScoreCircle label="Accessibility" score={data.accessibility} />
+              <ScoreCircle label="Best Pract."  score={data.bestPractices} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', borderTop: `1px solid ${C.border}`, paddingTop: 12, marginBottom: 12 }}>
+              {([['LCP', data.lcp], ['CLS', data.cls], ['TBT', data.tbt]] as const).map(([label, value]) => (
+                <div key={label} style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{value}</div>
+                  <div style={{ fontSize: 10, color: C.subtle, marginTop: 2 }}>{label}</div>
+                </div>
+              ))}
+            </div>
+            <button onClick={run} style={{ width: '100%', background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, padding: '5px 0', borderRadius: 4, cursor: 'pointer', fontSize: 11 }}>
+              Re-run
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function parseSerpUrl(canonicalUrl: string, pageKey: string) {
   const fallbackPath = pageKey === 'landing' ? '' : `› ${pageKey}`;
@@ -950,6 +1082,7 @@ function SeoPage() {
             {/* Right column — sticky analysis */}
             <div style={{ position: 'sticky', top: 0 }}>
               <AnalysisPanel checks={checks} contentChecks={contentChecks} contentLoading={contentLoading} />
+              <PageSpeedCard key={activeTab} pageKey={activeTab as PageKey} canonicalUrl={seo.canonicalUrl} />
               <div style={{ ...CARD, padding: 16 }}>
                 <div style={{ color: C.text, fontSize: 13, fontWeight: 700, marginBottom: 12 }}>Legend</div>
                 {[{ dot: C.good, text: 'Good — no action needed' }, { dot: C.ok, text: 'OK — consider improving' }, { dot: C.bad, text: 'Problem — needs attention' }].map(({ dot, text }) => (
