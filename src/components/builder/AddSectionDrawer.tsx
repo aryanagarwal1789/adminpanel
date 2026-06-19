@@ -6,7 +6,7 @@ import {
   Megaphone, HelpCircle, FileText, Sparkles, MonitorPlay,
   ListOrdered, CreditCard, MessageSquareQuote, Users, TrendingUp,
   ArrowRightCircle, Zap, ShoppingCart, Puzzle, BookOpen, PanelBottom,
-  List, Tag, MessageSquare, BarChart3, GitBranch,
+  List, Tag, MessageSquare, BarChart3, GitBranch, Download,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { TemplateBlockType, LayoutVariant } from "./types";
@@ -49,6 +49,9 @@ const GROUPS: Group[] = [
     { type: "slick-blog-grid", label: "Blog Post Grid", Icon: BookOpen },
     { type: "slick-timeline", label: "Timeline Steps", Icon: GitBranch },
     { type: "slick-footer-complex", label: "Footer Complex", Icon: Layout },
+    { type: "slick-app-download", label: "App Download", Icon: Download },
+    { type: "slick-promo-banner", label: "Promo Banner", Icon: Megaphone },
+    { type: "slick-app-showcase", label: "App Showcase (Scroll)", Icon: MonitorPlay },
   ]},
   { name: "Navigation", items: [
     { type: "nav-simple", label: "Nav Simple", Icon: Menu },

@@ -54,7 +54,10 @@ export type TemplateBlockType =
   | 'slick-integrations'
   | 'slick-blog-grid'
   | 'slick-timeline'
-  | 'slick-footer-complex';
+  | 'slick-footer-complex'
+  | 'slick-app-download'
+  | 'slick-promo-banner'
+  | 'slick-app-showcase';
 
 export type LayoutVariant = "1" | "2" | "3" | "1-2" | "2-1" | "4";
 
@@ -88,6 +91,16 @@ export interface BlockStyle {
   headingColor?: string;
   textColor?: string;
   textAlign?: 'left' | 'center' | 'right';
+  // Phase 1 — gradient, min-height, vertical align
+  bgGradientEnabled?: boolean;
+  bgGradientFrom?: string;
+  bgGradientTo?: string;
+  bgGradientAngle?: number;
+  minHeight?: number;
+  contentVerticalAlign?: 'top' | 'center' | 'bottom';
+  animation?: string;
+  animationDuration?: number;
+  animationDelay?: number;
 }
 
 export interface Block {
@@ -185,5 +198,8 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-blog-grid': 'Blog Post Grid',
   'slick-timeline': 'Timeline Steps',
   'slick-footer-complex': 'Footer — Complex',
+  'slick-app-download': 'App Download',
+  'slick-promo-banner': 'Promo Banner',
+  'slick-app-showcase': 'App Showcase (Marquee)',
   layout: "Layout",
 };

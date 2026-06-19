@@ -396,8 +396,23 @@ export function PageBuilder() {
         const { pages: rawPages } = await res.json() as { pages: { pageKey: string }[] };
         if (!rawPages?.length) { setLoading(false); return; }
 
+        // Known safe page keys — scraper bait, well-known paths, and HTML-entity duplicates are excluded
+        const BLOCKED_PATTERNS = [
+          /\./,                          // any file extension (favicon.ico, .env, etc.)
+          /&/,                           // HTML entity duplicates (&amp;)
+          /^apple-app-site-association/, // iOS well-known path
+          /^_/,                          // internal Next.js paths
+          /firebase/i,                   // firebase SDK paths from bots
+          /\.env/i,                      // .env file probes
+          /wp-/i,                        // WordPress scanner probes
+          /admin-sdk/i,                  // SDK paths from bots
+        ];
         const builtPages: Page[] = rawPages
-          .filter((p) => p.pageKey !== "__blog__" && !p.pageKey.includes('.')) // strip virtual entries and file requests (favicon.ico etc)
+          .filter((p) => {
+            if (p.pageKey === "__blog__") return false;
+            if (BLOCKED_PATTERNS.some((rx) => rx.test(p.pageKey))) return false;
+            return true;
+          })
           .map((p) => ({
             id: p.pageKey,
             name: p.pageKey.charAt(0).toUpperCase() + p.pageKey.slice(1),
@@ -1004,6 +1019,46 @@ export function PageBuilder() {
                               className="flex-1 accent-blue-500"
                             />
                             <span className="text-xs text-slate-300 w-8 text-right">{(selWidget.props.borderRadius as number) ?? 0}px</span>
+                          </div>
+                        </label>
+                        <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+                        <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Spacing &amp; Position</span>
+                        <div className="grid grid-cols-2 gap-2">
+                          {(['marginTop','marginBottom','marginLeft','marginRight'] as const).map((k) => (
+                            <label key={k} className="flex flex-col gap-1">
+                              <span className="text-xs text-slate-500 capitalize">{k.replace('margin','').toLowerCase()} margin</span>
+                              <div className="flex items-center gap-1">
+                                <input type="range" min={0} max={120}
+                                  value={(selWidget.props[k] as number) ?? 0}
+                                  onChange={(e) => { const nb = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, [k]: Number(e.target.value) }); setBlocks(nb); }}
+                                  className="flex-1 accent-blue-500" />
+                                <span className="text-xs text-slate-300 w-8 text-right">{(selWidget.props[k] as number) ?? 0}px</span>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                        <label className="flex flex-col gap-1.5">
+                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Width (px, 0 = auto)</span>
+                          <div className="flex items-center gap-2">
+                            <input type="number" min={0} max={2000}
+                              value={(selWidget.props.styleWidthPx as number) ?? 0}
+                              onChange={(e) => { const nb = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, styleWidthPx: Number(e.target.value) || undefined }); setBlocks(nb); }}
+                              className="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+                              placeholder="0 = auto" />
+                            <span className="text-xs text-slate-400">px</span>
+                          </div>
+                        </label>
+                        <label className="flex flex-col gap-1.5">
+                          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Align in column</span>
+                          <div className="flex gap-2">
+                            {(['left','center','right'] as const).map((a) => (
+                              <button key={a} type="button"
+                                onClick={() => { const nb = updateWidgetInBlocks(blocks, selectedWidgetId, { ...selWidget.props, widgetAlign: a }); setBlocks(nb); }}
+                                className={`flex-1 py-1.5 rounded text-xs font-medium pb-transition ${(selWidget.props.widgetAlign as string ?? 'left') === a ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+                              >
+                                {a.charAt(0).toUpperCase() + a.slice(1)}
+                              </button>
+                            ))}
                           </div>
                         </label>
                       </div>

@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, GripVertical, Plus, Trash2, Settings2 } from "lucide-react";
 import { WidgetEditor } from "./WidgetEditor";
+import { ColorPicker, NumberInput } from "./fields";
 import { defaultWidget, WIDGET_REGISTRY, type Widget, type WidgetType } from "./widgets";
 import type { Block, LayoutVariant } from "./types";
+
+interface ColStyle { bgColor?: string; padding?: number; verticalAlign?: string; gap?: number; }
 
 const COL_COUNT: Record<LayoutVariant, number> = { "1": 1, "2": 2, "3": 3, "1-2": 2, "2-1": 2, "4": 4 };
 
@@ -19,6 +22,14 @@ export function LayoutEditor({
 
   const [openWidget, setOpenWidget] = useState<{ col: number; id: string } | null>(null);
   const [dragRef, setDragRef] = useState<{ col: number; id: string } | null>(null);
+  const [openColSettings, setOpenColSettings] = useState<number | null>(null);
+
+  const colStyles: ColStyle[] = ((block.fields as { columnStyles?: ColStyle[] }).columnStyles) ?? [];
+  const getColStyle = (i: number): ColStyle => colStyles[i] ?? {};
+  const setColStyle = (i: number, patch: Partial<ColStyle>) => {
+    const next = cols.map((_, j) => j === i ? { ...getColStyle(i), ...patch } : getColStyle(j));
+    update({ columnStyles: next });
+  };
 
   const setCols = (next: Widget[][]) => update({ columns: next });
 
@@ -65,9 +76,32 @@ export function LayoutEditor({
 
       {cols.map((widgets, colIdx) => (
         <div key={colIdx} className="rounded-md border border-slate-700 overflow-hidden">
-          <div className="px-3 py-2 bg-slate-800/50 text-xs font-semibold text-slate-200">
-            Column {colIdx + 1}
+          <div className="px-3 py-2 bg-slate-800/50 text-xs font-semibold text-slate-200 flex items-center justify-between">
+            <span>Column {colIdx + 1}</span>
+            <button
+              onClick={() => setOpenColSettings(openColSettings === colIdx ? null : colIdx)}
+              className="p-0.5 rounded hover:bg-slate-700 text-slate-400 pb-transition"
+              title="Column style"
+            >
+              <Settings2 size={12} />
+            </button>
           </div>
+          {openColSettings === colIdx && (
+            <div className="px-3 py-2 bg-slate-900/60 border-b border-slate-700 space-y-2">
+              <ColorPicker label="Background color" value={getColStyle(colIdx).bgColor ?? ''} onChange={(v) => setColStyle(colIdx, { bgColor: v || undefined })} />
+              <NumberInput label="Padding (px)" value={getColStyle(colIdx).padding ?? 0} onChange={(v) => setColStyle(colIdx, { padding: v || undefined })} />
+              <NumberInput label="Gap between widgets (px)" value={getColStyle(colIdx).gap ?? 16} onChange={(v) => setColStyle(colIdx, { gap: v })} />
+              <div>
+                <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Vertical align</span>
+                <select value={getColStyle(colIdx).verticalAlign ?? 'start'} onChange={(e) => setColStyle(colIdx, { verticalAlign: e.target.value })}
+                  style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#f1f5f9', borderRadius: 4, padding: '5px 8px', fontSize: 12 }}>
+                  <option value="start">Top</option>
+                  <option value="center">Center</option>
+                  <option value="end">Bottom</option>
+                </select>
+              </div>
+            </div>
+          )}
           <div className="p-2 space-y-1.5 bg-slate-900/40">
             {widgets.length === 0 && (
               <div className="text-[11px] text-slate-500 text-center py-3">No widgets yet.</div>

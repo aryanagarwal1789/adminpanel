@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import {
-  ButtonEditor, ImageField, LinkItemEditor, NumberInput, Repeater, TextInput, Textarea, Toggle,
+  ButtonEditor, ColorPicker, ImageField, LinkItemEditor, NumberInput, Repeater, TextInput, Textarea, Toggle,
 } from "./fields";
 import type { ButtonField, LinkField } from "./defaults";
 import type { Block } from "./types";
@@ -463,6 +463,8 @@ function renderBlockFields(
           <Textarea label="Description" value={f.description as string} onChange={(v) => set("description", v)} />
           <TextInput label="CTA text" value={f.ctaText as string} onChange={(v) => set("ctaText", v)} />
           <TextInput label="CTA URL" value={f.ctaUrl as string} onChange={(v) => set("ctaUrl", v)} />
+          <TextInput label="Secondary CTA text" value={(f.ctaSecondaryText as string) ?? ""} onChange={(v) => set("ctaSecondaryText", v)} placeholder="e.g. Watch Demo (leave empty to hide)" />
+          <TextInput label="Secondary CTA URL" value={(f.ctaSecondaryUrl as string) ?? ""} onChange={(v) => set("ctaSecondaryUrl", v)} placeholder="e.g. https://youtu.be/..." />
         </div>
       );
 
@@ -1776,6 +1778,162 @@ function renderBlockFields(
           <TextInput label="Newsletter placeholder" value={f.newsletterPlaceholder as string ?? ''} onChange={(v) => set('newsletterPlaceholder', v)} />
           <TextInput label="Copyright" value={f.copyright as string ?? ''} onChange={(v) => set('copyright', v)} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
+        </div>
+      );
+
+    case 'slick-app-download':
+      return (
+        <div className="space-y-4">
+          <div style={{ paddingBottom: 8, marginBottom: 4, borderBottom: '1px solid #1e293b' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#475569' }}>Style Controls</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Heading color</span>
+              <input type="color" value={(f.styleVars as Record<string,string> ?? {})['--heading-color'] || '#ffffff'}
+                onChange={(e) => set('styleVars', { ...(f.styleVars as object ?? {}), '--heading-color': e.target.value })}
+                style={{ width: '100%', height: 32, borderRadius: 4, border: '1px solid #334155', cursor: 'pointer', background: 'none' }} />
+            </div>
+            <div>
+              <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Body color</span>
+              <input type="color" value={(f.styleVars as Record<string,string> ?? {})['--body-color'] || '#94a3b8'}
+                onChange={(e) => set('styleVars', { ...(f.styleVars as object ?? {}), '--body-color': e.target.value })}
+                style={{ width: '100%', height: 32, borderRadius: 4, border: '1px solid #334155', cursor: 'pointer', background: 'none' }} />
+            </div>
+            <div>
+              <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Accent color</span>
+              <input type="color" value={(f.styleVars as Record<string,string> ?? {})['--accent'] || '#2dd4bf'}
+                onChange={(e) => set('styleVars', { ...(f.styleVars as object ?? {}), '--accent': e.target.value })}
+                style={{ width: '100%', height: 32, borderRadius: 4, border: '1px solid #334155', cursor: 'pointer', background: 'none' }} />
+            </div>
+            <div>
+              <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Card background</span>
+              <input type="color" value={(f.styleVars as Record<string,string> ?? {})['--card-bg'] || '#122E2A'}
+                onChange={(e) => set('styleVars', { ...(f.styleVars as object ?? {}), '--card-bg': e.target.value })}
+                style={{ width: '100%', height: 32, borderRadius: 4, border: '1px solid #334155', cursor: 'pointer', background: 'none' }} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>V. padding (px)</span>
+              <input type="number" min={0} max={300}
+                value={parseInt((f.styleVars as Record<string,string> ?? {})['--section-py'] || '80', 10)}
+                onChange={(e) => set('styleVars', { ...(f.styleVars as object ?? {}), '--section-py': `${e.target.value}px` })}
+                style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#f1f5f9', borderRadius: 4, padding: '5px 8px', fontSize: 12 }} />
+            </div>
+            <div>
+              <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>H. padding (px)</span>
+              <input type="number" min={0} max={300}
+                value={parseInt((f.styleVars as Record<string,string> ?? {})['--section-px'] || '24', 10)}
+                onChange={(e) => set('styleVars', { ...(f.styleVars as object ?? {}), '--section-px': `${e.target.value}px` })}
+                style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#f1f5f9', borderRadius: 4, padding: '5px 8px', fontSize: 12 }} />
+            </div>
+          </div>
+          <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
+          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <Textarea label="Subtext" value={f.subtext as string ?? ''} onChange={(v) => set('subtext', v)} />
+          <Repeater<{ badgeImage: string; storeUrl: string; deviceLabel: string; qrImage: string; qrLabel: string }>
+            label="Stores"
+            items={(f.stores as { badgeImage: string; storeUrl: string; deviceLabel: string; qrImage: string; qrLabel: string }[]) ?? []}
+            onChange={(v) => set('stores', v)}
+            newItem={() => ({ badgeImage: '', storeUrl: '#', deviceLabel: 'Store name', qrImage: '', qrLabel: 'Scan to install' })}
+            itemPreview={(it) => it.deviceLabel || 'Store'}
+            renderItem={(it, u) => (
+              <>
+                <ImageField label="Badge image" value={it.badgeImage} onChange={(x) => u({ ...it, badgeImage: x })} />
+                <TextInput label="Store URL" value={it.storeUrl} onChange={(x) => u({ ...it, storeUrl: x })} />
+                <TextInput label="Device label" value={it.deviceLabel} onChange={(x) => u({ ...it, deviceLabel: x })} />
+                <ImageField label="QR code image" value={it.qrImage} onChange={(x) => u({ ...it, qrImage: x })} />
+                <TextInput label="QR label" value={it.qrLabel} onChange={(x) => u({ ...it, qrLabel: x })} />
+              </>
+            )}
+          />
+        </div>
+      );
+
+    case 'slick-app-showcase':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Tagline (bottom)" value={f.tagline as string ?? ''} onChange={(v) => set('tagline', v)} />
+          <div className="grid grid-cols-2 gap-2">
+            <NumberInput label="Speed (s, lower=faster)" value={(f.speed as number) ?? 35} onChange={(v) => set('speed', v)} />
+            <NumberInput label="Card width (px)" value={(f.cardWidth as number) ?? 260} onChange={(v) => set('cardWidth', v)} />
+            <NumberInput label="Card height (px)" value={(f.cardHeight as number) ?? 520} onChange={(v) => set('cardHeight', v)} />
+          </div>
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<{ title: string; subtitle: string; image: string; cardBg: string }>
+            label="Cards"
+            items={(f.cards as { title: string; subtitle: string; image: string; cardBg: string }[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'Feature', subtitle: 'Description here.', image: '', cardBg: '#0A3028' })}
+            itemPreview={(it) => it.title}
+            renderItem={(it, u) => (
+              <>
+                <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
+                <TextInput label="Subtitle" value={it.subtitle} onChange={(x) => u({ ...it, subtitle: x })} />
+                <ImageField label="Phone screenshot" value={it.image} onChange={(x) => u({ ...it, image: x })} />
+                <ColorPicker label="Card background" value={it.cardBg || '#0A3028'} onChange={(x: string) => u({ ...it, cardBg: x })} />
+              </>
+            )}
+          />
+        </div>
+      );
+
+    case 'slick-promo-banner':
+      return (
+        <div className="space-y-4">
+          <div style={{ paddingBottom: 8, marginBottom: 4, borderBottom: '1px solid #1e293b' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#475569' }}>Style Controls</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>V. padding (px)</span>
+              <input type="number" min={0} max={300}
+                value={parseInt((f.styleVars as Record<string,string> ?? {})['--section-py'] || '32', 10)}
+                onChange={(e) => set('styleVars', { ...(f.styleVars as object ?? {}), '--section-py': `${e.target.value}px` })}
+                style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#f1f5f9', borderRadius: 4, padding: '5px 8px', fontSize: 12 }} />
+            </div>
+            <div>
+              <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>H. padding (px)</span>
+              <input type="number" min={0} max={300}
+                value={parseInt((f.styleVars as Record<string,string> ?? {})['--section-px'] || '24', 10)}
+                onChange={(e) => set('styleVars', { ...(f.styleVars as object ?? {}), '--section-px': `${e.target.value}px` })}
+                style={{ width: '100%', background: '#0f172a', border: '1px solid #334155', color: '#f1f5f9', borderRadius: 4, padding: '5px 8px', fontSize: 12 }} />
+            </div>
+          </div>
+          <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <div>
+            <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Heading color</span>
+            <input type="color" value={(f.headingColor as string) || '#FFD700'}
+              onChange={(e) => set('headingColor', e.target.value)}
+              style={{ width: '100%', height: 32, borderRadius: 4, border: '1px solid #334155', cursor: 'pointer', background: 'none' }} />
+          </div>
+          <TextInput label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
+          <Repeater<string>
+            label="Steps"
+            items={(f.steps as string[]) ?? []}
+            onChange={(v) => set('steps', v)}
+            newItem={() => 'New step'}
+            itemPreview={(s) => s}
+            renderItem={(s, u) => (
+              <TextInput label="Step text" value={s} onChange={u} />
+            )}
+          />
+          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="CTA href" value={f.ctaHref as string ?? ''} onChange={(v) => set('ctaHref', v)} />
+          <ImageField label="Right-side image URL" value={f.image as string ?? ''} onChange={(v) => set('image', v)} />
+          <div>
+            <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Banner background color</span>
+            <input type="color" value={(f.bgColor as string) || '#00B39F'}
+              onChange={(e) => set('bgColor', e.target.value)}
+              style={{ width: '100%', height: 32, borderRadius: 4, border: '1px solid #334155', cursor: 'pointer', background: 'none' }} />
+          </div>
         </div>
       );
 

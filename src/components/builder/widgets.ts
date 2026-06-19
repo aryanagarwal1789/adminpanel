@@ -25,7 +25,9 @@ export interface WidgetMeta {
 export const WIDGET_REGISTRY: Record<string, WidgetMeta> = {
   row: { label: "Row (horizontal)", Icon: Columns },
   heading: { label: "Heading", Icon: Heading1 },
+  "rich-heading": { label: "Rich Heading ✦", Icon: Heading1 },
   paragraph: { label: "Paragraph", Icon: Type },
+  "rich-paragraph": { label: "Rich Paragraph ✦", Icon: AlignLeft },
   text: { label: "Text", Icon: Type },
   "rich-text": { label: "Rich Text", Icon: AlignLeft },
   "section-heading": { label: "Section Heading", Icon: Heading1 },
@@ -40,6 +42,9 @@ export const WIDGET_REGISTRY: Record<string, WidgetMeta> = {
   video: { label: "Video", Icon: Video },
   "video-embed": { label: "Video Embed", Icon: Play },
   form: { label: "Form", Icon: FormInput },
+  "form-advanced": { label: "Form (Advanced)", Icon: FormInput },
+  box: { label: "Box / Container", Icon: LayoutIcon },
+  "app-badge": { label: "App Store Badge", Icon: Wallet },
   list: { label: "List", Icon: ListIcon },
   accordion: { label: "Accordion", Icon: ChevronsUpDown },
   "pricing-card": { label: "Pricing Card", Icon: Tag },
@@ -78,7 +83,7 @@ export interface WidgetCategory { key: string; name: string; types: WidgetType[]
 
 export const WIDGET_CATEGORIES: WidgetCategory[] = [
   { key: "text", name: "Text", types: [
-    "heading","section-heading","section-header","paragraph","text","rich-text","metrics",
+    "heading","rich-heading","paragraph","rich-paragraph","section-heading","section-header","text","rich-text","metrics",
   ]},
   { key: "design", name: "Design", types: [
     "row","accordion","card","divider","horizontal-menu","navigation-menu",
@@ -87,7 +92,8 @@ export const WIDGET_CATEGORIES: WidgetCategory[] = [
   { key: "functionality", name: "Functionality", types: [
     "anchor","language-switcher","search-input","site-search-input","site-search-results",
   ]},
-  { key: "forms-buttons", name: "Forms and Buttons", types: ["button","form"] },
+  { key: "forms-buttons", name: "Forms and Buttons", types: ["button","form","form-advanced"] },
+  { key: "layout-widgets", name: "Layout", types: ["box"] },
   { key: "body-content", name: "Body Content", types: [
     "countdown","feature-list","list","testimonial-slider",
   ]},
@@ -99,12 +105,13 @@ export const WIDGET_CATEGORIES: WidgetCategory[] = [
     "blog-email-subscription","post-filter","post-listing","recent-blog-posts","rss-listing",
   ]},
   { key: "crm", name: "CRM", types: ["meetings","payment","product"] },
+  { key: "mobile", name: "Mobile", types: ["app-badge"] },
 ];
 
 // Editable types — anything else inserts a placeholder.
 export const EDITABLE_TYPES = new Set<string>([
-  "row",
-  "heading","paragraph","text","rich-text","section-heading","section-header",
+  "row","box",
+  "heading","rich-heading","paragraph","rich-paragraph","text","rich-text","section-heading","section-header",
   "image","button","divider","spacer","icon","card","video","video-embed",
   "form","list","accordion","pricing-card","metrics","image-grid",
   "testimonial-slider","feature-list","logo",
@@ -114,6 +121,7 @@ export const EDITABLE_TYPES = new Set<string>([
   "search-input","recent-blog-posts","post-listing","blog-email-subscription",
   "language-switcher","audio-player","site-header","post-filter",
   "rss-listing","meetings","payment","product",
+  "form-advanced","app-badge",
 ]);
 
 const defaultButton: ButtonField = { label: "Click me", url: "#", variant: "primary" };
@@ -121,9 +129,11 @@ const defaultButton: ButtonField = { label: "Click me", url: "#", variant: "prim
 export const WIDGET_DEFAULTS: Record<string, Record<string, unknown>> = {
   row: { cols: [[], []], weights: [1, 1], gap: 16 },
   heading: { text: "Heading", level: "h2", align: "left", color: "#0f172a" },
+  "rich-heading": { text: "Your **highlighted** headline", level: "h2", align: "left", color: "#ffffff", accentColor: "#00C6B1", fontSize: 0, fontWeight: "700" },
   "section-heading": { text: "Section heading", level: "h2", align: "left", color: "#0f172a" },
   "section-header": { text: "Section header", level: "h2", align: "left", color: "#0f172a" },
   paragraph: { text: "Add your paragraph text here.", size: "base", align: "left", color: "#334155" },
+  "rich-paragraph": { text: "Add your text here with **highlighted words** in accent color.", align: "left", color: "#e2e8f0", accentColor: "#00C6B1", fontSize: 18 },
   text: { text: "Add your text here.", size: "base", align: "left", color: "#334155" },
   "rich-text": { text: "Rich text content goes here.", size: "base", align: "left", color: "#334155" },
   image: { src: "", alt: "", width: 100, radius: 8 },
@@ -289,6 +299,38 @@ export const WIDGET_DEFAULTS: Record<string, Record<string, unknown>> = {
     ctaUrl: "#",
     badge: "",
     bgColor: "#ffffff",
+  },
+  box: {
+    widgets: [],
+    bgColor: "",
+    borderColor: "",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 24,
+    gap: 16,
+  },
+  "form-advanced": {
+    title: "",
+    fields: [
+      { type: "text",  label: "First Name",   placeholder: "Enter first name",   required: true,  width: "half" },
+      { type: "text",  label: "Last Name",    placeholder: "Enter last name",    required: true,  width: "half" },
+      { type: "email", label: "Work Email",   placeholder: "you@company.com",    required: true,  width: "full" },
+      { type: "phone", label: "Phone Number", placeholder: "+91 00000 00000",    required: false, width: "full" },
+      { type: "dropdown", label: "I am joining as", options: "Brand\nDistributor\nRetailer\nCompany App", required: true, width: "full" },
+    ],
+    submitLabel: "Submit",
+    submitBgColor: "#00C6B1",
+    submitTextColor: "#ffffff",
+    bgColor: "#ffffff",
+    borderRadius: 16,
+    padding: 32,
+  },
+  "app-badge": {
+    platform: "google",
+    storeUrl: "#",
+    badgeImage: "",
+    widthPx: 160,
+    height: 44,
   },
 };
 

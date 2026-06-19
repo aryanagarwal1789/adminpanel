@@ -121,6 +121,10 @@ export function HeadingWidget({ p }: { p: P }) {
   const text = str(p.text, "Heading");
   const level = (str(p.level, "h2") as "h1" | "h2" | "h3" | "h4");
   const color = str(p.color, "");
+  const fontSize = num(p.fontSize, 0);
+  const fontWeight = str(p.fontWeight, "");
+  const lineHeight = num(p.lineHeight, 0);
+  const letterSpacing = num(p.letterSpacing, 0);
   const sizes: Record<string, string> = {
     h1: "text-3xl font-bold tracking-tight",
     h2: "text-2xl font-semibold tracking-tight",
@@ -128,13 +132,16 @@ export function HeadingWidget({ p }: { p: P }) {
     h4: "text-base font-semibold",
   };
   const Tag = level as React.ElementType;
-  const accent = level === "h3" || level === "h4";
+  const style: React.CSSProperties = {
+    ...(color ? { color } : {}),
+    ...(fontSize ? { fontSize: `${fontSize}px` } : {}),
+    ...(fontWeight ? { fontWeight } : {}),
+    ...(lineHeight ? { lineHeight } : {}),
+    ...(letterSpacing ? { letterSpacing: `${letterSpacing}px` } : {}),
+  };
   return (
     <div className={alignClass(p.align)}>
-      <Tag
-        className={`${sizes[level] ?? sizes.h2} text-slate-900 ${accent ? "border-l-2 border-blue-500 pl-3 inline-block" : ""}`}
-        style={color ? { color } : undefined}
-      >
+      <Tag className={sizes[level] ?? sizes.h2} style={Object.keys(style).length ? style : undefined}>
         {text}
       </Tag>
     </div>
@@ -142,14 +149,21 @@ export function HeadingWidget({ p }: { p: P }) {
 }
 
 export function ParagraphWidget({ p }: { p: P }) {
-  const text = str(p.text, "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
-  const size = str(p.size, "base");
+  const text = str(p.text, "Your paragraph text here.");
   const color = str(p.color, "");
-  const sizeCls = size === "sm" ? "text-sm" : size === "lg" ? "text-lg" : "text-base";
+  const fontSize = num(p.fontSize, 0);
+  const fontWeight = str(p.fontWeight, "");
+  const lineHeight = num(p.lineHeight, 0);
+  const style: React.CSSProperties = {
+    ...(color ? { color } : {}),
+    ...(fontSize ? { fontSize: `${fontSize}px` } : {}),
+    ...(fontWeight ? { fontWeight } : {}),
+    ...(lineHeight ? { lineHeight } : {}),
+  };
   return (
     <p
-      className={`${sizeCls} ${alignClass(p.align)} text-slate-600 leading-relaxed whitespace-pre-wrap`}
-      style={color ? { color } : undefined}
+      className={`${alignClass(p.align)} text-slate-600 leading-relaxed whitespace-pre-wrap`}
+      style={Object.keys(style).length ? style : undefined}
     >
       {text}
     </p>
@@ -160,25 +174,32 @@ export function ImageWidget({ p }: { p: P }) {
   const src = str(p.src, "");
   const alt = str(p.alt, "");
   const width = Math.min(100, Math.max(0, num(p.width, 100)));
-  const radius = num(p.radius, 8);
+  const height = num(p.height, 0);
+  const radius = num(p.radius, 0);
+  const objectFit = str(p.objectFit, "cover") as React.CSSProperties["objectFit"];
+  const align = str(p.align, "left");
+  const marginLeft = align === "center" || align === "right" ? "auto" : undefined;
+  const marginRight = align === "center" ? "auto" : undefined;
+  const imgStyle: React.CSSProperties = {
+    width: `${width}%`,
+    borderRadius: radius,
+    objectFit,
+    display: "block",
+    ...(height ? { height: `${height}px` } : {}),
+    ...(marginLeft ? { marginLeft } : {}),
+    ...(marginRight ? { marginRight } : {}),
+  };
   if (!src) {
     return (
       <div
-        className="flex items-center justify-center bg-slate-100 text-slate-400 aspect-video"
-        style={{ width: `${width}%`, borderRadius: radius }}
+        className="flex items-center justify-center bg-slate-100 text-slate-400"
+        style={{ ...imgStyle, aspectRatio: height ? undefined : "16/9", objectFit: undefined }}
       >
         <ImageIcon className="w-10 h-10" />
       </div>
     );
   }
-  return (
-    <img
-      src={src}
-      alt={alt}
-      className="block object-cover"
-      style={{ width: `${width}%`, borderRadius: radius }}
-    />
-  );
+  return <img src={src} alt={alt} style={imgStyle} />;
 }
 
 export function ButtonWidget({ p }: { p: P }) {
@@ -186,7 +207,13 @@ export function ButtonWidget({ p }: { p: P }) {
   const variant = str(p.variant, "primary");
   const fullWidth = bool(p.fullWidth);
   const color = str(p.color, "");
-  const base = "inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md transition-colors";
+  const textColor = str(p.textColor, "");
+  const borderColor = str(p.borderColor, "");
+  const borderRadius = num(p.borderRadius, 6);
+  const paddingX = num(p.paddingX, 16);
+  const paddingY = num(p.paddingY, 8);
+  const fontSize = num(p.fontSize, 14);
+  const base = "inline-flex items-center justify-center font-medium transition-colors";
   const variants: Record<string, string> = {
     primary: "bg-blue-500 text-white hover:bg-blue-600 shadow-sm",
     secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200",
@@ -194,8 +221,14 @@ export function ButtonWidget({ p }: { p: P }) {
     ghost: "text-slate-700 hover:bg-slate-100",
   };
   const cls = `${base} ${variants[variant] ?? variants.primary} ${fullWidth ? "w-full" : ""}`;
-  const style: React.CSSProperties = {};
-  if (color && (variant === "primary" || variant === "secondary")) style.backgroundColor = color;
+  const style: React.CSSProperties = {
+    borderRadius: `${borderRadius}px`,
+    padding: `${paddingY}px ${paddingX}px`,
+    fontSize: `${fontSize}px`,
+    ...(color ? { backgroundColor: color } : {}),
+    ...(textColor ? { color: textColor } : {}),
+    ...(borderColor ? { border: `2px solid ${borderColor}`, backgroundColor: color || 'transparent' } : {}),
+  };
   return (
     <div className={`flex ${justifyClass(p.align)}`}>
       <button type="button" className={cls} style={style}>
@@ -209,6 +242,10 @@ export function DividerWidget({ p }: { p: P }) {
   const style = str(p.style, "solid");
   const thickness = num(p.thickness, 1);
   const color = str(p.color, "#e2e8f0");
+  const widthPct = num(p.widthPercent, 100);
+  const align = str(p.align, "left");
+  const ml = align === "center" ? "auto" : align === "right" ? "auto" : 0;
+  const mr = align === "center" ? "auto" : 0;
   return (
     <hr
       style={{
@@ -218,6 +255,9 @@ export function DividerWidget({ p }: { p: P }) {
         borderBottom: 0,
         borderLeft: 0,
         borderRight: 0,
+        width: `${widthPct}%`,
+        marginLeft: ml,
+        marginRight: mr,
       }}
     />
   );
@@ -247,26 +287,83 @@ export function IconWidget({ p }: { p: P }) {
 }
 
 export function CardWidget({ p }: { p: P }) {
-  const title = str(p.title, "Card title");
+  const title       = str(p.title,       "Card title");
   const description = str(p.description, "A short description that explains what this card is about.");
-  const image = str(p.image, "");
+  const image       = str(p.image,       "");
   const buttonLabel = str(p.buttonLabel, "Learn more");
+
+  const cardSt  = obj(p.cardStyle);
+  const imageSt = obj(p.imageStyle);
+  const titleSt = obj(p.titleStyle);
+  const descSt  = obj(p.descriptionStyle);
+  const btnSt   = obj(p.buttonStyle);
+
+  const cardStyle: React.CSSProperties = {
+    borderRadius: `${num(cardSt.borderRadius, 12)}px`,
+    background:   str(cardSt.bgColor, '#ffffff'),
+    border:       cardSt.borderColor ? `1px solid ${cardSt.borderColor}` : '1px solid #e2e8f0',
+    overflow:     'hidden',
+  };
+  const imgStyle: React.CSSProperties = {
+    width: '100%',
+    height: `${num(imageSt.height, 200)}px`,
+    objectFit: (str(imageSt.objectFit, 'cover')) as React.CSSProperties['objectFit'],
+    borderRadius: num(imageSt.borderRadius, 0),
+    display: 'block',
+  };
+  const titleStyle: React.CSSProperties = {
+    color:        str(titleSt.color, '#0f172a'),
+    fontSize:     num(titleSt.fontSize, 0) ? `${num(titleSt.fontSize, 0)}px` : undefined,
+    fontWeight:   str(titleSt.fontWeight, '700'),
+    textAlign:    (str(titleSt.align, 'left')) as React.CSSProperties['textAlign'],
+    marginBottom: `${num(titleSt.marginBottom, 4)}px`,
+    margin:       `0 0 ${num(titleSt.marginBottom, 4)}px`,
+  };
+  const descStyle: React.CSSProperties = {
+    color:      str(descSt.color, '#475569'),
+    fontSize:   num(descSt.fontSize, 0) ? `${num(descSt.fontSize, 0)}px` : '14px',
+    lineHeight: num(descSt.lineHeight, 0) || 1.6,
+    textAlign:  (str(descSt.align, 'left')) as React.CSSProperties['textAlign'],
+    margin:     0,
+  };
+  const btnBg     = str(btnSt.bgColor,     '');
+  const btnTc     = str(btnSt.textColor,   '');
+  const btnBorder = str(btnSt.borderColor, '');
+  const btnStyle: React.CSSProperties = {
+    display:       'inline-flex',
+    alignItems:    'center',
+    gap:           4,
+    padding:       `${num(btnSt.paddingY, 6)}px ${num(btnSt.paddingX, 12)}px`,
+    borderRadius:  `${num(btnSt.borderRadius, 6)}px`,
+    fontSize:      `${num(btnSt.fontSize, 14)}px`,
+    fontWeight:    600,
+    cursor:        'pointer',
+    textDecoration:'none',
+    background:    btnBg || 'transparent',
+    color:         btnTc || '#3b82f6',
+    border:        btnBorder ? `2px solid ${btnBorder}` : 'none',
+  };
+  const btnAlign = str(btnSt.align, 'left');
+  const pad = num(cardSt.padding, 16);
+
   return (
-    <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
-      {image ? (
-        <img src={image} alt="" className="w-full aspect-video object-cover" />
-      ) : (
-        <div className="w-full aspect-video bg-slate-100 flex items-center justify-center text-slate-400">
-          <ImageIcon className="w-8 h-8" />
-        </div>
+    <div style={cardStyle}>
+      {!bool(imageSt.hidden) && (
+        image
+          ? <img src={image} alt="" style={imgStyle} />
+          : <div style={{ ...imgStyle, background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+              <ImageIcon className="w-8 h-8" />
+            </div>
       )}
-      <div className="p-4">
-        <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-        <p className="mt-1 text-sm text-slate-600 leading-relaxed">{description}</p>
-        {buttonLabel && (
-          <a href={str(p.buttonUrl, "#")} className="mt-3 inline-flex items-center text-sm font-medium text-blue-500 hover:text-blue-600">
-            {buttonLabel} <ChevronRight className="w-4 h-4 ml-0.5" />
-          </a>
+      <div style={{ padding: `${pad}px` }}>
+        <h3 style={titleStyle}>{title}</h3>
+        <p style={descStyle}>{description}</p>
+        {buttonLabel && !bool(btnSt.hidden) && (
+          <div style={{ marginTop: 12, textAlign: btnAlign as React.CSSProperties['textAlign'] }}>
+            <a href={str(p.buttonUrl, '#')} style={btnStyle}>
+              {buttonLabel} <ChevronRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
         )}
       </div>
     </div>

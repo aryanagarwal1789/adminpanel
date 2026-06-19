@@ -54,14 +54,72 @@ export function StyleEditor({
 
   return (
     <div className="space-y-5">
+      <Section title="Quick Presets">
+        <div className="flex gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => update({ bgColor: '#0D1F1C', headingColor: '#ffffff', textColor: '#8BBFB8', bgTransparent: false, bgGradientEnabled: false })}
+            className="px-3 py-1.5 rounded text-xs font-medium text-white pb-transition"
+            style={{ background: '#0D1F1C', border: '1px solid #2A4A47' }}
+          >
+            Dark Teal
+          </button>
+          <button
+            type="button"
+            onClick={() => update({ bgColor: '#0f172a', headingColor: '#ffffff', textColor: '#94a3b8', bgTransparent: false, bgGradientEnabled: false })}
+            className="px-3 py-1.5 rounded text-xs font-medium text-white pb-transition"
+            style={{ background: '#0f172a', border: '1px solid #1e293b' }}
+          >
+            Dark Navy
+          </button>
+          <button
+            type="button"
+            onClick={() => update({ bgGradientEnabled: true, bgGradientFrom: '#0D1F1C', bgGradientTo: '#000000', bgGradientAngle: 135, headingColor: '#ffffff', textColor: '#8BBFB8', bgTransparent: false })}
+            className="px-3 py-1.5 rounded text-xs font-medium text-white pb-transition"
+            style={{ background: 'linear-gradient(135deg,#0D1F1C,#000)', border: '1px solid #2A4A47' }}
+          >
+            Dark Gradient
+          </button>
+          <button
+            type="button"
+            onClick={() => update({ bgColor: '#ffffff', headingColor: '#0f172a', textColor: '#475569', bgTransparent: false, bgGradientEnabled: false })}
+            className="px-3 py-1.5 rounded text-xs font-medium pb-transition"
+            style={{ background: '#ffffff', border: '1px solid #e2e8f0', color: '#0f172a' }}
+          >
+            Light
+          </button>
+        </div>
+      </Section>
+
       <Section title="Background">
         <Toggle label="Transparent" value={transparent} onChange={(v) => update({ bgTransparent: v })} />
         {!transparent && (
           <>
-            <ColorPicker label="Color" value={style.bgColor ?? ""} onChange={(v) => update({ bgColor: v })} />
-            <ImageField label="Background image URL" value={style.bgImage ?? ""} onChange={(v) => update({ bgImage: v })} />
+            <Toggle label="Use gradient" value={style.bgGradientEnabled ?? false} onChange={(v) => update({ bgGradientEnabled: v })} />
+            {style.bgGradientEnabled ? (
+              <>
+                <ColorPicker label="From color" value={style.bgGradientFrom ?? '#0D1F1C'} onChange={(v) => update({ bgGradientFrom: v })} />
+                <ColorPicker label="To color" value={style.bgGradientTo ?? '#000000'} onChange={(v) => update({ bgGradientTo: v })} />
+                <NumberInput label="Angle (deg)" value={style.bgGradientAngle ?? 135} onChange={(v) => update({ bgGradientAngle: v })} />
+              </>
+            ) : (
+              <>
+                <ColorPicker label="Color" value={style.bgColor ?? ""} onChange={(v) => update({ bgColor: v })} />
+                <ImageField label="Background image URL" value={style.bgImage ?? ""} onChange={(v) => update({ bgImage: v })} />
+              </>
+            )}
           </>
         )}
+      </Section>
+
+      <Section title="Size &amp; Layout">
+        <NumberInput label="Min height (px, 0 = auto)" value={style.minHeight ?? 0} onChange={(v) => update({ minHeight: v || undefined })} />
+        <Select<string>
+          label="Content vertical align"
+          value={style.contentVerticalAlign ?? 'top'}
+          onChange={(v) => update({ contentVerticalAlign: v as BlockStyle['contentVerticalAlign'] })}
+          options={[{ value: 'top', label: 'Top' }, { value: 'center', label: 'Center' }, { value: 'bottom', label: 'Bottom' }]}
+        />
       </Section>
 
       <Section title="Padding">
@@ -93,6 +151,54 @@ export function StyleEditor({
       <Section title="Text colors">
         <ColorPicker label="Heading color" value={style.headingColor ?? ""} onChange={(v) => update({ headingColor: v || undefined })} />
         <ColorPicker label="Body / subtext color" value={style.textColor ?? ""} onChange={(v) => update({ textColor: v || undefined })} />
+      </Section>
+
+      <Section title="Animation">
+        <Select<string>
+          label="Entrance animation"
+          value={style.animation ?? 'none'}
+          onChange={(v) => update({ animation: v === 'none' ? undefined : v })}
+          options={[
+            { value: 'none',        label: 'None' },
+            { value: 'fade-up',     label: 'Fade Up' },
+            { value: 'fade-down',   label: 'Fade Down' },
+            { value: 'fade-in',     label: 'Fade In' },
+            { value: 'slide-left',  label: 'Slide from Left' },
+            { value: 'slide-right', label: 'Slide from Right' },
+            { value: 'zoom-in',     label: 'Zoom In' },
+            { value: 'bounce-in',   label: 'Bounce In' },
+          ]}
+        />
+        {style.animation && style.animation !== 'none' && (
+          <>
+            <Select<string>
+              label="Duration"
+              value={String(style.animationDuration ?? 600)}
+              onChange={(v) => update({ animationDuration: Number(v) })}
+              options={[
+                { value: '300',  label: 'Fast (300ms)' },
+                { value: '500',  label: 'Normal (500ms)' },
+                { value: '600',  label: 'Default (600ms)' },
+                { value: '800',  label: 'Slow (800ms)' },
+                { value: '1000', label: 'Slower (1s)' },
+              ]}
+            />
+            <Select<string>
+              label="Delay"
+              value={String(style.animationDelay ?? 0)}
+              onChange={(v) => update({ animationDelay: Number(v) })}
+              options={[
+                { value: '0',   label: 'No delay' },
+                { value: '100', label: '100ms' },
+                { value: '200', label: '200ms' },
+                { value: '300', label: '300ms' },
+                { value: '400', label: '400ms' },
+                { value: '500', label: '500ms' },
+                { value: '700', label: '700ms' },
+              ]}
+            />
+          </>
+        )}
       </Section>
 
       {showTypography && (

@@ -1,4 +1,27 @@
+import { useState } from "react";
 import { ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
+
+// Collapsible sub-element section — used for per-field styling inside composite widgets
+function SubSection({ label, children, defaultOpen = false }: { label: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div style={{ borderRadius: 6, border: '1px solid #1e293b', overflow: 'hidden' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 10px', background: '#0f172a', border: 'none', cursor: 'pointer', color: '#cbd5e1', fontSize: 12, fontWeight: 600 }}
+      >
+        <span>{label}</span>
+        <ChevronDown size={12} style={{ transform: open ? 'rotate(0deg)' : 'rotate(-90deg)', transition: 'transform 150ms', flexShrink: 0 }} />
+      </button>
+      {open && (
+        <div style={{ padding: '10px 10px', background: '#0a1628', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
 import {
   ButtonEditor, ColorPicker, ImageField, VideoField, NumberInput, Repeater, Select,
   Slider, TextInput, Textarea, Toggle,
@@ -113,6 +136,37 @@ export function WidgetEditor({
       );
     }
 
+    case "rich-heading":
+      return (
+        <div className="space-y-3">
+          <Textarea label="Text — wrap words in **double asterisks** for accent color" rows={3} value={p.text as string ?? ''} onChange={(v) => set("text", v)} />
+          <div style={{ fontSize: 11, color: '#64748b', marginTop: -8, padding: '0 2px' }}>
+            Example: <code style={{ background: '#1e293b', padding: '1px 4px', borderRadius: 3 }}>First **Cloud Distribution** Platform</code>
+          </div>
+          <ColorPicker label="Default text color" value={p.color as string || '#ffffff'} onChange={(v) => set("color", v)} />
+          <ColorPicker label="Accent color (**highlighted** words)" value={p.accentColor as string || '#00C6B1'} onChange={(v) => set("accentColor", v)} />
+          <Select label="Heading level" value={(p.level as "h1") || "h2"} onChange={(v) => set("level", v)} options={LEVEL_OPTS as unknown as { value: "h1"; label: string }[]} />
+          <Select label="Alignment" value={(p.align as Align) || "left"} onChange={(v) => set("align", v)} options={ALIGN_OPTS} />
+          <NumberInput label="Font size (px, 0 = auto)" value={(p.fontSize as number) || 0} onChange={(v) => set("fontSize", v || undefined)} />
+          <Select label="Font weight" value={(p.fontWeight as string) || "700"} onChange={(v) => set("fontWeight", v)} options={[{value:"400",label:"Regular"},{value:"500",label:"Medium"},{value:"600",label:"Semibold"},{value:"700",label:"Bold"},{value:"800",label:"Extrabold"},{value:"900",label:"Black"}] as unknown as {value:"400";label:string}[]} />
+          <NumberInput label="Line height (e.g. 1.1 tight, 1.5 normal)" value={(p.lineHeight as number) || 0} onChange={(v) => set("lineHeight", v || undefined)} />
+          <NumberInput label="Letter spacing (px)" value={(p.letterSpacing as number) || 0} onChange={(v) => set("letterSpacing", v || undefined)} />
+        </div>
+      );
+    case "rich-paragraph":
+      return (
+        <div className="space-y-3">
+          <Textarea label="Text — use **word** for accent color" rows={5} value={p.text as string ?? ''} onChange={(v) => set("text", v)} />
+          <div style={{ fontSize: 11, color: '#64748b', marginTop: -8, padding: '0 2px' }}>
+            Example: <code style={{ background: '#1e293b', padding: '1px 4px', borderRadius: 3 }}>To create **1M+ stores** with **digital commerce**</code>
+          </div>
+          <ColorPicker label="Default text color" value={p.color as string || '#e2e8f0'} onChange={(v) => set("color", v)} />
+          <ColorPicker label="Accent color (**highlighted** words)" value={p.accentColor as string || '#00C6B1'} onChange={(v) => set("accentColor", v)} />
+          <Select label="Alignment" value={(p.align as Align) || "left"} onChange={(v) => set("align", v)} options={ALIGN_OPTS} />
+          <NumberInput label="Font size (px)" value={(p.fontSize as number) || 18} onChange={(v) => set("fontSize", v)} />
+          <NumberInput label="Line height" value={(p.lineHeight as number) || 1.7} onChange={(v) => set("lineHeight", v)} />
+        </div>
+      );
     case "heading":
     case "section-heading":
     case "section-header":
@@ -122,6 +176,10 @@ export function WidgetEditor({
           <Select label="Level" value={(p.level as "h1") || "h2"} onChange={(v) => set("level", v)} options={LEVEL_OPTS as unknown as { value: "h1"; label: string }[]} />
           <Select label="Alignment" value={(p.align as Align) || "left"} onChange={(v) => set("align", v)} options={ALIGN_OPTS} />
           <ColorPicker label="Color" value={p.color as string} onChange={(v) => set("color", v)} />
+          <NumberInput label="Font size (px, 0 = auto)" value={(p.fontSize as number) ?? 0} onChange={(v) => set("fontSize", v || undefined)} />
+          <Select label="Font weight" value={(p.fontWeight as string) || "700"} onChange={(v) => set("fontWeight", v)} options={[{value:"400",label:"Regular"},{value:"500",label:"Medium"},{value:"600",label:"Semibold"},{value:"700",label:"Bold"},{value:"800",label:"Extrabold"},{value:"900",label:"Black"}] as unknown as {value:"700";label:string}[]} />
+          <NumberInput label="Line height (e.g. 1.2)" value={(p.lineHeight as number) ?? 0} onChange={(v) => set("lineHeight", v || undefined)} />
+          <NumberInput label="Letter spacing (px)" value={(p.letterSpacing as number) ?? 0} onChange={(v) => set("letterSpacing", v || undefined)} />
         </div>
       );
     case "paragraph":
@@ -130,9 +188,11 @@ export function WidgetEditor({
       return (
         <div className="space-y-3">
           <Textarea label="Text" rows={4} value={p.text as string} onChange={(v) => set("text", v)} />
-          <Select label="Size" value={(p.size as "base") || "base"} onChange={(v) => set("size", v)} options={SIZE_OPTS as unknown as { value: "base"; label: string }[]} />
           <Select label="Alignment" value={(p.align as Align) || "left"} onChange={(v) => set("align", v)} options={ALIGN_OPTS} />
           <ColorPicker label="Color" value={p.color as string} onChange={(v) => set("color", v)} />
+          <NumberInput label="Font size (px, 0 = auto)" value={(p.fontSize as number) ?? 0} onChange={(v) => set("fontSize", v || undefined)} />
+          <Select label="Font weight" value={(p.fontWeight as string) || "400"} onChange={(v) => set("fontWeight", v)} options={[{value:"400",label:"Regular"},{value:"500",label:"Medium"},{value:"600",label:"Semibold"},{value:"700",label:"Bold"}] as unknown as {value:"400";label:string}[]} />
+          <NumberInput label="Line height (e.g. 1.6)" value={(p.lineHeight as number) ?? 0} onChange={(v) => set("lineHeight", v || undefined)} />
         </div>
       );
     case "image":
@@ -140,8 +200,12 @@ export function WidgetEditor({
         <div className="space-y-3">
           <ImageField label="Source URL" value={p.src as string} onChange={(v) => set("src", v)} />
           <TextInput label="Alt text" value={p.alt as string} onChange={(v) => set("alt", v)} />
-          <NumberInput label="Width %" value={p.width as number} onChange={(v) => set("width", v)} />
-          <NumberInput label="Border radius" value={p.radius as number} onChange={(v) => set("radius", v)} />
+          <NumberInput label="Width %" value={(p.width as number) ?? 100} onChange={(v) => set("width", v)} />
+          <NumberInput label="Height (px, 0 = auto)" value={(p.height as number) ?? 0} onChange={(v) => set("height", v || undefined)} />
+          <Select label="Object fit" value={(p.objectFit as "cover") || "cover"} onChange={(v) => set("objectFit", v)}
+            options={[{value:"cover",label:"Cover (crop to fill)"},{value:"contain",label:"Contain (show full image)"},{value:"fill",label:"Fill (stretch)"},{value:"none",label:"None (natural size)"}] as {value:"cover";label:string}[]} />
+          <Select label="Alignment" value={(p.align as Align) || "left"} onChange={(v) => set("align", v)} options={ALIGN_OPTS} />
+          <NumberInput label="Border radius (px)" value={(p.radius as number) ?? 0} onChange={(v) => set("radius", v)} />
         </div>
       );
     case "button":
@@ -152,6 +216,14 @@ export function WidgetEditor({
           <Select label="Variant" value={(p.variant as Variant) || "primary"} onChange={(v) => set("variant", v)} options={VARIANT_OPTS} />
           <Select label="Alignment" value={(p.align as Align) || "left"} onChange={(v) => set("align", v)} options={ALIGN_OPTS} />
           <Toggle label="Full width" value={p.fullWidth as boolean} onChange={(v) => set("fullWidth", v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <ColorPicker label="Background color" value={(p.color as string) ?? ''} onChange={(v) => set("color", v)} />
+          <ColorPicker label="Text color" value={(p.textColor as string) ?? ''} onChange={(v) => set("textColor", v)} />
+          <ColorPicker label="Border color" value={(p.borderColor as string) ?? ''} onChange={(v) => set("borderColor", v)} />
+          <NumberInput label="Border radius (px)" value={(p.borderRadius as number) ?? 6} onChange={(v) => set("borderRadius", v)} />
+          <NumberInput label="Padding X (px)" value={(p.paddingX as number) ?? 16} onChange={(v) => set("paddingX", v)} />
+          <NumberInput label="Padding Y (px)" value={(p.paddingY as number) ?? 8} onChange={(v) => set("paddingY", v)} />
+          <NumberInput label="Font size (px)" value={(p.fontSize as number) ?? 14} onChange={(v) => set("fontSize", v)} />
         </div>
       );
     case "divider":
@@ -160,12 +232,100 @@ export function WidgetEditor({
           <Select label="Style" value={(p.style as "solid") || "solid"} onChange={(v) => set("style", v)} options={[{ value: "solid", label: "Solid" }, { value: "dashed", label: "Dashed" }, { value: "dotted", label: "Dotted" }] as { value: "solid"; label: string }[]} />
           <ColorPicker label="Color" value={p.color as string} onChange={(v) => set("color", v)} />
           <NumberInput label="Thickness (px)" value={p.thickness as number} onChange={(v) => set("thickness", v)} />
+          <Slider label="Width %" min={5} max={100} value={(p.widthPercent as number) ?? 100} onChange={(v) => set("widthPercent", v)} />
+          <Select label="Alignment" value={(p.align as Align) || "left"} onChange={(v) => set("align", v)} options={ALIGN_OPTS} />
         </div>
       );
     case "spacer":
       return (
         <div className="space-y-3">
           <Slider label="Height (px)" min={8} max={200} value={p.height as number} onChange={(v) => set("height", v)} />
+        </div>
+      );
+    case "box": {
+      const innerWidgets = (p.widgets as Widget[]) ?? [];
+      const updateWidgets = (next: Widget[]) => update({ ...p, widgets: next });
+      return (
+        <div className="space-y-3">
+          <ColorPicker label="Background color" value={p.bgColor as string || ''} onChange={(v) => set("bgColor", v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#475569' }}>Border</div>
+          <Select label="Border sides" value={(p.borderSides as 'all') || 'all'} onChange={(v) => set("borderSides", v)}
+            options={[{value:'all',label:'All sides'},{value:'left',label:'Left only'},{value:'right',label:'Right only'},{value:'top',label:'Top only'},{value:'bottom',label:'Bottom only'},{value:'none',label:'None'}] as {value:'all';label:string}[]} />
+          {(p.borderSides as string) !== 'none' && <>
+            <ColorPicker label="Border color" value={p.borderColor as string || ''} onChange={(v) => set("borderColor", v)} />
+            <NumberInput label="Border width (px)" value={(p.borderWidth as number) ?? 1} onChange={(v) => set("borderWidth", v)} />
+          </>}
+          <NumberInput label="Border radius (px)" value={(p.borderRadius as number) ?? 12} onChange={(v) => set("borderRadius", v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <NumberInput label="Padding (px)" value={(p.padding as number) ?? 24} onChange={(v) => set("padding", v)} />
+          <Slider label="Gap between items (px)" min={0} max={64} value={(p.gap as number) ?? 16} onChange={(v) => set("gap", v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <div className="text-xs text-slate-400 uppercase font-semibold">Contents ({innerWidgets.length} widgets)</div>
+          {innerWidgets.length === 0 && <div className="text-xs text-slate-500">No widgets added yet.</div>}
+          {innerWidgets.map((w, i) => {
+            const meta = WIDGET_REGISTRY[w.type];
+            return (
+              <div key={w.id} className="flex items-center gap-2 text-xs text-slate-300 bg-slate-800 rounded px-2 py-1.5">
+                <span className="flex-1 truncate">{meta?.label ?? w.type}</span>
+                <button onClick={() => updateWidgets(innerWidgets.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300 shrink-0">×</button>
+              </div>
+            );
+          })}
+          <button
+            onClick={() => openWidgetPicker?.(0, (t) => updateWidgets([...innerWidgets, defaultWidget(t)]))}
+            className="w-full py-2 text-xs border border-dashed border-slate-700 rounded text-slate-400 hover:text-white hover:border-slate-500 pb-transition"
+          >
+            + Add widget to box
+          </button>
+        </div>
+      );
+    }
+    case "form-advanced": {
+      type FormField = { type: string; label: string; placeholder?: string; required?: boolean; width?: string; options?: string };
+      const fields = (p.fields as FormField[]) ?? [];
+      return (
+        <div className="space-y-3">
+          <TextInput label="Form title (optional)" value={p.title as string ?? ''} onChange={(v) => set("title", v)} />
+          <Repeater<FormField>
+            label="Fields"
+            items={fields}
+            onChange={(v) => set("fields", v)}
+            newItem={() => ({ type: 'text', label: 'New field', placeholder: '', required: false, width: 'full' })}
+            itemPreview={(it) => it.label}
+            renderItem={(it, u) => (
+              <>
+                <Select label="Field type" value={it.type as "text"} onChange={(v) => u({ ...it, type: v })}
+                  options={[{value:'text',label:'Text'},{value:'email',label:'Email'},{value:'phone',label:'Phone'},{value:'textarea',label:'Textarea'},{value:'dropdown',label:'Dropdown'},{value:'checkbox',label:'Checkbox'}] as {value:"text";label:string}[]} />
+                <TextInput label="Label" value={it.label} onChange={(v) => u({ ...it, label: v })} />
+                {it.type !== 'checkbox' && <TextInput label="Placeholder" value={it.placeholder ?? ''} onChange={(v) => u({ ...it, placeholder: v })} />}
+                {it.type === 'dropdown' && <Textarea label="Options (one per line)" rows={3} value={it.options ?? ''} onChange={(v) => u({ ...it, options: v })} />}
+                <Select label="Width" value={it.width as "full"} onChange={(v) => u({ ...it, width: v })}
+                  options={[{value:'full',label:'Full width'},{value:'half',label:'Half width (2 columns)'}] as {value:"full";label:string}[]} />
+                <Toggle label="Required" value={it.required ?? false} onChange={(v) => u({ ...it, required: v })} />
+              </>
+            )}
+          />
+          <TextInput label="Submit button label" value={p.submitLabel as string ?? 'Submit'} onChange={(v) => set("submitLabel", v)} />
+          <ColorPicker label="Button background" value={p.submitBgColor as string || '#00C6B1'} onChange={(v) => set("submitBgColor", v)} />
+          <ColorPicker label="Button text color" value={p.submitTextColor as string || '#ffffff'} onChange={(v) => set("submitTextColor", v)} />
+          <ColorPicker label="Form background" value={p.bgColor as string || '#ffffff'} onChange={(v) => set("bgColor", v)} />
+          <NumberInput label="Border radius (px)" value={p.borderRadius as number ?? 16} onChange={(v) => set("borderRadius", v)} />
+          <NumberInput label="Padding (px)" value={p.padding as number ?? 32} onChange={(v) => set("padding", v)} />
+        </div>
+      );
+    }
+    case "app-badge":
+      return (
+        <div className="space-y-3">
+          <Select label="Platform" value={(p.platform as "google") || "google"} onChange={(v) => set("platform", v)}
+            options={[{value:'google',label:'Google Play'},{value:'apple',label:'App Store'},{value:'custom',label:'Custom'}] as {value:"google";label:string}[]} />
+          <ImageField label="Badge image (upload or URL)" value={p.badgeImage as string ?? ''} onChange={(v) => set("badgeImage", v)} />
+          <TextInput label="Store URL" value={p.storeUrl as string ?? '#'} onChange={(v) => set("storeUrl", v)} />
+          <NumberInput label="Width (px)" value={(p.widthPx as number) ?? 160} onChange={(v) => set("widthPx", v)} />
+          <NumberInput label="Height (px)" value={(p.height as number) ?? 44} onChange={(v) => set("height", v)} />
+          <Select label="Object fit" value={(p.objectFit as "contain") || "contain"} onChange={(v) => set("objectFit", v)}
+            options={[{value:'contain',label:'Contain (show full badge)'},{value:'cover',label:'Cover (fill & crop)'},{value:'fill',label:'Fill (stretch)'}] as {value:"contain";label:string}[]} />
         </div>
       );
     case "icon":
@@ -177,16 +337,68 @@ export function WidgetEditor({
           <Select label="Alignment" value={(p.align as Align) || "left"} onChange={(v) => set("align", v)} options={ALIGN_OPTS} />
         </div>
       );
-    case "card":
+    case "card": {
+      type SS = Record<string, unknown>;
+      const cardSt   = (p.cardStyle        as SS) ?? {};
+      const imageSt  = (p.imageStyle       as SS) ?? {};
+      const titleSt  = (p.titleStyle       as SS) ?? {};
+      const descSt   = (p.descriptionStyle as SS) ?? {};
+      const btnSt    = (p.buttonStyle      as SS) ?? {};
+      const sc = (key: string, st: SS) => (v: unknown) => set(key, { ...st, ...{ [v as string]: v } });
+      void sc; // avoid unused warning — we use inline updaters below
+      const upd = (key: string, st: SS, field: string) => (v: unknown) => set(key, { ...st, [field]: v });
+      const WEIGHTS = [{value:'400',label:'Regular'},{value:'500',label:'Medium'},{value:'600',label:'Semibold'},{value:'700',label:'Bold'},{value:'800',label:'Extrabold'}] as unknown as {value:'400';label:string}[];
+      const FITS = [{value:'cover',label:'Cover'},{value:'contain',label:'Contain'},{value:'fill',label:'Fill'}] as unknown as {value:'cover';label:string}[];
       return (
-        <div className="space-y-3">
-          <TextInput label="Title" value={p.title as string} onChange={(v) => set("title", v)} />
-          <Textarea label="Description" value={p.description as string} onChange={(v) => set("description", v)} />
-          <ImageField label="Image URL" value={p.image as string} onChange={(v) => set("image", v)} />
-          <TextInput label="Button label" value={p.buttonLabel as string} onChange={(v) => set("buttonLabel", v)} />
-          <TextInput label="Button URL" value={p.buttonUrl as string} onChange={(v) => set("buttonUrl", v)} />
+        <div className="space-y-1.5">
+          <SubSection label="🃏 Card Container" defaultOpen>
+            <ColorPicker label="Background"    value={(cardSt.bgColor     as string) || '#ffffff'}  onChange={upd('cardStyle',   cardSt,  'bgColor')} />
+            <ColorPicker label="Border color"  value={(cardSt.borderColor as string) || ''}         onChange={upd('cardStyle',   cardSt,  'borderColor')} />
+            <NumberInput label="Border radius" value={(cardSt.borderRadius as number) ?? 12}        onChange={upd('cardStyle',   cardSt,  'borderRadius')} />
+            <NumberInput label="Padding (px)"  value={(cardSt.padding     as number) ?? 16}         onChange={upd('cardStyle',   cardSt,  'padding')} />
+          </SubSection>
+
+          <SubSection label="🖼 Image">
+            <ImageField  label="Image"         value={(p.image as string) || ''}                    onChange={(v) => set('image', v)} />
+            <Toggle      label="Hide image"    value={(imageSt.hidden as boolean) || false}         onChange={upd('imageStyle',  imageSt, 'hidden')} />
+            <NumberInput label="Height (px)"   value={(imageSt.height as number) ?? 200}            onChange={upd('imageStyle',  imageSt, 'height')} />
+            <Select      label="Object fit"    value={(imageSt.objectFit as 'cover') || 'cover'}    onChange={upd('imageStyle',  imageSt, 'objectFit')} options={FITS} />
+            <NumberInput label="Border radius" value={(imageSt.borderRadius as number) ?? 0}        onChange={upd('imageStyle',  imageSt, 'borderRadius')} />
+          </SubSection>
+
+          <SubSection label="📝 Title">
+            <TextInput   label="Text"          value={(p.title as string) || ''}                    onChange={(v) => set('title', v)} />
+            <ColorPicker label="Color"         value={(titleSt.color      as string) || '#0f172a'}  onChange={upd('titleStyle',  titleSt, 'color')} />
+            <NumberInput label="Font size (px)"value={(titleSt.fontSize   as number) ?? 0}          onChange={upd('titleStyle',  titleSt, 'fontSize')} />
+            <Select      label="Font weight"   value={(titleSt.fontWeight as '700') || '700'}       onChange={upd('titleStyle',  titleSt, 'fontWeight')} options={WEIGHTS} />
+            <Select      label="Alignment"     value={(titleSt.align      as Align) || 'left'}      onChange={upd('titleStyle',  titleSt, 'align')} options={ALIGN_OPTS} />
+            <NumberInput label="Margin bottom" value={(titleSt.marginBottom as number) ?? 4}        onChange={upd('titleStyle',  titleSt, 'marginBottom')} />
+          </SubSection>
+
+          <SubSection label="📄 Description">
+            <Textarea    label="Text"          rows={3} value={(p.description as string) || ''}     onChange={(v) => set('description', v)} />
+            <ColorPicker label="Color"         value={(descSt.color      as string) || '#475569'}   onChange={upd('descriptionStyle', descSt, 'color')} />
+            <NumberInput label="Font size (px)"value={(descSt.fontSize   as number) ?? 0}           onChange={upd('descriptionStyle', descSt, 'fontSize')} />
+            <NumberInput label="Line height"   value={(descSt.lineHeight as number) ?? 0}           onChange={upd('descriptionStyle', descSt, 'lineHeight')} />
+            <Select      label="Alignment"     value={(descSt.align      as Align) || 'left'}       onChange={upd('descriptionStyle', descSt, 'align')} options={ALIGN_OPTS} />
+          </SubSection>
+
+          <SubSection label="🔘 Button">
+            <TextInput   label="Label"         value={(p.buttonLabel as string) || ''}              onChange={(v) => set('buttonLabel', v)} />
+            <TextInput   label="URL"           value={(p.buttonUrl   as string) || '#'}             onChange={(v) => set('buttonUrl', v)} />
+            <Toggle      label="Hide button"   value={(btnSt.hidden  as boolean) || false}          onChange={upd('buttonStyle', btnSt, 'hidden')} />
+            <ColorPicker label="Background"    value={(btnSt.bgColor     as string) || ''}          onChange={upd('buttonStyle', btnSt, 'bgColor')} />
+            <ColorPicker label="Text color"    value={(btnSt.textColor   as string) || ''}          onChange={upd('buttonStyle', btnSt, 'textColor')} />
+            <ColorPicker label="Border color"  value={(btnSt.borderColor as string) || ''}          onChange={upd('buttonStyle', btnSt, 'borderColor')} />
+            <NumberInput label="Border radius" value={(btnSt.borderRadius as number) ?? 6}          onChange={upd('buttonStyle', btnSt, 'borderRadius')} />
+            <NumberInput label="Padding X"     value={(btnSt.paddingX    as number) ?? 12}          onChange={upd('buttonStyle', btnSt, 'paddingX')} />
+            <NumberInput label="Padding Y"     value={(btnSt.paddingY    as number) ?? 6}           onChange={upd('buttonStyle', btnSt, 'paddingY')} />
+            <NumberInput label="Font size (px)"value={(btnSt.fontSize    as number) ?? 14}          onChange={upd('buttonStyle', btnSt, 'fontSize')} />
+            <Select      label="Alignment"     value={(btnSt.align       as Align) || 'left'}       onChange={upd('buttonStyle', btnSt, 'align')} options={ALIGN_OPTS} />
+          </SubSection>
         </div>
       );
+    }
     case "video":
     case "video-embed":
       return (
@@ -489,6 +701,8 @@ export function WidgetEditor({
           />
           <Select label="Aspect ratio" value={(p.aspect as "16:9") || "16:9"} onChange={(v) => set("aspect", v)} options={[{ value: "16:9", label: "16:9" }, { value: "4:3", label: "4:3" }, { value: "1:1", label: "1:1" }] as { value: "16:9"; label: string }[]} />
           <Slider label="Border radius (px)" min={0} max={24} value={p.radius as number} onChange={(v) => set("radius", v)} />
+          <Select label="Auto-play interval" value={String((p.autoPlay as number) ?? 3000)} onChange={(v) => set("autoPlay", Number(v))}
+            options={[{value:'0',label:'Off (manual only)'},{value:'2000',label:'2 seconds'},{value:'3000',label:'3 seconds'},{value:'4000',label:'4 seconds'},{value:'5000',label:'5 seconds'},{value:'8000',label:'8 seconds'}] as {value:'0';label:string}[]} />
         </div>
       );
     case "search-input":
