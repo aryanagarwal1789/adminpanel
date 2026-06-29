@@ -2415,6 +2415,51 @@ function renderBlockFields(
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <TextInput label="Input placeholder" value={f.ctaPlaceholder as string ?? ''} onChange={(v) => set('ctaPlaceholder', v)} />
           <TextInput label="Trust line" value={f.trustText as string ?? ''} onChange={(v) => set('trustText', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Textarea label="Subtitle suffix" value={f.subtitleSuffix as string ?? ''} onChange={(v) => set('subtitleSuffix', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Phone time" value={f.phoneTime as string ?? ''} onChange={(v) => set('phoneTime', v)} />
+          <TextInput label="Phone greeting" value={f.phoneGreeting as string ?? ''} onChange={(v) => set('phoneGreeting', v)} />
+          <TextInput label="Phone date" value={f.phoneDate as string ?? ''} onChange={(v) => set('phoneDate', v)} />
+          <TextInput label="Phone region badge" value={f.phoneRegionBadge as string ?? ''} onChange={(v) => set('phoneRegionBadge', v)} />
+          <TextInput label="Phone score card footer" value={f.phoneScoreCardFooter as string ?? ''} onChange={(v) => set('phoneScoreCardFooter', v)} />
+          <TextInput label="Phone analytics label" value={f.phoneAnalyticsLabel as string ?? ''} onChange={(v) => set('phoneAnalyticsLabel', v)} />
+          <TextInput label="Phone body greeting" value={f.phoneBodyGreeting as string ?? ''} onChange={(v) => set('phoneBodyGreeting', v)} />
+          <TextInput label="Phone body sub" value={f.phoneBodySub as string ?? ''} onChange={(v) => set('phoneBodySub', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Task 1 badge" value={f.phoneTask1Badge as string ?? ''} onChange={(v) => set('phoneTask1Badge', v)} />
+          <TextInput label="Task 1 title" value={f.phoneTask1Title as string ?? ''} onChange={(v) => set('phoneTask1Title', v)} />
+          <TextInput label="Task 1 title sub" value={f.phoneTask1TitleSub as string ?? ''} onChange={(v) => set('phoneTask1TitleSub', v)} />
+          <TextInput label="Task 1 sub" value={f.phoneTask1Sub as string ?? ''} onChange={(v) => set('phoneTask1Sub', v)} />
+          <TextInput label="Task 1 incentive" value={f.phoneTask1Incentive as string ?? ''} onChange={(v) => set('phoneTask1Incentive', v)} />
+          <TextInput label="Task 1 ring label" value={f.phoneTask1RingLabel as string ?? ''} onChange={(v) => set('phoneTask1RingLabel', v)} />
+          <TextInput label="Task 1 ring sub" value={f.phoneTask1RingSub as string ?? ''} onChange={(v) => set('phoneTask1RingSub', v)} />
+          <TextInput label="Task 1 ring value" value={f.phoneTask1RingValue as string ?? ''} onChange={(v) => set('phoneTask1RingValue', v)} />
+          <TextInput label="Task 1 ring total" value={String(f.phoneTask1RingTotal ?? '')} onChange={(v) => set('phoneTask1RingTotal', Number(v) || 100)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Task 2 badge" value={f.phoneTask2Badge as string ?? ''} onChange={(v) => set('phoneTask2Badge', v)} />
+          <TextInput label="Task 2 title" value={f.phoneTask2Title as string ?? ''} onChange={(v) => set('phoneTask2Title', v)} />
+          <TextInput label="Task 2 title sub" value={f.phoneTask2TitleSub as string ?? ''} onChange={(v) => set('phoneTask2TitleSub', v)} />
+          <TextInput label="Task 2 sub" value={f.phoneTask2Sub as string ?? ''} onChange={(v) => set('phoneTask2Sub', v)} />
+          <TextInput label="Task 2 incentive" value={f.phoneTask2Incentive as string ?? ''} onChange={(v) => set('phoneTask2Incentive', v)} />
+          <TextInput label="Task 2 ring label" value={f.phoneTask2RingLabel as string ?? ''} onChange={(v) => set('phoneTask2RingLabel', v)} />
+          <TextInput label="Task 2 ring sub" value={f.phoneTask2RingSub as string ?? ''} onChange={(v) => set('phoneTask2RingSub', v)} />
+          <TextInput label="Task 2 ring value" value={f.phoneTask2RingValue as string ?? ''} onChange={(v) => set('phoneTask2RingValue', v)} />
+          <TextInput label="Task 2 ring total" value={String(f.phoneTask2RingTotal ?? '')} onChange={(v) => set('phoneTask2RingTotal', Number(v) || 60)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Left card 1 title" value={f.cardL1Title as string ?? ''} onChange={(v) => set('cardL1Title', v)} />
+          <TextInput label="Left card 1 sub" value={f.cardL1Sub as string ?? ''} onChange={(v) => set('cardL1Sub', v)} />
+          <TextInput label="Left card 2 stat" value={f.cardL2Stat as string ?? ''} onChange={(v) => set('cardL2Stat', v)} />
+          <TextInput label="Left card 2 title" value={f.cardL2Title as string ?? ''} onChange={(v) => set('cardL2Title', v)} />
+          <TextInput label="Left card 2 sub" value={f.cardL2Sub as string ?? ''} onChange={(v) => set('cardL2Sub', v)} />
+          <TextInput label="Right card 1 badge" value={f.cardR1Badge as string ?? ''} onChange={(v) => set('cardR1Badge', v)} />
+          <TextInput label="Right card 1 body" value={f.cardR1Body as string ?? ''} onChange={(v) => set('cardR1Body', v)} />
+          <TextInput label="Right card 1 body highlight" value={f.cardR1BodyHighlight as string ?? ''} onChange={(v) => set('cardR1BodyHighlight', v)} />
+          <TextInput label="Right card 2 title" value={f.cardR2Title as string ?? ''} onChange={(v) => set('cardR2Title', v)} />
+          <TextInput label="Right card 2 sub" value={f.cardR2Sub as string ?? ''} onChange={(v) => set('cardR2Sub', v)} />
+          <TextInput label="Right card 3 stat" value={f.cardR3Stat as string ?? ''} onChange={(v) => set('cardR3Stat', v)} />
+          <TextInput label="Right card 3 title" value={f.cardR3Title as string ?? ''} onChange={(v) => set('cardR3Title', v)} />
+          <TextInput label="Right card 3 sub" value={f.cardR3Sub as string ?? ''} onChange={(v) => set('cardR3Sub', v)} />
         </div>
       );
 
@@ -2528,6 +2573,7 @@ function renderBlockFields(
           <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
           <Textarea label="Subtitle text (before bold)" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
           <TextInput label="Subtitle bold phrase" value={f.subtitleBold as string ?? ''} onChange={(v) => set('subtitleBold', v)} />
+          <Textarea label="Subtitle suffix text" value={f.subtitleSuffix as string ?? ''} onChange={(v) => set('subtitleSuffix', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="CTA input placeholder" value={f.ctaPlaceholder as string ?? ''} onChange={(v) => set('ctaPlaceholder', v)} />
           <TextInput label="CTA button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
@@ -2662,6 +2708,10 @@ function renderBlockFields(
               </div>
             )}
           />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Agent kicker label" value={f.kickerLabel as string ?? ''} onChange={(v) => set('kickerLabel', v)} />
+          <TextInput label="Features section label" value={f.featuresLabel as string ?? ''} onChange={(v) => set('featuresLabel', v)} />
+          <TextInput label="Benefits section label" value={f.benefitsLabel as string ?? ''} onChange={(v) => set('benefitsLabel', v)} />
         </div>
       );
     }
@@ -2719,6 +2769,9 @@ function renderBlockFields(
         <div className="space-y-4">
           <TextInput label="Heading" value={f.title as string ?? ''} onChange={(v) => set('title', v)} />
           <Textarea label="Body copy" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Stamp percentage text" value={f.stampPercent as string ?? ''} onChange={(v) => set('stampPercent', v)} />
+          <TextInput label="Stamp label text" value={f.stampLabel as string ?? ''} onChange={(v) => set('stampLabel', v)} />
         </div>
       );
 
@@ -2732,6 +2785,24 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Integration 1 letter" value={f.integration1Letter as string ?? ''} onChange={(v) => set('integration1Letter', v)} />
+          <TextInput label="Integration 1 name" value={f.integration1Name as string ?? ''} onChange={(v) => set('integration1Name', v)} />
+          <TextInput label="Integration 1 sub" value={f.integration1Sub as string ?? ''} onChange={(v) => set('integration1Sub', v)} />
+          <TextInput label="Integration 2 letter" value={f.integration2Letter as string ?? ''} onChange={(v) => set('integration2Letter', v)} />
+          <TextInput label="Integration 2 name" value={f.integration2Name as string ?? ''} onChange={(v) => set('integration2Name', v)} />
+          <TextInput label="Integration 2 sub" value={f.integration2Sub as string ?? ''} onChange={(v) => set('integration2Sub', v)} />
+          <TextInput label="Sync status text" value={f.syncText as string ?? ''} onChange={(v) => set('syncText', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="KPI 1 label" value={f.kpi1Label as string ?? ''} onChange={(v) => set('kpi1Label', v)} />
+          <TextInput label="KPI 1 value" value={f.kpi1Value as string ?? ''} onChange={(v) => set('kpi1Value', v)} />
+          <TextInput label="KPI 1 unit" value={f.kpi1Unit as string ?? ''} onChange={(v) => set('kpi1Unit', v)} />
+          <TextInput label="KPI 2 label" value={f.kpi2Label as string ?? ''} onChange={(v) => set('kpi2Label', v)} />
+          <TextInput label="KPI 2 value" value={f.kpi2Value as string ?? ''} onChange={(v) => set('kpi2Value', v)} />
+          <TextInput label="KPI 2 unit" value={f.kpi2Unit as string ?? ''} onChange={(v) => set('kpi2Unit', v)} />
+          <TextInput label="KPI 3 label" value={f.kpi3Label as string ?? ''} onChange={(v) => set('kpi3Label', v)} />
+          <TextInput label="KPI 3 value" value={f.kpi3Value as string ?? ''} onChange={(v) => set('kpi3Value', v)} />
+          <TextInput label="Chart label" value={f.chartLabel as string ?? ''} onChange={(v) => set('chartLabel', v)} />
         </div>
       );
 
@@ -2774,6 +2845,20 @@ function renderBlockFields(
               </div>
             )}
           />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<{ text: string; sub?: string }>
+            label="Logos"
+            items={(f.logos as { text: string; sub?: string }[]) ?? []}
+            onChange={(v) => set('logos', v)}
+            newItem={() => ({ text: 'Brand', sub: '' })}
+            itemPreview={(it) => it.text || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Text" value={it.text ?? ''} onChange={(v) => u({ ...it, text: v })} />
+                <TextInput label="Sub (optional)" value={it.sub ?? ''} onChange={(v) => u({ ...it, sub: v })} />
+              </div>
+            )}
+          />
         </div>
       );
     }
@@ -2789,6 +2874,25 @@ function renderBlockFields(
           <Textarea label="Body copy" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
           <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Media card title" value={f.mediaTitle as string ?? ''} onChange={(v) => set('mediaTitle', v)} />
+          <TextInput label="Media card title highlight" value={f.mediaTitleHighlight as string ?? ''} onChange={(v) => set('mediaTitleHighlight', v)} />
+          <TextInput label="Media card title suffix" value={f.mediaTitlePost as string ?? ''} onChange={(v) => set('mediaTitlePost', v)} />
+          <Repeater<{ n: string; l: string }>
+            label="Media stats"
+            items={(f.mediaStats as { n: string; l: string }[]) ?? []}
+            onChange={(v) => set('mediaStats', v)}
+            newItem={() => ({ n: '0+', l: 'Label' })}
+            itemPreview={(it) => `${it.n} ${it.l}`}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={it.n ?? ''} onChange={(v) => u({ ...it, n: v })} />
+                <TextInput label="Label" value={it.l ?? ''} onChange={(v) => u({ ...it, l: v })} />
+              </div>
+            )}
+          />
+          <TextInput label="Media footer brand" value={f.mediaFooterBrand as string ?? ''} onChange={(v) => set('mediaFooterBrand', v)} />
+          <TextInput label="Media footer sub" value={f.mediaFooterSub as string ?? ''} onChange={(v) => set('mediaFooterSub', v)} />
         </div>
       );
 
@@ -2798,6 +2902,21 @@ function renderBlockFields(
           <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
           <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
           <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<{ title: string; body: string; stat: string }>
+            label="Features"
+            items={(f.features as { title: string; body: string; stat: string }[]) ?? []}
+            onChange={(v) => set('features', v)}
+            newItem={() => ({ title: 'New feature', body: 'Description', stat: '[ Impact stat ]' })}
+            itemPreview={(it) => it.title || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
+                <Textarea label="Body" value={it.body ?? ''} onChange={(v) => u({ ...it, body: v })} />
+                <TextInput label="Stat" value={it.stat ?? ''} onChange={(v) => u({ ...it, stat: v })} />
+              </div>
+            )}
+          />
         </div>
       );
 
@@ -2808,6 +2927,22 @@ function renderBlockFields(
           <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
           <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
           <Textarea label="Body copy" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Hub node name" value={f.hubName as string ?? ''} onChange={(v) => set('hubName', v)} />
+          <TextInput label="Hub node sub" value={f.hubSub as string ?? ''} onChange={(v) => set('hubSub', v)} />
+          <Repeater<{ label: string; sub?: string }>
+            label="Nodes"
+            items={(f.nodes as { label: string; sub?: string }[]) ?? []}
+            onChange={(v) => set('nodes', v)}
+            newItem={() => ({ label: 'New Node', sub: '' })}
+            itemPreview={(it) => it.label || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Label" value={it.label ?? ''} onChange={(v) => u({ ...it, label: v })} />
+                <TextInput label="Sub (optional)" value={it.sub ?? ''} onChange={(v) => u({ ...it, sub: v })} />
+              </div>
+            )}
+          />
         </div>
       );
 
@@ -2817,6 +2952,26 @@ function renderBlockFields(
           <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
           <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
           <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<{ title: string; body: string; stat: string; metricValue: string; metricLabel: string; metricSub: string; chip1: string; chip2: string }>
+            label="Cards"
+            items={(f.cards as { title: string; body: string; stat: string; metricValue: string; metricLabel: string; metricSub: string; chip1: string; chip2: string }[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'New card', body: 'Description', stat: 'Stat', metricValue: '0%', metricLabel: 'Metric', metricSub: 'Context', chip1: 'Chip 1', chip2: 'Chip 2' })}
+            itemPreview={(it) => it.title || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
+                <Textarea label="Body" value={it.body ?? ''} onChange={(v) => u({ ...it, body: v })} />
+                <TextInput label="Stat" value={it.stat ?? ''} onChange={(v) => u({ ...it, stat: v })} />
+                <TextInput label="Metric value" value={it.metricValue ?? ''} onChange={(v) => u({ ...it, metricValue: v })} />
+                <TextInput label="Metric label" value={it.metricLabel ?? ''} onChange={(v) => u({ ...it, metricLabel: v })} />
+                <TextInput label="Metric sub" value={it.metricSub ?? ''} onChange={(v) => u({ ...it, metricSub: v })} />
+                <TextInput label="Chip 1" value={it.chip1 ?? ''} onChange={(v) => u({ ...it, chip1: v })} />
+                <TextInput label="Chip 2" value={it.chip2 ?? ''} onChange={(v) => u({ ...it, chip2: v })} />
+              </div>
+            )}
+          />
         </div>
       );
 
@@ -2829,6 +2984,39 @@ function renderBlockFields(
           <Textarea label="Body copy" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
           <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Rating value" value={f.ratingValue as string ?? ''} onChange={(v) => set('ratingValue', v)} />
+          <TextInput label="Rating label" value={f.ratingLabel as string ?? ''} onChange={(v) => set('ratingLabel', v)} />
+          <Repeater<{ label: string; sub: string }>
+            label="Chips"
+            items={(f.chips as { label: string; sub: string }[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => ({ label: 'New chip', sub: 'Description' })}
+            itemPreview={(it) => it.label || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Label" value={it.label ?? ''} onChange={(v) => u({ ...it, label: v })} />
+                <TextInput label="Sub" value={it.sub ?? ''} onChange={(v) => u({ ...it, sub: v })} />
+              </div>
+            )}
+          />
+          <Repeater<{ initials: string; name: string; by: string; description: string; tag1: string; tag2: string }>
+            label="Apps"
+            items={(f.apps as { initials: string; name: string; by: string; description: string; tag1: string; tag2: string }[]) ?? []}
+            onChange={(v) => set('apps', v)}
+            newItem={() => ({ initials: 'AB', name: 'App Name', by: 'Company', description: 'Description', tag1: 'Tag 1', tag2: 'Live' })}
+            itemPreview={(it) => it.name || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Initials" value={it.initials ?? ''} onChange={(v) => u({ ...it, initials: v })} />
+                <TextInput label="App name" value={it.name ?? ''} onChange={(v) => u({ ...it, name: v })} />
+                <TextInput label="By (company)" value={it.by ?? ''} onChange={(v) => u({ ...it, by: v })} />
+                <TextInput label="Description" value={it.description ?? ''} onChange={(v) => u({ ...it, description: v })} />
+                <TextInput label="Tag 1" value={it.tag1 ?? ''} onChange={(v) => u({ ...it, tag1: v })} />
+                <TextInput label="Tag 2" value={it.tag2 ?? ''} onChange={(v) => u({ ...it, tag2: v })} />
+              </div>
+            )}
+          />
         </div>
       );
 
@@ -2841,6 +3029,18 @@ function renderBlockFields(
           <TextInput label="Heading suffix" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
           <Textarea label="Subtext" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
           <TextInput label="Hero image URL" value={f.heroImageUrl as string ?? ''} onChange={(v) => set('heroImageUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Hero image alt text" value={f.heroImageAlt as string ?? ''} onChange={(v) => set('heroImageAlt', v)} />
+          <Repeater<{ label: string }>
+            label="Pills"
+            items={(f.pills as { label: string }[]) ?? []}
+            onChange={(v) => set('pills', v)}
+            newItem={() => ({ label: 'New pill' })}
+            itemPreview={(it) => it.label || '(untitled)'}
+            renderItem={(it, u) => (
+              <TextInput label="Label" value={it.label ?? ''} onChange={(v) => u({ ...it, label: v })} />
+            )}
+          />
         </div>
       );
 
@@ -2851,6 +3051,34 @@ function renderBlockFields(
           <TextInput label="Heading bold" value={f.headingBold as string ?? ''} onChange={(v) => set('headingBold', v)} />
           <TextInput label="Heading suffix" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
           <Textarea label="Subtext" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<{ text: string; cls?: string }>
+            label="Logos"
+            items={(f.logos as { text: string; cls?: string }[]) ?? []}
+            onChange={(v) => set('logos', v)}
+            newItem={() => ({ text: 'Brand', cls: '' })}
+            itemPreview={(it) => it.text || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Text" value={it.text ?? ''} onChange={(v) => u({ ...it, text: v })} />
+                <TextInput label="CSS class (optional)" value={it.cls ?? ''} onChange={(v) => u({ ...it, cls: v })} />
+              </div>
+            )}
+          />
+          <Repeater<{ pre?: string; n: string; l: string }>
+            label="Stats"
+            items={(f.stats as { pre?: string; n: string; l: string }[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ pre: '', n: '0+', l: 'Label' })}
+            itemPreview={(it) => `${it.n} ${it.l}`}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Prefix (optional)" value={it.pre ?? ''} onChange={(v) => u({ ...it, pre: v })} />
+                <TextInput label="Number" value={it.n ?? ''} onChange={(v) => u({ ...it, n: v })} />
+                <TextInput label="Label" value={it.l ?? ''} onChange={(v) => u({ ...it, l: v })} />
+              </div>
+            )}
+          />
         </div>
       );
 
@@ -2921,6 +3149,41 @@ function renderBlockFields(
           <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
           <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
           <Textarea label="Subtext" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Show more label" value={f.toggleMoreLabel as string ?? ''} onChange={(v) => set('toggleMoreLabel', v)} />
+          <TextInput label="Show less label" value={f.toggleLessLabel as string ?? ''} onChange={(v) => set('toggleLessLabel', v)} />
+          <TextInput label="Biz team section label" value={f.bizTeamLabel as string ?? ''} onChange={(v) => set('bizTeamLabel', v)} />
+          <TextInput label="Tech team section label" value={f.techTeamLabel as string ?? ''} onChange={(v) => set('techTeamLabel', v)} />
+          <Repeater<{ name: string; role: string; prevRole: string; linkedinUrl?: string }>
+            label="Biz team members"
+            items={(f.bizTeam as { name: string; role: string; prevRole: string; linkedinUrl?: string }[]) ?? []}
+            onChange={(v) => set('bizTeam', v)}
+            newItem={() => ({ name: 'Name', role: 'Role', prevRole: 'Prev Role', linkedinUrl: '' })}
+            itemPreview={(it) => it.name || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Name" value={it.name ?? ''} onChange={(v) => u({ ...it, name: v })} />
+                <TextInput label="Role" value={it.role ?? ''} onChange={(v) => u({ ...it, role: v })} />
+                <TextInput label="Previous role" value={it.prevRole ?? ''} onChange={(v) => u({ ...it, prevRole: v })} />
+                <TextInput label="LinkedIn URL" value={it.linkedinUrl ?? ''} onChange={(v) => u({ ...it, linkedinUrl: v })} />
+              </div>
+            )}
+          />
+          <Repeater<{ name: string; role: string; prevRole: string; linkedinUrl?: string }>
+            label="Tech team members"
+            items={(f.techTeam as { name: string; role: string; prevRole: string; linkedinUrl?: string }[]) ?? []}
+            onChange={(v) => set('techTeam', v)}
+            newItem={() => ({ name: 'Name', role: 'Role', prevRole: 'Prev Role', linkedinUrl: '' })}
+            itemPreview={(it) => it.name || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Name" value={it.name ?? ''} onChange={(v) => u({ ...it, name: v })} />
+                <TextInput label="Role" value={it.role ?? ''} onChange={(v) => u({ ...it, role: v })} />
+                <TextInput label="Previous role" value={it.prevRole ?? ''} onChange={(v) => u({ ...it, prevRole: v })} />
+                <TextInput label="LinkedIn URL" value={it.linkedinUrl ?? ''} onChange={(v) => u({ ...it, linkedinUrl: v })} />
+              </div>
+            )}
+          />
         </div>
       );
 
@@ -2975,6 +3238,11 @@ function renderBlockFields(
           <TextInput label="Heading line 2 prefix" value={f.headingLine2Pre as string ?? ''} onChange={(v) => set('headingLine2Pre', v)} />
           <TextInput label="Heading line 2 gradient" value={f.headingLine2Grad as string ?? ''} onChange={(v) => set('headingLine2Grad', v)} />
           <TextInput label="LinkedIn URL" value={f.linkedinUrl as string ?? ''} onChange={(v) => set('linkedinUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Get directions link label" value={f.directionsLabel as string ?? ''} onChange={(v) => set('directionsLabel', v)} />
+          <TextInput label="LinkedIn section title" value={f.linkedinTitle as string ?? ''} onChange={(v) => set('linkedinTitle', v)} />
+          <Textarea label="LinkedIn section description" value={f.linkedinDesc as string ?? ''} onChange={(v) => set('linkedinDesc', v)} />
+          <TextInput label="LinkedIn link label" value={f.linkedinLinkLabel as string ?? ''} onChange={(v) => set('linkedinLinkLabel', v)} />
         </div>
       );
 
@@ -2987,6 +3255,23 @@ function renderBlockFields(
           <Textarea label="Sub text" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
           <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Sub bold/gradient text" value={f.subCode as string ?? ''} onChange={(v) => set('subCode', v)} />
+          <TextInput label="Sub suffix text" value={f.subSuffix as string ?? ''} onChange={(v) => set('subSuffix', v)} />
+          <Repeater<string>
+            label="Nav step labels"
+            items={(f.navLabels as string[]) ?? []}
+            onChange={(v) => set('navLabels', v)}
+            newItem={() => ''}
+            itemPreview={(it) => it || '(untitled)'}
+            renderItem={(it, u) => (
+              <TextInput label="Label" value={it ?? ''} onChange={u} />
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Final card eyebrow" value={f.finalEyebrow as string ?? ''} onChange={(v) => set('finalEyebrow', v)} />
+          <TextInput label="Final card title" value={f.finalTitle as string ?? ''} onChange={(v) => set('finalTitle', v)} />
+          <Textarea label="Final card description" value={f.finalDesc as string ?? ''} onChange={(v) => set('finalDesc', v)} />
         </div>
       );
 
@@ -3002,6 +3287,35 @@ function renderBlockFields(
           <TextInput label="Phone" value={f.phone as string ?? ''} onChange={(v) => set('phone', v)} />
           <TextInput label="HQ" value={f.hq as string ?? ''} onChange={(v) => set('hq', v)} />
           <TextInput label="Regional offices" value={f.regionalOffices as string ?? ''} onChange={(v) => set('regionalOffices', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Form title" value={f.formTitle as string ?? ''} onChange={(v) => set('formTitle', v)} />
+          <Textarea label="Form sub" value={f.formSub as string ?? ''} onChange={(v) => set('formSub', v)} />
+          <TextInput label="Submit button label" value={f.submitLabel as string ?? ''} onChange={(v) => set('submitLabel', v)} />
+          <TextInput label="Success message" value={f.successMessage as string ?? ''} onChange={(v) => set('successMessage', v)} />
+          <Repeater<string>
+            label="Product options"
+            items={(f.productOptions as string[]) ?? []}
+            onChange={(v) => set('productOptions', v)}
+            newItem={() => ''}
+            itemPreview={(it) => it || '(untitled)'}
+            renderItem={(it, u) => (
+              <TextInput label="Option" value={it ?? ''} onChange={u} />
+            )}
+          />
+          <Repeater<string>
+            label="Source options"
+            items={(f.sourceOptions as string[]) ?? []}
+            onChange={(v) => set('sourceOptions', v)}
+            newItem={() => ''}
+            itemPreview={(it) => it || '(untitled)'}
+            renderItem={(it, u) => (
+              <TextInput label="Option" value={it ?? ''} onChange={u} />
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Demo card title" value={f.demoTitle as string ?? ''} onChange={(v) => set('demoTitle', v)} />
+          <Textarea label="Demo card sub" value={f.demoSub as string ?? ''} onChange={(v) => set('demoSub', v)} />
+          <TextInput label="Contact rail heading" value={f.contactTitle as string ?? ''} onChange={(v) => set('contactTitle', v)} />
         </div>
       );
 
