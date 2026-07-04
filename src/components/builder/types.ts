@@ -59,6 +59,7 @@ export type TemplateBlockType =
   | 'slick-promo-banner'
   | 'slick-app-showcase'
   | 'slick-dv-hero'
+  | 'slick-dv-hero-v2'
   | 'slick-dv-carousel'
   | 'slick-dv-split'
   | 'slick-dv-register'
@@ -75,8 +76,20 @@ export type TemplateBlockType =
   | 'slick-scai-human-test'
   | 'slick-scai-global-showcase'
   | 'slick-scai-whatsapp-agent'
+  | 'slick-scai-vision-hero'
+  | 'slick-scai-vision-insights'
+  | 'slick-scai-vision-actions'
+  | 'slick-scai-vision-revenue-loss'
+  | 'slick-scai-vision-performance'
+  | 'slick-scai-vision-channels'
+  | 'slick-scai-vision-showcase'
   | 'slick-sc-video-showcase'
   | 'slick-sc-brand-strip'
+  | 'slick-sc-impact-stats'
+  | 'slick-sc-product-suite'
+  | 'slick-sc-ai-product-grid'
+  | 'slick-sc-data-safety'
+  | 'slick-sc-think-tank'
   | 'slick-sc-customer-stories'
   | 'slick-sc-trust-metrics'
   | 'slick-sc-integrations'
@@ -84,38 +97,71 @@ export type TemplateBlockType =
   | 'slick-sc-ai-commerce'
   | 'slick-sc-blog-insights'
   | 'slick-sfa-hero'
+  | 'slick-sfa-hero-v2'
   | 'slick-sfa-ai-engine'
   | 'slick-sfa-guarantee'
   | 'slick-sfa-insights'
+  | 'slick-sfa-revenue-loss'
+  | 'slick-sfa-typical'
+  | 'slick-sfa-showcase'
+  | 'slick-sfa-ai-engine-v2'
+  | 'slick-sfa-guarantee-v2'
   | 'slick-dms-hero'
+  | 'slick-dms-hero-v2'
   | 'slick-dms-comparison'
   | 'slick-dms-features'
+  | 'slick-dms-features-v2'
   | 'slick-dms-agents'
   | 'slick-dms-integrations'
+  | 'slick-dms-integrations-v2'
   | 'slick-dms-guarantee'
+  | 'slick-dms-cta'
   | 'slick-dms-deploy-metrics'
   | 'slick-dms-faq'
   | 'slick-eb2b-hero'
+  | 'slick-eb2b-hero-v2'
   | 'slick-eb2b-scale'
   | 'slick-eb2b-why'
   | 'slick-eb2b-features'
   | 'slick-eb2b-integrations'
   | 'slick-eb2b-impact'
   | 'slick-eb2b-deployments'
+  | 'slick-eb2b-faq'
   | 'slick-ab-hero'
+  | 'slick-ab-hero-v2'
+  | 'slick-careers-hero'
+  | 'slick-clients-hero'
+  | 'slick-blogs-hero'
+  | 'slick-contact-hero'
+  | 'slick-experience-hero'
+  | 'slick-exp-two-ways'
+  | 'slick-exp-ai-stack'
+  | 'slick-scai-hero-v2'
+  | 'slick-scai-how-it-works'
+  | 'slick-scai-capabilities'
+  | 'slick-scai-why'
+  | 'slick-scai-video-showcase'
+  | 'slick-scai-agents'
+  | 'slick-ab-intro'
+  | 'slick-ab-mission-vision'
   | 'slick-ab-founder-banner'
   | 'slick-ab-stats'
   | 'slick-ab-story'
   | 'slick-ab-video'
   | 'slick-ab-awards'
   | 'slick-ab-founders'
+  | 'slick-ab-founders-v2'
   | 'slick-ab-investors'
+  | 'slick-ab-investors-v2'
+  | 'slick-ab-team-section'
+  | 'slick-ab-journey'
   | 'slick-ab-cta'
   | 'slick-contact'
   | 'slick-lets-talk'
   | 'slick-offices'
   | 'slick-sc-footer'
-  | 'slick-sc-navbar';
+  | 'slick-sc-navbar'
+  | 'slick-sc-hero-v2';
 
 export type LayoutVariant = "1" | "2" | "3" | "1-2" | "2-1" | "4";
 
@@ -260,6 +306,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-promo-banner': 'Promo Banner',
   'slick-app-showcase': 'App Showcase (Marquee)',
   'slick-dv-hero': 'DigiVyapar — Hero',
+  'slick-dv-hero-v2': 'DigiVyapar — Hero V2',
   'slick-dv-carousel': 'DigiVyapar — Platform Carousel',
   'slick-dv-split': 'DigiVyapar — Split Section',
   'slick-dv-register': 'DigiVyapar — Register Form',
@@ -276,8 +323,20 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-scai-human-test': 'SCAI — Human Test',
   'slick-scai-global-showcase': 'SCAI — Global Showcase',
   'slick-scai-whatsapp-agent': 'SCAI — WhatsApp Agent',
+  'slick-scai-vision-hero': 'SCAI Vision — Hero',
+  'slick-scai-vision-insights': 'SCAI Vision — Insights',
+  'slick-scai-vision-actions':       'SCAI Vision — Actions Grid',
+  'slick-scai-vision-revenue-loss':  'SCAI Vision — Revenue Loss',
+  'slick-scai-vision-performance':   'SCAI Vision — Performance',
+  'slick-scai-vision-channels':      'SCAI Vision — Every Channel',
+  'slick-scai-vision-showcase':      'SCAI Vision — GT Showcase',
   'slick-sc-video-showcase': 'SC — Video Showcase',
   'slick-sc-brand-strip': 'SC — Brand Strip',
+  'slick-sc-impact-stats': 'SC — Impact Stats',
+  'slick-sc-product-suite': 'SC — Product Suite',
+  'slick-sc-ai-product-grid': 'SC — AI Product Grid',
+  'slick-sc-data-safety': 'SC — Data Safety',
+  'slick-sc-think-tank': 'SC — Think Tank',
   'slick-sc-customer-stories': 'SC — Customer Stories',
   'slick-sc-trust-metrics': 'SC — Trust Metrics',
   'slick-sc-integrations': 'SC — Integrations',
@@ -285,37 +344,70 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sc-ai-commerce': 'SC — AI Commerce Stack',
   'slick-sc-blog-insights': 'SC — Blog Insights',
   'slick-sfa-hero': 'SFA — Hero',
+  'slick-sfa-hero-v2': 'SFA — Hero V2',
   'slick-sfa-ai-engine': 'SFA — AI Engine',
   'slick-sfa-guarantee': 'SFA — Guarantee',
   'slick-sfa-insights': 'SFA — CPG Insights',
+  'slick-sfa-revenue-loss': 'SFA — Revenue Loss',
+  'slick-sfa-typical': 'SFA — Typical SFA',
+  'slick-sfa-showcase': 'SFA — AI Native Showcase',
+  'slick-sfa-ai-engine-v2': 'SFA — AI Engine V2',
+  'slick-sfa-guarantee-v2': 'SFA — Guarantee V2',
   'slick-dms-hero': 'DMS — Hero',
+  'slick-dms-hero-v2': 'DMS — Hero V2',
   'slick-dms-comparison': 'DMS — Comparison Slider',
   'slick-dms-features': 'DMS — Feature Tabs',
+  'slick-dms-features-v2': 'DMS — Feature Tabs V2',
   'slick-dms-agents': 'DMS — AI Agents',
   'slick-dms-integrations': 'DMS — Accounting Integrations',
+  'slick-dms-integrations-v2': 'DMS — Integrations V2 (Centered)',
   'slick-dms-guarantee': 'DMS — 110% Guarantee',
+  'slick-dms-cta': 'DMS — CTA (Dark Hero)',
   'slick-dms-deploy-metrics': 'DMS — Deployment Metrics',
   'slick-dms-faq': 'DMS — FAQ',
   'slick-eb2b-hero': 'eB2B — Hero',
+  'slick-eb2b-hero-v2': 'eB2B — Hero V2',
   'slick-eb2b-scale': 'eB2B — Platform Scale',
   'slick-eb2b-why': 'eB2B — Why SalesCode',
   'slick-eb2b-features': 'eB2B — Feature Cards',
   'slick-eb2b-integrations': 'eB2B — Integrations',
   'slick-eb2b-impact': 'eB2B — Proven Impact',
   'slick-eb2b-deployments': 'eB2B — Our Deployments',
+  'slick-eb2b-faq': 'eB2B — FAQ',
   'slick-ab-hero': 'About Us — Hero',
+  'slick-ab-hero-v2': 'About Us — Hero V2',
+  'slick-careers-hero': 'Careers — Hero',
+  'slick-clients-hero': 'Clients — Hero',
+  'slick-blogs-hero': 'Blogs — Hero',
+  'slick-contact-hero': 'Contact — Hero',
+  'slick-experience-hero': 'Experience — Hero',
+  'slick-exp-two-ways': 'Experience — Two Ways (Sessions + Workshops)',
+  'slick-exp-ai-stack': 'Experience — AI Stack (6-card grid)',
+  'slick-scai-hero-v2': 'SCAI — Hero V2',
+  'slick-scai-how-it-works': 'SCAI — How It Works (Video)',
+  'slick-scai-capabilities': 'SCAI — Capabilities Hub',
+  'slick-scai-why': 'SCAI — Why SCAI',
+  'slick-scai-video-showcase': 'SCAI — Video Showcase',
+  'slick-scai-agents': 'SCAI — Agent Ecosystem',
+  'slick-ab-intro': 'About Us — Intro & Video',
+  'slick-ab-mission-vision': 'About Us — Mission & Vision',
   'slick-ab-founder-banner': 'About Us — Founder Banner',
   'slick-ab-stats': 'About Us — Stats',
   'slick-ab-story': 'About Us — Our Story',
   'slick-ab-video': 'About Us — Video',
   'slick-ab-awards': 'About Us — Awards',
   'slick-ab-founders': 'About Us — Founders',
+  'slick-ab-founders-v2': 'About Us — Founders V2 (Photo)',
   'slick-ab-investors': 'About Us — Investors',
+  'slick-ab-investors-v2': 'About Us — Investors V2 (Carousel)',
+  'slick-ab-team-section': 'About Us — The Team (Tech + Biz)',
+  'slick-ab-journey': 'About Us — Our Journey (Timeline)',
   'slick-ab-cta': 'About Us — CTA',
   'slick-contact': 'Contact — Form & Schedule',
   'slick-lets-talk': 'Contact — Let\'s Talk Journey',
   'slick-offices': 'Contact — Our Offices',
   'slick-sc-footer': 'SC — Footer (Teal)',
   'slick-sc-navbar': 'SC — Navbar',
+  'slick-sc-hero-v2': 'SC — Hero V2 (Person + Floating Cards)',
   layout: "Layout",
 };
