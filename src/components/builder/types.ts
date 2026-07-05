@@ -160,6 +160,7 @@ export type TemplateBlockType =
   | 'slick-lets-talk'
   | 'slick-offices'
   | 'slick-sc-footer'
+  | 'slick-sc-footer-v2'
   | 'slick-sc-navbar'
   | 'slick-sc-hero-v2';
 
@@ -407,6 +408,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-lets-talk': 'Contact — Let\'s Talk Journey',
   'slick-offices': 'Contact — Our Offices',
   'slick-sc-footer': 'SC — Footer (Teal)',
+  'slick-sc-footer-v2': 'SC — Footer V2 (White)',
   'slick-sc-navbar': 'SC — Navbar',
   'slick-sc-hero-v2': 'SC — Hero V2 (Person + Floating Cards)',
   layout: "Layout",

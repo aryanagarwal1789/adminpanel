@@ -127,6 +127,7 @@ const GROUPS: Group[] = [
     { type: "slick-offices",    label: "Contact — Our Offices",     Icon: Grid2x2 },
     { type: "slick-offices-v2", label: "Contact — Our Offices V2",  Icon: Grid2x2 },
     { type: "slick-sc-footer", label: "SC — Footer (Teal)", Icon: PanelBottom },
+    { type: "slick-sc-footer-v2", label: "SC — Footer V2 (White)", Icon: PanelBottom },
   ]},
   { name: "SFA Landing", items: [
     { type: "slick-sfa-hero", label: "SFA — Hero", Icon: Sparkles },
