@@ -641,6 +641,18 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
     successTitle: "You're on the list",
     successMessage: "Thanks for your interest in DigiVyapar on ONDC. Our team will reach out shortly to get you started.",
   },
+  'slick-sc-product-cards': {
+    eyebrow: 'Our Products',
+    headingPre: 'Everything your sales team ',
+    headingGrad: 'needs to win',
+    headingPost: '',
+    cards: [
+      { title: 'Salescode SFA',   description: 'AI-native sales force automation built for CPG field teams — route planning, task execution, and real-time insights.', logoText: 'SFA',  logoColor: '#00C6B1', href: '/sfa' },
+      { title: 'eB2B Platform',   description: 'Digital ordering and distribution network connecting brands, distributors, and retailers across traditional trade.',   logoText: 'eB2B', logoColor: '#0A8F86', href: '/eb2b' },
+      { title: 'DigiVyapar',      description: 'ONDC-powered commerce platform enabling kirana stores and distributors to buy and sell digitally.',                   logoText: 'DV',   logoColor: '#082B4B', href: '/digivyapar' },
+      { title: 'SC.ai Vision',    description: 'Agentic AI layer that turns every field interaction into structured revenue intelligence at scale.',                    logoText: 'SC.ai',logoColor: '#00C6B1', href: '/scai' },
+    ],
+  },
   'slick-sc-product-showcase': {
     eyebrowLabel: 'Explore Salescode.ai Products',
     headingPre: 'Experience Our AI Products',

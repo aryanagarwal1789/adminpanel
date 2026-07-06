@@ -94,6 +94,7 @@ export type TemplateBlockType =
   | 'slick-sc-trust-metrics'
   | 'slick-sc-integrations'
   | 'slick-sc-product-showcase'
+  | 'slick-sc-product-cards'
   | 'slick-sc-ai-commerce'
   | 'slick-sc-blog-insights'
   | 'slick-sfa-hero'
@@ -343,6 +344,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sc-trust-metrics': 'SC — Trust Metrics',
   'slick-sc-integrations': 'SC — Integrations',
   'slick-sc-product-showcase': 'SC — Product Showcase',
+  'slick-sc-product-cards': 'SC — Product Cards',
   'slick-sc-ai-commerce': 'SC — AI Commerce Stack',
   'slick-sc-blog-insights': 'SC — Blog Insights',
   'slick-sfa-hero': 'SFA — Hero',

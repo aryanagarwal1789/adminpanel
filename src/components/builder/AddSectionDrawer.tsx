@@ -47,6 +47,7 @@ const GROUPS: Group[] = [
     { type: "slick-sc-trust-metrics", label: "SC — Trust Metrics", Icon: TrendingUp },
     { type: "slick-sc-integrations",      label: "SC — Integrations",      Icon: Puzzle      },
     { type: "slick-sc-product-showcase",  label: "SC — Product Showcase",  Icon: MonitorPlay },
+    { type: "slick-sc-product-cards",     label: "SC — Product Cards",      Icon: Grid2x2     },
     { type: "slick-sc-ai-commerce",       label: "SC — AI Commerce Stack", Icon: Grid2x2     },
     { type: "slick-sc-blog-insights",     label: "SC — Blog Insights",     Icon: BookOpen    },
   ]},

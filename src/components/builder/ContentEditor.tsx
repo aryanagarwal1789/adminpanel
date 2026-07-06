@@ -2210,6 +2210,37 @@ function renderBlockFields(
         </div>
       );
 
+    case 'slick-sc-product-cards': {
+      type PcCard = { title?: string; description?: string; logoImg?: string; logoAlt?: string; logoText?: string; logoColor?: string; href?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow pill" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <TextInput label="Heading suffix" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<PcCard>
+            label="Cards"
+            items={(f.cards as PcCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'Product', description: '', logoText: 'SC', logoColor: '#00C6B1', href: '#' })}
+            itemPreview={(c) => c.title || '(untitled)'}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={c.title ?? ''} onChange={(x) => u({ ...c, title: x })} />
+                <Textarea label="Description" value={c.description ?? ''} onChange={(x) => u({ ...c, description: x })} />
+                <TextInput label="Logo image URL" value={c.logoImg ?? ''} onChange={(x) => u({ ...c, logoImg: x })} />
+                <TextInput label="Logo alt text" value={c.logoAlt ?? ''} onChange={(x) => u({ ...c, logoAlt: x })} />
+                <TextInput label="Logo text (if no image)" value={c.logoText ?? ''} onChange={(x) => u({ ...c, logoText: x })} />
+                <TextInput label="Logo colour (hex)" value={c.logoColor ?? ''} onChange={(x) => u({ ...c, logoColor: x })} />
+                <TextInput label="Link URL" value={c.href ?? ''} onChange={(x) => u({ ...c, href: x })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
     case 'slick-sc-product-showcase': {
       type PsCard = { title?: string; ctaLabel?: string; ctaUrl?: string };
       return (
