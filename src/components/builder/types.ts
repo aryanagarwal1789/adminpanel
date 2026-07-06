@@ -162,7 +162,8 @@ export type TemplateBlockType =
   | 'slick-sc-footer'
   | 'slick-sc-footer-v2'
   | 'slick-sc-navbar'
-  | 'slick-sc-hero-v2';
+  | 'slick-sc-hero-v2'
+  | 'slick-sc-hero-v3';
 
 export type LayoutVariant = "1" | "2" | "3" | "1-2" | "2-1" | "4";
 
@@ -411,5 +412,6 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sc-footer-v2': 'SC — Footer V2 (White)',
   'slick-sc-navbar': 'SC — Navbar',
   'slick-sc-hero-v2': 'SC — Hero V2 (Person + Floating Cards)',
+  'slick-sc-hero-v3': 'SC — Hero V3 (Center Image)',
   layout: "Layout",
 };

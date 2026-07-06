@@ -35,6 +35,7 @@ const GROUPS: Group[] = [
   ]},
   { name: "Salescode Landing", items: [
     { type: "slick-sc-hero-v2",        label: "SC — Hero V2 (Person + Floating Cards)", Icon: Sparkles },
+    { type: "slick-sc-hero-v3",        label: "SC — Hero V3 (Center Image)", Icon: Sparkles },
     { type: "slick-sc-video-showcase", label: "SC — Video Showcase", Icon: MonitorPlay },
     { type: "slick-sc-brand-strip", label: "SC — Brand Strip", Icon: Grid2x2 },
     { type: "slick-sc-impact-stats", label: "SC — Impact Stats", Icon: TrendingUp },

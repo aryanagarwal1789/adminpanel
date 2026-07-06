@@ -1953,16 +1953,27 @@ function renderBlockFields(
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
-          <TextInput label="Google Play URL" value={f.gpUrl as string ?? ''} onChange={(v) => set('gpUrl', v)} />
-          <TextInput label="App Store URL" value={f.asUrl as string ?? ''} onChange={(v) => set('asUrl', v)} />
-          <ImageField label="Center phone image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
-          <ImageField label="Left card 1 (top)" value={f.imgLeft1 as string ?? ''} onChange={(v) => set('imgLeft1', v)} />
-          <ImageField label="Left card 2 (middle)" value={f.imgLeft2 as string ?? ''} onChange={(v) => set('imgLeft2', v)} />
-          <ImageField label="Left card 3 (bottom)" value={f.imgLeft3 as string ?? ''} onChange={(v) => set('imgLeft3', v)} />
-          <ImageField label="Right card 1 (top)" value={f.imgRight1 as string ?? ''} onChange={(v) => set('imgRight1', v)} />
-          <ImageField label="Right card 2 (middle)" value={f.imgRight2 as string ?? ''} onChange={(v) => set('imgRight2', v)} />
-          <ImageField label="Right card 3 (middle-bottom)" value={f.imgRight3 as string ?? ''} onChange={(v) => set('imgRight3', v)} />
-          <ImageField label="Right card 4 (bottom)" value={f.imgRight4 as string ?? ''} onChange={(v) => set('imgRight4', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <ImageField label="Center image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
+          <ImageField label="Bottom-left card" value={f.imgBottomLeft as string ?? ''} onChange={(v) => set('imgBottomLeft', v)} />
+          <ImageField label="Bottom-right card" value={f.imgBottomRight as string ?? ''} onChange={(v) => set('imgBottomRight', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Floating chips</p>
+          <TextInput label="Chip 1 — value" value={f.chip1Val as string ?? ''} onChange={(v) => set('chip1Val', v)} />
+          <TextInput label="Chip 1 — unit (teal)" value={f.chip1Unit as string ?? ''} onChange={(v) => set('chip1Unit', v)} />
+          <TextInput label="Chip 1 — label" value={f.chip1Lbl as string ?? ''} onChange={(v) => set('chip1Lbl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Chip 2 — value" value={f.chip2Val as string ?? ''} onChange={(v) => set('chip2Val', v)} />
+          <TextInput label="Chip 2 — unit (teal)" value={f.chip2Unit as string ?? ''} onChange={(v) => set('chip2Unit', v)} />
+          <TextInput label="Chip 2 — label" value={f.chip2Lbl as string ?? ''} onChange={(v) => set('chip2Lbl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Chip 3 — value" value={f.chip3Val as string ?? ''} onChange={(v) => set('chip3Val', v)} />
+          <TextInput label="Chip 3 — unit (teal)" value={f.chip3Unit as string ?? ''} onChange={(v) => set('chip3Unit', v)} />
+          <TextInput label="Chip 3 — label" value={f.chip3Lbl as string ?? ''} onChange={(v) => set('chip3Lbl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Chip 4 — value" value={f.chip4Val as string ?? ''} onChange={(v) => set('chip4Val', v)} />
+          <TextInput label="Chip 4 — unit (teal)" value={f.chip4Unit as string ?? ''} onChange={(v) => set('chip4Unit', v)} />
+          <TextInput label="Chip 4 — label" value={f.chip4Lbl as string ?? ''} onChange={(v) => set('chip4Lbl', v)} />
         </div>
       );
 
@@ -2756,9 +2767,7 @@ function renderBlockFields(
           <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
           <TextInput label="Heading gradient (red)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Phone 1 (left)" value={f.imgPhone1 as string ?? ''} onChange={(v) => set('imgPhone1', v)} />
-          <ImageField label="Phone 2 (centre)" value={f.imgPhone2 as string ?? ''} onChange={(v) => set('imgPhone2', v)} />
-          <ImageField label="Phone 3 (right)" value={f.imgPhone3 as string ?? ''} onChange={(v) => set('imgPhone3', v)} />
+          <ImageField label="Center image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Label — top left" value={f.labelTL as string ?? ''} onChange={(v) => set('labelTL', v)} />
           <TextInput label="Label — bottom left" value={f.labelBL as string ?? ''} onChange={(v) => set('labelBL', v)} />
@@ -2875,6 +2884,23 @@ function renderBlockFields(
           <ImageField label="Center image (dashboard)" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
           <ImageField label="Left card image" value={f.imgLeft as string ?? ''} onChange={(v) => set('imgLeft', v)} />
           <ImageField label="Right card image" value={f.imgRight as string ?? ''} onChange={(v) => set('imgRight', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Floating chips</p>
+          <TextInput label="Chip 1 — value" value={f.chip1Val as string ?? ''} onChange={(v) => set('chip1Val', v)} />
+          <TextInput label="Chip 1 — unit (teal)" value={f.chip1Unit as string ?? ''} onChange={(v) => set('chip1Unit', v)} />
+          <TextInput label="Chip 1 — label" value={f.chip1Label as string ?? ''} onChange={(v) => set('chip1Label', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Chip 2 — value" value={f.chip2Val as string ?? ''} onChange={(v) => set('chip2Val', v)} />
+          <TextInput label="Chip 2 — unit (teal)" value={f.chip2Unit as string ?? ''} onChange={(v) => set('chip2Unit', v)} />
+          <TextInput label="Chip 2 — label" value={f.chip2Label as string ?? ''} onChange={(v) => set('chip2Label', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Chip 3 — value" value={f.chip3Val as string ?? ''} onChange={(v) => set('chip3Val', v)} />
+          <TextInput label="Chip 3 — unit (teal)" value={f.chip3Unit as string ?? ''} onChange={(v) => set('chip3Unit', v)} />
+          <TextInput label="Chip 3 — label" value={f.chip3Label as string ?? ''} onChange={(v) => set('chip3Label', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Chip 4 — value" value={f.chip4Val as string ?? ''} onChange={(v) => set('chip4Val', v)} />
+          <TextInput label="Chip 4 — unit (teal)" value={f.chip4Unit as string ?? ''} onChange={(v) => set('chip4Unit', v)} />
+          <TextInput label="Chip 4 — label" value={f.chip4Label as string ?? ''} onChange={(v) => set('chip4Label', v)} />
         </div>
       );
 
@@ -2954,6 +2980,7 @@ function renderBlockFields(
           <TextInput label="Heading accent (gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
           <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
           <TextInput label="Italic subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <ImageField label="Screen image (replaces slider)" value={f.imgScreen as string ?? ''} onChange={(v) => set('imgScreen', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Left panel label (Standard DMS)" value={f.oldLabel as string ?? ''} onChange={(v) => set('oldLabel', v)} />
           <Repeater<CmpRow>
@@ -3263,7 +3290,7 @@ function renderBlockFields(
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Video URL (YouTube embed or direct)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
-          <TextInput label="Video thumbnail URL" value={f.videoThumb as string ?? ''} onChange={(v) => set('videoThumb', v)} />
+          <ImageField label="Video thumbnail" value={f.videoThumb as string ?? ''} onChange={(v) => set('videoThumb', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Media card title" value={f.mediaTitle as string ?? ''} onChange={(v) => set('mediaTitle', v)} />
           <TextInput label="Media card title highlight" value={f.mediaTitleHighlight as string ?? ''} onChange={(v) => set('mediaTitleHighlight', v)} />
@@ -3838,17 +3865,19 @@ function renderBlockFields(
         <div className="space-y-4">
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Mission row</p>
           <TextInput label="Mission pill" value={f.missionPill as string ?? ''} onChange={(v) => set('missionPill', v)} />
-          <TextInput label="Heading (dark)" value={f.missionHeadingWhite as string ?? ''} onChange={(v) => set('missionHeadingWhite', v)} />
-          <TextInput label="Heading (teal)" value={f.missionHeadingTeal as string ?? ''} onChange={(v) => set('missionHeadingTeal', v)} />
+          <TextInput label="Heading prefix (dark)" value={f.missionHeadingPre as string ?? ''} onChange={(v) => set('missionHeadingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.missionHeadingTeal as string ?? ''} onChange={(v) => set('missionHeadingTeal', v)} />
+          <TextInput label="Heading suffix (dark)" value={f.missionHeadingTail as string ?? ''} onChange={(v) => set('missionHeadingTail', v)} />
           <Textarea label="Sub text" value={f.missionSub as string ?? ''} onChange={(v) => set('missionSub', v)} />
           <ImageField label="Mission image" value={f.missionImg as string ?? ''} onChange={(v) => set('missionImg', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Vision row</p>
-          <Textarea label="Quote text" value={f.visionQuote as string ?? ''} onChange={(v) => set('visionQuote', v)} />
           <TextInput label="Vision pill" value={f.visionPill as string ?? ''} onChange={(v) => set('visionPill', v)} />
-          <TextInput label="Heading (dark)" value={f.visionHeadingWhite as string ?? ''} onChange={(v) => set('visionHeadingWhite', v)} />
-          <TextInput label="Heading (teal)" value={f.visionHeadingTeal as string ?? ''} onChange={(v) => set('visionHeadingTeal', v)} />
+          <TextInput label="Heading prefix (dark)" value={f.visionHeadingPre as string ?? ''} onChange={(v) => set('visionHeadingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.visionHeadingTeal as string ?? ''} onChange={(v) => set('visionHeadingTeal', v)} />
+          <TextInput label="Heading suffix (dark)" value={f.visionHeadingTail as string ?? ''} onChange={(v) => set('visionHeadingTail', v)} />
           <Textarea label="Sub text" value={f.visionSub as string ?? ''} onChange={(v) => set('visionSub', v)} />
+          <ImageField label="Vision image" value={f.visionImg as string ?? ''} onChange={(v) => set('visionImg', v)} />
         </div>
       );
 
@@ -4142,21 +4171,31 @@ function renderBlockFields(
           <TextInput label="Heading line 2 prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
           <TextInput label="Heading line 2 teal" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Textarea label="Sub (use **text** for bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <TextInput label="CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <ImageField label="Center image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
+        </div>
+      );
+
+    case 'slick-sc-hero-v3':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Heading line 1" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
+          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Sub normal text" value={f.subNormal as string ?? ''} onChange={(v) => set('subNormal', v)} />
           <TextInput label="Sub bold text" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
           <TextInput label="Sub tail text" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
-          <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Center image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
-          <ImageField label="Left card 1" value={f.imgLeft1 as string ?? ''} onChange={(v) => set('imgLeft1', v)} />
-          <ImageField label="Left card 2" value={f.imgLeft2 as string ?? ''} onChange={(v) => set('imgLeft2', v)} />
-          <ImageField label="Left card 3 (bottom)" value={f.imgLeft3 as string ?? ''} onChange={(v) => set('imgLeft3', v)} />
-          <ImageField label="Right card 1" value={f.imgRight1 as string ?? ''} onChange={(v) => set('imgRight1', v)} />
-          <ImageField label="Right card 2 (bottom)" value={f.imgRight2 as string ?? ''} onChange={(v) => set('imgRight2', v)} />
         </div>
       );
 
@@ -4638,6 +4677,23 @@ function renderBlockFields(
           <ImageField label="Centre phone" value={f.imgPhone as string ?? ''} onChange={(v) => set('imgPhone', v)} />
           <ImageField label="Bottom-left card (Share of Shelf)" value={f.imgBottomLeft as string ?? ''} onChange={(v) => set('imgBottomLeft', v)} />
           <ImageField label="Bottom-right card (Task completed)" value={f.imgBottomRight as string ?? ''} onChange={(v) => set('imgBottomRight', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Floating chips</p>
+          <TextInput label="Chip 1 — value" value={f.chip1Val as string ?? ''} onChange={(v) => set('chip1Val', v)} />
+          <TextInput label="Chip 1 — unit (teal)" value={f.chip1Unit as string ?? ''} onChange={(v) => set('chip1Unit', v)} />
+          <TextInput label="Chip 1 — label" value={f.chip1Lbl as string ?? ''} onChange={(v) => set('chip1Lbl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Chip 2 — value" value={f.chip2Val as string ?? ''} onChange={(v) => set('chip2Val', v)} />
+          <TextInput label="Chip 2 — unit (teal)" value={f.chip2Unit as string ?? ''} onChange={(v) => set('chip2Unit', v)} />
+          <TextInput label="Chip 2 — label" value={f.chip2Lbl as string ?? ''} onChange={(v) => set('chip2Lbl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Chip 3 — value" value={f.chip3Val as string ?? ''} onChange={(v) => set('chip3Val', v)} />
+          <TextInput label="Chip 3 — unit (teal)" value={f.chip3Unit as string ?? ''} onChange={(v) => set('chip3Unit', v)} />
+          <TextInput label="Chip 3 — label" value={f.chip3Lbl as string ?? ''} onChange={(v) => set('chip3Lbl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Chip 4 — value" value={f.chip4Val as string ?? ''} onChange={(v) => set('chip4Val', v)} />
+          <TextInput label="Chip 4 — unit (teal)" value={f.chip4Unit as string ?? ''} onChange={(v) => set('chip4Unit', v)} />
+          <TextInput label="Chip 4 — label" value={f.chip4Lbl as string ?? ''} onChange={(v) => set('chip4Lbl', v)} />
         </div>
       );
 
