@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlignLeft, ChevronDown, ChevronUp, ExternalLink,
   FileText, Globe, Heading2, Heading3, ImageIcon,
@@ -10,6 +10,127 @@ import type { BlogPost, ContentBlock, ContentBlockType } from "./BlogPanel";
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 const UPLOAD_URL = `${BACKEND}/site/upload`;
 const RENDERER  = (import.meta.env.VITE_RENDERER_URL as string | undefined) ?? "https://demo-experience.salescode.ai";
+
+// ── Inline rich-text parser (mirrors BlogPostPage rendering) ──────
+function parseParagraphPreview(text: string): React.ReactNode {
+  if (!text) return null;
+  const nodes: React.ReactNode[] = [];
+  let last = 0;
+  const re = /\*\*(.+?)\*\*|\[(.+?)\]\(([^)]+)\)|==(.+?)==/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) nodes.push(text.slice(last, m.index));
+    if (m[1] !== undefined)
+      nodes.push(<strong key={m.index} style={{ fontWeight: 700, color: '#e2e8f0' }}>{m[1]}</strong>);
+    else if (m[2] !== undefined)
+      nodes.push(<a key={m.index} href={m[3]} style={{ color: '#00c6b1', textDecoration: 'underline' }} target="_blank" rel="noopener noreferrer">{m[2]}</a>);
+    else if (m[4] !== undefined)
+      nodes.push(<span key={m.index} style={{ color: '#00c6b1' }}>{m[4]}</span>);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) nodes.push(text.slice(last));
+  return nodes;
+}
+
+// ── Rich textarea with formatting toolbar ─────────────────────────
+function RichTextarea({ value, onChange, rows = 5, placeholder }: {
+  value: string; onChange: (v: string) => void; rows?: number; placeholder?: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const [linkMode, setLinkMode] = useState(false);
+  const [linkUrl, setLinkUrl]   = useState('');
+  // Always track the latest selection so it's available when toolbar buttons are clicked
+  const savedSel = useRef<[number, number]>([0, 0]);
+
+  const saveSel = () => {
+    const ta = ref.current;
+    if (ta) savedSel.current = [ta.selectionStart, ta.selectionEnd];
+  };
+
+  const wrap = (before: string, after: string) => {
+    const ta = ref.current;
+    if (!ta) return;
+    const [s, e] = savedSel.current;
+    const sel = value.slice(s, e) || 'text';
+    onChange(value.slice(0, s) + before + sel + after + value.slice(e));
+    requestAnimationFrame(() => {
+      ta.focus();
+      ta.setSelectionRange(s + before.length, s + before.length + sel.length);
+    });
+  };
+
+  const startLink = (ev: React.MouseEvent) => {
+    ev.preventDefault();
+    setLinkUrl('https://');
+    setLinkMode(true);
+  };
+
+  const applyLink = () => {
+    const [s, e] = savedSel.current;
+    const sel = value.slice(s, e) || 'link text';
+    onChange(value.slice(0, s) + `[${sel}](${linkUrl})` + value.slice(e));
+    setLinkMode(false);
+    setLinkUrl('');
+    requestAnimationFrame(() => ref.current?.focus());
+  };
+
+  const btn: React.CSSProperties = {
+    background: '#1f2937', border: '1px solid #374151', color: '#9ca3af',
+    borderRadius: 6, padding: '2px 9px', fontSize: 12, cursor: 'pointer',
+    lineHeight: 1.7, fontFamily: 'inherit',
+  };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+        <button type="button" onMouseDown={ev => { ev.preventDefault(); wrap('**', '**'); }} title="Bold — **text**" style={btn}>
+          <strong style={{ color: '#e2e8f0' }}>B</strong>
+        </button>
+        <button type="button" onMouseDown={startLink} title="Hyperlink — [text](url)" style={btn}>
+          <span style={{ color: '#e2e8f0' }}>Link</span>
+        </button>
+        <button type="button" onMouseDown={ev => { ev.preventDefault(); wrap('==', '=='); }} title="Teal colour — ==text==" style={{ ...btn, borderColor: '#00c6b1' }}>
+          <span style={{ color: '#00c6b1', fontWeight: 700 }}>A</span>
+        </button>
+        <span style={{ color: '#374151', fontSize: 10, marginLeft: 4 }}>Select text then click</span>
+      </div>
+
+      {linkMode && (
+        <div style={{ display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center' }}>
+          <input
+            autoFocus
+            value={linkUrl}
+            onChange={e => setLinkUrl(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') applyLink(); if (e.key === 'Escape') setLinkMode(false); }}
+            placeholder="https://…"
+            style={{ flex: 1, background: '#1f2937', border: '1px solid #374151', borderRadius: 6, padding: '4px 10px', fontSize: 12, color: '#e2e8f0', outline: 'none' }}
+          />
+          <button type="button" onClick={applyLink} style={{ ...btn, color: '#00c6b1', borderColor: '#00c6b1' }}>Apply</button>
+          <button type="button" onClick={() => setLinkMode(false)} style={btn}>✕</button>
+        </div>
+      )}
+
+      <textarea
+        ref={ref}
+        className="w-full bg-transparent resize-none focus:outline-none text-slate-100 placeholder:text-slate-600 leading-relaxed text-base"
+        rows={rows}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        onSelect={saveSel}
+        onKeyUp={saveSel}
+        onMouseUp={saveSel}
+        placeholder={placeholder}
+      />
+
+      {value.trim() && (
+        <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #1f2937' }}>
+          <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#374151', marginBottom: 4 }}>Preview</div>
+          <div style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.65 }}>{parseParagraphPreview(value)}</div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── Utilities ─────────────────────────────────────────────────────
 function uid() { return Math.random().toString(36).slice(2, 10); }
@@ -142,8 +263,7 @@ function BlockCard({ block, onChange, onDelete, onUp, onDown, first, last }:
       {/* Content area */}
       <div className="px-4 pb-4 pt-1">
         {block.type === "paragraph" && (
-          <textarea className={baseArea} rows={5} value={block.text ?? ""}
-            onChange={e => onChange({ text: e.target.value })} placeholder="Write your paragraph here…" />
+          <RichTextarea value={block.text ?? ""} onChange={text => onChange({ text })} rows={5} placeholder="Write your paragraph here…" />
         )}
 
         {block.type === "heading2" && (
