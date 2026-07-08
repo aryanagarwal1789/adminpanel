@@ -2,13 +2,13 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import {
   FileText, Globe, X, Trash2, ExternalLink,
   AlignLeft, Heading2, Heading3, ImageIcon, Quote,
-  List, Minus, ChevronUp, ChevronDown, Plus, GripVertical,
+  List, Minus, ChevronUp, ChevronDown, Plus, GripVertical, HelpCircle, LayoutGrid,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { BlogPost, ContentBlock, ContentBlockType } from "./BlogPanel";
 
-const BACKEND = "https://salescode-marketplace.salescode.ai";
-const UPLOAD_URL = "https://salescode-marketplace.salescode.ai/site/upload";
+const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
+const UPLOAD_URL = `${import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai"}/site/upload`;
 
 function uid() { return Math.random().toString(36).slice(2, 10); }
 
@@ -16,6 +16,7 @@ function calcReadTime(content: ContentBlock[]): string {
   const words = content.reduce((acc, b) => {
     if (b.text) acc += b.text.split(/\s+/).length;
     if (b.items) acc += b.items.join(" ").split(/\s+/).length;
+    if (b.faqItems) acc += b.faqItems.map(f => `${f.q} ${f.a}`).join(" ").split(/\s+/).length;
     return acc;
   }, 0);
   return `${Math.max(1, Math.ceil(words / 200))} min read`;
@@ -73,6 +74,8 @@ const BLOCK_TYPES: { type: ContentBlockType; label: string; Icon: React.FC<{ siz
   { type: "quote",      label: "Quote",     Icon: Quote },
   { type: "list",       label: "List",      Icon: List },
   { type: "divider",    label: "Divider",   Icon: Minus },
+  { type: "faq",        label: "FAQ",        Icon: HelpCircle },
+  { type: "image-grid", label: "Image Grid", Icon: LayoutGrid },
 ];
 
 function blockLabel(type: ContentBlockType) {
@@ -83,8 +86,16 @@ function blockLabel(type: ContentBlockType) {
 function AddBlockMenu({ onAdd, onClose }: { onAdd: (t: ContentBlockType) => void; onClose: () => void }) {
   return (
     <div
-      className="absolute z-50 rounded-xl shadow-2xl py-1 w-44"
-      style={{ background: "#1a2035", border: "1px solid #334155", top: "100%", left: 0 }}
+      className="absolute z-50 rounded-xl shadow-2xl py-1 w-48"
+      style={{
+        background: "#1a2035",
+        border: "1px solid #334155",
+        bottom: "calc(100% + 6px)",
+        left: "50%",
+        transform: "translateX(-50%)",
+        maxHeight: 320,
+        overflowY: "auto",
+      }}
     >
       {BLOCK_TYPES.map(({ type, label, Icon }) => (
         <button
@@ -144,12 +155,17 @@ function BlockEditor({
       )}
 
       {(block.type === "heading2" || block.type === "heading3") && (
-        <input
-          className="w-full bg-transparent text-sm placeholder:text-slate-600 focus:outline-none text-slate-100 font-semibold"
-          value={block.text ?? ""}
-          onChange={e => onChange({ text: e.target.value })}
-          placeholder={block.type === "heading2" ? "Section heading…" : "Sub-heading…"}
-        />
+        <div className="space-y-1">
+          <input
+            className="w-full bg-transparent text-sm placeholder:text-slate-600 focus:outline-none text-slate-100 font-semibold"
+            value={block.text ?? ""}
+            onChange={e => onChange({ text: e.target.value })}
+            placeholder={block.type === "heading2" ? "Section heading…" : "Sub-heading…"}
+          />
+          <div style={{ color: "#475569", fontSize: 10 }}>
+            Tip: wrap words in <code style={{ color: "#00c6b1" }}>**double asterisks**</code> for teal color
+          </div>
+        </div>
       )}
 
       {block.type === "image" && (
@@ -245,6 +261,167 @@ function BlockEditor({
           <div className="flex-1 h-px" style={{ background: "#334155" }} />
           <span className="text-[10px] text-slate-600">Divider</span>
           <div className="flex-1 h-px" style={{ background: "#334155" }} />
+        </div>
+      )}
+
+      {block.type === "faq" && (
+        <div className="space-y-2">
+          <input
+            className="w-full bg-slate-800/50 rounded px-2 py-1.5 text-xs text-slate-300 placeholder:text-slate-600 focus:outline-none border border-slate-700/50"
+            value={block.text ?? ""}
+            onChange={e => onChange({ text: e.target.value })}
+            placeholder="Section title (optional, e.g. Frequently Asked Questions)"
+          />
+          <div className="space-y-2 pt-1">
+            {(block.faqItems ?? []).map((item, i) => (
+              <div key={i} className="rounded-md p-2.5 space-y-1.5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid #1e293b" }}>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-slate-600 shrink-0">Q{i + 1}</span>
+                  <input
+                    className="flex-1 bg-slate-800/50 rounded px-2 py-1 text-xs text-slate-300 placeholder:text-slate-600 focus:outline-none border border-slate-700/50"
+                    value={item.q}
+                    onChange={e => {
+                      const faqItems = [...(block.faqItems ?? [])];
+                      faqItems[i] = { ...faqItems[i], q: e.target.value };
+                      onChange({ faqItems });
+                    }}
+                    placeholder="Question…"
+                  />
+                  <button
+                    type="button"
+                    className="text-slate-600 hover:text-red-400 shrink-0"
+                    onClick={() => {
+                      const faqItems = [...(block.faqItems ?? [])];
+                      faqItems.splice(i, 1);
+                      onChange({ faqItems });
+                    }}
+                  >
+                    <X size={10} />
+                  </button>
+                </div>
+                <textarea
+                  className="w-full bg-slate-800/50 rounded px-2 py-1.5 text-xs text-slate-300 placeholder:text-slate-600 focus:outline-none border border-slate-700/50 resize-none"
+                  rows={3}
+                  value={item.a}
+                  onChange={e => {
+                    const faqItems = [...(block.faqItems ?? [])];
+                    faqItems[i] = { ...faqItems[i], a: e.target.value };
+                    onChange({ faqItems });
+                  }}
+                  placeholder="Answer…"
+                />
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="flex items-center gap-1 text-[11px] mt-1 hover:text-teal-400"
+            style={{ color: "#64748b" }}
+            onClick={() => onChange({ faqItems: [...(block.faqItems ?? []), { q: "", a: "" }] })}
+          >
+            <Plus size={10} /> Add FAQ item
+          </button>
+        </div>
+      )}
+
+      {block.type === "image-grid" && (
+        <div className="space-y-3">
+          {/* Column picker */}
+          <div className="flex items-center gap-2">
+            <span style={{ fontSize: 11, color: "#64748b" }}>Grid:</span>
+            {([2, 3, 4] as const).map(n => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => onChange({ columns: n })}
+                className="px-2 py-1 rounded text-[11px] font-medium transition-colors"
+                style={{
+                  background: (block.columns ?? 2) === n ? "#0f857a" : "rgba(255,255,255,0.06)",
+                  color: (block.columns ?? 2) === n ? "#fff" : "#94a3b8",
+                  border: `1px solid ${(block.columns ?? 2) === n ? "#0f857a" : "#334155"}`,
+                }}
+              >
+                {n} col
+              </button>
+            ))}
+          </div>
+
+          {/* Preview hint */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${block.columns ?? 2}, 1fr)`,
+              gap: 4,
+              borderRadius: 6,
+              overflow: "hidden",
+              background: "rgba(255,255,255,0.04)",
+              padding: 6,
+            }}
+          >
+            {Array.from({ length: block.columns ?? 2 }).map((_, i) => (
+              <div key={i} style={{ height: 20, borderRadius: 4, background: "rgba(15,133,122,0.25)" }} />
+            ))}
+          </div>
+
+          {/* Images list */}
+          <div className="space-y-2">
+            {(block.images ?? []).map((img, i) => (
+              <div key={i} className="rounded-md p-2.5 space-y-1.5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid #1e293b" }}>
+                <div className="flex items-center justify-between mb-1">
+                  <span style={{ fontSize: 10, color: "#64748b" }}>Image {i + 1}</span>
+                  {(block.images ?? []).length > 1 && (
+                    <button
+                      type="button"
+                      className="text-slate-600 hover:text-red-400"
+                      onClick={() => {
+                        const images = [...(block.images ?? [])];
+                        images.splice(i, 1);
+                        onChange({ images });
+                      }}
+                    >
+                      <X size={10} />
+                    </button>
+                  )}
+                </div>
+                <ImageUploadInline
+                  value={img.url}
+                  onChange={url => {
+                    const images = [...(block.images ?? [])];
+                    images[i] = { ...images[i], url };
+                    onChange({ images });
+                  }}
+                />
+                <input
+                  className="w-full bg-slate-800/50 rounded px-2 py-1 text-xs text-slate-300 placeholder:text-slate-600 focus:outline-none border border-slate-700/50"
+                  value={img.caption ?? ""}
+                  onChange={e => {
+                    const images = [...(block.images ?? [])];
+                    images[i] = { ...images[i], caption: e.target.value };
+                    onChange({ images });
+                  }}
+                  placeholder="Caption (optional)"
+                />
+                <input
+                  className="w-full bg-slate-800/50 rounded px-2 py-1 text-xs text-slate-300 placeholder:text-slate-600 focus:outline-none border border-slate-700/50"
+                  value={img.alt ?? ""}
+                  onChange={e => {
+                    const images = [...(block.images ?? [])];
+                    images[i] = { ...images[i], alt: e.target.value };
+                    onChange({ images });
+                  }}
+                  placeholder="Alt text"
+                />
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="flex items-center gap-1 text-[11px] mt-1 hover:text-teal-400"
+            style={{ color: "#64748b" }}
+            onClick={() => onChange({ images: [...(block.images ?? []), { url: "", caption: "", alt: "" }] })}
+          >
+            <Plus size={10} /> Add image
+          </button>
         </div>
       )}
     </div>
@@ -366,6 +543,8 @@ export function BlogPostEditor({ post, onClose, onSaved, onDeleted }: Props) {
   const addBlock = useCallback((type: ContentBlockType, afterIndex: number) => {
     const newBlock: ContentBlock = { id: uid(), type };
     if (type === "list") newBlock.items = [""];
+    if (type === "faq") newBlock.faqItems = [{ q: "", a: "" }];
+    if (type === "image-grid") { newBlock.columns = 2; newBlock.images = [{ url: "", caption: "", alt: "" }]; }
     const next = [...blocks];
     next.splice(afterIndex + 1, 0, newBlock);
     setBlocks(next);
@@ -517,6 +696,9 @@ export function BlogPostEditor({ post, onClose, onSaved, onDeleted }: Props) {
                 onChange={e => handleTitleChange(e.target.value)}
                 placeholder="Your blog post title"
               />
+              <div className="mt-1" style={{ color: "#475569", fontSize: 10 }}>
+                Wrap words in <code style={{ color: "#00c6b1" }}>**double asterisks**</code> for teal color highlights
+              </div>
             </div>
 
             {/* Excerpt */}

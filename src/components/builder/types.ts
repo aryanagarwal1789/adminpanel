@@ -173,7 +173,12 @@ export type TemplateBlockType =
   | 'slick-conclave-stats'
   | 'slick-conclave-register'
   | 'slick-conclave-guests'
-  | 'slick-sc-saudi-hero';
+  | 'slick-sc-saudi-hero'
+  | 'slick-sc-saudi-leadership'
+  | 'slick-sc-saudi-presence'
+  | 'slick-sc-saudi-platform'
+  | 'slick-sc-saudi-products'
+  | 'slick-sc-saudi-video';
 
 export type LayoutVariant = "1" | "2" | "3" | "1-2" | "2-1" | "4";
 
@@ -235,6 +240,7 @@ export interface Page {
   name: string;
   slug: string;
   title: string;
+  hostnames: string[];
 }
 
 export interface Theme {
@@ -433,5 +439,10 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-conclave-register': 'Conclave — Register Form',
   'slick-conclave-guests': 'Conclave — Guests Grid',
   'slick-sc-saudi-hero': 'SC — Saudi Presence Hero',
+  'slick-sc-saudi-leadership': 'SC — Saudi Leadership Team',
+  'slick-sc-saudi-presence': 'SC — Saudi Presence Photos',
+  'slick-sc-saudi-platform': 'SC — Saudi Platform Image',
+  'slick-sc-saudi-products': 'SC — Saudi Products',
+  'slick-sc-saudi-video': 'SC — Saudi Video',
   layout: "Layout",
 };

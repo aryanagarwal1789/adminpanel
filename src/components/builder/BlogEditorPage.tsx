@@ -2,12 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlignLeft, ChevronDown, ChevronUp, ExternalLink,
   FileText, Globe, Heading2, Heading3, ImageIcon,
-  List, Minus, Plus, Quote, Search, Trash2, X,
+  List, Minus, Plus, Quote, Search, Trash2, X, HelpCircle, LayoutGrid,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { BlogPost, ContentBlock, ContentBlockType } from "./BlogPanel";
 
-const BACKEND = "https://salescode-marketplace.salescode.ai";
+const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 const UPLOAD_URL = `${BACKEND}/site/upload`;
 const RENDERER  = (import.meta.env.VITE_RENDERER_URL as string | undefined) ?? "https://demo-experience.salescode.ai";
 
@@ -18,6 +18,7 @@ function calcReadTime(blocks: ContentBlock[]) {
   const words = blocks.reduce((n, b) => {
     if (b.text) n += b.text.split(/\s+/).length;
     if (b.items) n += b.items.join(" ").split(/\s+/).length;
+    if (b.faqItems) n += b.faqItems.map(f => `${f.q} ${f.a}`).join(" ").split(/\s+/).length;
     return n;
   }, 0);
   return `${Math.max(1, Math.ceil(words / 200))} min read`;
@@ -35,9 +36,11 @@ const BLOCK_META: { type: ContentBlockType; label: string; Icon: React.FC<{ size
   { type: "heading2",   label: "Heading 2",  Icon: Heading2   },
   { type: "heading3",   label: "Heading 3",  Icon: Heading3   },
   { type: "image",      label: "Image",      Icon: ImageIcon  },
+  { type: "image-grid", label: "Image Grid", Icon: LayoutGrid },
   { type: "quote",      label: "Quote",      Icon: Quote      },
   { type: "list",       label: "List",       Icon: List       },
   { type: "divider",    label: "Divider",    Icon: Minus      },
+  { type: "faq",        label: "FAQ",        Icon: HelpCircle },
 ];
 
 // ── Image uploader ────────────────────────────────────────────────
@@ -94,8 +97,12 @@ function AddMenu({ onAdd }: { onAdd: (t: ContentBlockType) => void }) {
         <Plus size={11} /> Add block
       </button>
       {open && (
-        <div className="absolute top-full mt-1 z-40 rounded-xl shadow-2xl py-1.5"
-          style={{ background: "#1a2035", border: "1px solid #2d3748", minWidth: 180 }}>
+        <div className="absolute z-40 rounded-xl shadow-2xl py-1.5"
+          style={{
+            background: "#1a2035", border: "1px solid #2d3748", minWidth: 180,
+            bottom: "calc(100% + 6px)", left: "50%", transform: "translateX(-50%)",
+            maxHeight: 340, overflowY: "auto",
+          }}>
           {BLOCK_META.map(({ type, label, Icon }) => (
             <button key={type} type="button"
               className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-left transition-colors hover:bg-white/5"
@@ -113,7 +120,7 @@ function AddMenu({ onAdd }: { onAdd: (t: ContentBlockType) => void }) {
 // ── Individual block editor ───────────────────────────────────────
 function BlockCard({ block, onChange, onDelete, onUp, onDown, first, last }:
   { block: ContentBlock; onChange: (p: Partial<ContentBlock>) => void; onDelete: () => void; onUp: () => void; onDown: () => void; first: boolean; last: boolean }) {
-  const meta = BLOCK_META.find(m => m.type === block.type)!;
+  const meta = BLOCK_META.find(m => m.type === block.type) ?? BLOCK_META[0];
   const Icon = meta.Icon;
 
   const baseArea = "w-full bg-transparent resize-none focus:outline-none text-slate-100 placeholder:text-slate-600 leading-relaxed text-base";
@@ -140,13 +147,19 @@ function BlockCard({ block, onChange, onDelete, onUp, onDown, first, last }:
         )}
 
         {block.type === "heading2" && (
-          <input className="w-full bg-transparent focus:outline-none text-white text-2xl font-bold placeholder:text-slate-600"
-            value={block.text ?? ""} onChange={e => onChange({ text: e.target.value })} placeholder="Section heading…" />
+          <div className="space-y-1">
+            <input className="w-full bg-transparent focus:outline-none text-white text-2xl font-bold placeholder:text-slate-600"
+              value={block.text ?? ""} onChange={e => onChange({ text: e.target.value })} placeholder="Section heading…" />
+            <div style={{ fontSize: 11, color: "#475569" }}>Wrap words in <code style={{ color: "#00c6b1" }}>**double asterisks**</code> for teal colour</div>
+          </div>
         )}
 
         {block.type === "heading3" && (
-          <input className="w-full bg-transparent focus:outline-none text-white text-lg font-semibold placeholder:text-slate-600"
-            value={block.text ?? ""} onChange={e => onChange({ text: e.target.value })} placeholder="Sub-heading…" />
+          <div className="space-y-1">
+            <input className="w-full bg-transparent focus:outline-none text-white text-lg font-semibold placeholder:text-slate-600"
+              value={block.text ?? ""} onChange={e => onChange({ text: e.target.value })} placeholder="Sub-heading…" />
+            <div style={{ fontSize: 11, color: "#475569" }}>Wrap words in <code style={{ color: "#00c6b1" }}>**double asterisks**</code> for teal colour</div>
+          </div>
         )}
 
         {block.type === "image" && (
@@ -207,6 +220,101 @@ function BlockCard({ block, onChange, onDelete, onUp, onDown, first, last }:
             <div className="flex-1 h-px" style={{ background: "#374151" }} />
             <span className="text-xs text-slate-600">Divider</span>
             <div className="flex-1 h-px" style={{ background: "#374151" }} />
+          </div>
+        )}
+
+        {block.type === "image-grid" && (
+          <div className="space-y-3">
+            {/* Column picker */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500">Grid columns:</span>
+              {([2, 3, 4] as const).map(n => (
+                <button key={n} type="button"
+                  onClick={() => onChange({ columns: n })}
+                  className="px-3 py-1 rounded-lg text-xs font-semibold transition-colors"
+                  style={{
+                    background: (block.columns ?? 2) === n ? "#0f857a" : "#1f2937",
+                    color:      (block.columns ?? 2) === n ? "#fff"    : "#64748b",
+                    border: `1px solid ${(block.columns ?? 2) === n ? "#0f857a" : "#374151"}`,
+                  }}>
+                  {n} col
+                </button>
+              ))}
+            </div>
+            {/* Layout preview */}
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(${block.columns ?? 2}, 1fr)`,
+              gap: 6, padding: 8, borderRadius: 8, background: "rgba(255,255,255,0.03)",
+            }}>
+              {Array.from({ length: block.columns ?? 2 }).map((_, i) => (
+                <div key={i} style={{ height: 24, borderRadius: 5, background: "rgba(15,133,122,0.3)" }} />
+              ))}
+            </div>
+            {/* Images */}
+            {(block.images ?? []).map((img, i) => (
+              <div key={i} className="rounded-xl p-3 space-y-2" style={{ background: "#1f2937", border: "1px solid #374151" }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500">Image {i + 1}</span>
+                  {(block.images ?? []).length > 1 && (
+                    <button type="button" className="text-slate-600 hover:text-red-400"
+                      onClick={() => { const images = [...(block.images ?? [])]; images.splice(i, 1); onChange({ images }); }}>
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+                <ImgUpload value={img.url} small label="Upload image"
+                  onChange={url => { const images = [...(block.images ?? [])]; images[i] = { ...images[i], url }; onChange({ images }); }} />
+                <input className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none text-slate-200 placeholder:text-slate-600"
+                  style={{ background: "#111827", border: "1px solid #374151" }}
+                  value={img.caption ?? ""} placeholder="Caption (optional)"
+                  onChange={e => { const images = [...(block.images ?? [])]; images[i] = { ...images[i], caption: e.target.value }; onChange({ images }); }} />
+                <input className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none text-slate-400 placeholder:text-slate-600"
+                  style={{ background: "#111827", border: "1px solid #374151" }}
+                  value={img.alt ?? ""} placeholder="Alt text"
+                  onChange={e => { const images = [...(block.images ?? [])]; images[i] = { ...images[i], alt: e.target.value }; onChange({ images }); }} />
+              </div>
+            ))}
+            <button type="button"
+              className="flex items-center gap-1.5 text-xs hover:text-teal-400 transition-colors"
+              style={{ color: "#4b5563" }}
+              onClick={() => onChange({ images: [...(block.images ?? []), { url: "", caption: "", alt: "" }] })}>
+              <Plus size={12} /> Add image
+            </button>
+          </div>
+        )}
+
+        {block.type === "faq" && (
+          <div className="space-y-3">
+            <input className="w-full rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none"
+              style={{ background: "#111827", border: "1px solid #1f2937" }}
+              value={block.text ?? ""} placeholder="Section title (e.g. Frequently Asked Questions)"
+              onChange={e => onChange({ text: e.target.value })} />
+            {(block.faqItems ?? []).map((item, i) => (
+              <div key={i} className="rounded-xl p-3 space-y-2" style={{ background: "#1f2937", border: "1px solid #374151" }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-slate-500">Q {i + 1}</span>
+                  <button type="button" className="text-slate-600 hover:text-red-400"
+                    onClick={() => { const faqItems = [...(block.faqItems ?? [])]; faqItems.splice(i, 1); onChange({ faqItems }); }}>
+                    <X size={12} />
+                  </button>
+                </div>
+                <input className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none text-slate-200 placeholder:text-slate-600"
+                  style={{ background: "#111827", border: "1px solid #374151" }}
+                  value={item.q} placeholder="Question…"
+                  onChange={e => { const faqItems = [...(block.faqItems ?? [])]; faqItems[i] = { ...faqItems[i], q: e.target.value }; onChange({ faqItems }); }} />
+                <textarea className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none text-slate-300 placeholder:text-slate-600 resize-none"
+                  style={{ background: "#111827", border: "1px solid #374151" }}
+                  rows={3} value={item.a} placeholder="Answer…"
+                  onChange={e => { const faqItems = [...(block.faqItems ?? [])]; faqItems[i] = { ...faqItems[i], a: e.target.value }; onChange({ faqItems }); }} />
+              </div>
+            ))}
+            <button type="button"
+              className="flex items-center gap-1.5 text-xs hover:text-teal-400 transition-colors"
+              style={{ color: "#4b5563" }}
+              onClick={() => onChange({ faqItems: [...(block.faqItems ?? []), { q: "", a: "" }] })}>
+              <Plus size={12} /> Add FAQ item
+            </button>
           </div>
         )}
       </div>
@@ -285,7 +393,9 @@ export function BlogEditorPage() {
 
   const addBlock = (type: ContentBlockType, afterIdx?: number) => {
     const nb: ContentBlock = { id: uid(), type };
-    if (type === "list") nb.items = [""];
+    if (type === "list")       nb.items    = [""];
+    if (type === "faq")        nb.faqItems = [{ q: "", a: "" }];
+    if (type === "image-grid") { nb.columns = 2; nb.images = [{ url: "", caption: "", alt: "" }]; }
     const next = [...blocks];
     next.splice(afterIdx !== undefined ? afterIdx + 1 : next.length, 0, nb);
     setBlocks(next);

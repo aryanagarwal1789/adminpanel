@@ -2,20 +2,23 @@ import { useCallback, useEffect, useState } from "react";
 import { FileText, Plus } from "lucide-react";
 import { toast } from "sonner";
 
-const BACKEND = "https://salescode-marketplace.salescode.ai";
+const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 
-export type ContentBlockType = 'paragraph' | 'heading2' | 'heading3' | 'image' | 'quote' | 'list' | 'divider';
+export type ContentBlockType = 'paragraph' | 'heading2' | 'heading3' | 'image' | 'quote' | 'list' | 'divider' | 'faq' | 'image-grid';
 
 export interface ContentBlock {
   id: string;
   type: ContentBlockType;
-  text?: string;        // paragraph / heading2 / heading3 / quote
+  text?: string;        // paragraph / heading2 / heading3 / quote / faq (section title)
   attribution?: string; // quote
   url?: string;         // image
   caption?: string;     // image
   alt?: string;         // image
   items?: string[];     // list
   ordered?: boolean;    // list
+  faqItems?: { q: string; a: string }[]; // faq
+  columns?: 2 | 3 | 4; // image-grid
+  images?: { url: string; caption?: string; alt?: string }[]; // image-grid
 }
 
 export interface BlogPost {

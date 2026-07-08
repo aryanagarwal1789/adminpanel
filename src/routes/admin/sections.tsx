@@ -5,7 +5,7 @@ import { UploadInput } from './upload-input';
 
 export const Route = createFileRoute('/admin/sections')({ component: SectionsPage });
 
-const BACKEND = 'https://salescode-marketplace.salescode.ai';
+const BACKEND = import.meta.env.VITE_BACKEND_URL ?? 'https://salescode-marketplace.salescode.ai';
 
 interface SectionItem {
   id: string;

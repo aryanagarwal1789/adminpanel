@@ -134,7 +134,12 @@ const GROUPS: Group[] = [
     { type: "slick-sc-footer-v2", label: "SC — Footer V2 (White)", Icon: PanelBottom },
   ]},
   { name: "Saudi Presence", items: [
-    { type: "slick-sc-saudi-hero", label: "Saudi — Presence Hero", Icon: Sparkles },
+    { type: "slick-sc-saudi-hero",       label: "Saudi — Presence Hero",     Icon: Sparkles },
+    { type: "slick-sc-saudi-leadership", label: "Saudi — Leadership Team",    Icon: Users },
+    { type: "slick-sc-saudi-presence",   label: "Saudi — Presence Photos",   Icon: ImageIcon },
+    { type: "slick-sc-saudi-platform",   label: "Saudi — Platform Image",    Icon: Layers },
+    { type: "slick-sc-saudi-video",      label: "Saudi — Video Section",     Icon: Layers },
+    { type: "slick-sc-saudi-products",   label: "Saudi — Products Grid",     Icon: Sparkles },
   ]},
   { name: "CXO Conclave", items: [
     { type: "slick-conclave-hero",     label: "Conclave — Hero",          Icon: Sparkles },

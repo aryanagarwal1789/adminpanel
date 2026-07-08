@@ -4,7 +4,7 @@ import { UploadInput } from './upload-input';
 
 export const Route = createFileRoute('/admin/seo')({ component: SeoPage });
 
-const BACKEND = 'https://salescode-marketplace.salescode.ai';
+const BACKEND = import.meta.env.VITE_BACKEND_URL ?? 'https://salescode-marketplace.salescode.ai';
 
 const PAGE_TABS = [
   { key: 'landing',    label: 'Landing'    },

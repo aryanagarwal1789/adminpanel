@@ -5163,7 +5163,19 @@ function renderBlockFields(
         </div>
       );
 
-    case 'slick-sc-platform-grid':
+    case 'slick-sc-platform-grid': {
+      const CARD_NAMES = [
+        'AI Native SFA for Urban','AI Native SFA for Rural','AI Native Supervisor App','AI Native Manager App',
+        'AI Native DMS for Urban','AI Native DMS for Rural','AI Native eB2B','AI Native Delivery App',
+        'AI Native IR for MT','AI Native IR for GT','AI Native IR for eB2B',
+        'SCAI – AI Sales Agent','AI Sales Coach','AI Analyst','AI Promo Co-Pilot',
+        'AI Promo Engine','AI Target Engine','AI Task Engine','Travel Expense','Sales Incentive','New Outlets',
+        'UPI Payments','WhatsApp','Digital Wallet',
+      ];
+      const cardUrls = (f.cardUrls as Record<string, string>) ?? {};
+      const setCardUrl = (name: string, url: string) => {
+        set('cardUrls', { ...cardUrls, [name]: url });
+      };
       return (
         <div className="space-y-4">
           <TextInput label="Badge text" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
@@ -5177,8 +5189,19 @@ function renderBlockFields(
           <TextInput label="Footer pre-text" value={f.ctaPreText as string ?? ''} onChange={(v) => set('ctaPreText', v)} />
           <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-500 font-medium">Card URLs</p>
+          {CARD_NAMES.map(name => (
+            <TextInput
+              key={name}
+              label={name}
+              value={cardUrls[name] ?? ''}
+              onChange={(v) => setCardUrl(name, v)}
+            />
+          ))}
         </div>
       );
+    }
 
     case 'slick-conclave-hero': {
       return (
@@ -5256,6 +5279,124 @@ function renderBlockFields(
       );
     }
 
+    case 'slick-sc-saudi-presence': {
+      type Card = { image?: string; captionBold?: string; captionRest?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
+          <TextInput label="Heading pre" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading teal" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
+          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<Card>
+            label="Cards"
+            items={(f.cards as Card[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ image: '', captionBold: '', captionRest: '' })}
+            itemPreview={(c) => c.captionBold || 'Card'}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <ImageField label="Image" value={c.image ?? ''} onChange={(v) => u({ ...c, image: v })} />
+                <TextInput label="Caption bold" value={c.captionBold ?? ''} onChange={(v) => u({ ...c, captionBold: v })} />
+                <TextInput label="Caption rest" value={c.captionRest ?? ''} onChange={(v) => u({ ...c, captionRest: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sc-saudi-platform': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="YouTube URL (overrides image)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <ImageField label="Section image (full-width)" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
+          <TextInput label="CTA label (HTML ok)" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+        </div>
+      );
+    }
+
+    case 'slick-sc-saudi-video': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="YouTube URL (overrides image)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <ImageField label="Fallback image" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
+          <TextInput label="CTA label (HTML ok)" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+        </div>
+      );
+    }
+
+    case 'slick-sc-saudi-products': {
+      type ProductItem = { pill?: string; headingWhite?: string; headingTeal?: string; description?: string; features?: Array<{ label: string; text: string }>; ctaLabel?: string; ctaHref?: string; imageSrc?: string; };
+      type FeatureItem = { label: string; text: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow pill" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading (white part)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
+          <TextInput label="Heading (teal part)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<ProductItem>
+            label="Products"
+            items={(f.products as ProductItem[]) ?? []}
+            onChange={(v) => set('products', v)}
+            newItem={() => ({ pill: '', headingWhite: 'AI Native', headingTeal: 'Product', description: '', features: [], ctaLabel: 'Know More', ctaHref: '#', imageSrc: '' })}
+            itemPreview={(p) => `${p.headingWhite ?? ''} ${p.headingTeal ?? ''}`.trim() || '(empty)'}
+            renderItem={(p, u) => (
+              <div className="space-y-3">
+                <TextInput label="Pill tag" value={p.pill ?? ''} onChange={(v) => u({ ...p, pill: v })} />
+                <TextInput label="Heading (white)" value={p.headingWhite ?? ''} onChange={(v) => u({ ...p, headingWhite: v })} />
+                <TextInput label="Heading (teal)" value={p.headingTeal ?? ''} onChange={(v) => u({ ...p, headingTeal: v })} />
+                <Textarea label="Description" value={p.description ?? ''} onChange={(v) => u({ ...p, description: v })} />
+                <Repeater<FeatureItem>
+                  label="Features"
+                  items={p.features ?? []}
+                  onChange={(v) => u({ ...p, features: v })}
+                  newItem={() => ({ label: 'Feature', text: '' })}
+                  itemPreview={(feat) => feat.label || '(empty)'}
+                  renderItem={(feat, uf) => (
+                    <div className="space-y-2">
+                      <TextInput label="Bold label" value={feat.label ?? ''} onChange={(v) => uf({ ...feat, label: v })} />
+                      <Textarea label="Description" value={feat.text ?? ''} onChange={(v) => uf({ ...feat, text: v })} />
+                    </div>
+                  )}
+                />
+                <TextInput label="CTA label" value={p.ctaLabel ?? ''} onChange={(v) => u({ ...p, ctaLabel: v })} />
+                <TextInput label="CTA URL" value={p.ctaHref ?? ''} onChange={(v) => u({ ...p, ctaHref: v })} />
+                <ImageField label="Product image" value={p.imageSrc ?? ''} onChange={(v) => u({ ...p, imageSrc: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sc-saudi-leadership': {
+      type Card = { image?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
+          <TextInput label="Heading (white)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
+          <TextInput label="Heading (teal)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
+          <TextInput label="Sub text" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<Card>
+            label="Cards"
+            items={(f.cards as Card[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ image: '' })}
+            itemPreview={(_, i) => `Card ${i + 1}`}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <ImageField label="Image" value={c.image ?? ''} onChange={(v) => u({ ...c, image: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
     case 'slick-sc-saudi-hero': {
       type RoleItem = { title: string; subtitle: string };
       return (
@@ -5293,10 +5434,15 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Language card title" value={f.langTitle as string ?? ''} onChange={(v) => set('langTitle', v)} />
           <Textarea label="Language card body" value={f.langBody as string ?? ''} onChange={(v) => set('langBody', v)} />
+          <ImageField label="Language card image" value={f.langImageSrc as string ?? ''} onChange={(v) => set('langImageSrc', v)} />
           <TextInput label="ZATCA card title" value={f.zatcaTitle as string ?? ''} onChange={(v) => set('zatcaTitle', v)} />
           <Textarea label="ZATCA card body" value={f.zatcaBody as string ?? ''} onChange={(v) => set('zatcaBody', v)} />
+          <ImageField label="ZATCA card image" value={f.zatcaImageSrc as string ?? ''} onChange={(v) => set('zatcaImageSrc', v)} />
           <TextInput label="Channel card title" value={f.channelTitle as string ?? ''} onChange={(v) => set('channelTitle', v)} />
           <Textarea label="Channel card body" value={f.channelBody as string ?? ''} onChange={(v) => set('channelBody', v)} />
+          <ImageField label="Channel card image" value={f.channelImageSrc as string ?? ''} onChange={(v) => set('channelImageSrc', v)} />
+          <ImageField label="Roles section image (replaces map + roles)" value={f.rolesImageSrc as string ?? ''} onChange={(v) => set('rolesImageSrc', v)} />
+          <ImageField label="Bottom right image" value={f.bottomImageSrc as string ?? ''} onChange={(v) => set('bottomImageSrc', v)} />
         </div>
       );
     }

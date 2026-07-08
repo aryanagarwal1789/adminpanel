@@ -4,7 +4,7 @@ import { UploadInput } from './upload-input';
 
 export const Route = createFileRoute('/admin/products/$productId')({ component: ProductDetailPage });
 
-const BACKEND = 'https://salescode-marketplace.salescode.ai';
+const BACKEND = import.meta.env.VITE_BACKEND_URL ?? 'https://salescode-marketplace.salescode.ai';
 
 const CATEGORIES = [
   { id: 'applications', label: 'Applications' },

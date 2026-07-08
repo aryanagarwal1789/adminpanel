@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 
-const UPLOAD_URL = 'https://salescode-marketplace.salescode.ai/site/upload';
+const UPLOAD_URL = `${import.meta.env.VITE_BACKEND_URL ?? 'https://salescode-marketplace.salescode.ai'}/site/upload`;
 
 const inp: React.CSSProperties = {
   background: '#0f172a', border: '1px solid #334155', color: '#f1f5f9',

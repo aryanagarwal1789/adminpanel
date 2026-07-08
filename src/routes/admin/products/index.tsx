@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 export const Route = createFileRoute('/admin/products/')({ component: ProductsPage });
 
-const BACKEND = 'https://salescode-marketplace.salescode.ai';
+const BACKEND = import.meta.env.VITE_BACKEND_URL ?? 'https://salescode-marketplace.salescode.ai';
 
 interface Product {
   productId: string;

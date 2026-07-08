@@ -4,7 +4,7 @@ import { useAdminPreview } from './preview-context';
 
 export const Route = createFileRoute('/admin/contact')({ component: ContactPage });
 
-const BACKEND = 'https://salescode-marketplace.salescode.ai';
+const BACKEND = import.meta.env.VITE_BACKEND_URL ?? 'https://salescode-marketplace.salescode.ai';
 
 interface ContactData {
   title: string;

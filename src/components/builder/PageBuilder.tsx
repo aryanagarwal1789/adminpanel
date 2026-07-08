@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   Undo2, Redo2, Plus, Eye, EyeOff, Trash2, GripVertical,
-  X, Palette, Play, FileText, ChevronLeft, PenLine, Paintbrush, Settings, Layers,
+  X, Palette, Play, FileText, ChevronLeft, PenLine, Paintbrush, Settings, Layers, Globe,
 } from "lucide-react";
 import { defaultBlock } from "./blocks";
 import { AddSectionDrawer } from "./AddSectionDrawer";
@@ -126,10 +126,10 @@ function updateWidgetInBlocks(blocks: Block[], widgetId: string, props: Record<s
 }
 
 const INITIAL_PAGES: Page[] = [
-  { id: "landing", name: "Landing", slug: "/", title: "Landing Page" },
-  { id: "about", name: "About", slug: "/about", title: "About Us" },
-  { id: "pricing", name: "Pricing", slug: "/pricing", title: "Pricing" },
-  { id: "contact", name: "Contact", slug: "/contact", title: "Contact" },
+  { id: "landing", name: "Landing", slug: "/",        title: "Landing Page", hostnames: [] },
+  { id: "about",   name: "About",   slug: "/about",   title: "About Us",     hostnames: [] },
+  { id: "pricing", name: "Pricing", slug: "/pricing", title: "Pricing",      hostnames: [] },
+  { id: "contact", name: "Contact", slug: "/contact", title: "Contact",      hostnames: [] },
 ];
 
 const seedLanding = (): Block[] =>
@@ -146,7 +146,7 @@ const INITIAL_STATE: BuilderState = {
   pageBlocks: { landing: seedLanding(), about: [], pricing: [], contact: [] },
 };
 
-const BACKEND = "https://salescode-marketplace.salescode.ai";
+const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 
 export function PageBuilder() {
   // History stack
@@ -171,6 +171,7 @@ export function PageBuilder() {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"content" | "style">("content");
   const [editingTitle, setEditingTitle] = useState(false);
+  const [editingPageHostnames, setEditingPageHostnames] = useState<string | null>(null);
   const [addAtIndex, setAddAtIndex] = useState<number | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
@@ -369,7 +370,7 @@ export function PageBuilder() {
       toast.error("A page with that slug already exists");
       return;
     }
-    const newPage: Page = { id, name, slug: `/${id}`, title: name };
+    const newPage: Page = { id, name, slug: `/${id}`, title: name, hostnames: [] };
     commit({ pages: [...pages, newPage], pageBlocks: { ...pageBlocks, [id]: [] } });
     setActivePage(id);
     setSelectedBlockId(null);
@@ -393,7 +394,7 @@ export function PageBuilder() {
       try {
         const res = await fetch(`${BACKEND}/site/builder/pages`);
         if (!res.ok) throw new Error();
-        const { pages: rawPages } = await res.json() as { pages: { pageKey: string }[] };
+        const { pages: rawPages } = await res.json() as { pages: { pageKey: string; hostnames?: string[] }[] };
         if (!rawPages?.length) { setLoading(false); return; }
 
         // Known safe page keys — scraper bait, well-known paths, and HTML-entity duplicates are excluded
@@ -418,6 +419,7 @@ export function PageBuilder() {
             name: p.pageKey.charAt(0).toUpperCase() + p.pageKey.slice(1),
             slug: `/${p.pageKey}`,
             title: p.pageKey.charAt(0).toUpperCase() + p.pageKey.slice(1) + " Page",
+            hostnames: p.hostnames ?? [],
           }));
 
         const firstKey = builtPages[0].id;
@@ -675,7 +677,7 @@ export function PageBuilder() {
                 const res = await fetch(`${BACKEND}/site/builder/pages/${activePage}`, {
                   method: "PUT",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ blocks, theme }),
+                  body: JSON.stringify({ blocks, theme, hostnames: currentPage.hostnames ?? [] }),
                 });
                 if (!res.ok) throw new Error(`${res.status}`);
                 toast.success("Page published successfully");
@@ -752,46 +754,82 @@ export function PageBuilder() {
               <div className="overflow-y-auto flex-1">
                 {pages.map((p) => {
                   const active = p.id === activePage;
+                  const hn = p.hostnames ?? [];
+                  const isEditingHn = editingPageHostnames === p.id;
                   return (
                     <div
                       key={p.id}
-                      className={`group flex items-center justify-between border-l-2 pb-transition ${
+                      className={`group flex flex-col border-l-2 pb-transition ${
                         active ? "border-blue-500 bg-slate-800/60" : "border-transparent hover:bg-slate-800/40"
                       }`}
                     >
-                      <button
-                        onClick={() => { setActivePage(p.id); setSelectedBlockId(null); }}
-                        className={`flex-1 text-left px-4 py-2 text-sm ${active ? "text-white" : "text-slate-300"}`}
-                      >
-                        {p.name}
-                      </button>
-                      {p.id !== "__blog__" && (
+                      {/* Page name row */}
+                      <div className="flex items-center justify-between">
                         <button
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            if (!confirm(`Delete page "${p.name}"? This cannot be undone.`)) return;
-                            try {
-                              await fetch(`${BACKEND}/site/builder/pages/${p.id}`, { method: "DELETE" });
-                            } catch { /* ignore */ }
-                            const remaining = pages.filter((pg) => pg.id !== p.id);
-                            const nextActive = activePage === p.id
-                              ? (remaining.find((pg) => pg.id !== "__blog__")?.id ?? "landing")
-                              : activePage;
-                            commit({
-                              pages: remaining,
-                              pageBlocks: Object.fromEntries(
-                                Object.entries(pageBlocks).filter(([k]) => k !== p.id)
-                              ),
-                            });
-                            setActivePage(nextActive);
-                            setSelectedBlockId(null);
-                          }}
-                          className="opacity-0 group-hover:opacity-100 p-2 text-slate-500 hover:text-red-400 pb-transition shrink-0"
-                          title={`Delete ${p.name}`}
+                          onClick={() => { setActivePage(p.id); setSelectedBlockId(null); }}
+                          className={`flex-1 text-left px-4 py-2 text-sm ${active ? "text-white" : "text-slate-300"}`}
                         >
-                          <Trash2 size={13} />
+                          {p.name}
                         </button>
-                      )}
+                        {p.id !== "__blog__" && (
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (!confirm(`Delete page "${p.name}"? This cannot be undone.`)) return;
+                              try {
+                                await fetch(`${BACKEND}/site/builder/pages/${p.id}`, { method: "DELETE" });
+                              } catch { /* ignore */ }
+                              const remaining = pages.filter((pg) => pg.id !== p.id);
+                              const nextActive = activePage === p.id
+                                ? (remaining.find((pg) => pg.id !== "__blog__")?.id ?? "landing")
+                                : activePage;
+                              commit({
+                                pages: remaining,
+                                pageBlocks: Object.fromEntries(
+                                  Object.entries(pageBlocks).filter(([k]) => k !== p.id)
+                                ),
+                              });
+                              setActivePage(nextActive);
+                              setSelectedBlockId(null);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-2 text-slate-500 hover:text-red-400 pb-transition shrink-0"
+                            title={`Delete ${p.name}`}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Hostnames row — always visible for every page */}
+                      <div className="flex items-start gap-1.5 px-4 pb-2.5">
+                        <Globe size={11} className="text-slate-500 mt-0.5 shrink-0" />
+                        {isEditingHn ? (
+                          <input
+                            autoFocus
+                            defaultValue={hn.join(', ')}
+                            onBlur={(e) => {
+                              const vals = e.target.value.split(',').map((v) => v.trim()).filter(Boolean);
+                              setPages(pages.map((pg) => pg.id === p.id ? { ...pg, hostnames: vals } : pg));
+                              setEditingPageHostnames(null);
+                            }}
+                            onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+                            placeholder="salescode.ai, demo.salescode.ai"
+                            className="flex-1 bg-slate-700 text-white text-xs px-2 py-0.5 rounded outline-none border border-blue-500 min-w-0"
+                          />
+                        ) : (
+                          <button
+                            onClick={() => setEditingPageHostnames(p.id)}
+                            className="text-left flex-1 min-w-0"
+                            title="Set which domains serve this page (empty = all domains)"
+                          >
+                            {hn.length > 0 ? (
+                              <span className="text-xs text-slate-400 truncate block">{hn.join(', ')}</span>
+                            ) : (
+                              <span className="text-xs text-slate-600 hover:text-slate-400 pb-transition">+ add URLs</span>
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
