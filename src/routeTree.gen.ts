@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as BlogEditorRouteImport } from './routes/blog-editor'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -21,6 +22,11 @@ import { Route as AdminAboutRouteImport } from './routes/admin/about'
 import { Route as AdminProductsIndexRouteImport } from './routes/admin/products/index'
 import { Route as AdminProductsProductIdRouteImport } from './routes/admin/products.$productId'
 
+const BlogEditorRoute = BlogEditorRouteImport.update({
+  id: '/blog-editor',
+  path: '/blog-editor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -80,6 +86,7 @@ const AdminProductsProductIdRoute = AdminProductsProductIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/blog-editor': typeof BlogEditorRoute
   '/admin/about': typeof AdminAboutRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/contact': typeof AdminContactRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/blog-editor': typeof BlogEditorRoute
   '/admin/about': typeof AdminAboutRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/contact': typeof AdminContactRoute
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/blog-editor': typeof BlogEditorRoute
   '/admin/about': typeof AdminAboutRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/contact': typeof AdminContactRoute
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/blog-editor'
     | '/admin/about'
     | '/admin/clients'
     | '/admin/contact'
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/blog-editor'
     | '/admin/about'
     | '/admin/clients'
     | '/admin/contact'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/blog-editor'
     | '/admin/about'
     | '/admin/clients'
     | '/admin/contact'
@@ -158,10 +170,18 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  BlogEditorRoute: typeof BlogEditorRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/blog-editor': {
+      id: '/blog-editor'
+      path: '/blog-editor'
+      fullPath: '/blog-editor'
+      preLoaderRoute: typeof BlogEditorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -281,6 +301,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  BlogEditorRoute: BlogEditorRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

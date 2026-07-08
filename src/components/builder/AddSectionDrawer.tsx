@@ -37,6 +37,8 @@ const GROUPS: Group[] = [
     { type: "slick-sc-hero-v2",        label: "SC — Hero V2 (Person + Floating Cards)", Icon: Sparkles },
     { type: "slick-sc-hero-v3",        label: "SC — Hero V3 (Center Image)", Icon: Sparkles },
     { type: "slick-sc-video-showcase", label: "SC — Video Showcase", Icon: MonitorPlay },
+    { type: "slick-sc-platform-grid",  label: "SC — Platform Grid",  Icon: Grid      },
+    { type: "slick-sc-privacy-policy", label: "SC — Privacy Policy", Icon: FileText  },
     { type: "slick-sc-brand-strip", label: "SC — Brand Strip", Icon: Grid2x2 },
     { type: "slick-sc-impact-stats", label: "SC — Impact Stats", Icon: TrendingUp },
     { type: "slick-sc-product-suite", label: "SC — Product Suite", Icon: Grid2x2 },
@@ -130,6 +132,17 @@ const GROUPS: Group[] = [
     { type: "slick-offices-v2", label: "Contact — Our Offices V2",  Icon: Grid2x2 },
     { type: "slick-sc-footer", label: "SC — Footer (Teal)", Icon: PanelBottom },
     { type: "slick-sc-footer-v2", label: "SC — Footer V2 (White)", Icon: PanelBottom },
+  ]},
+  { name: "Saudi Presence", items: [
+    { type: "slick-sc-saudi-hero", label: "Saudi — Presence Hero", Icon: Sparkles },
+  ]},
+  { name: "CXO Conclave", items: [
+    { type: "slick-conclave-hero",     label: "Conclave — Hero",          Icon: Sparkles },
+    { type: "slick-conclave-speakers", label: "Conclave — Speakers Grid", Icon: Grid2x2 },
+    { type: "slick-conclave-agenda",   label: "Conclave — Agenda",        Icon: ListOrdered },
+    { type: "slick-conclave-stats",    label: "Conclave — Stats",         Icon: TrendingUp },
+    { type: "slick-conclave-register", label: "Conclave — Register Form", Icon: MessageSquare },
+    { type: "slick-conclave-guests",   label: "Conclave — Guests Grid",   Icon: Grid2x2 },
   ]},
   { name: "SFA Landing", items: [
     { type: "slick-sfa-hero", label: "SFA — Hero", Icon: Sparkles },

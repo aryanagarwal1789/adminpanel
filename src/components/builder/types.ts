@@ -84,6 +84,8 @@ export type TemplateBlockType =
   | 'slick-scai-vision-channels'
   | 'slick-scai-vision-showcase'
   | 'slick-sc-video-showcase'
+  | 'slick-sc-platform-grid'
+  | 'slick-sc-privacy-policy'
   | 'slick-sc-brand-strip'
   | 'slick-sc-impact-stats'
   | 'slick-sc-product-suite'
@@ -164,7 +166,14 @@ export type TemplateBlockType =
   | 'slick-sc-footer-v2'
   | 'slick-sc-navbar'
   | 'slick-sc-hero-v2'
-  | 'slick-sc-hero-v3';
+  | 'slick-sc-hero-v3'
+  | 'slick-conclave-hero'
+  | 'slick-conclave-speakers'
+  | 'slick-conclave-agenda'
+  | 'slick-conclave-stats'
+  | 'slick-conclave-register'
+  | 'slick-conclave-guests'
+  | 'slick-sc-saudi-hero';
 
 export type LayoutVariant = "1" | "2" | "3" | "1-2" | "2-1" | "4";
 
@@ -334,6 +343,8 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-scai-vision-channels':      'SCAI Vision — Every Channel',
   'slick-scai-vision-showcase':      'SCAI Vision — GT Showcase',
   'slick-sc-video-showcase': 'SC — Video Showcase',
+  'slick-sc-platform-grid':   'SC — Platform Grid',
+  'slick-sc-privacy-policy':  'SC — Privacy Policy',
   'slick-sc-brand-strip': 'SC — Brand Strip',
   'slick-sc-impact-stats': 'SC — Impact Stats',
   'slick-sc-product-suite': 'SC — Product Suite',
@@ -415,5 +426,12 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sc-navbar': 'SC — Navbar',
   'slick-sc-hero-v2': 'SC — Hero V2 (Person + Floating Cards)',
   'slick-sc-hero-v3': 'SC — Hero V3 (Center Image)',
+  'slick-conclave-hero': 'Conclave — Hero',
+  'slick-conclave-speakers': 'Conclave — Speakers Grid',
+  'slick-conclave-agenda': 'Conclave — Agenda',
+  'slick-conclave-stats': 'Conclave — Stats',
+  'slick-conclave-register': 'Conclave — Register Form',
+  'slick-conclave-guests': 'Conclave — Guests Grid',
+  'slick-sc-saudi-hero': 'SC — Saudi Presence Hero',
   layout: "Layout",
 };

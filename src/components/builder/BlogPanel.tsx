@@ -4,14 +4,33 @@ import { toast } from "sonner";
 
 const BACKEND = "https://salescode-marketplace.salescode.ai";
 
+export type ContentBlockType = 'paragraph' | 'heading2' | 'heading3' | 'image' | 'quote' | 'list' | 'divider';
+
+export interface ContentBlock {
+  id: string;
+  type: ContentBlockType;
+  text?: string;        // paragraph / heading2 / heading3 / quote
+  attribution?: string; // quote
+  url?: string;         // image
+  caption?: string;     // image
+  alt?: string;         // image
+  items?: string[];     // list
+  ordered?: boolean;    // list
+}
+
 export interface BlogPost {
   _id?: string;
   slug: string;
   title: string;
+  category?: string;
   excerpt: string;
   body: string;
-  author: string;
+  content?: ContentBlock[];
+  author?: string;
+  authorRole?: string;
+  readTime?: string;
   featuredImage: string;
+  featuredImageCaption?: string;
   tags: string[];
   status: "draft" | "published";
   publishedAt?: string;

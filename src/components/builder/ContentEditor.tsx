@@ -5005,46 +5005,42 @@ function renderBlockFields(
           <TextInput label="Heading (teal)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
           <Textarea label="Sub text" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 1</p>
-          <ImageField label="Card 1 icon" value={f.c1Icon as string ?? ''} onChange={(v) => set('c1Icon', v)} />
-          <TextInput label="Card 1 title" value={f.c1Title as string ?? ''} onChange={(v) => set('c1Title', v)} />
-          <Textarea label="Card 1 body" value={f.c1Body as string ?? ''} onChange={(v) => set('c1Body', v)} />
+          <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 1 — Left tall (Ultra-Configurable Agents)</p>
+          <TextInput label="Title" value={f.c1Title as string ?? ''} onChange={(v) => set('c1Title', v)} />
+          <Textarea label="Body" value={f.c1Body as string ?? ''} onChange={(v) => set('c1Body', v)} />
+          <ImageField label="Agent image" value={f.c1Image as string ?? ''} onChange={(v) => set('c1Image', v)} />
+          <TextInput label="Caption (teal line)" value={f.c1Caption as string ?? ''} onChange={(v) => set('c1Caption', v)} />
+          <TextInput label="Caption (bold line)" value={f.c1CaptionSub as string ?? ''} onChange={(v) => set('c1CaptionSub', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 2</p>
-          <ImageField label="Card 2 icon" value={f.c2Icon as string ?? ''} onChange={(v) => set('c2Icon', v)} />
-          <TextInput label="Card 2 title" value={f.c2Title as string ?? ''} onChange={(v) => set('c2Title', v)} />
-          <TextInput label="Card 2 body (before bold)" value={f.c2BodyPre as string ?? ''} onChange={(v) => set('c2BodyPre', v)} />
-          <TextInput label="Card 2 body (bold)" value={f.c2BodyBold as string ?? ''} onChange={(v) => set('c2BodyBold', v)} />
-          <TextInput label="Card 2 body (after bold)" value={f.c2BodyPost as string ?? ''} onChange={(v) => set('c2BodyPost', v)} />
+          <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 2 — Middle top (Instant Multi-Channel)</p>
+          <TextInput label="Title" value={f.c2Title as string ?? ''} onChange={(v) => set('c2Title', v)} />
+          <TextInput label="Body (before bold)" value={f.c2BodyPre as string ?? ''} onChange={(v) => set('c2BodyPre', v)} />
+          <TextInput label="Body (bold)" value={f.c2BodyBold as string ?? ''} onChange={(v) => set('c2BodyBold', v)} />
+          <TextInput label="Body (after bold)" value={f.c2BodyPost as string ?? ''} onChange={(v) => set('c2BodyPost', v)} />
+          <ImageField label="Side image" value={f.c2Image as string ?? ''} onChange={(v) => set('c2Image', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 3</p>
-          <ImageField label="Card 3 icon" value={f.c3Icon as string ?? ''} onChange={(v) => set('c3Icon', v)} />
-          <TextInput label="Card 3 title" value={f.c3Title as string ?? ''} onChange={(v) => set('c3Title', v)} />
-          <TextInput label="Card 3 body (before bold)" value={f.c3BodyPre as string ?? ''} onChange={(v) => set('c3BodyPre', v)} />
-          <TextInput label="Card 3 body (bold)" value={f.c3BodyBold as string ?? ''} onChange={(v) => set('c3BodyBold', v)} />
-          <TextInput label="Card 3 body (after bold)" value={f.c3BodyPost as string ?? ''} onChange={(v) => set('c3BodyPost', v)} />
+          <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Banner — Agentic AI CTA</p>
+          <Textarea label="Heading text" value={f.bannerPre as string ?? ''} onChange={(v) => set('bannerPre', v)} />
+          <TextInput label="Big teal text (e.g. AGENTIC AI)" value={f.bannerBold3 as string ?? ''} onChange={(v) => set('bannerBold3', v)} />
+          <TextInput label="CTA button label" value={f.bannerCtaLabel as string ?? ''} onChange={(v) => set('bannerCtaLabel', v)} />
+          <TextInput label="CTA button URL" value={f.bannerCtaUrl as string ?? ''} onChange={(v) => set('bannerCtaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Banner</p>
-          <TextInput label="Banner — normal 1" value={f.bannerPre as string ?? ''} onChange={(v) => set('bannerPre', v)} />
-          <TextInput label="Banner — bold 1" value={f.bannerBold1 as string ?? ''} onChange={(v) => set('bannerBold1', v)} />
-          <TextInput label="Banner — normal 2" value={f.bannerMid as string ?? ''} onChange={(v) => set('bannerMid', v)} />
-          <TextInput label="Banner — bold 2" value={f.bannerBold2 as string ?? ''} onChange={(v) => set('bannerBold2', v)} />
-          <TextInput label="Banner — normal 3" value={f.bannerMid2 as string ?? ''} onChange={(v) => set('bannerMid2', v)} />
-          <TextInput label="Banner — bold 3" value={f.bannerBold3 as string ?? ''} onChange={(v) => set('bannerBold3', v)} />
+          <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 3 — Middle bottom (Train Fast)</p>
+          <TextInput label="Title" value={f.c3Title as string ?? ''} onChange={(v) => set('c3Title', v)} />
+          <TextInput label="Body (before bold)" value={f.c3BodyPre as string ?? ''} onChange={(v) => set('c3BodyPre', v)} />
+          <TextInput label="Body (bold)" value={f.c3BodyBold as string ?? ''} onChange={(v) => set('c3BodyBold', v)} />
+          <TextInput label="Body (after bold)" value={f.c3BodyPost as string ?? ''} onChange={(v) => set('c3BodyPost', v)} />
+          <ImageField label="Side image" value={f.c3Image as string ?? ''} onChange={(v) => set('c3Image', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 4</p>
-          <ImageField label="Card 4 icon" value={f.c4Icon as string ?? ''} onChange={(v) => set('c4Icon', v)} />
-          <TextInput label="Card 4 title" value={f.c4Title as string ?? ''} onChange={(v) => set('c4Title', v)} />
-          <TextInput label="Card 4 body (before bold)" value={f.c4BodyPre as string ?? ''} onChange={(v) => set('c4BodyPre', v)} />
-          <TextInput label="Card 4 body (bold)" value={f.c4BodyBold as string ?? ''} onChange={(v) => set('c4BodyBold', v)} />
-          <TextInput label="Card 4 body (after bold)" value={f.c4BodyPost as string ?? ''} onChange={(v) => set('c4BodyPost', v)} />
+          <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 4 — Right top (Embedded in RTM)</p>
+          <TextInput label="Title" value={f.c4Title as string ?? ''} onChange={(v) => set('c4Title', v)} />
+          <Textarea label="Body" value={f.c4Body as string ?? ''} onChange={(v) => set('c4Body', v)} />
+          <ImageField label="Image" value={f.c4Image as string ?? ''} onChange={(v) => set('c4Image', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 5 — Multilingual</p>
-          <ImageField label="Card 5 icon" value={f.c5Icon as string ?? ''} onChange={(v) => set('c5Icon', v)} />
-          <TextInput label="Card 5 title" value={f.c5Title as string ?? ''} onChange={(v) => set('c5Title', v)} />
-          <Textarea label="Card 5 body" value={f.c5Body as string ?? ''} onChange={(v) => set('c5Body', v)} />
-          <TextInput label="Languages (comma-separated)" value={f.c5Languages as string ?? ''} onChange={(v) => set('c5Languages', v)} />
-          <TextInput label="CTA pill text" value={f.c5Cta as string ?? ''} onChange={(v) => set('c5Cta', v)} />
+          <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 5 — Right bottom (AI Agents)</p>
+          <TextInput label="Title" value={f.c5Title as string ?? ''} onChange={(v) => set('c5Title', v)} />
+          <Textarea label="Body" value={f.c5Body as string ?? ''} onChange={(v) => set('c5Body', v)} />
+          <ImageField label="Visual image" value={f.c5Image as string ?? ''} onChange={(v) => set('c5Image', v)} />
         </div>
       );
 
@@ -5150,6 +5146,192 @@ function renderBlockFields(
             itemPreview={(s) => s || '(empty)'}
             renderItem={(s, u) => <TextInput label="Phrase" value={s} onChange={u} />}
           />
+        </div>
+      );
+
+    case 'slick-sc-privacy-policy':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Hero subheading" value={f.heroSub as string ?? ''} onChange={(v) => set('heroSub', v)} />
+          <TextInput label="Effective date" value={f.effectiveDate as string ?? ''} onChange={(v) => set('effectiveDate', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="CTA eyebrow" value={f.ctaEyebrow as string ?? ''} onChange={(v) => set('ctaEyebrow', v)} />
+          <TextInput label="CTA heading" value={f.ctaHeading as string ?? ''} onChange={(v) => set('ctaHeading', v)} />
+          <TextInput label="CTA subheading" value={f.ctaSub as string ?? ''} onChange={(v) => set('ctaSub', v)} />
+          <TextInput label="CTA button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="CTA button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+        </div>
+      );
+
+    case 'slick-sc-platform-grid':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge text" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Heading (plain)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Subheading" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Footer pre-text" value={f.ctaPreText as string ?? ''} onChange={(v) => set('ctaPreText', v)} />
+          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+        </div>
+      );
+
+    case 'slick-conclave-hero': {
+      return (
+        <div className="space-y-4">
+          <ImageField label="Branding image (logo + heading as one image)" value={f.brandingImageSrc as string ?? ''} onChange={(v) => set('brandingImageSrc', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Date" value={f.date as string ?? ''} onChange={(v) => set('date', v)} />
+          <TextInput label="Venue" value={f.venue as string ?? ''} onChange={(v) => set('venue', v)} />
+          <p className="text-xs text-slate-400">Portrait photos (scrolling strip — add as many as needed)</p>
+          {((f.photos as string[]) ?? []).map((src: string, i: number) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className="flex-1">
+                <ImageField label={`Photo ${i + 1}`} value={src} onChange={(v) => { const arr = [...((f.photos as string[]) ?? [])]; arr[i] = v; set('photos', arr); }} />
+              </div>
+              <button type="button" className="text-xs text-red-400 hover:text-red-300 px-2 py-1 mt-5" onClick={() => { const arr = [...((f.photos as string[]) ?? [])]; arr.splice(i, 1); set('photos', arr); }}>✕</button>
+            </div>
+          ))}
+          <button type="button" className="text-xs text-teal-400 hover:text-teal-300" onClick={() => set('photos', [...((f.photos as string[]) ?? []), ''])}>+ Add photo</button>
+        </div>
+      );
+    }
+
+    case 'slick-conclave-speakers': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading part 1" value={f.heading1 as string ?? ''} onChange={(v) => set('heading1', v)} />
+          <TextInput label="Heading part 2 (teal)" value={f.heading2 as string ?? ''} onChange={(v) => set('heading2', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<string>
+            label="Photos"
+            items={(f.photos as string[]) ?? []}
+            onChange={(v) => set('photos', v)}
+            newItem={() => ''}
+            itemPreview={(url) => url ? url.split('/').pop() ?? 'photo' : '(empty)'}
+            renderItem={(url, update) => (
+              <ImageField label="Photo URL" value={url ?? ''} onChange={(v) => update(v)} />
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-conclave-agenda':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Section heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <ImageField label="Agenda image" value={f.agendaImage as string ?? ''} onChange={(v) => set('agendaImage', v)} />
+        </div>
+      );
+
+    case 'slick-conclave-stats': {
+      type Stat = { value: string; label: string; sublabel?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow line 1" value={f.eyebrow1 as string ?? ''} onChange={(v) => set('eyebrow1', v)} />
+          <TextInput label="Eyebrow line 2 (teal)" value={f.eyebrow2 as string ?? ''} onChange={(v) => set('eyebrow2', v)} />
+          <ImageField label="Banner image (full-width)" value={f.bannerImage as string ?? ''} onChange={(v) => set('bannerImage', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<Stat>
+            label="Stats"
+            items={(f.stats as Stat[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ value: '10+', label: 'Leaders', sublabel: '' })}
+            itemPreview={(s) => `${s.value} ${s.label}`}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Value" value={s.value ?? ''} onChange={(v) => u({ ...s, value: v })} />
+                <TextInput label="Label" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
+                <TextInput label="Sublabel" value={s.sublabel ?? ''} onChange={(v) => u({ ...s, sublabel: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sc-saudi-hero': {
+      type RoleItem = { title: string; subtitle: string };
+      return (
+        <div className="space-y-4">
+          <ImageField label="Logo" value={f.logoSrc as string ?? ''} onChange={(v) => set('logoSrc', v)} />
+          <TextInput label="Eyebrow text" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading English" value={f.headingEn as string ?? ''} onChange={(v) => set('headingEn', v)} />
+          <TextInput label="Heading Arabic" value={f.headingAr as string ?? ''} onChange={(v) => set('headingAr', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-500">Person photos (4 — 2 left, 2 right)</p>
+          {[0, 1, 2, 3].map(i => (
+            <ImageField key={i} label={`Photo ${i + 1}`} value={((f.photos as string[]) ?? [])[i] ?? ''} onChange={(v) => { const arr = [...((f.photos as string[]) ?? ['','','',''])]; arr[i] = v; set('photos', arr); }} />
+          ))}
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <ImageField label="Map image (optional)" value={f.mapSrc as string ?? ''} onChange={(v) => set('mapSrc', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Stat value" value={f.statValue as string ?? ''} onChange={(v) => set('statValue', v)} />
+          <TextInput label="Stat label" value={f.statLabel as string ?? ''} onChange={(v) => set('statLabel', v)} />
+          <Textarea label="Stat description" value={f.statDesc as string ?? ''} onChange={(v) => set('statDesc', v)} />
+          <TextInput label="Stat highlight (teal)" value={f.statHighlight as string ?? ''} onChange={(v) => set('statHighlight', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<RoleItem>
+            label="Team roles"
+            items={(f.roles as RoleItem[]) ?? []}
+            onChange={(v) => set('roles', v)}
+            newItem={() => ({ title: 'Role Title', subtitle: 'Native Arabic/English Speaker' })}
+            itemPreview={(r) => r.title || '(empty)'}
+            renderItem={(r, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={r.title ?? ''} onChange={(v) => u({ ...r, title: v })} />
+                <TextInput label="Subtitle" value={r.subtitle ?? ''} onChange={(v) => u({ ...r, subtitle: v })} />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Language card title" value={f.langTitle as string ?? ''} onChange={(v) => set('langTitle', v)} />
+          <Textarea label="Language card body" value={f.langBody as string ?? ''} onChange={(v) => set('langBody', v)} />
+          <TextInput label="ZATCA card title" value={f.zatcaTitle as string ?? ''} onChange={(v) => set('zatcaTitle', v)} />
+          <Textarea label="ZATCA card body" value={f.zatcaBody as string ?? ''} onChange={(v) => set('zatcaBody', v)} />
+          <TextInput label="Channel card title" value={f.channelTitle as string ?? ''} onChange={(v) => set('channelTitle', v)} />
+          <Textarea label="Channel card body" value={f.channelBody as string ?? ''} onChange={(v) => set('channelBody', v)} />
+        </div>
+      );
+    }
+
+    case 'slick-conclave-guests': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading part 1" value={f.heading1 as string ?? ''} onChange={(v) => set('heading1', v)} />
+          <TextInput label="Heading part 2 (teal)" value={f.heading2 as string ?? ''} onChange={(v) => set('heading2', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<string>
+            label="Photos"
+            items={(f.photos as string[]) ?? []}
+            onChange={(v) => set('photos', v)}
+            newItem={() => ''}
+            itemPreview={(url) => url ? url.split('/').pop() ?? 'photo' : '(empty)'}
+            renderItem={(url, update) => (
+              <ImageField label="Photo URL" value={url ?? ''} onChange={(v) => update(v)} />
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-conclave-register':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading line 1" value={f.heading1 as string ?? ''} onChange={(v) => set('heading1', v)} />
+          <TextInput label="Heading line 2 (teal)" value={f.heading2 as string ?? ''} onChange={(v) => set('heading2', v)} />
+          <TextInput label="Date" value={f.date as string ?? ''} onChange={(v) => set('date', v)} />
+          <TextInput label="Venue" value={f.venue as string ?? ''} onChange={(v) => set('venue', v)} />
+          <TextInput label="Form heading line 1 (teal)" value={f.formHeading1 as string ?? ''} onChange={(v) => set('formHeading1', v)} />
+          <TextInput label="Form heading line 2 (white)" value={f.formHeading2 as string ?? ''} onChange={(v) => set('formHeading2', v)} />
+          <TextInput label="Submit button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="Form endpoint URL" value={f.formEndpoint as string ?? ''} onChange={(v) => set('formEndpoint', v)} />
         </div>
       );
 
