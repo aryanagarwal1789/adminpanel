@@ -1,11 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { MARKETPLACE_URL } from "@/lib/config";
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAdminPreview } from './preview-context';
 import { UploadInput } from './upload-input';
 
 export const Route = createFileRoute('/admin/sections')({ component: SectionsPage });
 
-const BACKEND = 'https://salescode-marketplace.salescode.ai';
+const BACKEND = MARKETPLACE_URL;
 
 interface SectionItem {
   id: string;

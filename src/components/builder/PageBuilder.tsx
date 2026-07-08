@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MARKETPLACE_URL } from "@/lib/config";
 import { toast } from "sonner";
 import {
   Undo2, Redo2, Plus, Eye, EyeOff, Trash2, GripVertical,
@@ -146,7 +147,7 @@ const INITIAL_STATE: BuilderState = {
   pageBlocks: { landing: seedLanding(), about: [], pricing: [], contact: [] },
 };
 
-const BACKEND = "https://salescode-marketplace.salescode.ai";
+const BACKEND = MARKETPLACE_URL;
 
 export function PageBuilder() {
   // History stack

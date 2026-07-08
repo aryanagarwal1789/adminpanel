@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { MARKETPLACE_UPLOAD_URL } from "@/lib/config";
 import { ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
 import type { ButtonField, LinkField } from "./defaults";
 
@@ -33,7 +34,7 @@ export function Textarea({ label, value, onChange, rows = 3 }: { label: string; 
   );
 }
 
-const UPLOAD_URL = "https://salescode-marketplace.salescode.ai/site/upload";
+const UPLOAD_URL = MARKETPLACE_UPLOAD_URL;
 
 export function VideoField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   const [uploading, setUploading] = useState(false);

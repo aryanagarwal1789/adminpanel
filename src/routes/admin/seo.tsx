@@ -1,10 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { MARKETPLACE_URL } from "@/lib/config";
 import { useEffect, useState } from 'react';
 import { UploadInput } from './upload-input';
 
 export const Route = createFileRoute('/admin/seo')({ component: SeoPage });
 
-const BACKEND = 'https://salescode-marketplace.salescode.ai';
+const BACKEND = MARKETPLACE_URL;
 
 const PAGE_TABS = [
   { key: 'landing',    label: 'Landing'    },

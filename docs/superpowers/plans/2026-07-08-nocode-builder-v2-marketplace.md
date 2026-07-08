@@ -10,6 +10,12 @@
 
 **Repo for every path in this plan:** `/Users/salescode/Desktop/Work/salescodemarketplace`
 
+> **⚠️ REPRIORITIZED 2026-07-08 (user directive):** i18n for **old (v1) pages is priority one**, and **no old data may be migrated**. Therefore:
+> - **Task 1's index change + `migrateBuilderPagesSiteKey` script are DEFERRED** (they belong to later multi-site work). Do **not** change the `builderpages` unique index and do **not** run any migration now.
+> - Execution order is now: **(1) Task 4 Translation model → (2) Task 5 overlay engine → (3) legacy `/site/builder` `?locale` overlay + translations CRUD** (a trimmed, additive version of Task 8/Task 7 that leaves old create/store and the pageKey-only queries untouched, keyed by a `DEFAULT_SITE_KEY` constant defined in a new `src/config/site.ts`).
+> - Site-scoped routes (Task 3, Task 6) and the siteKey field on `builderpages` come **after** legacy i18n, and will be done additively (new fields default; index change only when multi-site is actually needed).
+> - Old and new page create/store must both keep working; new v2 create/store is added additively (a `tree` field) with no migration.
+
 ## Global Constraints
 
 - **No test framework / no test files** in marketplace (user directive). Each task is verified manually via `curl` against a locally-running dev server (`npm run dev`, connects to your dev Mongo) or a throwaway `npx ts-node -e` eval. Never commit a test file.

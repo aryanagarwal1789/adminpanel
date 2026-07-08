@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { MARKETPLACE_URL } from "@/lib/config";
 import {
   AlignLeft, ChevronDown, ChevronUp, ExternalLink,
   FileText, Globe, Heading2, Heading3, ImageIcon,
@@ -7,7 +8,7 @@ import {
 import { toast } from "sonner";
 import type { BlogPost, ContentBlock, ContentBlockType } from "./BlogPanel";
 
-const BACKEND = "https://salescode-marketplace.salescode.ai";
+const BACKEND = MARKETPLACE_URL;
 const UPLOAD_URL = `${BACKEND}/site/upload`;
 const RENDERER  = (import.meta.env.VITE_RENDERER_URL as string | undefined) ?? "https://demo-experience.salescode.ai";
 

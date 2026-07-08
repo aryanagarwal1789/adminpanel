@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
+import { MARKETPLACE_UPLOAD_URL } from "@/lib/config";
 
-const UPLOAD_URL = 'https://salescode-marketplace.salescode.ai/site/upload';
+const UPLOAD_URL = MARKETPLACE_UPLOAD_URL;
 
 const inp: React.CSSProperties = {
   background: '#0f172a', border: '1px solid #334155', color: '#f1f5f9',

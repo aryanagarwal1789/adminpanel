@@ -1,9 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { MARKETPLACE_URL } from "@/lib/config";
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 export const Route = createFileRoute('/admin/products/')({ component: ProductsPage });
 
-const BACKEND = 'https://salescode-marketplace.salescode.ai';
+const BACKEND = MARKETPLACE_URL;
 
 interface Product {
   productId: string;

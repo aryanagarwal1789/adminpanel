@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { MARKETPLACE_URL, MARKETPLACE_UPLOAD_URL } from "@/lib/config";
 import {
   FileText, Globe, X, Trash2, ExternalLink,
   AlignLeft, Heading2, Heading3, ImageIcon, Quote,
@@ -7,8 +8,8 @@ import {
 import { toast } from "sonner";
 import type { BlogPost, ContentBlock, ContentBlockType } from "./BlogPanel";
 
-const BACKEND = "https://salescode-marketplace.salescode.ai";
-const UPLOAD_URL = "https://salescode-marketplace.salescode.ai/site/upload";
+const BACKEND = MARKETPLACE_URL;
+const UPLOAD_URL = MARKETPLACE_UPLOAD_URL;
 
 function uid() { return Math.random().toString(36).slice(2, 10); }
 

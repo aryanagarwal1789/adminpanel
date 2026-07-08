@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
+import { MARKETPLACE_URL } from "@/lib/config";
 import { FileText, Plus } from "lucide-react";
 import { toast } from "sonner";
 
-const BACKEND = "https://salescode-marketplace.salescode.ai";
+const BACKEND = MARKETPLACE_URL;
 
 export type ContentBlockType = 'paragraph' | 'heading2' | 'heading3' | 'image' | 'quote' | 'list' | 'divider';
 

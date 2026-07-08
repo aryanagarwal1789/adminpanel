@@ -1,10 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { MARKETPLACE_URL } from "@/lib/config";
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAdminPreview } from './preview-context';
 
 export const Route = createFileRoute('/admin/contact')({ component: ContactPage });
 
-const BACKEND = 'https://salescode-marketplace.salescode.ai';
+const BACKEND = MARKETPLACE_URL;
 
 interface ContactData {
   title: string;
