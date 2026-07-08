@@ -190,31 +190,34 @@ Branches on `schemaVersion`: `2` → recursive renderer; legacy → existing fla
 
 ## 8. Internationalization (i18n)
 
-**Base text lives inline in the config; translations are per-locale key→text bundles stored in Mongo and edited in adminpanel; marketplace overlays them at read time.**
+**Applies to BOTH legacy (v1 flat `blocks`) and new (v2 `tree`) pages.** Base text lives inline in the config; translations are per-locale key→text bundles stored in Mongo and edited in adminpanel; marketplace overlays them at read time via a **schema-agnostic, path-based engine**.
 
-- The config tree stores the **default-locale (e.g. `en`) text inline** — authors type text in the builder exactly as today.
-- Each translatable prop has a **stable key**, auto-derived: `pageKey.nodeId.propPath` (e.g. `landing.n2.text`).
-- Translation bundles are stored per site + locale:
+- **Base (default-locale, e.g. `en`) text stays inline** in the stored config — v2 in node `props`, v1 in block `fields`. Authors type text in the builder as today; no change to base-language authoring.
+- **Translation key** = `<pageKey>.<entityId>.<propPath>`, where `entityId` is the node id (v2) or block id (v1) and `propPath` is the dot-path to the string leaf within `props`/`fields`. Examples: `landing.n2.text`, `landing.b1.items.0.title`.
+- Bundles are stored per site + locale (one doc spans all pages of the site; the page-prefixed keys disambiguate):
 
 ```jsonc
 // translations collection (Mongo), adminpanel-edited
 { "siteKey": "demo-experience", "locale": "es",
   "strings": { "landing.n2.text": "Crece tus ventas con IA",
-               "landing.n3.label": "Empezar" } }
+               "landing.b1.headline": "El futuro de las ventas" } }
 ```
 
+- **Overlay engine (schema-agnostic):** walk the page doc; for every entity (v2 node OR v1 block) and every string leaf in its content, compute the key; if present in `strings`, replace the value; otherwise keep the base. **Identical logic for both schemas** — the bundle alone determines what is translated, so legacy pages need no per-type "translatable-field" registry.
+- **What the editor offers as translatable:** v2 uses the registry `translatable` flag (precise). v1 has no registry, so adminpanel lists the page's string leaves as candidates and the author marks which to translate (URLs/colors/image srcs excluded by the author). Only marked strings get keys written to the bundle.
 - **adminpanel** gets a translations panel: pick a locale, edit strings side-by-side with base (optional machine-seed to pre-fill). Saved to Mongo — adding/fixing a language needs **no deploy**.
 - **Read path** (marketplace):
 
 ```
 GET /site/{siteKey}/builder/pages/{pageKey}?locale=es      (host→siteKey, +locale)
-  → load page doc from Mongo (base = default-locale text inline)
-  → if locale ≠ defaultLocale: overlay translations[locale] onto translatable props by key
+  → load page doc (v1 blocks[] OR v2 tree; base text inline)
+  → if locale ≠ defaultLocale: overlay the page's strings from translations[locale]
   → missing key → fall back to base text
-  → return fully-localized tree
+  → return localized doc (same shape it was stored in)
 ```
 
-The overlay is cheap string substitution on pre-authored bundles — fast, deterministic, cacheable. No live machine translation on the request path.
+- **self-serve** passes `?locale` on BOTH the v2 fetch and the legacy fetch. The legacy flat renderer needs no change — it renders whatever (already-localized) text it receives.
+- The overlay is cheap string substitution on pre-authored bundles — fast, deterministic, cacheable. No live machine translation on the request path.
 
 ---
 
@@ -273,6 +276,7 @@ involved in serving it.
 - Existing pages stay **frozen on the legacy flat renderer**, selected by `schemaVersion` (v1/absent → flat renderer; `2` → recursive renderer).
 - **No converter, no porting** of the 182 legacy types this iteration.
 - Same `builderpages` collection for both; the version field discriminates.
+- **i18n is the one capability legacy pages DO gain** — the schema-agnostic overlay engine (§8) localizes v1 `blocks[].fields` too. Only *structure and components* are frozen; text can be translated on both v1 and v2 pages.
 - Consequence: two renderers coexist in self-serve indefinitely until legacy pages are retired or rebuilt.
 
 ---
