@@ -149,22 +149,29 @@ const INITIAL_STATE: BuilderState = {
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 
 export function PageBuilder() {
-  // History stack
-  const [history, setHistory] = useState<BuilderState[]>([INITIAL_STATE]);
-  const [histIdx, setHistIdx] = useState(0);
-  const state = history[histIdx];
+  // Undo/redo history — stack + index kept in a SINGLE state object so they can
+  // never desync. (Previously these were two separate useState values updated in
+  // commit(); because setHistory used the stale closure `histIdx` while setHistIdx
+  // used a functional update, two commits in quick succession — e.g. StrictMode
+  // double-invoking the bootstrap effect — pushed the index past the stack length,
+  // leaving state undefined and wiping loaded pages back to defaults.)
+  const [hist, setHist] = useState<{ stack: BuilderState[]; idx: number }>({
+    stack: [INITIAL_STATE],
+    idx: 0,
+  });
+  const state = hist.stack[hist.idx] ?? INITIAL_STATE;
   const { pages, pageBlocks } = state;
 
   const commit = useCallback((next: BuilderState) => {
-    setHistory((h) => {
-      const trimmed = h.slice(0, histIdx + 1);
+    setHist(({ stack, idx }) => {
+      const trimmed = stack.slice(0, idx + 1);
       trimmed.push(next);
-      // cap history to 50
+      // cap history to 50 entries
       const overflow = Math.max(0, trimmed.length - 50);
-      return trimmed.slice(overflow);
+      const newStack = trimmed.slice(overflow);
+      return { stack: newStack, idx: newStack.length - 1 };
     });
-    setHistIdx((i) => Math.min(i + 1, 49));
-  }, [histIdx]);
+  }, []);
 
   const [activePage, setActivePage] = useState<string>("landing");
   const [loading, setLoading] = useState(true);
@@ -383,10 +390,11 @@ export function PageBuilder() {
     sendToIframe(msg);
   };
 
-  const canUndo = histIdx > 0;
-  const canRedo = histIdx < history.length - 1;
-  const undo = () => canUndo && setHistIdx((i) => i - 1);
-  const redo = () => canRedo && setHistIdx((i) => i + 1);
+  const canUndo = hist.idx > 0;
+  const canRedo = hist.idx < hist.stack.length - 1;
+  const undo = () => setHist((h) => (h.idx > 0 ? { ...h, idx: h.idx - 1 } : h));
+  const redo = () =>
+    setHist((h) => (h.idx < h.stack.length - 1 ? { ...h, idx: h.idx + 1 } : h));
 
   // Bootstrap: load pages list + first page blocks from backend
   useEffect(() => {

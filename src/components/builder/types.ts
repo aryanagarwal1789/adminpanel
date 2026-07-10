@@ -83,6 +83,8 @@ export type TemplateBlockType =
   | 'slick-scai-vision-performance'
   | 'slick-scai-vision-channels'
   | 'slick-scai-vision-showcase'
+  | 'slick-scai-vision-stat-bar'
+  | 'slick-scai-vision-measures'
   | 'slick-sc-video-showcase'
   | 'slick-sc-platform-grid'
   | 'slick-sc-privacy-policy'
@@ -160,6 +162,7 @@ export type TemplateBlockType =
   | 'slick-ab-journey'
   | 'slick-ab-cta'
   | 'slick-contact'
+  | 'slick-sc-contact-hs'
   | 'slick-lets-talk'
   | 'slick-offices'
   | 'slick-sc-footer'
@@ -178,7 +181,86 @@ export type TemplateBlockType =
   | 'slick-sc-saudi-presence'
   | 'slick-sc-saudi-platform'
   | 'slick-sc-saudi-products'
-  | 'slick-sc-saudi-video';
+  | 'slick-sc-saudi-video'
+  | 'slick-ac-hero'
+  | 'slick-ac-how-it-works'
+  | 'slick-ac-problem'
+  | 'slick-ac-capabilities'
+  | 'slick-ac-stats'
+  | 'slick-ac-execution'
+  | 'slick-ac-pitch'
+  | 'slick-ac-scenario'
+  | 'slick-ac-launch'
+  | 'slick-ac-objections'
+  | 'slick-ac-backend'
+  | 'slick-ac-cta'
+  | 'slick-ac-brand-strip'
+  | 'slick-da-hero'
+  | 'slick-da-brand-strip'
+  | 'slick-da-problem'
+  | 'slick-da-darkpanel'
+  | 'slick-da-workflow'
+  | 'slick-da-capabilities'
+  | 'slick-da-split'
+  | 'slick-da-impact'
+  | 'slick-da-proof'
+  | 'slick-da-cta'
+  | 'slick-pe-hero'
+  | 'slick-pe-statbar'
+  | 'slick-pe-problem'
+  | 'slick-pe-darkpanel'
+  | 'slick-pe-stages'
+  | 'slick-pe-capabilities'
+  | 'slick-pe-split'
+  | 'slick-pe-impact'
+  | 'slick-pe-proof'
+  | 'slick-rs-hero'
+  | 'slick-rs-brand-strip'
+  | 'slick-rs-problem'
+  | 'slick-rs-compare'
+  | 'slick-rs-darkpanel'
+  | 'slick-rs-problemgrid'
+  | 'slick-rs-capabilities'
+  | 'slick-rs-split'
+  | 'slick-rs-impact'
+  | 'slick-sv-hero'
+  | 'slick-sv-scale'
+  | 'slick-sv-problem'
+  | 'slick-sv-darkpanel'
+  | 'slick-sv-stages'
+  | 'slick-sv-accuracy'
+  | 'slick-sv-features'
+  | 'slick-sv-split'
+  | 'slick-sv-proof'
+  | 'slick-su-hero'
+  | 'slick-su-scale'
+  | 'slick-su-problem'
+  | 'slick-su-lossrail'
+  | 'slick-su-timeline'
+  | 'slick-su-engine'
+  | 'slick-su-guarantee'
+  | 'slick-mt-hero'
+  | 'slick-mt-statbar'
+  | 'slick-mt-problem'
+  | 'slick-mt-split'
+  | 'slick-mt-icards'
+  | 'slick-mt-darktabs'
+  | 'slick-mt-darkpanel'
+  | 'slick-mt-features'
+  | 'slick-mt-proof'
+  | 'slick-mt-trust'
+  | 'slick-ud-problem'
+  | 'slick-ud-timeline'
+  | 'slick-ud-impact'
+  | 'slick-sn-hero'
+  | 'slick-sn-scale'
+  | 'slick-sn-problem'
+  | 'slick-sn-howitworks'
+  | 'slick-sn-features'
+  | 'slick-sn-spotlight'
+  | 'slick-sn-darkcard'
+  | 'slick-sn-recovery'
+  | 'slick-sn-proof';
 
 export type LayoutVariant = "1" | "2" | "3" | "1-2" | "2-1" | "4";
 
@@ -348,6 +430,8 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-scai-vision-performance':   'SCAI Vision — Performance',
   'slick-scai-vision-channels':      'SCAI Vision — Every Channel',
   'slick-scai-vision-showcase':      'SCAI Vision — GT Showcase',
+  'slick-scai-vision-stat-bar':      'SCAI Vision — Stat Bar',
+  'slick-scai-vision-measures':      'SCAI Vision — Measures Tabs',
   'slick-sc-video-showcase': 'SC — Video Showcase',
   'slick-sc-platform-grid':   'SC — Platform Grid',
   'slick-sc-privacy-policy':  'SC — Privacy Policy',
@@ -425,6 +509,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-ab-journey': 'About Us — Our Journey (Timeline)',
   'slick-ab-cta': 'About Us — CTA',
   'slick-contact': 'Contact — Form & Schedule',
+  'slick-sc-contact-hs': 'Contact — HubSpot Embed (native captcha)',
   'slick-lets-talk': 'Contact — Let\'s Talk Journey',
   'slick-offices': 'Contact — Our Offices',
   'slick-sc-footer': 'SC — Footer (Teal)',
@@ -444,5 +529,84 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sc-saudi-platform': 'SC — Saudi Platform Image',
   'slick-sc-saudi-products': 'SC — Saudi Products',
   'slick-sc-saudi-video': 'SC — Saudi Video',
+  'slick-ac-hero': 'AI Coach — Hero',
+  'slick-ac-how-it-works': 'AI Coach — How It Works',
+  'slick-ac-problem': 'AI Coach — Problem (Broken Coaching)',
+  'slick-ac-capabilities': 'AI Coach — Capabilities',
+  'slick-ac-stats': 'AI Coach — Impact Stats',
+  'slick-ac-execution': 'AI Coach — Built Into Execution',
+  'slick-ac-pitch': 'AI Coach — Perfect Every Pitch (Tabs)',
+  'slick-ac-scenario': 'AI Coach — Coach in Any Scenario (Tabs)',
+  'slick-ac-launch': 'AI Coach — 2-Minute Launch',
+  'slick-ac-objections': 'AI Coach — Handle Objections',
+  'slick-ac-backend': 'AI Coach — Backend to Frontend (Tabs)',
+  'slick-ac-cta': 'AI Coach — Final CTA',
+  'slick-ac-brand-strip': 'AI Coach — Brand Strip (marquee)',
+  'slick-da-hero': 'Delivery App — Hero',
+  'slick-da-brand-strip': 'Delivery App — Brand Strip',
+  'slick-da-problem': 'Delivery App — Market Problem (Cited)',
+  'slick-da-darkpanel': 'Delivery App — Dark Panel',
+  'slick-da-workflow': 'Delivery App — How It Works',
+  'slick-da-capabilities': 'Delivery App — Capabilities',
+  'slick-da-split': 'Delivery App — In-App Split',
+  'slick-da-impact': 'Delivery App — Impact Cards',
+  'slick-da-proof': 'Delivery App — Proof',
+  'slick-da-cta': 'Delivery App — CTA Banner',
+  'slick-pe-hero': 'Promo Engine — Hero',
+  'slick-pe-statbar': 'Promo Engine — Stat Bar',
+  'slick-pe-problem': 'Promo Engine — Market Problem (Cited)',
+  'slick-pe-darkpanel': 'Promo Engine — Dark Panel',
+  'slick-pe-stages': 'Promo Engine — How It Works',
+  'slick-pe-capabilities': 'Promo Engine — Capabilities',
+  'slick-pe-split': 'Promo Engine — Lifecycle Split',
+  'slick-pe-impact': 'Promo Engine — Impact Cards',
+  'slick-pe-proof': 'Promo Engine — Reported Impact',
+  'slick-rs-hero': 'Rural SFA — Hero',
+  'slick-rs-brand-strip': 'Rural SFA — Brand Strip',
+  'slick-rs-problem': 'Rural SFA — Market Problem (Cited)',
+  'slick-rs-compare': 'Rural SFA — Compare Grid',
+  'slick-rs-darkpanel': 'Rural SFA — Dark Panel',
+  'slick-rs-problemgrid': 'Rural SFA — How It Works Grid',
+  'slick-rs-capabilities': 'Rural SFA — Capabilities',
+  'slick-rs-split': 'Rural SFA — In-App Split',
+  'slick-rs-impact': 'Rural SFA — Impact Cards',
+  'slick-sv-hero': 'SCAI Vision — Hero',
+  'slick-sv-scale': 'SCAI Vision — Scale / Trust',
+  'slick-sv-problem': 'SCAI Vision — Market Problem (Cited)',
+  'slick-sv-darkpanel': 'SCAI Vision — Dark Panel',
+  'slick-sv-stages': 'SCAI Vision — How It Works',
+  'slick-sv-accuracy': 'SCAI Vision — Accuracy Bar',
+  'slick-sv-features': 'SCAI Vision — Six Checks Grid',
+  'slick-sv-split': 'SCAI Vision — Split (reversible)',
+  'slick-sv-proof': 'SCAI Vision — Proof Cards',
+  'slick-su-hero': 'Urban SFA — Hero',
+  'slick-su-scale': 'Urban SFA — Trust & Scale',
+  'slick-su-problem': 'Urban SFA — Market Problem (Cited)',
+  'slick-su-lossrail': 'Urban SFA — Cost of Legacy (Loss Rail)',
+  'slick-su-timeline': 'Urban SFA — Day Timeline',
+  'slick-su-engine': 'Urban SFA — AI Engine',
+  'slick-su-guarantee': 'Urban SFA — Guarantee',
+  'slick-mt-hero': 'Modern Trade — Hero',
+  'slick-mt-statbar': 'Modern Trade — Stat Bar',
+  'slick-mt-problem': 'Modern Trade — Market Problem (Cited)',
+  'slick-mt-split': 'Modern Trade — Split (reversible)',
+  'slick-mt-icards': 'Modern Trade — Rich Impact Cards',
+  'slick-mt-darktabs': 'Modern Trade — Dark Tabbed Metrics',
+  'slick-mt-darkpanel': 'Modern Trade — Dark Panel',
+  'slick-mt-features': 'Modern Trade — Feature Grid',
+  'slick-mt-proof': 'Modern Trade — Proof Cards',
+  'slick-mt-trust': 'Modern Trade — Trust / Logos',
+  'slick-ud-problem': 'Urban DMS — Market Problem',
+  'slick-ud-timeline': 'Urban DMS — How It Works',
+  'slick-ud-impact': 'Urban DMS — Modules / Impact',
+  'slick-sn-hero': 'AI Supervisor — Hero',
+  'slick-sn-scale': 'AI Supervisor — Platform Scale',
+  'slick-sn-problem': 'AI Supervisor — Manager Time Crisis',
+  'slick-sn-howitworks': 'AI Supervisor — How It Works (Steps)',
+  'slick-sn-features': 'AI Supervisor — Features',
+  'slick-sn-spotlight': 'AI Supervisor — Spotlight Split',
+  'slick-sn-darkcard': 'AI Supervisor — Dark Copilot Card',
+  'slick-sn-recovery': 'AI Supervisor — Order Recovery',
+  'slick-sn-proof': 'AI Supervisor — Proof Cards',
   layout: "Layout",
 };

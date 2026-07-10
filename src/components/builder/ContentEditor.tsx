@@ -2792,13 +2792,27 @@ function renderBlockFields(
           <TextInput label="Label — bottom right" value={f.labelBR as string ?? ''} onChange={(v) => set('labelBR', v)} />
         </div>
       );
-    case 'slick-sfa-typical':
+    case 'slick-sfa-typical': {
+      type TypSlide = { imageUrl?: string; imageAlt?: string };
       return (
         <div className="space-y-4">
           <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
           <TextInput label="Heading gradient (red)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <NumberInput label="Autoplay interval (ms, 0 = off)" value={f.autoplayMs as number ?? 3000} onChange={(v) => set('autoplayMs', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Center image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
+          <Repeater<TypSlide>
+            label="Slides"
+            items={(f.slides as TypSlide[]) ?? []}
+            onChange={(v) => set('slides', v)}
+            newItem={() => ({ imageUrl: '', imageAlt: '' })}
+            itemPreview={(s) => s.imageAlt || 'Slide'}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <ImageField label="Slide image" value={s.imageUrl ?? ''} onChange={(v) => u({ ...s, imageUrl: v })} />
+                <TextInput label="Image alt" value={s.imageAlt ?? ''} onChange={(v) => u({ ...s, imageAlt: v })} />
+              </div>
+            )}
+          />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Label — top left" value={f.labelTL as string ?? ''} onChange={(v) => set('labelTL', v)} />
           <TextInput label="Label — bottom left" value={f.labelBL as string ?? ''} onChange={(v) => set('labelBL', v)} />
@@ -2806,6 +2820,7 @@ function renderBlockFields(
           <TextInput label="Label — bottom right" value={f.labelBR as string ?? ''} onChange={(v) => set('labelBR', v)} />
         </div>
       );
+    }
     case 'slick-sfa-revenue-loss':
       return (
         <div className="space-y-4">
@@ -4355,6 +4370,22 @@ function renderBlockFields(
         </div>
       );
 
+    case 'slick-sc-contact-hs':
+      return (
+        <div className="space-y-4">
+          <TextInput label="HubSpot Portal ID" value={f.portalId as string ?? ''} onChange={(v) => set('portalId', v)} />
+          <TextInput label="HubSpot Form ID (GUID)" value={f.formId as string ?? ''} onChange={(v) => set('formId', v)} />
+          <TextInput label="HubSpot Region (e.g. na1, eu1)" value={f.region as string ?? ''} onChange={(v) => set('region', v)} />
+          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Lede" value={f.lede as string ?? ''} onChange={(v) => set('lede', v)} />
+          <TextInput label="Card title" value={f.cardTitle as string ?? ''} onChange={(v) => set('cardTitle', v)} />
+          <Textarea label="Card subtitle" value={f.cardSub as string ?? ''} onChange={(v) => set('cardSub', v)} />
+        </div>
+      );
+
     case 'slick-contact':
       return (
         <div className="space-y-4">
@@ -4466,6 +4497,78 @@ function renderBlockFields(
                 <TextInput label="Card label (e.g. Increase)" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
                 <TextInput label="Value (e.g. 2x)" value={s.value ?? ''} onChange={(v) => u({ ...s, value: v })} />
                 <TextInput label="Description" value={s.desc ?? ''} onChange={(v) => u({ ...s, desc: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-scai-vision-stat-bar': {
+      type SBItem = { value?: string; label?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow (badge)" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<SBItem>
+            label="Stats"
+            items={(f.stats as SBItem[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ value: '0x', label: 'New metric' })}
+            itemPreview={(s) => `${s.value ?? ''} — ${s.label ?? '(empty)'}`}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Value (e.g. 95%+)" value={s.value ?? ''} onChange={(v) => u({ ...s, value: v })} />
+                <TextInput label="Label" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-scai-vision-measures': {
+      type MRow = { kPre?: string; kHl?: string; kPost?: string; v?: string };
+      type MTab = { label?: string; headingPre?: string; headingAccent?: string; body?: string; bigValue?: string; bigLabel?: string; rows?: MRow[]; imageUrl?: string; imageAlt?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow (badge)" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<MTab>
+            label="Tabs"
+            items={(f.tabs as MTab[]) ?? []}
+            onChange={(v) => set('tabs', v)}
+            newItem={() => ({ label: 'New tab', headingPre: 'Heading ', headingAccent: 'accent', body: '', bigValue: '0x', bigLabel: '', rows: [], imageUrl: '', imageAlt: '' })}
+            itemPreview={(t) => t.label || '(tab)'}
+            renderItem={(t, u) => (
+              <div className="space-y-2">
+                <TextInput label="Tab label" value={t.label ?? ''} onChange={(v) => u({ ...t, label: v })} />
+                <TextInput label="Panel heading prefix" value={t.headingPre ?? ''} onChange={(v) => u({ ...t, headingPre: v })} />
+                <TextInput label="Panel heading accent (teal)" value={t.headingAccent ?? ''} onChange={(v) => u({ ...t, headingAccent: v })} />
+                <Textarea label="Body" value={t.body ?? ''} onChange={(v) => u({ ...t, body: v })} />
+                <TextInput label="Big value (e.g. 95%+)" value={t.bigValue ?? ''} onChange={(v) => u({ ...t, bigValue: v })} />
+                <TextInput label="Big value label" value={t.bigLabel ?? ''} onChange={(v) => u({ ...t, bigLabel: v })} />
+                <ImageField label="Panel image" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
+                <TextInput label="Image alt / placeholder caption" value={t.imageAlt ?? ''} onChange={(v) => u({ ...t, imageAlt: v })} />
+                <Repeater<MRow>
+                  label="Rows"
+                  items={t.rows ?? []}
+                  onChange={(v) => u({ ...t, rows: v })}
+                  newItem={() => ({ kPre: '', kHl: 'highlight', kPost: '', v: '' })}
+                  itemPreview={(r) => `${r.kPre ?? ''}${r.kHl ?? ''}${r.kPost ?? ''}`.trim() || '(row)'}
+                  renderItem={(r, ur) => (
+                    <div className="space-y-2">
+                      <TextInput label="Label — before highlight" value={r.kPre ?? ''} onChange={(v) => ur({ ...r, kPre: v })} />
+                      <TextInput label="Label — highlighted (teal)" value={r.kHl ?? ''} onChange={(v) => ur({ ...r, kHl: v })} />
+                      <TextInput label="Label — after highlight" value={r.kPost ?? ''} onChange={(v) => ur({ ...r, kPost: v })} />
+                      <TextInput label="Sub value" value={r.v ?? ''} onChange={(v) => ur({ ...r, v: v })} />
+                    </div>
+                  )}
+                />
               </div>
             )}
           />
@@ -5480,6 +5583,2191 @@ function renderBlockFields(
           <TextInput label="Form endpoint URL" value={f.formEndpoint as string ?? ''} onChange={(v) => set('formEndpoint', v)} />
         </div>
       );
+
+    case 'slick-ac-hero':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill (bold prefix)" value={f.pillPre as string ?? ''} onChange={(v) => set('pillPre', v)} />
+          <TextInput label="Pill (rest)" value={f.pillPost as string ?? ''} onChange={(v) => set('pillPost', v)} />
+          <TextInput label="Heading line 1" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading line 2 (teal gradient)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <Textarea label="Subtitle (start)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <TextInput label="Subtitle (bold/white middle)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
+          <TextInput label="Subtitle (tail)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
+          <ImageField label="Hero screenshot URL" value={f.heroImageUrl as string ?? ''} onChange={(v) => set('heroImageUrl', v)} />
+          <TextInput label="Hero image alt" value={f.heroImageAlt as string ?? ''} onChange={(v) => set('heroImageAlt', v)} />
+        </div>
+      );
+
+    case 'slick-ac-how-it-works': {
+      type HiwStep = { title: string; desc: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <ImageField label="Center circle photo URL" value={f.centerImageUrl as string ?? ''} onChange={(v) => set('centerImageUrl', v)} />
+          <Repeater<HiwStep>
+            label="Steps (3)"
+            items={(f.steps as HiwStep[]) ?? []}
+            onChange={(v) => set('steps', v)}
+            newItem={() => ({ title: 'STEP', desc: 'Step description.' })}
+            itemPreview={(s) => s.title}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title (e.g. SETUP)" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
+                <Textarea label="Description" value={s.desc ?? ''} onChange={(v) => u({ ...s, desc: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-ac-problem': {
+      type ProbCard = { icon: string; title: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge (red)" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading red word 1" value={f.headingRed1 as string ?? ''} onChange={(v) => set('headingRed1', v)} />
+          <TextInput label="Heading (mid)" value={f.headingMid as string ?? ''} onChange={(v) => set('headingMid', v)} />
+          <TextInput label="Heading red word 2" value={f.headingRed2 as string ?? ''} onChange={(v) => set('headingRed2', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<ProbCard>
+            label="Problem cards (5)"
+            items={(f.cards as ProbCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ icon: 'head', title: 'Problem' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Icon (head / msg / eye / target / chart)" value={c.icon ?? ''} onChange={(v) => u({ ...c, icon: v })} />
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+              </div>
+            )}
+          />
+          <TextInput label="Stat number (e.g. 3–8% Sales Lost)" value={f.statNum as string ?? ''} onChange={(v) => set('statNum', v)} />
+          <Textarea label="Stat caption (start)" value={f.statPre as string ?? ''} onChange={(v) => set('statPre', v)} />
+          <TextInput label="Stat caption (bold end)" value={f.statBold as string ?? ''} onChange={(v) => set('statBold', v)} />
+        </div>
+      );
+    }
+
+    case 'slick-ac-capabilities': {
+      type CapCard = { icon: string; title: string; desc: string; highlight?: boolean };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<CapCard>
+            label="Capability cards (6)"
+            items={(f.cards as CapCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ icon: 'spark', title: 'Feature', desc: 'Feature description.' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Icon (refresh / head / target / msg / chart / spark)" value={c.icon ?? ''} onChange={(v) => u({ ...c, icon: v })} />
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Description" value={c.desc ?? ''} onChange={(v) => u({ ...c, desc: v })} />
+                <Toggle label="Highlight card (teal gradient)" value={c.highlight ?? false} onChange={(v) => u({ ...c, highlight: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-ac-stats': {
+      type Stat = { num: string; unit: string; label: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Repeater<Stat>
+            label="Stats (4 columns)"
+            items={(f.stats as Stat[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ num: '0', unit: '%', label: 'Stat label' })}
+            itemPreview={(s) => `${s.num}${s.unit}`}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
+                <TextInput label="Unit (%, min, /7…)" value={s.unit ?? ''} onChange={(v) => u({ ...s, unit: v })} />
+                <Textarea label="Label (use line break for 2 lines)" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-ac-execution': {
+      type ExecCard = { icon: string; title: string; desc: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<ExecCard>
+            label="Cards (5)"
+            items={(f.cards as ExecCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ icon: 'apps', title: 'Card', desc: 'Card description.' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Icon (apps / box / phone / clock / user)" value={c.icon ?? ''} onChange={(v) => u({ ...c, icon: v })} />
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Description" value={c.desc ?? ''} onChange={(v) => u({ ...c, desc: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-ac-pitch': {
+      type PitchTab = { icon: string; title: string; desc: string; imageUrl?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<PitchTab>
+            label="Tabs (4) — phone mockup"
+            items={(f.tabs as PitchTab[]) ?? []}
+            onChange={(v) => set('tabs', v)}
+            newItem={() => ({ icon: 'eye', title: 'Tab', desc: 'Tab description.', imageUrl: '' })}
+            itemPreview={(t) => t.title}
+            renderItem={(t, u) => (
+              <div className="space-y-2">
+                <TextInput label="Icon (eye / head / mic / msg)" value={t.icon ?? ''} onChange={(v) => u({ ...t, icon: v })} />
+                <TextInput label="Title" value={t.title ?? ''} onChange={(v) => u({ ...t, title: v })} />
+                <Textarea label="Description" value={t.desc ?? ''} onChange={(v) => u({ ...t, desc: v })} />
+                <ImageField label="Phone screen image URL" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-ac-scenario': {
+      type ScTab = { icon: string; title: string; desc: string; imageUrl?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<ScTab>
+            label="Tabs (3) — phone mockup"
+            items={(f.tabs as ScTab[]) ?? []}
+            onChange={(v) => set('tabs', v)}
+            newItem={() => ({ icon: 'bolt', title: 'Scenario', desc: 'Scenario description.', imageUrl: '' })}
+            itemPreview={(t) => t.title}
+            renderItem={(t, u) => (
+              <div className="space-y-2">
+                <TextInput label="Icon (bolt / chart / mic)" value={t.icon ?? ''} onChange={(v) => u({ ...t, icon: v })} />
+                <TextInput label="Title" value={t.title ?? ''} onChange={(v) => u({ ...t, title: v })} />
+                <Textarea label="Description" value={t.desc ?? ''} onChange={(v) => u({ ...t, desc: v })} />
+                <ImageField label="Phone screen image URL" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-ac-launch': {
+      type LaunchStep = { icon: string; title: string; desc: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Repeater<LaunchStep>
+            label="Steps (3)"
+            items={(f.steps as LaunchStep[]) ?? []}
+            onChange={(v) => set('steps', v)}
+            newItem={() => ({ icon: 'rocket', title: 'Step', desc: 'Step description.' })}
+            itemPreview={(s) => s.title}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Icon (users / database / rocket)" value={s.icon ?? ''} onChange={(v) => u({ ...s, icon: v })} />
+                <TextInput label="Title" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
+                <Textarea label="Description" value={s.desc ?? ''} onChange={(v) => u({ ...s, desc: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-ac-objections':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <TextInput label="Teal lead line" value={f.tealLine as string ?? ''} onChange={(v) => set('tealLine', v)} />
+          <Textarea label="Body paragraph" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
+          <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+        </div>
+      );
+
+    case 'slick-ac-backend': {
+      type BeTab = { title: string; desc: string; imageUrl?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<BeTab>
+            label="Tabs (3) — wide image"
+            items={(f.tabs as BeTab[]) ?? []}
+            onChange={(v) => set('tabs', v)}
+            newItem={() => ({ title: 'Role', desc: 'Role description.', imageUrl: '' })}
+            itemPreview={(t) => t.title}
+            renderItem={(t, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={t.title ?? ''} onChange={(v) => u({ ...t, title: v })} />
+                <Textarea label="Description" value={t.desc ?? ''} onChange={(v) => u({ ...t, desc: v })} />
+                <ImageField label="View image URL" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-ac-brand-strip': {
+      type Logo = { imageUrl?: string; alt?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Label" value={f.label as string ?? ''} onChange={(v) => set('label', v)} />
+          <NumberInput label="Scroll speed (seconds)" value={(f.speedSeconds as number) ?? 30} onChange={(v) => set('speedSeconds', v)} />
+          <Repeater<Logo>
+            label="Logos"
+            items={(f.logos as Logo[]) ?? []}
+            onChange={(v) => set('logos', v)}
+            newItem={() => ({ imageUrl: '', alt: 'Logo' })}
+            itemPreview={(l) => l.alt || l.imageUrl || '(empty)'}
+            renderItem={(l, u) => (
+              <div className="space-y-2">
+                <ImageField label="Logo image URL" value={l.imageUrl ?? ''} onChange={(v) => u({ ...l, imageUrl: v })} />
+                <TextInput label="Alt / placeholder" value={l.alt ?? ''} onChange={(v) => u({ ...l, alt: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-ac-cta': {
+      type CheckItem = { text: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge (with shield)" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading line 1 (pre)" value={f.headingLine1Pre as string ?? ''} onChange={(v) => set('headingLine1Pre', v)} />
+          <TextInput label="Heading line 1 (teal)" value={f.headingLine1Grad as string ?? ''} onChange={(v) => set('headingLine1Grad', v)} />
+          <TextInput label="Heading line 2 (pre)" value={f.headingLine2Pre as string ?? ''} onChange={(v) => set('headingLine2Pre', v)} />
+          <TextInput label="Heading line 2 (teal)" value={f.headingLine2Grad as string ?? ''} onChange={(v) => set('headingLine2Grad', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <TextInput label="Email placeholder" value={f.emailPlaceholder as string ?? ''} onChange={(v) => set('emailPlaceholder', v)} />
+          <TextInput label="CTA button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <Repeater<CheckItem>
+            label="Check bullets (3)"
+            items={(f.checks as CheckItem[]) ?? []}
+            onChange={(v) => set('checks', v)}
+            newItem={() => ({ text: 'Benefit text' })}
+            itemPreview={(c) => c.text}
+            renderItem={(c, u) => (
+              <TextInput label="Text" value={c.text ?? ''} onChange={(v) => u({ ...c, text: v })} />
+            )}
+          />
+        </div>
+      );
+    }
+
+
+    case 'slick-da-hero': {
+      type Chip = { val: string; lbl: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle (start)" value={f.subPre as string ?? ''} onChange={(v) => set('subPre', v)} />
+          <TextInput label="Subtitle (bold/white middle)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
+          <TextInput label="Subtitle (tail)" value={f.subPost as string ?? ''} onChange={(v) => set('subPost', v)} />
+          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
+          <ImageField label="Hero screenshot URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
+          <Repeater<Chip>
+            label="Floating chips (4)"
+            items={(f.chips as Chip[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => ({ val: '[V]', lbl: 'Metric label' })}
+            itemPreview={(c) => c.lbl}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Value (or [Vx] placeholder)" value={c.val ?? ''} onChange={(v) => u({ ...c, val: v })} />
+                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-da-brand-strip': {
+      type Logo = { url?: string; label?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<Logo>
+            label="Logos"
+            items={(f.logos as Logo[]) ?? []}
+            onChange={(v) => set('logos', v)}
+            newItem={() => ({ url: '', label: 'Customer' })}
+            itemPreview={(l) => l.label || l.url || '(empty)'}
+            renderItem={(l, u) => (
+              <div className="space-y-2">
+                <ImageField label="Logo image URL" value={l.url ?? ''} onChange={(v) => u({ ...l, url: v })} />
+                <TextInput label="Label / alt" value={l.label ?? ''} onChange={(v) => u({ ...l, label: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-da-problem': {
+      type StatCite = { label: string; big: string; claim: string; srcName: string; srcUrl?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge (red)" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (red)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<StatCite>
+            label="Cited stats (3)"
+            items={(f.stats as StatCite[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ label: 'Label', big: '00%', claim: 'Claim text.', srcName: 'Source (Year)', srcUrl: '' })}
+            itemPreview={(s) => s.big}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Label (uppercase)" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
+                <TextInput label="Big number" value={s.big ?? ''} onChange={(v) => u({ ...s, big: v })} />
+                <Textarea label="Claim" value={s.claim ?? ''} onChange={(v) => u({ ...s, claim: v })} />
+                <TextInput label="Source name" value={s.srcName ?? ''} onChange={(v) => u({ ...s, srcName: v })} />
+                <TextInput label="Source URL" value={s.srcUrl ?? ''} onChange={(v) => u({ ...s, srcUrl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-da-darkpanel':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Body" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
+          <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+        </div>
+      );
+
+    case 'slick-da-workflow': {
+      type FlowItem = { li1Bold: string; li1: string; li2Bold: string; li2: string };
+      type Step = { num: string; title: string; benefit: string; items: FlowItem };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<Step>
+            label="Steps (4)"
+            items={(f.steps as Step[]) ?? []}
+            onChange={(v) => set('steps', v)}
+            newItem={() => ({ num: '0X', title: 'Step', benefit: 'Benefit', items: { li1Bold: 'Bold:', li1: ' rest.', li2Bold: 'Bold:', li2: ' rest.' } })}
+            itemPreview={(s) => s.title}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
+                <TextInput label="Title" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
+                <TextInput label="Benefit pill" value={s.benefit ?? ''} onChange={(v) => u({ ...s, benefit: v })} />
+                <TextInput label="Line 1 bold" value={s.items?.li1Bold ?? ''} onChange={(v) => u({ ...s, items: { ...s.items, li1Bold: v } })} />
+                <TextInput label="Line 1 rest" value={s.items?.li1 ?? ''} onChange={(v) => u({ ...s, items: { ...s.items, li1: v } })} />
+                <TextInput label="Line 2 bold" value={s.items?.li2Bold ?? ''} onChange={(v) => u({ ...s, items: { ...s.items, li2Bold: v } })} />
+                <TextInput label="Line 2 rest" value={s.items?.li2 ?? ''} onChange={(v) => u({ ...s, items: { ...s.items, li2: v } })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-da-capabilities': {
+      type CapCard = { imageUrl?: string; imageAlt?: string; title: string; benefit: string; descPre?: string; descBold: string; descTail: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<CapCard>
+            label="Capability cards (8)"
+            items={(f.cards as CapCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ imageUrl: '', title: 'Capability', benefit: 'Benefit', descPre: '', descBold: 'Bold', descTail: ' rest.' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <ImageField label="Thumbnail image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <TextInput label="Benefit pill" value={c.benefit ?? ''} onChange={(v) => u({ ...c, benefit: v })} />
+                <TextInput label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
+                <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
+                <TextInput label="Desc (after bold)" value={c.descTail ?? ''} onChange={(v) => u({ ...c, descTail: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-da-split': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Body (start)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
+          <TextInput label="Body bold 1" value={f.bodyBold1 as string ?? ''} onChange={(v) => set('bodyBold1', v)} />
+          <Textarea label="Body (middle)" value={f.bodyMid as string ?? ''} onChange={(v) => set('bodyMid', v)} />
+          <TextInput label="Body bold 2" value={f.bodyBold2 as string ?? ''} onChange={(v) => set('bodyBold2', v)} />
+          <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <Repeater<string>
+            label="Feature chips"
+            items={(f.chips as string[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => 'New chip'}
+            itemPreview={(c) => c || '(empty)'}
+            renderItem={(c, u) => (
+              <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />
+            )}
+          />
+          <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+        </div>
+      );
+    }
+
+    case 'slick-da-impact': {
+      type IStat = { v: string; k: string; sub: string };
+      type ICard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; imageUrl?: string; stats: IStat[] };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<ICard>
+            label="Impact cards (3)"
+            items={(f.cards as ICard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'Impact', bodyPre: 'Text ', bodyBold: 'bold', bodyTail: '.', imageUrl: '', stats: [ { v: '00%', k: 'metric', sub: 'note' }, { v: '00%', k: 'metric', sub: 'note' } ] })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
+                <TextInput label="Body (bold)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
+                <TextInput label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
+                <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <Repeater<IStat>
+                  label="Stats (2)"
+                  items={c.stats ?? []}
+                  onChange={(sv) => u({ ...c, stats: sv })}
+                  newItem={() => ({ v: '00%', k: 'metric', sub: 'note' })}
+                  itemPreview={(s) => s.k}
+                  renderItem={(s, su) => (
+                    <div className="space-y-2">
+                      <TextInput label="Value (or [VERIFY: x])" value={s.v ?? ''} onChange={(v) => su({ ...s, v })} />
+                      <TextInput label="Key" value={s.k ?? ''} onChange={(v) => su({ ...s, k: v })} />
+                      <TextInput label="Sub-note" value={s.sub ?? ''} onChange={(v) => su({ ...s, sub: v })} />
+                    </div>
+                  )}
+                />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-da-proof': {
+      type PCard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; v: string; k: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Repeater<PCard>
+            label="Proof cards (3)"
+            items={(f.cards as PCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'Proof', bodyPre: 'Text.', bodyBold: '', bodyTail: '', v: '00', k: 'metric' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
+                <TextInput label="Body (bold, optional)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
+                <TextInput label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
+                <TextInput label="Value (or [VERIFY: x])" value={c.v ?? ''} onChange={(v) => u({ ...c, v })} />
+                <TextInput label="Key" value={c.k ?? ''} onChange={(v) => u({ ...c, k: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-da-cta':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+        </div>
+      );
+
+
+    case 'slick-pe-hero': {
+      type Chip = { valPre: string; valAccent: string; valPost: string; lbl: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
+          <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
+          <Repeater<Chip>
+            label="Floating chips (4)"
+            items={(f.chips as Chip[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => ({ valPre: '00', valAccent: '+', valPost: '', lbl: 'Metric' })}
+            itemPreview={(c) => c.lbl}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Value (before accent)" value={c.valPre ?? ''} onChange={(v) => u({ ...c, valPre: v })} />
+                <TextInput label="Accent (teal, e.g. + or arrow)" value={c.valAccent ?? ''} onChange={(v) => u({ ...c, valAccent: v })} />
+                <TextInput label="Value (after accent)" value={c.valPost ?? ''} onChange={(v) => u({ ...c, valPost: v })} />
+                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-pe-statbar': {
+      type Stat = { n: string; l: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Repeater<Stat>
+            label="Stats (4)"
+            items={(f.stats as Stat[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ n: '00', l: 'Label' })}
+            itemPreview={(s) => s.n}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={s.n ?? ''} onChange={(v) => u({ ...s, n: v })} />
+                <TextInput label="Label" value={s.l ?? ''} onChange={(v) => u({ ...s, l: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-pe-problem': {
+      type StatCite = { big: string; claim: string; srcName: string; srcUrl?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill (coral)" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (coral)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<StatCite>
+            label="Cited stats (3)"
+            items={(f.stats as StatCite[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ big: '00%', claim: 'Claim text.', srcName: 'Source (Year)', srcUrl: '' })}
+            itemPreview={(s) => s.big}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Big number (coral)" value={s.big ?? ''} onChange={(v) => u({ ...s, big: v })} />
+                <Textarea label="Claim" value={s.claim ?? ''} onChange={(v) => u({ ...s, claim: v })} />
+                <TextInput label="Source name" value={s.srcName ?? ''} onChange={(v) => u({ ...s, srcName: v })} />
+                <TextInput label="Source URL" value={s.srcUrl ?? ''} onChange={(v) => u({ ...s, srcUrl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-pe-darkpanel':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Body (start)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
+          <TextInput label="Body bold 1" value={f.bodyBold1 as string ?? ''} onChange={(v) => set('bodyBold1', v)} />
+          <Textarea label="Body (middle)" value={f.bodyMid as string ?? ''} onChange={(v) => set('bodyMid', v)} />
+          <TextInput label="Body bold 2" value={f.bodyBold2 as string ?? ''} onChange={(v) => set('bodyBold2', v)} />
+          <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+        </div>
+      );
+
+    case 'slick-pe-stages': {
+      type Stage = { num: string; title: string; desc: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<Stage>
+            label="Steps (4)"
+            items={(f.stages as Stage[]) ?? []}
+            onChange={(v) => set('stages', v)}
+            newItem={() => ({ num: '0', title: 'Step', desc: 'Step description.' })}
+            itemPreview={(s) => s.title}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
+                <TextInput label="Title" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
+                <Textarea label="Description" value={s.desc ?? ''} onChange={(v) => u({ ...s, desc: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-pe-capabilities': {
+      type FCard = { imageUrl?: string; imageAlt?: string; title: string; descPre?: string; descBold: string; descTail: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Repeater<FCard>
+            label="Capability cards (6)"
+            items={(f.cards as FCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ imageUrl: '', title: 'Capability', descPre: '', descBold: 'Bold', descTail: ' rest.' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <ImageField label="Thumbnail image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <TextInput label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
+                <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
+                <TextInput label="Desc (after bold)" value={c.descTail ?? ''} onChange={(v) => u({ ...c, descTail: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-pe-split': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Body (before bold)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
+          <TextInput label="Body (bold)" value={f.bodyBold as string ?? ''} onChange={(v) => set('bodyBold', v)} />
+          <Textarea label="Body (after bold)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <Repeater<string>
+            label="Lifecycle chips"
+            items={(f.chips as string[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => 'New step'}
+            itemPreview={(c) => c || '(empty)'}
+            renderItem={(c, u) => (
+              <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />
+            )}
+          />
+          <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+        </div>
+      );
+    }
+
+    case 'slick-pe-impact': {
+      type ICard = { title: string; body: string; imageUrl?: string; imageAlt?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<ICard>
+            label="Impact cards (3)"
+            items={(f.cards as ICard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'Impact', body: 'Body text.', imageUrl: '' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Body" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+                <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+
+    case 'slick-pe-proof': {
+      type ProofCard = { title: string; body: string; value: string; note: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (tail)" value={f.headingTail as string ?? ''} onChange={(v) => set('headingTail', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<ProofCard>
+            label="Proof cards"
+            items={(f.cards as ProofCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'KPI', body: 'Body text.', value: '0%', note: 'Note text.' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Body" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+                <TextInput label="Value (flagged)" value={c.value ?? ''} onChange={(v) => u({ ...c, value: v })} />
+                <Textarea label="Note" value={c.note ?? ''} onChange={(v) => u({ ...c, note: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+
+    case 'slick-rs-hero': {
+      type Chip = { valPre: string; valAccent: string; valPost: string; lbl: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
+          <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
+          <TextInput label="Stat note" value={f.statNote as string ?? ''} onChange={(v) => set('statNote', v)} />
+          <Repeater<Chip>
+            label="Floating chips (4)"
+            items={(f.chips as Chip[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => ({ valPre: '00', valAccent: '+', valPost: '', lbl: 'Metric' })}
+            itemPreview={(c) => c.lbl}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Value (before accent)" value={c.valPre ?? ''} onChange={(v) => u({ ...c, valPre: v })} />
+                <TextInput label="Accent (teal, e.g. +)" value={c.valAccent ?? ''} onChange={(v) => u({ ...c, valAccent: v })} />
+                <TextInput label="Value (after accent)" value={c.valPost ?? ''} onChange={(v) => u({ ...c, valPost: v })} />
+                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-rs-brand-strip': {
+      type Logo = { url?: string; label: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<Logo>
+            label="Logo slots"
+            items={(f.logos as Logo[]) ?? []}
+            onChange={(v) => set('logos', v)}
+            newItem={() => ({ url: '', label: 'Customer name' })}
+            itemPreview={(l) => l.label}
+            renderItem={(l, u) => (
+              <div className="space-y-2">
+                <ImageField label="Logo URL" value={l.url ?? ''} onChange={(v) => u({ ...l, url: v })} />
+                <TextInput label="Label / slot text" value={l.label ?? ''} onChange={(v) => u({ ...l, label: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-rs-problem': {
+      type StatCite = { big: string; claim: string; srcName: string; srcUrl?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (red)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<StatCite>
+            label="Cited stats (3)"
+            items={(f.stats as StatCite[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ big: '00%', claim: 'Claim text.', srcName: 'Source (Year)', srcUrl: '' })}
+            itemPreview={(s) => s.big}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Big number (red)" value={s.big ?? ''} onChange={(v) => u({ ...s, big: v })} />
+                <Textarea label="Claim" value={s.claim ?? ''} onChange={(v) => u({ ...s, claim: v })} />
+                <TextInput label="Source name" value={s.srcName ?? ''} onChange={(v) => u({ ...s, srcName: v })} />
+                <TextInput label="Source URL" value={s.srcUrl ?? ''} onChange={(v) => u({ ...s, srcUrl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-rs-compare': {
+      type CmpItem = { title: string; body: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <TextInput label="Bad column label" value={f.badLabel as string ?? ''} onChange={(v) => set('badLabel', v)} />
+          <TextInput label="Good column label" value={f.goodLabel as string ?? ''} onChange={(v) => set('goodLabel', v)} />
+          <Repeater<CmpItem>
+            label="Generic SFA items (bad)"
+            items={(f.badItems as CmpItem[]) ?? []}
+            onChange={(v) => set('badItems', v)}
+            newItem={() => ({ title: 'Problem', body: 'Description.' })}
+            itemPreview={(it) => it.title}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
+                <Textarea label="Body" value={it.body ?? ''} onChange={(v) => u({ ...it, body: v })} />
+              </div>
+            )}
+          />
+          <Repeater<CmpItem>
+            label="Salescode items (good)"
+            items={(f.goodItems as CmpItem[]) ?? []}
+            onChange={(v) => set('goodItems', v)}
+            newItem={() => ({ title: 'Capability', body: 'Description.' })}
+            itemPreview={(it) => it.title}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
+                <Textarea label="Body" value={it.body ?? ''} onChange={(v) => u({ ...it, body: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-rs-darkpanel':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Body" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
+          <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+        </div>
+      );
+
+    case 'slick-rs-problemgrid': {
+      type ProbCard = { num: string; title: string; bodyPre: string; bodyBold: string; bodyTail: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<ProbCard>
+            label="Problem cards (6)"
+            items={(f.cards as ProbCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ num: '0', title: 'Problem', bodyPre: '', bodyBold: 'Solution', bodyTail: '.' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={c.num ?? ''} onChange={(v) => u({ ...c, num: v })} />
+                <TextInput label="Title (problem)" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
+                <TextInput label="Body (bold teal)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
+                <Textarea label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-rs-capabilities': {
+      type Cap = { icon: string; title: string; benefit: string; descPre: string; descBold: string; descTail: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<Cap>
+            label="Capability cards (8)"
+            items={(f.cards as Cap[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ icon: '⭐', title: 'Capability', benefit: 'Benefit', descPre: '', descBold: 'Bold', descTail: '.' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Icon (emoji)" value={c.icon ?? ''} onChange={(v) => u({ ...c, icon: v })} />
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <TextInput label="Benefit pill" value={c.benefit ?? ''} onChange={(v) => u({ ...c, benefit: v })} />
+                <TextInput label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
+                <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
+                <TextInput label="Desc (after bold)" value={c.descTail ?? ''} onChange={(v) => u({ ...c, descTail: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-rs-split': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Body (start)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
+          <TextInput label="Body bold 1" value={f.bodyBold1 as string ?? ''} onChange={(v) => set('bodyBold1', v)} />
+          <Textarea label="Body (middle)" value={f.bodyMid as string ?? ''} onChange={(v) => set('bodyMid', v)} />
+          <TextInput label="Body bold 2" value={f.bodyBold2 as string ?? ''} onChange={(v) => set('bodyBold2', v)} />
+          <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <Repeater<string>
+            label="Feature chips"
+            items={(f.chips as string[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => 'New chip'}
+            itemPreview={(c) => c || '(empty)'}
+            renderItem={(c, u) => (
+              <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />
+            )}
+          />
+          <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+        </div>
+      );
+    }
+
+    case 'slick-rs-impact': {
+      type IStat = { v: string; k: string; sub: string };
+      type ICard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; imageUrl?: string; imageAlt?: string; stats: IStat[] };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<ICard>
+            label="Impact cards (3)"
+            items={(f.cards as ICard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'Impact', bodyPre: '', bodyBold: 'Bold', bodyTail: '.', imageUrl: '', stats: [] })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
+                <TextInput label="Body (bold)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
+                <Textarea label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
+                <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+                <Repeater<IStat>
+                  label="Verify stats (2)"
+                  items={c.stats ?? []}
+                  onChange={(nv) => u({ ...c, stats: nv })}
+                  newItem={() => ({ v: '[VERIFY: Vx]', k: 'metric', sub: 'detail' })}
+                  itemPreview={(s) => s.k}
+                  renderItem={(s, su) => (
+                    <div className="space-y-2">
+                      <TextInput label="Value" value={s.v ?? ''} onChange={(nv) => su({ ...s, v: nv })} />
+                      <TextInput label="Metric" value={s.k ?? ''} onChange={(nv) => su({ ...s, k: nv })} />
+                      <TextInput label="Sub" value={s.sub ?? ''} onChange={(nv) => su({ ...s, sub: nv })} />
+                    </div>
+                  )}
+                />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+
+    case 'slick-sv-hero': {
+      type Chip = { valPre: string; valAccent: string; lbl: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading line 1" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading line 2 (teal accent)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <Textarea label="Subtitle (start)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <TextInput label="Subtitle bold" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
+          <Textarea label="Subtitle (tail)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
+          <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
+          <Repeater<Chip>
+            label="Floating chips (4)"
+            items={(f.chips as Chip[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => ({ valPre: '00', valAccent: '+', lbl: 'Metric' })}
+            itemPreview={(c) => c.lbl}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Value" value={c.valPre ?? ''} onChange={(v) => u({ ...c, valPre: v })} />
+                <TextInput label="Accent (teal suffix, e.g. + % s)" value={c.valAccent ?? ''} onChange={(v) => u({ ...c, valAccent: v })} />
+                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sv-scale': {
+      type Stat = { n: string; l: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <Textarea label="Subtitle (start)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <TextInput label="Subtitle bold" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
+          <Textarea label="Subtitle (tail)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <Repeater<Stat>
+            label="Stats (4)"
+            items={(f.stats as Stat[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ n: '00', l: 'Label' })}
+            itemPreview={(s) => s.n}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={s.n ?? ''} onChange={(v) => u({ ...s, n: v })} />
+                <TextInput label="Label" value={s.l ?? ''} onChange={(v) => u({ ...s, l: v })} />
+              </div>
+            )}
+          />
+          <Repeater<string>
+            label="Logo image URLs"
+            items={(f.logoUrls as string[]) ?? []}
+            onChange={(v) => set('logoUrls', v)}
+            newItem={() => ''}
+            itemPreview={(u) => u || '(empty slot)'}
+            renderItem={(u, upd) => (
+              <ImageField label="Logo URL" value={u ?? ''} onChange={(v) => upd(v)} />
+            )}
+          />
+          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+        </div>
+      );
+    }
+
+    case 'slick-sv-problem': {
+      type StatCite = { big: string; claim: string; srcName: string; srcUrl?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill (coral)" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Subtitle (start)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <TextInput label="Subtitle bold" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
+          <Textarea label="Subtitle (tail)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <Repeater<StatCite>
+            label="Cited stats (3)"
+            items={(f.stats as StatCite[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ big: '00%', claim: 'Claim text.', srcName: 'Source (Year)', srcUrl: '' })}
+            itemPreview={(s) => s.big}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Big number (coral)" value={s.big ?? ''} onChange={(v) => u({ ...s, big: v })} />
+                <Textarea label="Claim" value={s.claim ?? ''} onChange={(v) => u({ ...s, claim: v })} />
+                <TextInput label="Source name" value={s.srcName ?? ''} onChange={(v) => u({ ...s, srcName: v })} />
+                <TextInput label="Source URL" value={s.srcUrl ?? ''} onChange={(v) => u({ ...s, srcUrl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sv-darkpanel':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Body (start)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
+          <TextInput label="Body bold 1" value={f.bodyBold1 as string ?? ''} onChange={(v) => set('bodyBold1', v)} />
+          <Textarea label="Body (middle)" value={f.bodyMid as string ?? ''} onChange={(v) => set('bodyMid', v)} />
+          <TextInput label="Body bold 2" value={f.bodyBold2 as string ?? ''} onChange={(v) => set('bodyBold2', v)} />
+          <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+        </div>
+      );
+
+    case 'slick-sv-stages': {
+      type Stage = { num: string; title: string; descPre: string; descBold: string; descTail: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<Stage>
+            label="Steps (4)"
+            items={(f.stages as Stage[]) ?? []}
+            onChange={(v) => set('stages', v)}
+            newItem={() => ({ num: '0', title: 'Step', descPre: '', descBold: 'Bold', descTail: ' rest.' })}
+            itemPreview={(s) => s.title}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
+                <TextInput label="Title" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
+                <Textarea label="Desc (before bold)" value={s.descPre ?? ''} onChange={(v) => u({ ...s, descPre: v })} />
+                <TextInput label="Desc (bold)" value={s.descBold ?? ''} onChange={(v) => u({ ...s, descBold: v })} />
+                <Textarea label="Desc (after bold)" value={s.descTail ?? ''} onChange={(v) => u({ ...s, descTail: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sv-accuracy': {
+      type Stat = { n: string; l: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Repeater<Stat>
+            label="Accuracy stats (4)"
+            items={(f.stats as Stat[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ n: '00%', l: 'Label' })}
+            itemPreview={(s) => s.n}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={s.n ?? ''} onChange={(v) => u({ ...s, n: v })} />
+                <TextInput label="Label" value={s.l ?? ''} onChange={(v) => u({ ...s, l: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sv-features': {
+      type FCard = { imageUrl?: string; imageAlt?: string; title: string; descPre: string; descBold: string; descTail: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Repeater<FCard>
+            label="Check cards (6)"
+            items={(f.cards as FCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ imageUrl: '', imageAlt: '', title: 'Check', descPre: '', descBold: 'Bold', descTail: '.' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <ImageField label="Thumbnail image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <TextInput label="Image alt / placeholder text" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
+                <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
+                <Textarea label="Desc (after bold)" value={c.descTail ?? ''} onChange={(v) => u({ ...c, descTail: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sv-split': {
+      return (
+        <div className="space-y-4">
+          <Toggle label="Reverse layout (image left)" value={Boolean(f.reverse)} onChange={(v) => set('reverse', v)} />
+          <Toggle label="Mint band background" value={Boolean(f.bandMint)} onChange={(v) => set('bandMint', v)} />
+          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <Textarea label="Body (start)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
+          <TextInput label="Body bold 1" value={f.bodyBold1 as string ?? ''} onChange={(v) => set('bodyBold1', v)} />
+          <Textarea label="Body (middle)" value={f.bodyMid as string ?? ''} onChange={(v) => set('bodyMid', v)} />
+          <TextInput label="Body bold 2" value={f.bodyBold2 as string ?? ''} onChange={(v) => set('bodyBold2', v)} />
+          <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <Repeater<string>
+            label="Chips"
+            items={(f.chips as string[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => 'New chip'}
+            itemPreview={(c) => c || '(empty)'}
+            renderItem={(c, u) => (
+              <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />
+            )}
+          />
+          <ImageField label="Art image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt / placeholder text" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+        </div>
+      );
+    }
+
+    case 'slick-sv-proof': {
+      type PCard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; statValue: string; statKey: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Repeater<PCard>
+            label="Proof cards (3)"
+            items={(f.cards as PCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'Metric', bodyPre: '', bodyBold: 'Bold', bodyTail: '.', statValue: '00%', statKey: 'metric label' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
+                <TextInput label="Body (bold)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
+                <Textarea label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
+                <TextInput label="Stat value (or [VERIFY: x])" value={c.statValue ?? ''} onChange={(v) => u({ ...c, statValue: v })} />
+                <TextInput label="Stat key" value={c.statKey ?? ''} onChange={(v) => u({ ...c, statKey: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+
+    case 'slick-su-hero': {
+      type Chip = { valPre: string; valAccent: string; lbl: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal, new line)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <Textarea label="Subtitle (before bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <TextInput label="Subtitle (bold end)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
+          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
+          <ImageField label="Phone mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <TextInput label="Mockup alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
+          <Repeater<Chip>
+            label="Floating chips (4)"
+            items={(f.chips as Chip[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => ({ valPre: '00', valAccent: '+', lbl: 'Metric' })}
+            itemPreview={(c) => c.lbl}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Value" value={c.valPre ?? ''} onChange={(v) => u({ ...c, valPre: v })} />
+                <TextInput label="Accent (teal)" value={c.valAccent ?? ''} onChange={(v) => u({ ...c, valAccent: v })} />
+                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-su-scale': {
+      type Stat = { num: string; lab: string };
+      type Logo = { url?: string; label: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <TextInput label="Note" value={f.note as string ?? ''} onChange={(v) => set('note', v)} />
+          <Repeater<Stat>
+            label="Stats (4)"
+            items={(f.stats as Stat[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ num: '00', lab: 'Label' })}
+            itemPreview={(s) => s.num}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
+                <TextInput label="Label" value={s.lab ?? ''} onChange={(v) => u({ ...s, lab: v })} />
+              </div>
+            )}
+          />
+          <Repeater<Logo>
+            label="Logo slots"
+            items={(f.logos as Logo[]) ?? []}
+            onChange={(v) => set('logos', v)}
+            newItem={() => ({ url: '', label: 'Brand' })}
+            itemPreview={(l) => l.label}
+            renderItem={(l, u) => (
+              <div className="space-y-2">
+                <ImageField label="Logo URL" value={l.url ?? ''} onChange={(v) => u({ ...l, url: v })} />
+                <TextInput label="Label / slot text" value={l.label ?? ''} onChange={(v) => u({ ...l, label: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-su-problem': {
+      type Card = { big: string; claim: string; srcName: string; srcUrl?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (red)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <TextInput label="Kicker (before bold)" value={f.kickerPre as string ?? ''} onChange={(v) => set('kickerPre', v)} />
+          <TextInput label="Kicker (bold)" value={f.kickerBold as string ?? ''} onChange={(v) => set('kickerBold', v)} />
+          <Repeater<Card>
+            label="Cited stats (3)"
+            items={(f.cards as Card[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ big: '00%', claim: 'Claim.', srcName: 'Source', srcUrl: '' })}
+            itemPreview={(c) => c.big}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Big number (red)" value={c.big ?? ''} onChange={(v) => u({ ...c, big: v })} />
+                <Textarea label="Claim" value={c.claim ?? ''} onChange={(v) => u({ ...c, claim: v })} />
+                <TextInput label="Source name" value={c.srcName ?? ''} onChange={(v) => u({ ...c, srcName: v })} />
+                <TextInput label="Source URL" value={c.srcUrl ?? ''} onChange={(v) => u({ ...c, srcUrl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-su-lossrail': {
+      type Driver = { stat: string; name: string; verify?: string; desc: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (red)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Sub (before bold)" value={f.subPre as string ?? ''} onChange={(v) => set('subPre', v)} />
+          <TextInput label="Sub (bold)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
+          <TextInput label="Sub (after bold)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <TextInput label="Sub verify tag" value={f.subVerify as string ?? ''} onChange={(v) => set('subVerify', v)} />
+          <TextInput label="Keep %" value={f.keepPct as string ?? ''} onChange={(v) => set('keepPct', v)} />
+          <TextInput label="Keep label" value={f.keepLabel as string ?? ''} onChange={(v) => set('keepLabel', v)} />
+          <TextInput label="Lost %" value={f.lostPct as string ?? ''} onChange={(v) => set('lostPct', v)} />
+          <TextInput label="Lost label" value={f.lostLabel as string ?? ''} onChange={(v) => set('lostLabel', v)} />
+          <TextInput label="Drivers title" value={f.driversTitle as string ?? ''} onChange={(v) => set('driversTitle', v)} />
+          <Textarea label="Note" value={f.note as string ?? ''} onChange={(v) => set('note', v)} />
+          <Repeater<Driver>
+            label="Drivers (4)"
+            items={(f.drivers as Driver[]) ?? []}
+            onChange={(v) => set('drivers', v)}
+            newItem={() => ({ stat: '00%', name: 'Driver', verify: '', desc: 'Description.' })}
+            itemPreview={(d) => d.name}
+            renderItem={(d, u) => (
+              <div className="space-y-2">
+                <TextInput label="Stat" value={d.stat ?? ''} onChange={(v) => u({ ...d, stat: v })} />
+                <TextInput label="Name" value={d.name ?? ''} onChange={(v) => u({ ...d, name: v })} />
+                <TextInput label="Verify tag (optional)" value={d.verify ?? ''} onChange={(v) => u({ ...d, verify: v })} />
+                <Textarea label="Description" value={d.desc ?? ''} onChange={(v) => u({ ...d, desc: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-su-timeline': {
+      type Item = { num: string; title: string; linePre: string; lineBold: string; lineTail: string; impN?: string; impK?: string; impNone?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Sub (before bold)" value={f.subPre as string ?? ''} onChange={(v) => set('subPre', v)} />
+          <TextInput label="Sub (bold)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
+          <TextInput label="Sub (after bold)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <TextInput label="Proof (before bold)" value={f.proofPre as string ?? ''} onChange={(v) => set('proofPre', v)} />
+          <TextInput label="Proof (bold)" value={f.proofBold as string ?? ''} onChange={(v) => set('proofBold', v)} />
+          <TextInput label="Proof (after bold)" value={f.proofTail as string ?? ''} onChange={(v) => set('proofTail', v)} />
+          <Repeater<Item>
+            label="Timeline items (5)"
+            items={(f.items as Item[]) ?? []}
+            onChange={(v) => set('items', v)}
+            newItem={() => ({ num: '0', title: 'Stage', linePre: '', lineBold: 'Bold', lineTail: '.', impNone: 'Note' })}
+            itemPreview={(it) => it.title}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={it.num ?? ''} onChange={(v) => u({ ...it, num: v })} />
+                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
+                <Textarea label="Line (before bold)" value={it.linePre ?? ''} onChange={(v) => u({ ...it, linePre: v })} />
+                <TextInput label="Line (bold)" value={it.lineBold ?? ''} onChange={(v) => u({ ...it, lineBold: v })} />
+                <TextInput label="Line (after bold)" value={it.lineTail ?? ''} onChange={(v) => u({ ...it, lineTail: v })} />
+                <TextInput label="Impact number (blank if none)" value={it.impN ?? ''} onChange={(v) => u({ ...it, impN: v })} />
+                <TextInput label="Impact key" value={it.impK ?? ''} onChange={(v) => u({ ...it, impK: v })} />
+                <TextInput label="Impact 'none' note (if no number)" value={it.impNone ?? ''} onChange={(v) => u({ ...it, impNone: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-su-engine': {
+      type Card = { icon: string; title: string; descPre: string; descBold: string; descTail: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Sub (before bold 1)" value={f.subPre as string ?? ''} onChange={(v) => set('subPre', v)} />
+          <TextInput label="Sub bold 1" value={f.subBold1 as string ?? ''} onChange={(v) => set('subBold1', v)} />
+          <TextInput label="Sub (middle)" value={f.subMid as string ?? ''} onChange={(v) => set('subMid', v)} />
+          <TextInput label="Sub bold 2" value={f.subBold2 as string ?? ''} onChange={(v) => set('subBold2', v)} />
+          <TextInput label="Sub (tail)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <Repeater<Card>
+            label="Feature cards (4)"
+            items={(f.cards as Card[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ icon: 'target', title: 'Feature', descPre: '', descBold: 'Bold', descTail: '.' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Icon (target | tasks | star | bars)" value={c.icon ?? ''} onChange={(v) => u({ ...c, icon: v })} />
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <TextInput label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
+                <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
+                <TextInput label="Desc (after bold)" value={c.descTail ?? ''} onChange={(v) => u({ ...c, descTail: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-su-guarantee':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Sub line 1" value={f.subLine1 as string ?? ''} onChange={(v) => set('subLine1', v)} />
+          <Textarea label="Sub line 2" value={f.subLine2 as string ?? ''} onChange={(v) => set('subLine2', v)} />
+          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+        </div>
+      );
+
+
+    case 'slick-mt-hero': {
+      type Chip = { valPre: string; valAccent: string; lbl: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <Textarea label="Subtitle (start)" value={f.subPre as string ?? ''} onChange={(v) => set('subPre', v)} />
+          <TextInput label="Subtitle bold" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
+          <Textarea label="Subtitle (tail)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
+          <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <TextInput label="Hero image alt / placeholder" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
+          <Repeater<Chip>
+            label="Floating chips (4)"
+            items={(f.chips as Chip[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => ({ valPre: '00', valAccent: '%', lbl: 'Metric' })}
+            itemPreview={(c) => c.lbl}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Value" value={c.valPre ?? ''} onChange={(v) => u({ ...c, valPre: v })} />
+                <TextInput label="Accent (teal suffix)" value={c.valAccent ?? ''} onChange={(v) => u({ ...c, valAccent: v })} />
+                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-mt-statbar': {
+      type Stat = { n: string; l: string };
+      return (
+        <div className="space-y-4">
+          <Toggle label="Mint band background" value={Boolean(f.bandMint)} onChange={(v) => set('bandMint', v)} />
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Repeater<Stat>
+            label="Stats (4)"
+            items={(f.stats as Stat[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ n: '00', l: 'Label' })}
+            itemPreview={(s) => s.n}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={s.n ?? ''} onChange={(v) => u({ ...s, n: v })} />
+                <TextInput label="Label" value={s.l ?? ''} onChange={(v) => u({ ...s, l: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-mt-problem': {
+      type StatCite = { big: string; claim: string; src: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Repeater<StatCite>
+            label="Cited stats (3)"
+            items={(f.stats as StatCite[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ big: '00%', claim: 'Claim text.', src: 'Source' })}
+            itemPreview={(s) => s.big}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Big number (coral)" value={s.big ?? ''} onChange={(v) => u({ ...s, big: v })} />
+                <Textarea label="Claim" value={s.claim ?? ''} onChange={(v) => u({ ...s, claim: v })} />
+                <TextInput label="Source" value={s.src ?? ''} onChange={(v) => u({ ...s, src: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-mt-split': {
+      return (
+        <div className="space-y-4">
+          <Toggle label="Reverse layout (image left)" value={Boolean(f.reverse)} onChange={(v) => set('reverse', v)} />
+          <Toggle label="Mint band background" value={Boolean(f.bandMint)} onChange={(v) => set('bandMint', v)} />
+          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (tail)" value={f.headingTail as string ?? ''} onChange={(v) => set('headingTail', v)} />
+          <Textarea label="Body (before bold)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
+          <TextInput label="Body (bold)" value={f.bodyBold as string ?? ''} onChange={(v) => set('bodyBold', v)} />
+          <Textarea label="Body (after bold)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <Repeater<string>
+            label="Chips"
+            items={(f.chips as string[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => 'New chip'}
+            itemPreview={(c) => c || '(empty)'}
+            renderItem={(c, u) => (
+              <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />
+            )}
+          />
+          <ImageField label="Art image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt / placeholder" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+        </div>
+      );
+    }
+
+    case 'slick-mt-icards': {
+      type ICard = { title: string; body: string; imageUrl?: string; imageAlt?: string; statV: string; statK: string; statSub: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Repeater<ICard>
+            label="Impact cards (3)"
+            items={(f.cards as ICard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'Card', body: 'Body text.', imageUrl: '', imageAlt: '', statV: '00%', statK: 'metric', statSub: 'detail' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Body" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+                <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <TextInput label="Image alt / placeholder" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+                <TextInput label="Stat value" value={c.statV ?? ''} onChange={(v) => u({ ...c, statV: v })} />
+                <TextInput label="Stat key" value={c.statK ?? ''} onChange={(v) => u({ ...c, statK: v })} />
+                <TextInput label="Stat sub" value={c.statSub ?? ''} onChange={(v) => u({ ...c, statSub: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-mt-darktabs': {
+      type Tab = { label: string; h3Pre: string; h3Accent: string; body: string; big: string; bigLabel: string; imageUrl?: string; imageAlt?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal, new line)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<Tab>
+            label="Tabs (4)"
+            items={(f.tabs as Tab[]) ?? []}
+            onChange={(v) => set('tabs', v)}
+            newItem={() => ({ label: 'Tab', h3Pre: '', h3Accent: 'accent', body: 'Body.', big: '00%', bigLabel: 'label', imageUrl: '', imageAlt: '' })}
+            itemPreview={(t) => t.label}
+            renderItem={(t, u) => (
+              <div className="space-y-2">
+                <TextInput label="Tab label" value={t.label ?? ''} onChange={(v) => u({ ...t, label: v })} />
+                <TextInput label="Panel heading (pre)" value={t.h3Pre ?? ''} onChange={(v) => u({ ...t, h3Pre: v })} />
+                <TextInput label="Panel heading accent" value={t.h3Accent ?? ''} onChange={(v) => u({ ...t, h3Accent: v })} />
+                <Textarea label="Panel body" value={t.body ?? ''} onChange={(v) => u({ ...t, body: v })} />
+                <TextInput label="Big number" value={t.big ?? ''} onChange={(v) => u({ ...t, big: v })} />
+                <TextInput label="Big number label" value={t.bigLabel ?? ''} onChange={(v) => u({ ...t, bigLabel: v })} />
+                <ImageField label="Panel image URL" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
+                <TextInput label="Image alt / placeholder" value={t.imageAlt ?? ''} onChange={(v) => u({ ...t, imageAlt: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-mt-darkpanel':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <Textarea label="Body (before bold)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
+          <Textarea label="Body (bold)" value={f.bodyBold as string ?? ''} onChange={(v) => set('bodyBold', v)} />
+          <Textarea label="Body (after bold)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <Repeater<string>
+            label="Chips"
+            items={(f.chips as string[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => 'New chip'}
+            itemPreview={(c) => c || '(empty)'}
+            renderItem={(c, u) => (
+              <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />
+            )}
+          />
+        </div>
+      );
+
+    case 'slick-mt-features': {
+      type FCard = { imageUrl?: string; imageAlt?: string; title: string; descPre: string; descBold: string; descTail: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Repeater<FCard>
+            label="Feature cards (3)"
+            items={(f.cards as FCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ imageUrl: '', imageAlt: '', title: 'Feature', descPre: '', descBold: 'Bold', descTail: '.' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <ImageField label="Thumbnail image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <TextInput label="Image alt / placeholder" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
+                <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
+                <Textarea label="Desc (after bold)" value={c.descTail ?? ''} onChange={(v) => u({ ...c, descTail: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-mt-proof': {
+      type PCard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; pairV: string; pairK: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Repeater<PCard>
+            label="Proof cards (3)"
+            items={(f.cards as PCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'Card', bodyPre: '', bodyBold: 'Bold', bodyTail: '.', pairV: '00%', pairK: 'metric' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
+                <TextInput label="Body (bold)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
+                <Textarea label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
+                <TextInput label="Stat value" value={c.pairV ?? ''} onChange={(v) => u({ ...c, pairV: v })} />
+                <TextInput label="Stat key" value={c.pairK ?? ''} onChange={(v) => u({ ...c, pairK: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-mt-trust': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Repeater<string>
+            label="Logo image URLs"
+            items={(f.logoUrls as string[]) ?? []}
+            onChange={(v) => set('logoUrls', v)}
+            newItem={() => ''}
+            itemPreview={(u) => u || '(empty slot)'}
+            renderItem={(u, upd) => (
+              <ImageField label="Logo URL" value={u ?? ''} onChange={(v) => upd(v)} />
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-ud-problem': {
+      type UPCard = { big?: string; claim?: string; srcLabel?: string; srcUrl?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (coral)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (tail)" value={f.headingTail as string ?? ''} onChange={(v) => set('headingTail', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<UPCard>
+            label="Stat cards"
+            items={(f.cards as UPCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ big: '00%', claim: 'New cited stat', srcLabel: 'Source', srcUrl: '' })}
+            itemPreview={(c) => `${c.big ?? ''} — ${c.claim ?? '(empty)'}`}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Big figure" value={c.big ?? ''} onChange={(v) => u({ ...c, big: v })} />
+                <Textarea label="Claim" value={c.claim ?? ''} onChange={(v) => u({ ...c, claim: v })} />
+                <TextInput label="Source label" value={c.srcLabel ?? ''} onChange={(v) => u({ ...c, srcLabel: v })} />
+                <TextInput label="Source URL" value={c.srcUrl ?? ''} onChange={(v) => u({ ...c, srcUrl: v })} />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Textarea label="Kicker (before bold)" value={f.kickerPre as string ?? ''} onChange={(v) => set('kickerPre', v)} />
+          <TextInput label="Kicker (bold end)" value={f.kickerBold as string ?? ''} onChange={(v) => set('kickerBold', v)} />
+        </div>
+      );
+    }
+
+    case 'slick-ud-timeline': {
+      type UTBullet = { lead?: string; rest?: string };
+      type UTItem = { num?: string; title?: string; benefit?: string; bullets?: UTBullet[] };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (tail)" value={f.headingTail as string ?? ''} onChange={(v) => set('headingTail', v)} />
+          <TextInput label="Subtitle (pre)" value={f.subPre as string ?? ''} onChange={(v) => set('subPre', v)} />
+          <TextInput label="Subtitle (bold)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
+          <Textarea label="Subtitle (tail — [VERIFY: x] allowed)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <Textarea label="Proof line ([VERIFY: x] allowed)" value={f.proof as string ?? ''} onChange={(v) => set('proof', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<UTItem>
+            label="Stages"
+            items={(f.items as UTItem[]) ?? []}
+            onChange={(v) => set('items', v)}
+            newItem={() => ({ num: '0', title: 'New stage', benefit: 'Benefit', bullets: [] })}
+            itemPreview={(it) => `${it.num ?? ''}. ${it.title ?? '(stage)'}`}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={it.num ?? ''} onChange={(v) => u({ ...it, num: v })} />
+                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
+                <TextInput label="Benefit pill" value={it.benefit ?? ''} onChange={(v) => u({ ...it, benefit: v })} />
+                <Repeater<UTBullet>
+                  label="Bullets"
+                  items={it.bullets ?? []}
+                  onChange={(v) => u({ ...it, bullets: v })}
+                  newItem={() => ({ lead: 'Lead:', rest: ' detail' })}
+                  itemPreview={(b) => `${b.lead ?? ''}${b.rest ?? ''}`.trim() || '(bullet)'}
+                  renderItem={(b, ub) => (
+                    <div className="space-y-2">
+                      <TextInput label="Lead (bold)" value={b.lead ?? ''} onChange={(v) => ub({ ...b, lead: v })} />
+                      <Textarea label="Rest" value={b.rest ?? ''} onChange={(v) => ub({ ...b, rest: v })} />
+                    </div>
+                  )}
+                />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-ud-impact': {
+      type UICard = { title?: string; benefit?: string; bodyPre?: string; bodyBold?: string; bodyTail?: string; imageUrl?: string; imageAlt?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (tail)" value={f.headingTail as string ?? ''} onChange={(v) => set('headingTail', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<UICard>
+            label="Module cards"
+            items={(f.cards as UICard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'New module', benefit: 'Benefit', bodyPre: '', bodyBold: '', bodyTail: '', imageUrl: '', imageAlt: '' })}
+            itemPreview={(c) => c.title || '(card)'}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <TextInput label="Benefit pill" value={c.benefit ?? ''} onChange={(v) => u({ ...c, benefit: v })} />
+                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
+                <TextInput label="Body (bold)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
+                <Textarea label="Body (tail — [VERIFY: x] allowed)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
+                <ImageField label="Card image" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <TextInput label="Image alt / placeholder caption" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Textarea label="Footer note (before bold)" value={f.notePre as string ?? ''} onChange={(v) => set('notePre', v)} />
+          <TextInput label="Footer note (bold)" value={f.noteBold as string ?? ''} onChange={(v) => set('noteBold', v)} />
+          <Textarea label="Footer note (tail)" value={f.noteTail as string ?? ''} onChange={(v) => set('noteTail', v)} />
+        </div>
+      );
+    }
+
+
+    case 'slick-sn-hero': {
+      type Chip = { valPre: string; valAccent: string; lbl: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <Textarea label="Subtitle (before bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <TextInput label="Subtitle (bold end)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
+          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
+          <ImageField label="Phone mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <TextInput label="Mockup alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
+          <Repeater<Chip>
+            label="Floating chips (4)"
+            items={(f.chips as Chip[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => ({ valPre: '00', valAccent: '+', lbl: 'Metric' })}
+            itemPreview={(c) => c.lbl}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Value" value={c.valPre ?? ''} onChange={(v) => u({ ...c, valPre: v })} />
+                <TextInput label="Accent (teal)" value={c.valAccent ?? ''} onChange={(v) => u({ ...c, valAccent: v })} />
+                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sn-scale': {
+      type Stat = { n: string; l: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Repeater<Stat>
+            label="Stats (4)"
+            items={(f.stats as Stat[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ n: '00', l: 'Label' })}
+            itemPreview={(s) => s.n}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={s.n ?? ''} onChange={(v) => u({ ...s, n: v })} />
+                <TextInput label="Label" value={s.l ?? ''} onChange={(v) => u({ ...s, l: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sn-problem': {
+      type Cite = { big: string; claim: string; srcName: string; srcUrl?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill (red)" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (red)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<Cite>
+            label="Cited stats (3)"
+            items={(f.stats as Cite[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ big: '00%', claim: 'Claim.', srcName: 'Source', srcUrl: '' })}
+            itemPreview={(s) => s.big}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Big number (red)" value={s.big ?? ''} onChange={(v) => u({ ...s, big: v })} />
+                <Textarea label="Claim" value={s.claim ?? ''} onChange={(v) => u({ ...s, claim: v })} />
+                <TextInput label="Source name" value={s.srcName ?? ''} onChange={(v) => u({ ...s, srcName: v })} />
+                <TextInput label="Source URL" value={s.srcUrl ?? ''} onChange={(v) => u({ ...s, srcUrl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sn-howitworks': {
+      type Step = { num: string; title: string; desc: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <Repeater<Step>
+            label="Steps (4)"
+            items={(f.steps as Step[]) ?? []}
+            onChange={(v) => set('steps', v)}
+            newItem={() => ({ num: '0', title: 'Step', desc: 'Description.' })}
+            itemPreview={(s) => s.title}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
+                <TextInput label="Title" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
+                <Textarea label="Description" value={s.desc ?? ''} onChange={(v) => u({ ...s, desc: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sn-features': {
+      type FCard = { imageUrl?: string; imageAlt?: string; title: string; desc: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Repeater<FCard>
+            label="Feature cards (3)"
+            items={(f.cards as FCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ imageUrl: '', title: 'Feature', desc: 'Description.' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <ImageField label="Thumbnail URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Description" value={c.desc ?? ''} onChange={(v) => u({ ...c, desc: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sn-spotlight': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <TextInput label="Body (bold lead)" value={f.bodyBold as string ?? ''} onChange={(v) => set('bodyBold', v)} />
+          <Textarea label="Body (rest)" value={f.bodyRest as string ?? ''} onChange={(v) => set('bodyRest', v)} />
+          <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <Repeater<string>
+            label="Chips"
+            items={(f.chips as string[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => 'New chip'}
+            itemPreview={(c) => c || '(empty)'}
+            renderItem={(c, u) => (
+              <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sn-darkcard':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Body (before bold 1)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
+          <TextInput label="Body bold 1" value={f.bodyBold1 as string ?? ''} onChange={(v) => set('bodyBold1', v)} />
+          <Textarea label="Body (middle)" value={f.bodyMid as string ?? ''} onChange={(v) => set('bodyMid', v)} />
+          <TextInput label="Body bold 2" value={f.bodyBold2 as string ?? ''} onChange={(v) => set('bodyBold2', v)} />
+          <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+        </div>
+      );
+
+    case 'slick-sn-recovery': {
+      type Pt = { ic: string; title: string; desc: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <Repeater<Pt>
+            label="Recovery points (4)"
+            items={(f.points as Pt[]) ?? []}
+            onChange={(v) => set('points', v)}
+            newItem={() => ({ ic: '0', title: 'Scenario', desc: 'Description.' })}
+            itemPreview={(p) => p.title}
+            renderItem={(p, u) => (
+              <div className="space-y-2">
+                <TextInput label="Icon/number" value={p.ic ?? ''} onChange={(v) => u({ ...p, ic: v })} />
+                <TextInput label="Title" value={p.title ?? ''} onChange={(v) => u({ ...p, title: v })} />
+                <Textarea label="Description" value={p.desc ?? ''} onChange={(v) => u({ ...p, desc: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-sn-proof': {
+      type PCard = { title: string; body: string; statValue: string; statKey: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Repeater<PCard>
+            label="Proof cards (3)"
+            items={(f.cards as PCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'Outcome', body: 'Description.', statValue: '[Vx]', statKey: 'Metric' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Body" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+                <TextInput label="Stat value (e.g. [V1] or +18%)" value={c.statValue ?? ''} onChange={(v) => u({ ...c, statValue: v })} />
+                <TextInput label="Stat key" value={c.statKey ?? ''} onChange={(v) => u({ ...c, statKey: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
 
     case "layout":
       return <LayoutEditor block={block} update={update} openWidgetPicker={openWidgetPicker} />;
