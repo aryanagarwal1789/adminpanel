@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   Undo2, Redo2, Plus, Eye, EyeOff, Trash2, GripVertical,
-  X, Palette, Play, FileText, ChevronLeft, PenLine, Paintbrush, Settings, Layers, Globe,
+  X, Palette, Play, FileText, ChevronLeft, PenLine, Paintbrush, Settings, Layers, Globe, Search,
 } from "lucide-react";
 import { defaultBlock } from "./blocks";
 import { AddSectionDrawer } from "./AddSectionDrawer";
@@ -174,6 +174,7 @@ export function PageBuilder() {
   }, []);
 
   const [activePage, setActivePage] = useState<string>("landing");
+  const [pageSearch, setPageSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"content" | "style">("content");
@@ -759,8 +760,46 @@ export function PageBuilder() {
             </div>
 
             {leftPanel === "pages" && (
-              <div className="overflow-y-auto flex-1">
-                {pages.map((p) => {
+              <div className="flex flex-col flex-1 min-h-0">
+                <div className="px-3 py-2 border-b border-slate-800">
+                  <div className="relative">
+                    <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={pageSearch}
+                      onChange={(e) => setPageSearch(e.target.value)}
+                      placeholder="Search pages..."
+                      className="w-full bg-slate-800 text-white text-xs pl-8 pr-7 py-1.5 rounded outline-none border border-slate-700 focus:border-blue-500 placeholder:text-slate-500 pb-transition"
+                    />
+                    {pageSearch && (
+                      <button
+                        onClick={() => setPageSearch("")}
+                        title="Clear search"
+                        className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-slate-500 hover:text-slate-300"
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="overflow-y-auto flex-1">
+                {(() => {
+                  const q = pageSearch.trim().toLowerCase();
+                  const filtered = q
+                    ? pages.filter((p) =>
+                        p.name.toLowerCase().includes(q) ||
+                        p.slug.toLowerCase().includes(q) ||
+                        (p.hostnames ?? []).some((h) => h.toLowerCase().includes(q))
+                      )
+                    : pages;
+                  if (filtered.length === 0) {
+                    return (
+                      <div className="px-4 py-4 text-xs text-slate-500">
+                        No pages match &ldquo;{pageSearch}&rdquo;.
+                      </div>
+                    );
+                  }
+                  return filtered.map((p) => {
                   const active = p.id === activePage;
                   const hn = p.hostnames ?? [];
                   const isEditingHn = editingPageHostnames === p.id;
@@ -840,7 +879,9 @@ export function PageBuilder() {
                       </div>
                     </div>
                   );
-                })}
+                  });
+                })()}
+                </div>
               </div>
             )}
 

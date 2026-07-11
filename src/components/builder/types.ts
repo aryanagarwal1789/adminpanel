@@ -182,6 +182,24 @@ export type TemplateBlockType =
   | 'slick-sc-saudi-platform'
   | 'slick-sc-saudi-products'
   | 'slick-sc-saudi-video'
+  | 'slick-sc-upi-hero'
+  | 'slick-sc-upi-challenge'
+  | 'slick-sc-upi-dark'
+  | 'slick-sc-upi-how'
+  | 'slick-sc-upi-suite'
+  | 'slick-sc-upi-split'
+  | 'slick-sc-upi-proof'
+  | 'slick-sc-upi-related'
+  | 'slick-si-impact'
+  | 'slick-si-capabilities'
+  | 'slick-si-darkpanel'
+  | 'slick-si-split'
+  | 'slick-si-proof'
+  | 'slick-ate-darkpanel'
+  | 'slick-ate-proof'
+  | 'slick-atk-capabilities'
+  | 'slick-atk-darkpanel'
+  | 'slick-atk-proof'
   | 'slick-ac-hero'
   | 'slick-ac-how-it-works'
   | 'slick-ac-problem'
@@ -529,6 +547,24 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sc-saudi-platform': 'SC — Saudi Platform Image',
   'slick-sc-saudi-products': 'SC — Saudi Products',
   'slick-sc-saudi-video': 'SC — Saudi Video',
+  'slick-sc-upi-hero': 'UPI — Hero',
+  'slick-sc-upi-challenge': 'UPI — Business Challenge',
+  'slick-sc-upi-dark': 'UPI — Dark Explainer',
+  'slick-sc-upi-how': 'UPI — How It Works',
+  'slick-sc-upi-suite': 'UPI — Suite Fit',
+  'slick-sc-upi-split': 'UPI — Features Split',
+  'slick-sc-upi-proof': 'UPI — Proof',
+  'slick-sc-upi-related': 'UPI — Related Capabilities',
+  'slick-si-impact': 'Sales Incentive — Impact',
+  'slick-si-capabilities': 'Sales Incentive — Capabilities',
+  'slick-si-darkpanel': 'Sales Incentive — Dark Panel',
+  'slick-si-split': 'Sales Incentive — Split',
+  'slick-si-proof': 'Sales Incentive — Proof',
+  'slick-ate-darkpanel': 'AI Target Engine — Dark Panel',
+  'slick-ate-proof': 'AI Target Engine — Proof',
+  'slick-atk-capabilities': 'AI Task Engine — Capabilities',
+  'slick-atk-darkpanel': 'AI Task Engine — Dark Panel',
+  'slick-atk-proof': 'AI Task Engine — Proof',
   'slick-ac-hero': 'AI Coach — Hero',
   'slick-ac-how-it-works': 'AI Coach — How It Works',
   'slick-ac-problem': 'AI Coach — Problem (Broken Coaching)',

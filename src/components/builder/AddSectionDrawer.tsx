@@ -142,6 +142,32 @@ const GROUPS: Group[] = [
     { type: "slick-sc-saudi-video",      label: "Saudi — Video Section",     Icon: Layers },
     { type: "slick-sc-saudi-products",   label: "Saudi — Products Grid",     Icon: Sparkles },
   ]},
+  { name: "UPI Payments", items: [
+    { type: "slick-sc-upi-hero",      label: "UPI — Hero",               Icon: Sparkles },
+    { type: "slick-sc-upi-challenge", label: "UPI — Business Challenge", Icon: BarChart3 },
+    { type: "slick-sc-upi-dark",      label: "UPI — Dark Explainer",     Icon: Layers },
+    { type: "slick-sc-upi-how",       label: "UPI — How It Works",       Icon: List },
+    { type: "slick-sc-upi-suite",     label: "UPI — Suite Fit",          Icon: Layers },
+    { type: "slick-sc-upi-split",     label: "UPI — Features Split",     Icon: Sparkles },
+    { type: "slick-sc-upi-proof",     label: "UPI — Proof",              Icon: BarChart3 },
+    { type: "slick-sc-upi-related",   label: "UPI — Related Capabilities", Icon: Layers },
+  ]},
+  { name: "Sales Incentive", items: [
+    { type: "slick-si-impact",        label: "Sales Incentive — Impact",       Icon: BarChart3 },
+    { type: "slick-si-capabilities",  label: "Sales Incentive — Capabilities",  Icon: Layers },
+    { type: "slick-si-darkpanel",     label: "Sales Incentive — Dark Panel",    Icon: Layers },
+    { type: "slick-si-split",         label: "Sales Incentive — Split",         Icon: Columns },
+    { type: "slick-si-proof",         label: "Sales Incentive — Proof",         Icon: BarChart3 },
+  ]},
+  { name: "AI Target Engine", items: [
+    { type: "slick-ate-darkpanel",    label: "AI Target Engine — Dark Panel",   Icon: Layers },
+    { type: "slick-ate-proof",        label: "AI Target Engine — Proof",        Icon: BarChart3 },
+  ]},
+  { name: "AI Task Engine", items: [
+    { type: "slick-atk-capabilities", label: "AI Task Engine — Capabilities",   Icon: Layers },
+    { type: "slick-atk-darkpanel",    label: "AI Task Engine — Dark Panel",     Icon: Layers },
+    { type: "slick-atk-proof",        label: "AI Task Engine — Proof",          Icon: BarChart3 },
+  ]},
   { name: "AI Coach", items: [
     { type: "slick-ac-hero",          label: "AI Coach — Hero",              Icon: Sparkles },
     { type: "slick-ac-how-it-works",  label: "AI Coach — How It Works",      Icon: ListOrdered },
