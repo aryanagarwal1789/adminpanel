@@ -6857,6 +6857,7 @@ function renderBlockFields(
         <div className="space-y-4">
           <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
           <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Subheading" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
           <Repeater<FCard>
             label="Check cards (6)"
             items={(f.cards as FCard[]) ?? []}
@@ -7201,6 +7202,7 @@ function renderBlockFields(
           <Toggle label="Mint band background" value={Boolean(f.bandMint)} onChange={(v) => set('bandMint', v)} />
           <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
           <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Subheading / body" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
           <Repeater<Stat>
             label="Stats (4)"
             items={(f.stats as Stat[]) ?? []}
@@ -7276,6 +7278,7 @@ function renderBlockFields(
         <div className="space-y-4">
           <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
           <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Sub text" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
           <Repeater<ICard>
             label="Impact cards (3)"
             items={(f.cards as ICard[]) ?? []}
@@ -7657,6 +7660,7 @@ function renderBlockFields(
         <div className="space-y-4">
           <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
           <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Subheading" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
           <Repeater<FCard>
             label="Feature cards (3)"
             items={(f.cards as FCard[]) ?? []}

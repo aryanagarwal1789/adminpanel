@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { UploadInput } from './upload-input';
 
 export const Route = createFileRoute('/admin/seo')({ component: SeoPage });
@@ -12,9 +12,9 @@ const PAGE_TABS = [
   { key: 'about-us',  label: 'About Us'   },
   { key: 'contact-us',label: 'Contact Us' },
   { key: 'client',    label: 'Clients'    },
-] as const;
+];
 
-type PageKey = typeof PAGE_TABS[number]['key'];
+type PageKey = string;
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 interface SeoData {
@@ -177,13 +177,13 @@ function overallScore(checks: SeoCheck[]) {
 }
 
 // ─── Page content extraction — reads the live rendered HTML (T10, T13) ──────
-// In local dev, requests go through the Vite proxy (/renderer-proxy → demo-experience.salescode.ai)
+// In local dev, requests go through the Vite proxy (/renderer-proxy → experience.experience.salescode.ai)
 // to avoid CORS. In production the real URL is used directly.
 const RENDERER_BASE = import.meta.env.DEV
   ? '/renderer-proxy'
-  : (import.meta.env.VITE_RENDERER_URL ?? 'https://demo-experience.salescode.ai');
+  : (import.meta.env.VITE_RENDERER_URL ?? 'https://experience.experience.salescode.ai');
 
-const RENDERER_PATHS: Record<PageKey, string> = {
+const RENDERER_PATHS: Record<string, string> = {
   'landing':    '/',
   'blog':       '/blog',
   'about-us':  '/about',
@@ -197,8 +197,8 @@ interface PageContent {
   images: Array<{ src: string; alt: string }>;
 }
 
-async function fetchPageContent(pageKey: PageKey): Promise<PageContent> {
-  const url = `${RENDERER_BASE}${RENDERER_PATHS[pageKey]}`;
+async function fetchPageContent(pageKey: string): Promise<PageContent> {
+  const url = `${RENDERER_BASE}${RENDERER_PATHS[pageKey] ?? '/en/' + pageKey}`;
   const res  = await fetch(url, { mode: 'cors' });
   if (!res.ok) throw new Error(`${res.status}`);
   const html = await res.text();
@@ -337,7 +337,7 @@ function PageSpeedCard({ pageKey, canonicalUrl }: { pageKey: PageKey; canonicalU
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState<string | null>(null);
 
-  const targetUrl = canonicalUrl || `https://demo-experience.salescode.ai${RENDERER_PATHS[pageKey]}`;
+  const targetUrl = canonicalUrl || `https://experience.experience.salescode.ai${RENDERER_PATHS[pageKey] ?? '/en/' + pageKey}`;
 
   useEffect(() => { setData(null); setError(null); }, [strategy]);
 
@@ -414,16 +414,16 @@ function PageSpeedCard({ pageKey, canonicalUrl }: { pageKey: PageKey; canonicalU
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function parseSerpUrl(canonicalUrl: string, pageKey: string) {
   const fallbackPath = pageKey === 'landing' ? '' : `› ${pageKey}`;
-  if (!canonicalUrl) return { domain: 'salescode.ai', path: fallbackPath };
+  if (!canonicalUrl) return { domain: 'experience.salescode.ai', path: fallbackPath };
   try {
     const u = new URL(canonicalUrl);
     const parts = u.pathname.split('/').filter(Boolean);
     return { domain: u.hostname, path: parts.length ? '› ' + parts.join(' › ') : '' };
-  } catch { return { domain: 'salescode.ai', path: fallbackPath }; }
+  } catch { return { domain: 'experience.salescode.ai', path: fallbackPath }; }
 }
 
 function getDomain(url: string) {
-  try { return new URL(url).hostname; } catch { return 'salescode.ai'; }
+  try { return new URL(url).hostname; } catch { return 'experience.salescode.ai'; }
 }
 
 function mergeSeo(loaded: Partial<SeoData>): SeoData {
@@ -628,7 +628,7 @@ function SerpPreview({ seo, pageKey }: { seo: SeoData; pageKey: string }) {
 // ─── Social card preview ──────────────────────────────────────────────────
 function SocialPreview({ seo }: { seo: SeoData }) {
   const [tab, setTab] = useState<'og' | 'twitter'>('og');
-  const domain  = seo.canonicalUrl ? getDomain(seo.canonicalUrl) : 'salescode.ai';
+  const domain  = seo.canonicalUrl ? getDomain(seo.canonicalUrl) : 'experience.salescode.ai';
   const ogTitle = seo.ogTitle      || seo.metaTitle;
   const ogDesc  = seo.ogDescription || seo.metaDescription;
   const twTitle = seo.twitterTitle  || seo.metaTitle;
@@ -671,26 +671,25 @@ function SocialPreview({ seo }: { seo: SeoData }) {
 }
 
 // ─── T2 + A5: Site-wide view (Sitemap + llms.txt) ─────────────────────────
-function SiteView() {
+function SiteView({ tabs }: { tabs: Array<{ key: string; label: string }> }) {
   const [pageData, setPageData]     = useState<Record<string, Partial<SeoData>> | null>(null);
   const [loadingMap, setLoadingMap] = useState(true);
-  const [llms, setLlms]             = useState<LlmsData>({ siteName: 'Salescode AI', tagline: '', pages: PAGE_TABS.map(t => ({ name: t.label, url: t.key === 'landing' ? 'https://salescode.ai/' : `https://salescode.ai/${t.key}`, description: '' })) });
+  const [llms, setLlms]             = useState<LlmsData>({ siteName: 'Salescode AI', tagline: '', pages: tabs.map(t => ({ name: t.label, url: t.key === 'landing' ? 'https://experience.salescode.ai/' : `https://experience.salescode.ai/${t.key}`, description: '' })) });
   const [copied, setCopied]         = useState(false);
 
   useEffect(() => {
-    Promise.all(PAGE_TABS.map(t => fetch(`${BACKEND}/site/seo/${t.key}`).then(r => r.json())))
+    Promise.all(tabs.map(t => fetch(`${BACKEND}/site/seo/${t.key}`).then(r => r.json())))
       .then(results => {
         const map: Record<string, Partial<SeoData>> = {};
-        PAGE_TABS.forEach((t, i) => { map[t.key] = results[i].seo ?? {}; });
+        tabs.forEach((t, i) => { map[t.key] = results[i].seo ?? {}; });
         setPageData(map);
-        // Auto-populate llms pages from canonical URLs + meta descriptions
         setLlms(prev => ({
           ...prev,
-          pages: PAGE_TABS.map((t, i) => {
+          pages: tabs.map((t, i) => {
             const d = results[i].seo ?? {} as Partial<SeoData>;
             return {
               name: t.label,
-              url:  d.canonicalUrl || (t.key === 'landing' ? 'https://salescode.ai/' : `https://salescode.ai/${t.key}`),
+              url:  d.canonicalUrl || (t.key === 'landing' ? 'https://experience.salescode.ai/' : `https://experience.salescode.ai/${t.key}`),
               description: prev.pages[i]?.description || d.metaDescription || '',
             };
           }),
@@ -698,7 +697,7 @@ function SiteView() {
       })
       .catch(() => {})
       .finally(() => setLoadingMap(false));
-  }, []);
+  }, [tabs]);
 
   function generateLlmsTxt() {
     const lines: string[] = [];
@@ -746,11 +745,11 @@ function SiteView() {
                   </tr>
                 </thead>
                 <tbody>
-                  {PAGE_TABS.map(t => {
+                  {tabs.map(t => {
                     const d = pageData?.[t.key] ?? {};
                     const { indexing } = parseRobots(d.robots ?? 'index, follow');
                     const isIndexed    = indexing === 'index';
-                    const canonical    = d.canonicalUrl || `salescode.ai/${t.key === 'landing' ? '' : t.key}`;
+                    const canonical    = d.canonicalUrl || `experience.salescode.ai/${t.key === 'landing' ? '' : t.key}`;
                     return (
                       <tr key={t.key} style={{ borderBottom: `1px solid ${C.border}` }}>
                         <td style={{ padding: '10px 12px', color: C.text, fontWeight: 600 }}>{t.label}</td>
@@ -777,7 +776,7 @@ function SiteView() {
           <div style={{ padding: '12px 16px', borderTop: `1px solid ${C.border}`, background: '#0f172a', borderRadius: '0 0 8px 8px' }}>
             <p style={{ color: C.subtle, fontSize: 11, margin: 0 }}>
               To change a page's indexing, open its tab above and update the <strong style={{ color: C.muted }}>Robots</strong> setting.
-              Your sitemap URL: <code style={{ color: C.blue }}>https://salescode.ai/sitemap.xml</code>
+              Your sitemap URL: <code style={{ color: C.blue }}>https://experience.salescode.ai/sitemap.xml</code>
             </p>
           </div>
         </div>
@@ -829,7 +828,7 @@ function SiteView() {
             </div>
 
             <p style={{ color: C.subtle, fontSize: 11, margin: '12px 0 0', lineHeight: 1.6 }}>
-              After copying, save as <code style={{ color: C.blue }}>llms.txt</code> and publish it at <code style={{ color: C.blue }}>https://salescode.ai/llms.txt</code> (in your public root folder).
+              After copying, save as <code style={{ color: C.blue }}>llms.txt</code> and publish it at <code style={{ color: C.blue }}>https://experience.salescode.ai/llms.txt</code> (in your public root folder).
             </p>
           </div>
           {/* suppress unused var warning for SEL_SM */}
@@ -843,7 +842,10 @@ function SiteView() {
 
 // ─── Main page ────────────────────────────────────────────────────────────
 function SeoPage() {
-  const [activeTab, setActiveTab]       = useState<PageKey | 'site'>('landing');
+  const [activeTab, setActiveTab]       = useState<string>('landing');
+  const [tabs, setTabs]                 = useState<Array<{ key: string; label: string }>>(PAGE_TABS);
+  const [dropOpen, setDropOpen]         = useState(false);
+  const dropRef                         = useRef<HTMLDivElement>(null);
   const [seo, setSeo]                   = useState<SeoData>(BLANK_SEO);
   const [loading, setLoading]           = useState(true);
   const [saving, setSaving]             = useState(false);
@@ -855,6 +857,43 @@ function SeoPage() {
 
   const showToast = (t: Toast) => { setToast(t); setTimeout(() => setToast(null), 3000); };
   const isPage = activeTab !== 'site';
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (dropRef.current && !dropRef.current.contains(e.target as Node)) setDropOpen(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  // Load all builder pages and merge with the static tab list
+  useEffect(() => {
+    fetch(`${BACKEND}/site/builder/pages`)
+      .then(r => r.json())
+      .then((data: { pages?: Array<{ pageKey: string }> }) => {
+        // Include common key aliases so variants like 'clients'/'client', 'about'/'about-us' don't duplicate
+        const staticKeys = new Set([
+          ...PAGE_TABS.map(t => t.key),
+          'about', 'clients', 'contact',
+        ]);
+        const seen = new Set<string>();
+        const newTabs = (data.pages ?? [])
+          .filter(p => {
+            if (!p.pageKey || p.pageKey === '__blog__') return false;
+            if (staticKeys.has(p.pageKey)) return false;
+            if (seen.has(p.pageKey)) return false;
+            seen.add(p.pageKey);
+            return true;
+          })
+          .map(p => ({
+            key: p.pageKey,
+            label: p.pageKey.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+          }));
+        if (newTabs.length) setTabs(prev => [...prev, ...newTabs]);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!isPage) return;
@@ -873,7 +912,7 @@ function SeoPage() {
       .catch(() => showToast({ type: 'error', message: 'Failed to load SEO data' }))
       .finally(() => setLoading(false));
 
-    const contentFetch = fetchPageContent(activeTab as PageKey)
+    const contentFetch = fetchPageContent(activeTab)
       .then(content => setPageContent(content))
       .catch(() => setPageContent({ headings: [], paragraphs: [], images: [] }))
       .finally(() => setContentLoading(false));
@@ -947,22 +986,39 @@ function SeoPage() {
         )}
       </div>
 
-      {/* Tabs row */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 18, alignItems: 'center' }}>
-        <div style={{ display: 'flex', gap: 2, background: '#0f172a', border: `1px solid ${C.border}`, borderRadius: 6, padding: 3, flex: 1 }}>
-          {PAGE_TABS.map(t => (
-            <button key={t.key} onClick={() => setActiveTab(t.key)} style={{ flex: 1, padding: '5px 0', borderRadius: 4, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, background: activeTab === t.key ? C.blue : 'transparent', color: activeTab === t.key ? '#fff' : C.muted, transition: 'all 0.15s' }}>
-              {t.label}
-            </button>
-          ))}
+      {/* Page selector row */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 18, alignItems: 'center' }}>
+        <div ref={dropRef} style={{ position: 'relative', flex: 1 }}>
+          {/* Trigger button */}
+          <button
+            onClick={() => setDropOpen(o => !o)}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, background: '#0f172a', border: `1px solid ${isPage && !dropOpen ? C.blue : dropOpen ? C.blue : C.border}`, color: C.text, borderRadius: 6, padding: '9px 12px', fontSize: 13, fontWeight: 600, cursor: 'pointer', textAlign: 'left', outline: 'none', boxSizing: 'border-box' }}
+          >
+            <span>{isPage ? (tabs.find(t => t.key === activeTab)?.label ?? activeTab) : 'Select a page…'}</span>
+            <span style={{ color: C.muted, fontSize: 10, flexShrink: 0, transform: dropOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', display: 'inline-block' }}>▾</span>
+          </button>
+          {/* Dropdown panel */}
+          {dropOpen && (
+            <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: '#1e293b', border: `1px solid ${C.border}`, borderRadius: 8, maxHeight: 260, overflowY: 'auto', zIndex: 200, boxShadow: '0 12px 32px rgba(0,0,0,0.5)' }}>
+              {tabs.map(t => (
+                <button
+                  key={t.key}
+                  onClick={() => { setActiveTab(t.key); setDropOpen(false); }}
+                  style={{ width: '100%', padding: '8px 12px', background: t.key === activeTab ? 'rgba(59,130,246,0.15)' : 'transparent', border: 'none', borderBottom: `1px solid ${C.border}`, cursor: 'pointer', textAlign: 'left', color: t.key === activeTab ? C.blue : C.text, fontSize: 13, fontWeight: t.key === activeTab ? 600 : 400, display: 'block', boxSizing: 'border-box' }}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-        <button onClick={() => setActiveTab('site')} style={{ padding: '7px 14px', borderRadius: 6, border: `1px solid ${activeTab === 'site' ? C.blue : C.border}`, cursor: 'pointer', fontSize: 12, fontWeight: 600, background: activeTab === 'site' ? 'rgba(59,130,246,0.15)' : 'transparent', color: activeTab === 'site' ? C.blue : C.muted, whiteSpace: 'nowrap', transition: 'all 0.15s' }}>
+        <button onClick={() => { setActiveTab('site'); setDropOpen(false); }} style={{ padding: '9px 16px', borderRadius: 6, border: `1px solid ${activeTab === 'site' ? C.blue : C.border}`, cursor: 'pointer', fontSize: 12, fontWeight: 600, background: activeTab === 'site' ? 'rgba(59,130,246,0.15)' : 'transparent', color: activeTab === 'site' ? C.blue : C.muted, whiteSpace: 'nowrap', transition: 'all 0.15s' }}>
           🌐 Site Settings
         </button>
       </div>
 
       {/* Site view */}
-      {activeTab === 'site' && <SiteView />}
+      {activeTab === 'site' && <SiteView tabs={tabs} />}
 
       {/* Per-page view */}
       {isPage && (
@@ -992,7 +1048,7 @@ function SeoPage() {
                   <LenBar len={seo.metaDescription.length} max={160} min={140} />
                 </Field>
                 <Field lbl="Canonical URL">
-                  <input style={INP} value={seo.canonicalUrl} onChange={e => update({ canonicalUrl: e.target.value })} placeholder="https://salescode.ai/…" />
+                  <input style={INP} value={seo.canonicalUrl} onChange={e => update({ canonicalUrl: e.target.value })} placeholder="https://experience.salescode.ai/…" />
                 </Field>
                 <Field lbl="Robots — Indexing & Link Following" hint="Controls whether search engines index this page and follow its links.">
                   <RobotsControl value={seo.robots} onChange={v => update({ robots: v })} />
@@ -1020,7 +1076,7 @@ function SeoPage() {
                 <SchemaCard title="Software Application" enabled={seo.schemasEnabled.softwareApplication} onToggle={v => toggleSchema('softwareApplication', v)}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <Field lbl="Name"><input style={INP} value={sa.name} onChange={e => updateSchema('softwareApplication', { name: e.target.value })} placeholder="Salescode AI" /></Field>
-                    <Field lbl="URL"><input style={INP} value={sa.url} onChange={e => updateSchema('softwareApplication', { url: e.target.value })} placeholder="https://salescode.ai" /></Field>
+                    <Field lbl="URL"><input style={INP} value={sa.url} onChange={e => updateSchema('softwareApplication', { url: e.target.value })} placeholder="https://experience.salescode.ai" /></Field>
                   </div>
                   <Field lbl="Description"><textarea style={TA} value={sa.description} onChange={e => updateSchema('softwareApplication', { description: e.target.value })} /></Field>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -1036,7 +1092,7 @@ function SeoPage() {
                   {crumb.items.map((item, idx) => (
                     <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr auto', gap: 8, marginBottom: 8, alignItems: 'center' }}>
                       <input style={INP} value={item.name} onChange={e => updateCrumb(idx, { name: e.target.value })} placeholder={idx === 0 ? 'Home' : 'Page name'} />
-                      <input style={INP} value={item.url} onChange={e => updateCrumb(idx, { url: e.target.value })} placeholder={idx === 0 ? 'https://salescode.ai/' : 'https://salescode.ai/…'} />
+                      <input style={INP} value={item.url} onChange={e => updateCrumb(idx, { url: e.target.value })} placeholder={idx === 0 ? 'https://experience.salescode.ai/' : 'https://experience.salescode.ai/…'} />
                       <button onClick={() => removeCrumb(idx)} style={{ background: 'none', border: `1px solid ${C.bad}`, color: C.bad, padding: '6px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>✕</button>
                     </div>
                   ))}
@@ -1071,7 +1127,7 @@ function SeoPage() {
                 </SchemaCard>
 
                 <SchemaCard title="Speakable (Voice Search)" enabled={seo.schemasEnabled.speakable} onToggle={v => toggleSchema('speakable', v)}>
-                  <Field lbl="URL"><input style={INP} value={speak.url} onChange={e => updateSchema('speakable', { url: e.target.value })} placeholder="https://salescode.ai/…" /></Field>
+                  <Field lbl="URL"><input style={INP} value={speak.url} onChange={e => updateSchema('speakable', { url: e.target.value })} placeholder="https://experience.salescode.ai/…" /></Field>
                   <Field lbl="CSS Selectors (one per line)">
                     <textarea style={TA} value={speakableInput} onChange={e => setSpeakable(e.target.value)} placeholder={'.article-headline\n.article-body p'} rows={4} />
                   </Field>
@@ -1082,7 +1138,7 @@ function SeoPage() {
             {/* Right column — sticky analysis */}
             <div style={{ position: 'sticky', top: 0 }}>
               <AnalysisPanel checks={checks} contentChecks={contentChecks} contentLoading={contentLoading} />
-              <PageSpeedCard key={activeTab} pageKey={activeTab as PageKey} canonicalUrl={seo.canonicalUrl} />
+              <PageSpeedCard key={activeTab} pageKey={activeTab} canonicalUrl={seo.canonicalUrl} />
               <div style={{ ...CARD, padding: 16 }}>
                 <div style={{ color: C.text, fontSize: 13, fontWeight: 700, marginBottom: 12 }}>Legend</div>
                 {[{ dot: C.good, text: 'Good — no action needed' }, { dot: C.ok, text: 'OK — consider improving' }, { dot: C.bad, text: 'Problem — needs attention' }].map(({ dot, text }) => (
