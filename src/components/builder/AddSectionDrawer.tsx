@@ -168,6 +168,13 @@ const GROUPS: Group[] = [
     { type: "slick-atk-darkpanel",    label: "AI Task Engine — Dark Panel",     Icon: Layers },
     { type: "slick-atk-proof",        label: "AI Task Engine — Proof",          Icon: BarChart3 },
   ]},
+  { name: "Manager App", items: [
+    { type: "slick-ma-hero",       label: "Manager App — Hero",                 Icon: Sparkles },
+    { type: "slick-ma-problem",    label: "Manager App — Market Problem",       Icon: BarChart3 },
+    { type: "slick-ma-signals",    label: "Manager App — Signal Layers",        Icon: List },
+    { type: "slick-ma-decision",   label: "Manager App — Decision Intelligence", Icon: Layers },
+    { type: "slick-ma-enterprise", label: "Manager App — Enterprise Ready",     Icon: Grid2x2 },
+  ]},
   { name: "AI Coach", items: [
     { type: "slick-ac-hero",          label: "AI Coach — Hero",              Icon: Sparkles },
     { type: "slick-ac-how-it-works",  label: "AI Coach — How It Works",      Icon: ListOrdered },

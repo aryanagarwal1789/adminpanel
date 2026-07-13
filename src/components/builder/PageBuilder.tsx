@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
-  Undo2, Redo2, Plus, Eye, EyeOff, Trash2, GripVertical,
+  Undo2, Redo2, Plus, Eye, EyeOff, Trash2, GripVertical, Copy, Clipboard,
   X, Palette, Play, FileText, ChevronLeft, PenLine, Paintbrush, Settings, Layers, Globe, Search,
 } from "lucide-react";
 import { defaultBlock } from "./blocks";
@@ -182,6 +182,9 @@ export function PageBuilder() {
   const [editingPageHostnames, setEditingPageHostnames] = useState<string | null>(null);
   const [addAtIndex, setAddAtIndex] = useState<number | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
+  const [clipboardBlock, setClipboardBlock] = useState<Block | null>(() => {
+    try { const s = localStorage.getItem('pb_clipboard'); return s ? JSON.parse(s) : null; } catch { return null; }
+  });
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
   const [themeOpen, setThemeOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -330,6 +333,41 @@ export function PageBuilder() {
     if (confirmFirst && !window.confirm("Delete this section?")) return;
     setBlocks(blocks.filter((b) => b.id !== id).map((b, i) => ({ ...b, order: i })));
     if (selectedBlockId === id) setSelectedBlockId(null);
+  };
+
+  const copyBlockToClipboard = (id: string) => {
+    const src = blocks.find((b) => b.id === id);
+    if (!src) return;
+    const copy = JSON.parse(JSON.stringify(src));
+    localStorage.setItem('pb_clipboard', JSON.stringify(copy));
+    setClipboardBlock(copy);
+    toast.success('Section copied — switch to any page and paste it');
+  };
+
+  const pasteFromClipboard = () => {
+    if (!clipboardBlock) return;
+    const pasted = {
+      ...JSON.parse(JSON.stringify(clipboardBlock)),
+      id: `b_${Math.random().toString(36).slice(2, 9)}`,
+      order: blocks.length,
+    };
+    setBlocks([...blocks, pasted].map((b, i) => ({ ...b, order: i })));
+    setSelectedBlockId(pasted.id);
+    toast.success('Section pasted');
+  };
+
+  const duplicateBlock = (id: string) => {
+    const src = blocks.find((b) => b.id === id);
+    if (!src) return;
+    const idx = blocks.findIndex((b) => b.id === id);
+    const copy = {
+      ...JSON.parse(JSON.stringify(src)),
+      id: `b_${Math.random().toString(36).slice(2, 9)}`,
+    };
+    const next = [...blocks];
+    next.splice(idx + 1, 0, copy);
+    setBlocks(next.map((b, i) => ({ ...b, order: i })));
+    setSelectedBlockId(copy.id);
   };
 
   const toggleHidden = (id: string) => {
@@ -895,6 +933,15 @@ export function PageBuilder() {
                 />
               ) : (
                 <div className="overflow-y-auto flex-1 px-2 pb-3 pt-1 space-y-0.5">
+                  {clipboardBlock && (
+                    <button
+                      onClick={pasteFromClipboard}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs text-blue-400 border border-blue-400/30 hover:bg-blue-400/10 pb-transition mb-1"
+                    >
+                      <Clipboard size={12} />
+                      <span className="flex-1 text-left truncate">Paste: {BLOCK_LABELS[(clipboardBlock as Block).type]}</span>
+                    </button>
+                  )}
                   {blocks.length === 0 && (
                     <div className="px-2 py-4 text-xs text-slate-500">No sections yet.</div>
                   )}
@@ -917,12 +964,21 @@ export function PageBuilder() {
                         <button
                           onClick={(e) => { e.stopPropagation(); toggleHidden(b.id); }}
                           className="opacity-60 hover:opacity-100"
+                          title="Show/hide"
                         >
                           {b.hidden ? <EyeOff size={13} /> : <Eye size={13} />}
                         </button>
                         <button
+                          onClick={(e) => { e.stopPropagation(); copyBlockToClipboard(b.id); }}
+                          className="opacity-60 hover:opacity-100 hover:text-blue-400"
+                          title="Copy to clipboard (paste on any page)"
+                        >
+                          <Clipboard size={13} />
+                        </button>
+                        <button
                           onClick={(e) => { e.stopPropagation(); deleteBlock(b.id, true); }}
                           className="opacity-60 hover:opacity-100 hover:text-red-400"
+                          title="Delete section"
                         >
                           <Trash2 size={13} />
                         </button>

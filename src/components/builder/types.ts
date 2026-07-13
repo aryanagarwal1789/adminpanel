@@ -200,6 +200,11 @@ export type TemplateBlockType =
   | 'slick-atk-capabilities'
   | 'slick-atk-darkpanel'
   | 'slick-atk-proof'
+  | 'slick-ma-hero'
+  | 'slick-ma-problem'
+  | 'slick-ma-signals'
+  | 'slick-ma-decision'
+  | 'slick-ma-enterprise'
   | 'slick-ac-hero'
   | 'slick-ac-how-it-works'
   | 'slick-ac-problem'
@@ -565,6 +570,11 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-atk-capabilities': 'AI Task Engine — Capabilities',
   'slick-atk-darkpanel': 'AI Task Engine — Dark Panel',
   'slick-atk-proof': 'AI Task Engine — Proof',
+  'slick-ma-hero': 'Manager App — Hero',
+  'slick-ma-problem': 'Manager App — Market Problem',
+  'slick-ma-signals': 'Manager App — Signal Layers',
+  'slick-ma-decision': 'Manager App — Decision Intelligence',
+  'slick-ma-enterprise': 'Manager App — Enterprise Ready',
   'slick-ac-hero': 'AI Coach — Hero',
   'slick-ac-how-it-works': 'AI Coach — How It Works',
   'slick-ac-problem': 'AI Coach — Problem (Broken Coaching)',
