@@ -4372,7 +4372,30 @@ function renderBlockFields(
         </div>
       );
 
-    case 'slick-sc-footer-v2':
+    case 'slick-sc-footer-v2': {
+      type FLink = { label: string; href: string; badge?: string };
+      type SLink = { icon: string; label: string; href: string };
+      const linkColumn = (
+        title: string, key: string, tKey: string, withBadge: boolean,
+      ) => (
+        <>
+          <TextInput label={`${title} — column title`} value={f[tKey] as string ?? ''} onChange={(v) => set(tKey, v)} />
+          <Repeater<FLink>
+            label={`${title} links`}
+            items={(f[key] as FLink[]) ?? []}
+            onChange={(v) => set(key, v)}
+            newItem={() => ({ label: 'New link', href: '#' })}
+            itemPreview={(l) => l.label}
+            renderItem={(l, u) => (
+              <div className="space-y-2">
+                <TextInput label="Label" value={l.label ?? ''} onChange={(v) => u({ ...l, label: v })} />
+                <TextInput label="URL" value={l.href ?? ''} onChange={(v) => u({ ...l, href: v })} />
+                {withBadge && <TextInput label="Badge (new / hiring — optional)" value={l.badge ?? ''} onChange={(v) => u({ ...l, badge: v })} />}
+              </div>
+            )}
+          />
+        </>
+      );
       return (
         <div className="space-y-4">
           <TextInput label="CTA badge" value={f.ctaBadge as string ?? ''} onChange={(v) => set('ctaBadge', v)} />
@@ -4389,9 +4412,55 @@ function renderBlockFields(
           <TextInput label="Email" value={f.email as string ?? ''} onChange={(v) => set('email', v)} />
           <TextInput label="Email label" value={f.emailLabel as string ?? ''} onChange={(v) => set('emailLabel', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          {linkColumn('Products', 'products', 'productsTitle', true)}
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          {linkColumn('Resources', 'resources', 'resourcesTitle', true)}
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          {linkColumn('Company', 'company', 'companyTitle', true)}
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Social — column title" value={f.socialTitle as string ?? ''} onChange={(v) => set('socialTitle', v)} />
+          <Repeater<SLink>
+            label="Social links"
+            items={(f.social as SLink[]) ?? []}
+            onChange={(v) => set('social', v)}
+            newItem={() => ({ icon: 'li', label: 'New', href: '#' })}
+            itemPreview={(s) => s.label}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Icon (li / ig / yt)" value={s.icon ?? ''} onChange={(v) => u({ ...s, icon: v })} />
+                <TextInput label="Label" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
+                <TextInput label="URL" value={s.href ?? ''} onChange={(v) => u({ ...s, href: v })} />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Trust bar label" value={f.trustLabel as string ?? ''} onChange={(v) => set('trustLabel', v)} />
+          <Repeater<string>
+            label="Trust pills"
+            items={(f.trust as string[]) ?? []}
+            onChange={(v) => set('trust', v)}
+            newItem={() => 'New pill'}
+            itemPreview={(t) => t || '(empty)'}
+            renderItem={(t, u) => <TextInput label="Pill" value={t ?? ''} onChange={(v) => u(v)} />}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Copyright text" value={f.copyright as string ?? ''} onChange={(v) => set('copyright', v)} />
+          <Repeater<FLink>
+            label="Legal links (bottom bar)"
+            items={(f.legal as FLink[]) ?? []}
+            onChange={(v) => set('legal', v)}
+            newItem={() => ({ label: 'New link', href: '#' })}
+            itemPreview={(l) => l.label}
+            renderItem={(l, u) => (
+              <div className="space-y-2">
+                <TextInput label="Label" value={l.label ?? ''} onChange={(v) => u({ ...l, label: v })} />
+                <TextInput label="URL" value={l.href ?? ''} onChange={(v) => u({ ...l, href: v })} />
+              </div>
+            )}
+          />
         </div>
       );
+    }
 
     case 'slick-offices-v2': {
       type OV2 = { city?: string; address?: string; icon?: string };
@@ -8185,6 +8254,83 @@ function renderBlockFields(
       );
     }
 
+    case 'slick-rd-barriers': {
+      type Driver = { name: string; desc: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <Textarea label="Heading (** = coral span)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Subheading (** for bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <TextInput label="Drivers title" value={f.driversTitle as string ?? ''} onChange={(v) => set('driversTitle', v)} />
+          <Repeater<Driver>
+            label="Barriers (auto-numbered)"
+            items={(f.drivers as Driver[]) ?? []}
+            onChange={(v) => set('drivers', v)}
+            newItem={() => ({ name: 'Barrier', desc: 'Description.' })}
+            itemPreview={(d) => d.name}
+            renderItem={(d, u) => (
+              <div className="space-y-2">
+                <TextInput label="Name" value={d.name ?? ''} onChange={(v) => u({ ...d, name: v })} />
+                <Textarea label="Description" value={d.desc ?? ''} onChange={(v) => u({ ...d, desc: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-rd-showcase': {
+      return (
+        <div className="space-y-4">
+          <Textarea label="Heading (** = teal span)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Subheading" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <ImageField label="Center image" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <TextInput label="Image alt / placeholder" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <Repeater<string>
+            label="Floating labels (4: TL, BL, TR, BR)"
+            items={(f.labels as string[]) ?? []}
+            onChange={(v) => set('labels', v)}
+            newItem={() => 'New label'}
+            itemPreview={(l) => l || '(empty)'}
+            renderItem={(l, u) => <TextInput label="Label" value={l ?? ''} onChange={(v) => u(v)} />}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-rd-features': {
+      type ECard = { iconKey: string; title: string; body: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <Textarea label="Heading (** = teal span)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Subheading (** for bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <Repeater<ECard>
+            label="Feature cards"
+            items={(f.cards as ECard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ iconKey: 'trend', title: 'Feature', body: 'Body with **bold**.' })}
+            itemPreview={(c) => c.title}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <TextInput label="Icon key (trend, alert, listcheck, refresh, van, clipboard, ledger, phone)" value={c.iconKey ?? ''} onChange={(v) => u({ ...c, iconKey: v })} />
+                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <Textarea label="Body (** bold, [VERIFY: ..] flag)" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+              </div>
+            )}
+          />
+          <Repeater<string>
+            label="Footer notes (** bold, [VERIFY: ..] flag)"
+            items={(f.notes as string[]) ?? []}
+            onChange={(v) => set('notes', v)}
+            newItem={() => 'New note with [VERIFY: X].'}
+            itemPreview={(n) => n.slice(0, 40)}
+            renderItem={(n, u) => <Textarea label="Note" value={n ?? ''} onChange={(v) => u(v)} />}
+          />
+        </div>
+      );
+    }
+
     case 'slick-ma-hero': {
       type Chip = { val: string; unit: string; lbl: string };
       return (
@@ -8340,6 +8486,7 @@ function renderBlockFields(
     }
 
     case 'slick-atk-capabilities':
+    case 'slick-aa-capabilities':
     case 'slick-si-capabilities': {
       type SiCapCard = { title: string; body: string; imageUrl?: string; imageAlt?: string; imageSlot?: string };
       return (
@@ -8447,6 +8594,30 @@ function renderBlockFields(
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <Textarea label="Image slot placeholder (shown when no image)" value={f.imageSlot as string ?? ''} onChange={(v) => set('imageSlot', v)} />
           <Toggle label="Reverse layout (image on left)" value={f.reverse as boolean} onChange={(v) => set('reverse', v)} />
+        </div>
+      );
+
+    case 'slick-aa-split':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
+          <Textarea label="Heading (use ** for teal accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Body (use ** for bold)" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
+          <Repeater<string>
+            label="Chips"
+            items={(f.chips as string[]) ?? []}
+            onChange={(v) => set('chips', v)}
+            newItem={() => 'New chip'}
+            itemPreview={(c) => c || '(empty)'}
+            renderItem={(c, u) => <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />}
+          />
+          <ImageField label="Image URL" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
+          <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <Toggle label="Reverse layout (image on left)" value={f.reverse !== false} onChange={(v) => set('reverse', v)} />
+          <ImageSizeControls
+            widthKey="imageMaxWidth" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ fit: 'cover' }} withHeight={false}
+          />
         </div>
       );
 

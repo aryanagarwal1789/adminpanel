@@ -225,6 +225,10 @@ export function PageBuilder() {
   const [blogNewMode, setBlogNewMode] = useState(false);
   const [blogRefreshKey, setBlogRefreshKey] = useState(0);
   const isBlogMode = activePage === "__blog__" || activePage === "blog";
+  // On the blog page the left panel toggles between managing Posts (default) and
+  // editing page Sections. `blogPosts` = "currently showing the posts manager".
+  const [blogTab, setBlogTab] = useState<'posts' | 'sections'>('posts');
+  const blogPosts = isBlogMode && blogTab === 'posts';
 
   // Widget picker (lifted out of right-panel overflow context to avoid clipping)
   const [widgetPicker, setWidgetPicker] = useState<{ onPick: (t: WidgetType) => void } | null>(null);
@@ -772,16 +776,33 @@ export function PageBuilder() {
         {leftPanel && (
           <aside className="w-[280px] shrink-0 flex flex-col text-white border-r border-slate-800" style={{ background: "#0f172a" }}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800">
-              <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">
-                {leftPanel === "pages" ? "Pages" : isBlogMode ? "Blog Posts" : "Sections"}
-              </span>
+              {leftPanel === "sections" && isBlogMode ? (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setBlogTab('posts')}
+                    className={`text-xs font-semibold px-2 py-0.5 rounded pb-transition ${blogTab === 'posts' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                  >
+                    Posts
+                  </button>
+                  <button
+                    onClick={() => setBlogTab('sections')}
+                    className={`text-xs font-semibold px-2 py-0.5 rounded pb-transition ${blogTab === 'sections' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-200'}`}
+                  >
+                    Sections
+                  </button>
+                </div>
+              ) : (
+                <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">
+                  {leftPanel === "pages" ? "Pages" : "Sections"}
+                </span>
+              )}
               <div className="flex items-center gap-1">
-                {leftPanel === "sections" && !isBlogMode && (
+                {leftPanel === "sections" && !blogPosts && (
                   <button onClick={() => setAddAtIndex(blocks.length)} className="p-1 rounded hover:bg-slate-800 text-slate-400 pb-transition" title="Add section">
                     <Plus size={14} />
                   </button>
                 )}
-                {leftPanel === "sections" && isBlogMode && (
+                {leftPanel === "sections" && blogPosts && (
                   <button onClick={() => { setSelectedBlogPost(null); setBlogNewMode(true); }} className="p-1 rounded hover:bg-slate-800 text-slate-400 pb-transition" title="New post">
                     <Plus size={14} />
                   </button>
@@ -924,7 +945,7 @@ export function PageBuilder() {
             )}
 
             {leftPanel === "sections" && (
-              isBlogMode ? (
+              blogPosts ? (
                 <BlogPanel
                   selectedSlug={blogNewMode ? null : (selectedBlogPost?.slug ?? null)}
                   onSelect={(post) => { setSelectedBlogPost(post); setBlogNewMode(false); }}
@@ -997,7 +1018,7 @@ export function PageBuilder() {
           src={(() => {
             const base = import.meta.env.VITE_RENDERER_URL ?? "https://demo-experience.salescode.ai";
             if (isBlogMode) {
-              return selectedBlogPost && !blogNewMode
+              return blogPosts && selectedBlogPost && !blogNewMode
                 ? `${base}/blog/${selectedBlogPost.slug}?preview=1`
                 : `${base}/blog?preview=1`;
             }
@@ -1017,13 +1038,13 @@ export function PageBuilder() {
             onPickTemplate={(t) => addAtIndex !== null && addBlock(t, addAtIndex)}
             onPickLayout={(l) => addAtIndex !== null && addBlock("layout", addAtIndex, l)}
           />
-        ) : (selectedWidgetId !== null || selectedBlock !== null || (isBlogMode && (blogNewMode || selectedBlogPost !== null))) && (
+        ) : (selectedWidgetId !== null || selectedBlock !== null || (blogPosts && (blogNewMode || selectedBlogPost !== null))) && (
           <aside
             data-builder-panel
             className="w-[320px] shrink-0 flex flex-col text-white border-l border-slate-800"
             style={{ background: "#0f172a" }}
           >
-            {isBlogMode ? (
+            {blogPosts ? (
               (blogNewMode || selectedBlogPost) ? (
                 <BlogPostEditor
                   post={blogNewMode ? null : selectedBlogPost}

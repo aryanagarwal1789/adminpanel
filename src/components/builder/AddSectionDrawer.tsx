@@ -168,12 +168,21 @@ const GROUPS: Group[] = [
     { type: "slick-atk-darkpanel",    label: "AI Task Engine — Dark Panel",     Icon: Layers },
     { type: "slick-atk-proof",        label: "AI Task Engine — Proof",          Icon: BarChart3 },
   ]},
+  { name: "AI Analyst", items: [
+    { type: "slick-aa-split",        label: "AI Analyst — Existing Stack Split", Icon: Layers },
+    { type: "slick-aa-capabilities", label: "AI Analyst — Capabilities",         Icon: Layers },
+  ]},
   { name: "Manager App", items: [
     { type: "slick-ma-hero",       label: "Manager App — Hero",                 Icon: Sparkles },
     { type: "slick-ma-problem",    label: "Manager App — Market Problem",       Icon: BarChart3 },
     { type: "slick-ma-signals",    label: "Manager App — Signal Layers",        Icon: List },
     { type: "slick-ma-decision",   label: "Manager App — Decision Intelligence", Icon: Layers },
     { type: "slick-ma-enterprise", label: "Manager App — Enterprise Ready",     Icon: Grid2x2 },
+  ]},
+  { name: "DMS Rural", items: [
+    { type: "slick-rd-barriers",   label: "DMS Rural — Adoption Barriers",      Icon: List },
+    { type: "slick-rd-showcase",   label: "DMS Rural — Month Showcase",         Icon: Sparkles },
+    { type: "slick-rd-features",   label: "DMS Rural — Features",               Icon: Grid2x2 },
   ]},
   { name: "AI Coach", items: [
     { type: "slick-ac-hero",          label: "AI Coach — Hero",              Icon: Sparkles },
