@@ -1263,11 +1263,6 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
   'slick-sc-privacy-policy': {
     heroSub:       'How SalesCode.ai collects, uses, and protects personal information across our apps and services.',
     effectiveDate: '22 December 2018',
-    ctaEyebrow:    "The new 'Code' of CPG sales",
-    ctaHeading:    'Sales Uplift Guaranteed !!',
-    ctaSub:        'See what AI-led sales and RTM can do for your brand.',
-    ctaLabel:      'Get a Demo',
-    ctaUrl:        '#',
   },
   'slick-sc-platform-grid': {
     eyebrowLabel:  'The Complete Sales-Tech Suite',

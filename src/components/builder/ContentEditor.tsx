@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import {
-  ButtonEditor, ColorPicker, ImageField, LinkItemEditor, NumberInput, Repeater, TextInput, Textarea, Toggle,
+  ButtonEditor, ColorPicker, ImageField, LinkItemEditor, NumberInput, Repeater, Select, TextInput, Textarea, Toggle,
 } from "./fields";
 import type { ButtonField, LinkField } from "./defaults";
 import type { Block } from "./types";
@@ -10,6 +10,60 @@ import { WidgetListItem } from "./WidgetEditor";
 import { defaultWidget, type Widget, type WidgetType } from "./widgets";
 
 type FieldsOf = Record<string, unknown>;
+
+const OBJECT_FIT_OPTIONS = [
+  { value: 'cover', label: 'Cover (fill, may crop)' },
+  { value: 'contain', label: 'Contain (fit, may letterbox)' },
+  { value: 'fill', label: 'Fill (stretch, distorts)' },
+  { value: 'none', label: 'None (original size)' },
+  { value: 'scale-down', label: 'Scale down' },
+] as const;
+type ObjectFitValue = typeof OBJECT_FIT_OPTIONS[number]['value'];
+
+// Shared "Width / Height / Aspect ratio / Object-fit" control group for an image.
+// Pass the block's CURRENT hardcoded defaults via `defaults` so an untouched image
+// keeps rendering exactly as before — these controls only override when the user
+// explicitly sets a value. `withHeight=false` hides the height input for images
+// whose box is width-only (natural aspect ratio, no forced height).
+function ImageSizeControls({
+  widthKey, heightKey, aspectRatioKey, fitKey, f, set, defaults, withHeight = true,
+}: {
+  widthKey: string; heightKey?: string; aspectRatioKey: string; fitKey: string;
+  f: FieldsOf; set: (k: string, v: unknown) => void;
+  defaults: { width?: number; height?: number; fit: ObjectFitValue };
+  withHeight?: boolean;
+}) {
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-slate-500 font-medium">Image size</p>
+      <div className="grid grid-cols-2 gap-2">
+        <NumberInput
+          label="Width (px)"
+          value={(f[widthKey] as number) ?? defaults.width ?? 0}
+          onChange={(v) => set(widthKey, v)}
+        />
+        {withHeight && heightKey && (
+          <NumberInput
+            label="Height (px)"
+            value={(f[heightKey] as number) ?? defaults.height ?? 0}
+            onChange={(v) => set(heightKey, v)}
+          />
+        )}
+      </div>
+      <TextInput
+        label="Aspect ratio (e.g. 16/9) — overrides height when set"
+        value={(f[aspectRatioKey] as string) ?? ''}
+        onChange={(v) => set(aspectRatioKey, v)}
+      />
+      <Select<ObjectFitValue>
+        label="Object-fit"
+        value={(f[fitKey] as ObjectFitValue) ?? defaults.fit}
+        onChange={(v) => set(fitKey, v)}
+        options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+      />
+    </div>
+  );
+}
 
 interface Props {
   block: Block;
@@ -2518,7 +2572,7 @@ function renderBlockFields(
                 <TextInput label="Title" value={c.title ?? ''} onChange={(x) => u({ ...c, title: x })} />
                 <TextInput label="Description" value={c.description ?? ''} onChange={(x) => u({ ...c, description: x })} />
                 <ImageField label="Thumbnail image" value={c.thumbnailUrl ?? ''} onChange={(x) => u({ ...c, thumbnailUrl: x })} />
-                <TextInput label="Video URL (YouTube / mp4)" value={c.videoUrl ?? ''} onChange={(x) => u({ ...c, videoUrl: x })} />
+                <TextInput label="Video URL (YouTube, YouTube Shorts, or direct mp4)" value={c.videoUrl ?? ''} onChange={(x) => u({ ...c, videoUrl: x })} />
               </div>
             )}
           />
@@ -5296,12 +5350,6 @@ function renderBlockFields(
         <div className="space-y-4">
           <TextInput label="Hero subheading" value={f.heroSub as string ?? ''} onChange={(v) => set('heroSub', v)} />
           <TextInput label="Effective date" value={f.effectiveDate as string ?? ''} onChange={(v) => set('effectiveDate', v)} />
-          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA eyebrow" value={f.ctaEyebrow as string ?? ''} onChange={(v) => set('ctaEyebrow', v)} />
-          <TextInput label="CTA heading" value={f.ctaHeading as string ?? ''} onChange={(v) => set('ctaHeading', v)} />
-          <TextInput label="CTA subheading" value={f.ctaSub as string ?? ''} onChange={(v) => set('ctaSub', v)} />
-          <TextInput label="CTA button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
-          <TextInput label="CTA button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
 
@@ -5666,6 +5714,10 @@ function renderBlockFields(
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Hero screenshot URL" value={f.heroImageUrl as string ?? ''} onChange={(v) => set('heroImageUrl', v)} />
           <TextInput label="Hero image alt" value={f.heroImageAlt as string ?? ''} onChange={(v) => set('heroImageAlt', v)} />
+          <ImageSizeControls
+            widthKey="heroImageMaxWidth" heightKey="heroImageHeight" aspectRatioKey="heroImageAspectRatio" fitKey="heroImageFit"
+            f={f} set={set} defaults={{ width: 980, height: 420, fit: 'contain' }}
+          />
         </div>
       );
 
@@ -5677,6 +5729,12 @@ function renderBlockFields(
           <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
           <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
           <ImageField label="Center circle photo URL" value={f.centerImageUrl as string ?? ''} onChange={(v) => set('centerImageUrl', v)} />
+          <Select<ObjectFitValue>
+            label="Object-fit (frame size is fixed — tied to the spinning ring graphic)"
+            value={(f.centerImageFit as ObjectFitValue) ?? 'cover'}
+            onChange={(v) => set('centerImageFit', v)}
+            options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+          />
           <Repeater<HiwStep>
             label="Steps (3)"
             items={(f.steps as HiwStep[]) ?? []}
@@ -5824,6 +5882,10 @@ function renderBlockFields(
               </div>
             )}
           />
+          <ImageSizeControls
+            widthKey="frameWidth" heightKey="frameHeight" aspectRatioKey="frameAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ width: 300, height: 600, fit: 'cover' }}
+          />
         </div>
       );
     }
@@ -5849,6 +5911,10 @@ function renderBlockFields(
                 <ImageField label="Phone screen image URL" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
               </div>
             )}
+          />
+          <ImageSizeControls
+            widthKey="frameWidth" heightKey="frameHeight" aspectRatioKey="frameAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ width: 300, height: 600, fit: 'cover' }}
           />
         </div>
       );
@@ -5891,6 +5957,10 @@ function renderBlockFields(
           <TextInput label="YouTube video link" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <ImageField label="Thumbnail / image (shown before play, or standalone if no video)" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <ImageSizeControls
+            widthKey="frameWidth" heightKey="frameHeight" aspectRatioKey="frameAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ width: 330, height: 500, fit: 'cover' }}
+          />
         </div>
       );
 
@@ -5916,12 +5986,16 @@ function renderBlockFields(
               </div>
             )}
           />
+          <ImageSizeControls
+            widthKey="imageMaxWidth" heightKey="imageHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ width: 540, height: 420, fit: 'cover' }}
+          />
         </div>
       );
     }
 
     case 'slick-ac-brand-strip': {
-      type Logo = { imageUrl?: string; alt?: string };
+      type Logo = { imageUrl?: string; alt?: string; width?: number; height?: number; fit?: ObjectFitValue };
       return (
         <div className="space-y-4">
           <TextInput label="Label" value={f.label as string ?? ''} onChange={(v) => set('label', v)} />
@@ -5936,6 +6010,16 @@ function renderBlockFields(
               <div className="space-y-2">
                 <ImageField label="Logo image URL" value={l.imageUrl ?? ''} onChange={(v) => u({ ...l, imageUrl: v })} />
                 <TextInput label="Alt / placeholder" value={l.alt ?? ''} onChange={(v) => u({ ...l, alt: v })} />
+                <div className="grid grid-cols-2 gap-2">
+                  <NumberInput label="Width (px)" value={l.width ?? 120} onChange={(v) => u({ ...l, width: v })} />
+                  <NumberInput label="Height (px)" value={l.height ?? 40} onChange={(v) => u({ ...l, height: v })} />
+                </div>
+                <Select<ObjectFitValue>
+                  label="Object-fit"
+                  value={l.fit ?? 'contain'}
+                  onChange={(v) => u({ ...l, fit: v })}
+                  options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+                />
               </div>
             )}
           />
@@ -5987,6 +6071,10 @@ function renderBlockFields(
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Hero screenshot URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
           <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
+          <ImageSizeControls
+            widthKey="mockImageMaxWidth" aspectRatioKey="mockImageAspectRatio" fitKey="mockImageFit"
+            f={f} set={set} defaults={{ width: 980, fit: 'contain' }} withHeight={false}
+          />
           <Repeater<Chip>
             label="Floating chips (4)"
             items={(f.chips as Chip[]) ?? []}
@@ -6005,7 +6093,7 @@ function renderBlockFields(
     }
 
     case 'slick-da-brand-strip': {
-      type Logo = { url?: string; label?: string };
+      type Logo = { url?: string; label?: string; width?: number; height?: number; fit?: ObjectFitValue };
       return (
         <div className="space-y-4">
           <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
@@ -6021,6 +6109,16 @@ function renderBlockFields(
               <div className="space-y-2">
                 <ImageField label="Logo image URL" value={l.url ?? ''} onChange={(v) => u({ ...l, url: v })} />
                 <TextInput label="Label / alt" value={l.label ?? ''} onChange={(v) => u({ ...l, label: v })} />
+                <div className="grid grid-cols-2 gap-2">
+                  <NumberInput label="Max width (px)" value={l.width ?? 118} onChange={(v) => u({ ...l, width: v })} />
+                  <NumberInput label="Max height (px)" value={l.height ?? 44} onChange={(v) => u({ ...l, height: v })} />
+                </div>
+                <Select<ObjectFitValue>
+                  label="Object-fit"
+                  value={l.fit ?? 'contain'}
+                  onChange={(v) => u({ ...l, fit: v })}
+                  options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+                />
               </div>
             )}
           />
@@ -6065,6 +6163,10 @@ function renderBlockFields(
           <Textarea label="Body" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
           <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <ImageSizeControls
+            widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ height: 340, fit: 'contain' }}
+          />
         </div>
       );
 
@@ -6101,7 +6203,7 @@ function renderBlockFields(
     }
 
     case 'slick-da-capabilities': {
-      type CapCard = { imageUrl?: string; imageAlt?: string; title: string; benefit: string; descPre?: string; descBold: string; descTail: string };
+      type CapCard = { imageUrl?: string; imageAlt?: string; imageFit?: ObjectFitValue; title: string; benefit: string; descPre?: string; descBold: string; descTail: string };
       return (
         <div className="space-y-4">
           <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
@@ -6117,6 +6219,12 @@ function renderBlockFields(
               <div className="space-y-2">
                 <ImageField label="Thumbnail image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+                <Select<ObjectFitValue>
+                  label="Object-fit (thumbnail frame size is fixed by the grid)"
+                  value={c.imageFit ?? 'contain'}
+                  onChange={(v) => u({ ...c, imageFit: v })}
+                  options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+                />
                 <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
                 <TextInput label="Benefit pill" value={c.benefit ?? ''} onChange={(v) => u({ ...c, benefit: v })} />
                 <TextInput label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
@@ -6153,13 +6261,17 @@ function renderBlockFields(
           />
           <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <ImageSizeControls
+            widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ height: 420, fit: 'contain' }}
+          />
         </div>
       );
     }
 
     case 'slick-da-impact': {
       type IStat = { v: string; k: string; sub: string };
-      type ICard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; imageUrl?: string; stats: IStat[] };
+      type ICard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; imageUrl?: string; imageFit?: ObjectFitValue; stats: IStat[] };
       return (
         <div className="space-y-4">
           <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
@@ -6178,6 +6290,12 @@ function renderBlockFields(
                 <TextInput label="Body (bold)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
                 <TextInput label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
                 <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <Select<ObjectFitValue>
+                  label="Object-fit (viz frame size is fixed by the grid)"
+                  value={c.imageFit ?? 'contain'}
+                  onChange={(v) => u({ ...c, imageFit: v })}
+                  options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+                />
                 <Repeater<IStat>
                   label="Stats (2)"
                   items={c.stats ?? []}
@@ -6255,6 +6373,10 @@ function renderBlockFields(
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
           <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
+          <ImageSizeControls
+            widthKey="mockImageMaxWidth" heightKey="mockImageMaxHeight" aspectRatioKey="mockImageAspectRatio" fitKey="mockImageFit"
+            f={f} set={set} defaults={{ width: 680, height: 320, fit: 'cover' }}
+          />
           <Repeater<Chip>
             label="Floating chips (4)"
             items={(f.chips as Chip[]) ?? []}
@@ -6339,6 +6461,18 @@ function renderBlockFields(
           <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
           <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <NumberInput label="Max width (px, 0 = unset)" value={(f.imageMaxWidth as number) ?? 0} onChange={(v) => set('imageMaxWidth', v)} />
+          <TextInput
+            label="Aspect ratio (e.g. 4/3) — optional, overrides natural image height"
+            value={(f.imageAspectRatio as string) ?? ''}
+            onChange={(v) => set('imageAspectRatio', v)}
+          />
+          <Select<ObjectFitValue>
+            label="Object-fit (only applies when an aspect ratio is set above)"
+            value={(f.imageFit as ObjectFitValue) ?? 'cover'}
+            onChange={(v) => set('imageFit', v)}
+            options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+          />
         </div>
       );
 
@@ -6370,7 +6504,7 @@ function renderBlockFields(
     }
 
     case 'slick-pe-capabilities': {
-      type FCard = { imageUrl?: string; imageAlt?: string; title: string; descPre?: string; descBold: string; descTail: string };
+      type FCard = { imageUrl?: string; imageAlt?: string; imageAspectRatio?: string; imageFit?: ObjectFitValue; title: string; descPre?: string; descBold: string; descTail: string };
       return (
         <div className="space-y-4">
           <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
@@ -6385,6 +6519,17 @@ function renderBlockFields(
               <div className="space-y-2">
                 <ImageField label="Thumbnail image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+                <TextInput
+                  label="Aspect ratio (e.g. 4/3) — optional, overrides natural image height"
+                  value={c.imageAspectRatio ?? ''}
+                  onChange={(v) => u({ ...c, imageAspectRatio: v })}
+                />
+                <Select<ObjectFitValue>
+                  label="Object-fit (only applies when an aspect ratio is set above)"
+                  value={c.imageFit ?? 'cover'}
+                  onChange={(v) => u({ ...c, imageFit: v })}
+                  options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+                />
                 <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
                 <TextInput label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
                 <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
@@ -6418,12 +6563,24 @@ function renderBlockFields(
           />
           <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <NumberInput label="Max width (px, 0 = unset)" value={(f.imageMaxWidth as number) ?? 0} onChange={(v) => set('imageMaxWidth', v)} />
+          <TextInput
+            label="Aspect ratio (e.g. 4/5) — optional, overrides natural image height"
+            value={(f.imageAspectRatio as string) ?? ''}
+            onChange={(v) => set('imageAspectRatio', v)}
+          />
+          <Select<ObjectFitValue>
+            label="Object-fit (only applies when an aspect ratio is set above)"
+            value={(f.imageFit as ObjectFitValue) ?? 'cover'}
+            onChange={(v) => set('imageFit', v)}
+            options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+          />
         </div>
       );
     }
 
     case 'slick-pe-impact': {
-      type ICard = { title: string; body: string; imageUrl?: string; imageAlt?: string };
+      type ICard = { title: string; body: string; imageUrl?: string; imageAlt?: string; imageFit?: ObjectFitValue };
       return (
         <div className="space-y-4">
           <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
@@ -6441,6 +6598,12 @@ function renderBlockFields(
                 <Textarea label="Body" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
                 <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+                <Select<ObjectFitValue>
+                  label="Object-fit (viz frame size is fixed by the grid)"
+                  value={c.imageFit ?? 'contain'}
+                  onChange={(v) => u({ ...c, imageFit: v })}
+                  options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+                />
               </div>
             )}
           />
@@ -6493,6 +6656,10 @@ function renderBlockFields(
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
           <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
+          <ImageSizeControls
+            widthKey="mockImageMaxWidth" heightKey="mockImageMaxHeight" aspectRatioKey="mockImageAspectRatio" fitKey="mockImageFit"
+            f={f} set={set} defaults={{ width: 1040, height: 380, fit: 'contain' }}
+          />
           <TextInput label="Stat note" value={f.statNote as string ?? ''} onChange={(v) => set('statNote', v)} />
           <Repeater<Chip>
             label="Floating chips (4)"
@@ -6514,7 +6681,7 @@ function renderBlockFields(
     }
 
     case 'slick-rs-brand-strip': {
-      type Logo = { url?: string; label: string };
+      type Logo = { url?: string; label: string; width?: number; height?: number; fit?: ObjectFitValue };
       return (
         <div className="space-y-4">
           <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
@@ -6530,6 +6697,16 @@ function renderBlockFields(
               <div className="space-y-2">
                 <ImageField label="Logo URL" value={l.url ?? ''} onChange={(v) => u({ ...l, url: v })} />
                 <TextInput label="Label / slot text" value={l.label ?? ''} onChange={(v) => u({ ...l, label: v })} />
+                <div className="grid grid-cols-2 gap-2">
+                  <NumberInput label="Width (px, 0 = auto)" value={l.width ?? 0} onChange={(v) => u({ ...l, width: v })} />
+                  <NumberInput label="Height (px)" value={l.height ?? 44} onChange={(v) => u({ ...l, height: v })} />
+                </div>
+                <Select<ObjectFitValue>
+                  label="Object-fit"
+                  value={l.fit ?? 'contain'}
+                  onChange={(v) => u({ ...l, fit: v })}
+                  options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+                />
               </div>
             )}
           />
@@ -6616,6 +6793,10 @@ function renderBlockFields(
           <Textarea label="Body" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
           <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <ImageSizeControls
+            widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ height: 320, fit: 'contain' }}
+          />
         </div>
       );
 
@@ -6702,13 +6883,17 @@ function renderBlockFields(
           />
           <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <ImageSizeControls
+            widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ height: 420, fit: 'contain' }}
+          />
         </div>
       );
     }
 
     case 'slick-rs-impact': {
       type IStat = { v: string; k: string; sub: string };
-      type ICard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; imageUrl?: string; imageAlt?: string; stats: IStat[] };
+      type ICard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; imageUrl?: string; imageAlt?: string; imageFit?: ObjectFitValue; stats: IStat[] };
       return (
         <div className="space-y-4">
           <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
@@ -6730,6 +6915,12 @@ function renderBlockFields(
                 <Textarea label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
                 <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+                <Select<ObjectFitValue>
+                  label="Object-fit (viz frame size is fixed by the grid)"
+                  value={c.imageFit ?? 'contain'}
+                  onChange={(v) => u({ ...c, imageFit: v })}
+                  options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+                />
                 <Repeater<IStat>
                   label="Verify stats (2)"
                   items={c.stats ?? []}
@@ -6768,6 +6959,10 @@ function renderBlockFields(
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
           <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
+          <ImageSizeControls
+            widthKey="mockImageMaxWidth" aspectRatioKey="mockImageAspectRatio" fitKey="mockImageFit"
+            f={f} set={set} defaults={{ width: 560, fit: 'contain' }} withHeight={false}
+          />
           <Repeater<Chip>
             label="Floating chips (4)"
             items={(f.chips as Chip[]) ?? []}
@@ -6818,6 +7013,15 @@ function renderBlockFields(
             renderItem={(u, upd) => (
               <ImageField label="Logo URL" value={u ?? ''} onChange={(v) => upd(v)} />
             )}
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <NumberInput label="Logo max height (px)" value={(f.logoMaxHeight as number) ?? 44} onChange={(v) => set('logoMaxHeight', v)} />
+          </div>
+          <Select<ObjectFitValue>
+            label="Logo object-fit (applies to all logos)"
+            value={(f.logoFit as ObjectFitValue) ?? 'contain'}
+            onChange={(v) => set('logoFit', v)}
+            options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
           />
           <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
@@ -6918,7 +7122,7 @@ function renderBlockFields(
     }
 
     case 'slick-sv-features': {
-      type FCard = { imageUrl?: string; imageAlt?: string; title: string; descPre: string; descBold: string; descTail: string };
+      type FCard = { imageUrl?: string; imageAlt?: string; imageFit?: ObjectFitValue; title: string; descPre: string; descBold: string; descTail: string };
       return (
         <div className="space-y-4">
           <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
@@ -6934,6 +7138,12 @@ function renderBlockFields(
               <div className="space-y-2">
                 <ImageField label="Thumbnail image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <TextInput label="Image alt / placeholder text" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+                <Select<ObjectFitValue>
+                  label="Object-fit (thumbnail frame size is fixed by the grid)"
+                  value={c.imageFit ?? 'fill'}
+                  onChange={(v) => u({ ...c, imageFit: v })}
+                  options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+                />
                 <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
                 <Textarea label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
                 <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
@@ -6970,6 +7180,22 @@ function renderBlockFields(
           />
           <ImageField label="Art image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt / placeholder text" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <NumberInput
+            label="Image width (% of column — default 108 intentionally bleeds past the edge)"
+            value={(f.imageWidthPercent as number) ?? 108}
+            onChange={(v) => set('imageWidthPercent', v)}
+          />
+          <TextInput
+            label="Aspect ratio (e.g. 4/5) — optional, overrides natural image height"
+            value={(f.imageAspectRatio as string) ?? ''}
+            onChange={(v) => set('imageAspectRatio', v)}
+          />
+          <Select<ObjectFitValue>
+            label="Object-fit (only applies when an aspect ratio is set above)"
+            value={(f.imageFit as ObjectFitValue) ?? 'cover'}
+            onChange={(v) => set('imageFit', v)}
+            options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+          />
         </div>
       );
     }
@@ -7017,6 +7243,10 @@ function renderBlockFields(
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Phone mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
           <TextInput label="Mockup alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
+          <ImageSizeControls
+            widthKey="mockImageWidth" aspectRatioKey="mockImageAspectRatio" fitKey="mockImageFit"
+            f={f} set={set} defaults={{ width: 330, fit: 'contain' }} withHeight={false}
+          />
           <Repeater<Chip>
             label="Floating chips (4)"
             items={(f.chips as Chip[]) ?? []}
@@ -7037,7 +7267,7 @@ function renderBlockFields(
 
     case 'slick-su-scale': {
       type Stat = { num: string; lab: string };
-      type Logo = { url?: string; label: string };
+      type Logo = { url?: string; label: string; width?: number; height?: number; fit?: ObjectFitValue };
       return (
         <div className="space-y-4">
           <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
@@ -7068,6 +7298,16 @@ function renderBlockFields(
               <div className="space-y-2">
                 <ImageField label="Logo URL" value={l.url ?? ''} onChange={(v) => u({ ...l, url: v })} />
                 <TextInput label="Label / slot text" value={l.label ?? ''} onChange={(v) => u({ ...l, label: v })} />
+                <div className="grid grid-cols-2 gap-2">
+                  <NumberInput label="Max height (px)" value={l.height ?? 52} onChange={(v) => u({ ...l, height: v })} />
+                  <NumberInput label="Max width (px)" value={l.width ?? 140} onChange={(v) => u({ ...l, width: v })} />
+                </div>
+                <Select<ObjectFitValue>
+                  label="Object-fit"
+                  value={l.fit ?? 'contain'}
+                  onChange={(v) => u({ ...l, fit: v })}
+                  options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+                />
               </div>
             )}
           />
@@ -7621,6 +7861,10 @@ function renderBlockFields(
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Phone mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
           <TextInput label="Mockup alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
+          <ImageSizeControls
+            widthKey="mockImageMaxWidth" aspectRatioKey="mockImageAspectRatio" fitKey="mockImageFit"
+            f={f} set={set} defaults={{ width: 480, fit: 'contain' }} withHeight={false}
+          />
           <Repeater<Chip>
             label="Floating chips (4)"
             items={(f.chips as Chip[]) ?? []}
@@ -7702,6 +7946,10 @@ function renderBlockFields(
           <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
           <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <ImageSizeControls
+            widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ height: 640, fit: 'contain' }}
+          />
           <Repeater<Step>
             label="Steps (4)"
             items={(f.steps as Step[]) ?? []}
@@ -7721,7 +7969,7 @@ function renderBlockFields(
     }
 
     case 'slick-sn-features': {
-      type FCard = { imageUrl?: string; imageAlt?: string; title: string; desc: string };
+      type FCard = { imageUrl?: string; imageAlt?: string; imageFit?: ObjectFitValue; title: string; desc: string };
       return (
         <div className="space-y-4">
           <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
@@ -7737,6 +7985,12 @@ function renderBlockFields(
               <div className="space-y-2">
                 <ImageField label="Thumbnail URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
+                <Select<ObjectFitValue>
+                  label="Object-fit (thumbnail frame size is fixed by the grid)"
+                  value={c.imageFit ?? 'cover'}
+                  onChange={(v) => u({ ...c, imageFit: v })}
+                  options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+                />
                 <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
                 <Textarea label="Description" value={c.desc ?? ''} onChange={(v) => u({ ...c, desc: v })} />
               </div>
@@ -7757,6 +8011,10 @@ function renderBlockFields(
           <Textarea label="Body (rest)" value={f.bodyRest as string ?? ''} onChange={(v) => set('bodyRest', v)} />
           <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <ImageSizeControls
+            widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ height: 640, fit: 'contain' }}
+          />
           <Repeater<string>
             label="Chips"
             items={(f.chips as string[]) ?? []}
@@ -7783,6 +8041,10 @@ function renderBlockFields(
           <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
           <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <ImageSizeControls
+            widthKey="imageMaxWidth" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ fit: 'contain' }} withHeight={false}
+          />
         </div>
       );
 
@@ -7797,6 +8059,10 @@ function renderBlockFields(
           <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
           <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <ImageSizeControls
+            widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ height: 640, fit: 'contain' }}
+          />
           <Repeater<Pt>
             label="Recovery points (4)"
             items={(f.points as Pt[]) ?? []}
@@ -7849,6 +8115,10 @@ function renderBlockFields(
           <TextInput label="CTA label" value={f.ctaPrimaryLabel as string ?? ''} onChange={(v) => set('ctaPrimaryLabel', v)} />
           <TextInput label="CTA URL" value={f.ctaPrimaryUrl as string ?? ''} onChange={(v) => set('ctaPrimaryUrl', v)} />
           <ImageField label="Image" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
+          <ImageSizeControls
+            widthKey="imageMaxWidth" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ width: 800, fit: 'cover' }} withHeight={false}
+          />
         </div>
       );
 
@@ -7928,6 +8198,10 @@ function renderBlockFields(
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <ImageField label="Phone image" value={f.image as string ?? ''} onChange={(v) => set('image', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
+          <ImageSizeControls
+            widthKey="imageWidth" heightKey="imageHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ width: 254, height: 363, fit: 'contain' }}
+          />
           <Repeater<Chip>
             label="Floating chips (4)"
             items={(f.chips as Chip[]) ?? []}
@@ -8030,6 +8304,10 @@ function renderBlockFields(
                 <TextInput label="Image alt / slot text" value={s.imageAlt ?? ''} onChange={(v) => u({ ...s, imageAlt: v })} />
               </div>
             )}
+          />
+          <ImageSizeControls
+            widthKey="imageMaxWidth" heightKey="imageHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ height: 300, fit: 'cover' }}
           />
         </div>
       );
@@ -8279,6 +8557,10 @@ function renderBlockFields(
             )}
           />
           <ImageField label="Image" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
+          <ImageSizeControls
+            widthKey="imageMaxWidth" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
+            f={f} set={set} defaults={{ fit: 'cover' }} withHeight={false}
+          />
         </div>
       );
 
