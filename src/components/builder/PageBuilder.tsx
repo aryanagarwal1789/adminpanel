@@ -148,6 +148,15 @@ const INITIAL_STATE: BuilderState = {
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 
+// Edit-lock identity: a stable random id per browser (owns the lock) + the
+// display name entered at login (shown as "X is editing this page").
+function getEditor(): { id: string; name: string } {
+  let id = localStorage.getItem("pb_editor_id");
+  if (!id) { id = crypto.randomUUID(); localStorage.setItem("pb_editor_id", id); }
+  const name = localStorage.getItem("pb_editor_name") || "Editor";
+  return { id, name };
+}
+
 export function PageBuilder() {
   // Undo/redo history — stack + index kept in a SINGLE state object so they can
   // never desync. (Previously these were two separate useState values updated in
@@ -219,6 +228,72 @@ export function PageBuilder() {
 
   // Nested item focus (click on a specific item inside a slick block)
   const [focusedNestedItem, setFocusedNestedItem] = useState<{ blockId: string; itemKey: string; itemIndex: number } | null>(null);
+
+  // ── Edit-lock (soft TTL lease) ──
+  // lockedBy = name of another editor currently holding this page (null = free / mine).
+  const [lockedBy, setLockedBy] = useState<string | null>(null);
+  const heldByMe = useRef(false);
+  const activePageRef = useRef(activePage);
+  useEffect(() => { activePageRef.current = activePage; }, [activePage]);
+
+  const acquireLock = useCallback(async (pageKey: string, force = false): Promise<boolean> => {
+    const { id, name } = getEditor();
+    try {
+      const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}/lock`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ editorId: id, editorName: name, force }),
+      });
+      if (res.status === 409) {
+        const d = await res.json().catch(() => ({}));
+        heldByMe.current = false;
+        setLockedBy(d.lockedBy || "another editor");
+        return false;
+      }
+      if (res.ok) { heldByMe.current = true; setLockedBy(null); return true; }
+    } catch { /* offline — treat as held to avoid false "locked" banner */ }
+    heldByMe.current = true;
+    setLockedBy(null);
+    return true;
+  }, []);
+
+  const releaseLock = useCallback((pageKey: string) => {
+    const { id } = getEditor();
+    try {
+      fetch(`${BACKEND}/site/builder/pages/${pageKey}/unlock`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ editorId: id }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch { /* ignore */ }
+  }, []);
+
+  // Acquire on page open, heartbeat every 60s (only while visible), release on switch.
+  useEffect(() => {
+    if (activePage === "__blog__") return; // pseudo-page, nothing to lock
+    let timer: ReturnType<typeof setInterval> | undefined;
+    acquireLock(activePage);
+    timer = setInterval(() => {
+      if (heldByMe.current && document.visibilityState === "visible") acquireLock(activePage);
+    }, 60_000);
+    const onVis = () => { if (document.visibilityState === "visible" && heldByMe.current) acquireLock(activePage); };
+    document.addEventListener("visibilitychange", onVis);
+    const pageAtMount = activePage;
+    return () => {
+      if (timer) clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVis);
+      if (heldByMe.current) releaseLock(pageAtMount);
+      heldByMe.current = false;
+    };
+  }, [activePage, acquireLock, releaseLock]);
+
+  // Best-effort release when the tab closes.
+  useEffect(() => {
+    const onUnload = () => { if (heldByMe.current) releaseLock(activePageRef.current); };
+    window.addEventListener("beforeunload", onUnload);
+    return () => window.removeEventListener("beforeunload", onUnload);
+  }, [releaseLock]);
 
   // Blog state
   const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
@@ -723,26 +798,52 @@ export function PageBuilder() {
             <Play size={13} /> Preview
           </button>
           <button
+            disabled={!!lockedBy}
+            title={lockedBy ? `Locked by ${lockedBy}` : undefined}
             onClick={async () => {
               try {
+                const { id } = getEditor();
                 const res = await fetch(`${BACKEND}/site/builder/pages/${activePage}`, {
                   method: "PUT",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ blocks, theme, hostnames: currentPage.hostnames ?? [] }),
+                  body: JSON.stringify({ blocks, theme, hostnames: currentPage.hostnames ?? [], editorId: id }),
                 });
+                if (res.status === 423) {
+                  const d = await res.json().catch(() => ({}));
+                  setLockedBy(d.lockedBy || "another editor");
+                  heldByMe.current = false;
+                  toast.error(`Locked by ${d.lockedBy || "another editor"} — can't publish.`);
+                  return;
+                }
                 if (!res.ok) throw new Error(`${res.status}`);
                 toast.success("Page published successfully");
               } catch (err) {
                 toast.error(`Publish failed — is the backend running? (${err})`);
               }
             }}
-            className="px-3 py-1.5 text-sm rounded-md font-medium text-white pb-transition hover:opacity-90"
+            className="px-3 py-1.5 text-sm rounded-md font-medium text-white pb-transition hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: "#22c55e" }}
           >
             Publish
           </button>
         </div>
       </header>
+
+      {/* Edit-lock banner — page is being edited by someone else (view-only) */}
+      {lockedBy && (
+        <div className="flex items-center justify-center gap-3 px-4 py-2 text-sm font-medium text-amber-900 bg-amber-100 border-b border-amber-300">
+          <span>🔒 {lockedBy} is editing this page — you’re in view-only mode. Publishing is disabled to avoid overwriting their work.</span>
+          <button
+            onClick={async () => {
+              const ok = await acquireLock(activePage, true);
+              if (ok) toast.success("You’ve taken over editing this page.");
+            }}
+            className="px-2.5 py-1 rounded-md text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 pb-transition"
+          >
+            Take over
+          </button>
+        </div>
+      )}
 
       {/* Body */}
       <div className="flex-1 flex overflow-hidden relative">

@@ -12,16 +12,18 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ username?: string; password?: string; form?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; username?: string; password?: string; form?: string }>({});
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     const nextErrors: typeof errors = {};
+    if (!name.trim()) nextErrors.name = "Name is required";
     if (!username.trim()) nextErrors.username = "Username is required";
     if (!password) nextErrors.password = "Password is required";
     else if (password.length < 6) nextErrors.password = "Password must be at least 6 characters";
@@ -41,6 +43,10 @@ function LoginPage() {
       return;
     }
 
+    // Store the editor's display name — used to show "X is editing this page"
+    // in the builder's page edit-lock.
+    localStorage.setItem("pb_editor_name", name.trim());
+
     // Full navigation so the root auth guard re-runs and picks up the session.
     const redirect = popRedirectPath();
     window.location.replace(redirect && redirect !== "/login" ? redirect : "/");
@@ -59,6 +65,23 @@ function LoginPage() {
         </div>
 
         <form className="mt-8 space-y-4" onSubmit={handleSubmit} noValidate>
+          <div className="space-y-1.5">
+            <Label htmlFor="name">Your name</Label>
+            <Input
+              id="name"
+              type="text"
+              autoComplete="name"
+              placeholder="e.g. Aryan"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              aria-invalid={!!errors.name}
+              disabled={submitting}
+            />
+            {errors.name && (
+              <p className="text-xs text-destructive">{errors.name}</p>
+            )}
+          </div>
+
           <div className="space-y-1.5">
             <Label htmlFor="username">Username</Label>
             <Input

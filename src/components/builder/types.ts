@@ -123,6 +123,7 @@ export type TemplateBlockType =
   | 'slick-dms-cta'
   | 'slick-dms-deploy-metrics'
   | 'slick-dms-faq'
+  | 'slick-dms-voice-agents'
   | 'slick-eb2b-hero'
   | 'slick-eb2b-hero-v2'
   | 'slick-eb2b-scale'
@@ -207,6 +208,7 @@ export type TemplateBlockType =
   | 'slick-ma-signals'
   | 'slick-ma-decision'
   | 'slick-ma-enterprise'
+  | 'slick-ma-signals-grid'
   | 'slick-rd-barriers'
   | 'slick-rd-showcase'
   | 'slick-rd-features'
@@ -260,6 +262,7 @@ export type TemplateBlockType =
   | 'slick-sv-features'
   | 'slick-sv-split'
   | 'slick-sv-proof'
+  | 'slick-sv-humantest'
   | 'slick-su-hero'
   | 'slick-su-scale'
   | 'slick-su-problem'
@@ -498,6 +501,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-dms-cta': 'DMS — CTA (Dark Hero)',
   'slick-dms-deploy-metrics': 'DMS — Deployment Metrics',
   'slick-dms-faq': 'DMS — FAQ',
+  'slick-dms-voice-agents': 'DMS — Voice AI Agents',
   'slick-eb2b-hero': 'eB2B — Hero',
   'slick-eb2b-hero-v2': 'eB2B — Hero V2',
   'slick-eb2b-scale': 'eB2B — Platform Scale',
@@ -582,6 +586,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-ma-signals': 'Manager App — Signal Layers',
   'slick-ma-decision': 'Manager App — Decision Intelligence',
   'slick-ma-enterprise': 'Manager App — Enterprise Ready',
+  'slick-ma-signals-grid': 'Manager App — Signal Grid',
   'slick-rd-barriers': 'DMS Rural — Adoption Barriers',
   'slick-rd-showcase': 'DMS Rural — Month Showcase',
   'slick-rd-features': 'DMS Rural — Features',
@@ -635,6 +640,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sv-features': 'SCAI Vision — Six Checks Grid',
   'slick-sv-split': 'SCAI Vision — Split (reversible)',
   'slick-sv-proof': 'SCAI Vision — Proof Cards',
+  'slick-sv-humantest': 'SCAI Vision — Human Test',
   'slick-su-hero': 'Urban SFA — Hero',
   'slick-su-scale': 'Urban SFA — Trust & Scale',
   'slick-su-problem': 'Urban SFA — Market Problem (Cited)',

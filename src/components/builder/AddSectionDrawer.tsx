@@ -6,7 +6,7 @@ import {
   Megaphone, HelpCircle, FileText, Sparkles, MonitorPlay,
   ListOrdered, CreditCard, MessageSquareQuote, Users, TrendingUp,
   ArrowRightCircle, Zap, ShoppingCart, Puzzle, BookOpen, PanelBottom,
-  List, Tag, MessageSquare, BarChart3, GitBranch, Download, Layers,
+  List, Tag, MessageSquare, BarChart3, GitBranch, Download, Layers, Mic,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { TemplateBlockType, LayoutVariant } from "./types";
@@ -60,6 +60,7 @@ const GROUPS: Group[] = [
     { type: "slick-dms-features", label: "DMS — Feature Tabs", Icon: ListOrdered },
     { type: "slick-dms-features-v2", label: "DMS — Feature Tabs V2", Icon: ListOrdered },
     { type: "slick-dms-agents", label: "DMS — AI Agents", Icon: Users },
+    { type: "slick-dms-voice-agents", label: "DMS — Voice AI Agents", Icon: Mic },
     { type: "slick-dms-integrations", label: "DMS — Accounting Integrations", Icon: Puzzle },
     { type: "slick-dms-integrations-v2", label: "DMS — Integrations V2 (Centered)", Icon: Puzzle },
     { type: "slick-dms-guarantee", label: "DMS — 110% Guarantee", Icon: TrendingUp },
@@ -178,6 +179,7 @@ const GROUPS: Group[] = [
     { type: "slick-ma-signals",    label: "Manager App — Signal Layers",        Icon: List },
     { type: "slick-ma-decision",   label: "Manager App — Decision Intelligence", Icon: Layers },
     { type: "slick-ma-enterprise", label: "Manager App — Enterprise Ready",     Icon: Grid2x2 },
+    { type: "slick-ma-signals-grid", label: "Manager App — Signal Grid",        Icon: Grid2x2 },
   ]},
   { name: "DMS Rural", items: [
     { type: "slick-rd-barriers",   label: "DMS Rural — Adoption Barriers",      Icon: List },
@@ -243,6 +245,7 @@ const GROUPS: Group[] = [
     { type: "slick-sv-features",  label: "SCAI Vision — Six Checks Grid",  Icon: Grid2x2 },
     { type: "slick-sv-split",     label: "SCAI Vision — Split",            Icon: Columns },
     { type: "slick-sv-proof",     label: "SCAI Vision — Proof Cards",      Icon: Star },
+    { type: "slick-sv-humantest", label: "SCAI Vision — Human Test",       Icon: MonitorPlay },
   ]},
   { name: "SCAI Vision (Modern Trade)", items: [
     { type: "slick-mt-hero",      label: "Modern Trade — Hero",              Icon: Sparkles },
