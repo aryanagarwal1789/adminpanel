@@ -1,8 +1,8 @@
 import { getAuth } from '@/lib/auth';
-import { MARKETPLACE_URL } from '@/lib/config';
 import type { Block, Theme } from '@/components/builder/types';
 
-const BASE = `${MARKETPLACE_URL}/site/builder/pages`;
+const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
+const BASE = `${BACKEND}/site/builder/pages`;
 
 export interface EditorIdentity { ownerId: string; ownerEmail: string; ownerName: string; }
 export interface DraftDto {
@@ -36,7 +36,7 @@ export async function saveMyDraft(
   blocks: Block[],
   theme: Theme,
   base?: { blocks: Block[]; theme: Theme; pageUpdatedAt: string | null }
-): Promise<{ updatedAt: string } | null> {
+): Promise<{ updatedAt: string }> {
   const id = getEditorIdentity();
   const res = await fetch(`${BASE}/${pageKey}/draft`, {
     method: 'PUT',
@@ -50,7 +50,8 @@ export async function saveMyDraft(
 
 export async function deleteMyDraft(pageKey: string): Promise<void> {
   const { ownerId } = getEditorIdentity();
-  await fetch(`${BASE}/${pageKey}/draft?ownerId=${encodeURIComponent(ownerId)}`, { method: 'DELETE' });
+  const res = await fetch(`${BASE}/${pageKey}/draft?ownerId=${encodeURIComponent(ownerId)}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`deleteMyDraft failed: ${res.status}`);
 }
 
 export async function listDrafts(pageKey: string): Promise<DraftsResponse> {
