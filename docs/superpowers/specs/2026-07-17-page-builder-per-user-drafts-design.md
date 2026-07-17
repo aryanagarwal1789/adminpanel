@@ -35,28 +35,24 @@ Consequences today:
 |---|---|
 | Core outcome | Isolation + no lost work, plus presence |
 | Draft storage | New `BuilderDraft` Mongo collection, keyed by `(pageKey, ownerId)` |
-| User identity | Reuse the **already-wired** SSO in the adminpanel (`getAuth()` / `getAppToken()`); backend derives a trusted owner from the JWT |
+| User identity | Reuse the **already-wired** SSO in the adminpanel (`getAuth()`); owner is **client-supplied for now** — backend JWT verification deferred (§14) |
 | Publish vs others' drafts | Never blocks; other editors get an actionable pull-and-rebase prompt |
 | Conflict resolution | Block-level 3-way rebase; default **mine wins**; review + per-change undo/reapply |
 | Delivery | Phase 1 (drafts + presence + simple 409 choice), then Phase 2 (rebase engine + review UI, powering both triggers) |
 
 ## 5. Identity model
 
-Identity already exists and requires **no new auth work**:
+Identity comes from the SSO **already wired** in the adminpanel — no new auth work — and backend auth **hardening is deferred for now** (scope decision; see §14):
 
-- [`src/lib/auth.ts`](../../../src/lib/auth.ts) implements Google SSO → `dev-auth.salescode.ai` → `exchangeSso()` → marketplace `POST /auth/exchange-sso`, which enforces **`@salescode.ai` + PortalUser allowlist** and returns an app JWT `{ userId, email, role }`.
+- [`src/lib/auth.ts`](../../../src/lib/auth.ts) implements Google SSO → `dev-auth.salescode.ai` → `exchangeSso()` → marketplace `POST /auth/exchange-sso` (enforces **`@salescode.ai` + PortalUser allowlist**), returning `{ userId, email, role, token }`.
 - [`__root.tsx`](../../../src/routes/__root.tsx) already gates the whole app (unauth → `/login`).
-- `getAuth()` → `{ userId, email, role, token }`; `getAppToken()` → the Bearer JWT.
+- `getAuth()` → `{ userId, email, role, token }` is the identity source.
 
-**Draft owner = the JWT's `userId`** (with `email` for display). The frontend sends `Authorization: Bearer <appToken>`; the backend verifies with `jwt.verify(token, JWT_SECRET_KEY)` — the same mechanism already used by `configUpdateAuth`'s `developer` branch — and reads the owner from the verified payload. **Owner is never taken from the request body.**
+**Draft owner = `getAuth().userId`** (with `email` / local-part name for display). The frontend sends these owner fields with each draft request. **Backend JWT verification is out of scope for now** — the draft routes trust the client-supplied owner, consistent with the builder routes being unauthenticated today. Hardening (verifying the Bearer JWT server-side via `jwt.verify(token, JWT_SECRET_KEY)` — the mechanism `configUpdateAuth`'s `developer` branch already uses) is deferred to the SSO-enforcement work in §14.
 
-### Interim caveat (must be documented in code)
+### Interim limitation (must be documented in code)
 
-A temporary hardcoded login (`loginWithCredentials`, `admin` / `PageCraft@2026`) issues `email: admin@salescode.ai`, `token: "local-dev"`. `"local-dev"` is not a valid JWT.
-
-- Backend guard: verify the JWT when present and valid → trusted owner. When the token is `"local-dev"` (or otherwise unverifiable), **fall back** to a client-supplied `ownerId` (from `getAuth().userId`, which is `admin` for the hardcoded path).
-- This keeps the feature working today and is **no regression** — the builder routes are fully unauthenticated at present.
-- **Limitation:** while everyone logs in via the hardcoded path they share the `admin` identity and therefore share one draft. Per-user drafts become truly per-person once Google SSO is the enforced login. This is expected, not a bug.
+A temporary hardcoded login (`loginWithCredentials`, `admin` / `PageCraft@2026`) issues `userId: admin`, `email: admin@salescode.ai`. Everyone on that path shares the `admin` identity → **they share one draft**. Per-user drafts become truly per-person once real Google SSO is the login path. This is expected, not a bug — and it is why the owner is keyed on `userId`, which is already per-person under real SSO.
 
 ## 6. Data model — `BuilderDraft`
 
@@ -90,7 +86,7 @@ interface IBuilderDraft {
 
 ## 7. Backend API (`salescodemarketplace`, `BuilderPagesController` @ `/site/builder`)
 
-All new routes are JWT-verified (§5). GET of the published page stays public (renderer needs it).
+Identity (owner) is client-supplied from `getAuth()` (§5); backend JWT verification is deferred. GET of the published page stays public (renderer needs it).
 
 | Method | Path | Purpose |
 |---|---|---|
@@ -101,7 +97,7 @@ All new routes are JWT-verified (§5). GET of the published page stays public (r
 | `POST` | `/pages/:pageKey/rebase-save` | Re-baseline my draft onto the latest published version (used by the proactive "someone republished" flow). Body = the merged `{ blocks, theme }`. Sets `baseBlocks/baseTheme ← current published`, `basePageUpdatedAt ← current page.updatedAt`, `blocks/theme ← merged`. Returns updated draft. |
 
 **Publish** — extend the existing `PUT /pages/:pageKey`:
-- Require the JWT guard.
+- Identity (`editorId` / `editorName`) is client-supplied from `getAuth()` — backend verification deferred (§5).
 - Continue to accept `editorId / editorName / lastKnownUpdatedAt` (already implemented: 409 on stale base, 423 on lock).
 - **On success, delete only the caller's own draft.** Other editors' drafts survive (they will be rebased via §9).
 
@@ -176,7 +172,7 @@ Entered from either trigger. Shows the merged page in the builder preview plus a
 ## 12. Phasing
 
 **Phase 1 — safety net (ships first):**
-- `BuilderDraft` model + `PUT/GET/DELETE …/draft` + `GET …/drafts` (with head) + JWT guard (with interim fallback).
+- `BuilderDraft` model + `PUT/GET/DELETE …/draft` + `GET …/drafts` (with head). Owner is client-supplied from `getAuth()` — no backend verification yet (§5).
 - Frontend: autosave, restore-on-open, presence banner, auth'd publish.
 - Simple 409 handling: **overwrite / take-latest** dialog (no merge yet).
 
@@ -192,7 +188,7 @@ Entered from either trigger. Shows the merged page in the builder preview plus a
 - Draft upsert/get/delete; unique-index enforcement (one draft per user+page).
 - Presence list shape + `isMe` flag + head (`updatedAt`, `lastUpdatedBy`).
 - Publish deletes only the caller's draft; others survive.
-- JWT owner derivation; interim `"local-dev"` fallback to client `ownerId`.
+- Owner sourced from the client-supplied fields (backend verification deferred).
 - `rebase-save` re-baselines base + updatedAt correctly.
 
 **Frontend (`adminpanel`):**
@@ -205,5 +201,5 @@ Entered from either trigger. Shows the merged page in the builder preview plus a
 ## 14. Open questions / future
 
 - **Draft TTL / cleanup** — should abandoned drafts expire (e.g., 30-day TTL index)? Deferred; not required for correctness.
-- **Enforcing SSO** — removing the hardcoded login (once the SSO origin allowlist covers the admin panel) makes drafts truly per-person and lets the backend drop the interim `ownerId` fallback.
+- **SSO enforcement + backend auth hardening (deferred by scope decision)** — once the SSO origin allowlist covers the admin panel, remove the hardcoded login (drafts become truly per-person) and add server-side JWT verification (`jwt.verify(token, JWT_SECRET_KEY)`) to the draft/publish routes so the owner is trusted rather than client-supplied.
 - **Presence liveness** — presence currently means "has a draft," not "actively viewing." A `lastSeenAt` heartbeat could distinguish active editors later.
