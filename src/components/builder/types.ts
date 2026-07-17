@@ -74,6 +74,7 @@ export type TemplateBlockType =
   | 'slick-scai-quick-guide'
   | 'slick-scai-multilingual'
   | 'slick-scai-final-cta'
+  | 'slick-dare-to-compare'
   | 'slick-scai-industry'
   | 'slick-scai-human-test'
   | 'slick-scai-global-showcase'
@@ -115,6 +116,7 @@ export type TemplateBlockType =
   | 'slick-sfa-showcase'
   | 'slick-sfa-ai-engine-v2'
   | 'slick-sfa-guarantee-v2'
+  | 'slick-sfa-sales-team-cost'
   | 'slick-dms-hero'
   | 'slick-dms-hero-v2'
   | 'slick-dms-comparison'
@@ -248,6 +250,7 @@ export type TemplateBlockType =
   | 'slick-pe-split'
   | 'slick-pe-impact'
   | 'slick-pe-proof'
+  | 'slick-pe-outcome-flow'
   | 'slick-rs-hero'
   | 'slick-rs-brand-strip'
   | 'slick-rs-problem'
@@ -456,6 +459,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-scai-quick-guide': 'SCAI — Quick Guide',
   'slick-scai-multilingual': 'SCAI — Multilingual Voice Agent',
   'slick-scai-final-cta': 'SCAI — Final CTA Banner',
+  'slick-dare-to-compare': 'Dare to Compare',
   'slick-scai-industry': 'SCAI — Industry Categories',
   'slick-scai-human-test': 'SCAI — Human Test',
   'slick-scai-global-showcase': 'SCAI — Global Showcase',
@@ -497,6 +501,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sfa-showcase': 'SFA — AI Native Showcase',
   'slick-sfa-ai-engine-v2': 'SFA — AI Engine V2',
   'slick-sfa-guarantee-v2': 'SFA — Guarantee V2',
+  'slick-sfa-sales-team-cost': 'SFA — Cost of a Legacy Sales Team',
   'slick-dms-hero': 'DMS — Hero',
   'slick-dms-hero-v2': 'DMS — Hero V2',
   'slick-dms-comparison': 'DMS — Comparison Slider',
@@ -630,6 +635,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-pe-split': 'Promo Engine — Lifecycle Split',
   'slick-pe-impact': 'Promo Engine — Impact Cards',
   'slick-pe-proof': 'Promo Engine — Reported Impact',
+  'slick-pe-outcome-flow': 'Promo Engine — Outcome Flow',
   'slick-rs-hero': 'Rural SFA — Hero',
   'slick-rs-brand-strip': 'Rural SFA — Brand Strip',
   'slick-rs-problem': 'Rural SFA — Market Problem (Cited)',
