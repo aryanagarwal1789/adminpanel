@@ -253,6 +253,10 @@ export function PageBuilder() {
   const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
   const [restoredDraftAt, setRestoredDraftAt] = useState<string | null>(null);
   const draftBaseSent = useRef<Set<string>>(new Set()); // pageKeys whose draft `base` was already sent
+  const draftRestoredPages = useRef<Set<string>>(new Set()); // pages whose restore attempt has completed
+  const lastSavedContent = useRef<Record<string, string>>({}); // pageKey -> JSON of last-saved {blocks,theme}
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   const acquireLock = useCallback(async (pageKey: string, force = false): Promise<boolean> => {
     const { id, name } = getEditor();
@@ -303,6 +307,7 @@ export function PageBuilder() {
         draftBaseSent.current.delete(pageKey);
         setRestoredDraftAt(null);
         setPageBaseSnapshot((m) => ({ ...m, [pageKey]: { blocks: blocksToSave, theme: themeToSave } }));
+        lastSavedContent.current[pageKey] = JSON.stringify({ blocks: blocksToSave, theme: themeToSave });
         toast.success("Page published successfully");
         return;
       }
@@ -319,6 +324,7 @@ export function PageBuilder() {
       draftBaseSent.current.delete(pageKey);
       setRestoredDraftAt(null);
       setPageBaseSnapshot((m) => ({ ...m, [pageKey]: { blocks: blocksToSave, theme: themeToSave } }));
+      lastSavedContent.current[pageKey] = JSON.stringify({ blocks: blocksToSave, theme: themeToSave });
       toast.success("Page published successfully");
     } catch (err) {
       toast.error(`Publish failed — is the backend running? (${err})`);
@@ -462,8 +468,9 @@ export function PageBuilder() {
   const currentPage = pages.find((p) => p.id === activePage) ?? pages[0];
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId) || null;
 
-  const saveDraftNow = useCallback(async (): Promise<void> => {
-    if (activePage === '__blog__') return;
+  const saveDraftNow = useCallback(async (): Promise<boolean> => {
+    if (activePage === '__blog__') return false;
+    if (!pageBaseSnapshot[activePage]) return false; // no published base captured → don't create a phantom draft
     const key = activePage;
     setDraftStatus('saving');
     try {
@@ -472,20 +479,22 @@ export function PageBuilder() {
         ? { blocks: pageBaseSnapshot[key].blocks, theme: pageBaseSnapshot[key].theme, pageUpdatedAt: pageUpdatedAt[key] ?? null }
         : undefined;
       await saveMyDraft(key, blocks, theme, base);
-      draftBaseSent.current.add(key);
-      setDraftStatus('saved');
-      setDraftSavedAt(Date.now());
-    } catch {
-      setDraftStatus('error');
-    }
+      if (base) draftBaseSent.current.add(key);           // only mark once base was truly sent
+      lastSavedContent.current[key] = JSON.stringify({ blocks, theme });
+      setDraftStatus('saved'); setDraftSavedAt(Date.now());
+      return true;
+    } catch { setDraftStatus('error'); return false; }
   }, [activePage, blocks, theme, pageBaseSnapshot, pageUpdatedAt]);
 
   // Debounced autosave on edit.
   useEffect(() => {
     if (loading || activePage === '__blog__') return;
+    if (!pageBaseSnapshot[activePage]) return;                 // wait for published base
+    if (!draftRestoredPages.current.has(activePage)) return;   // wait until restore attempt finished (avoid clobbering a real draft)
+    if (lastSavedContent.current[activePage] === JSON.stringify({ blocks, theme })) return; // dirty-check: skip no-op saves
     const t = setTimeout(() => { void saveDraftNow(); }, 2000);
     return () => clearTimeout(t);
-  }, [blocks, theme, activePage, loading, saveDraftNow]);
+  }, [blocks, theme, activePage, loading, pageBaseSnapshot, saveDraftNow]);
 
   const sendToIframe = useCallback((msg: Record<string, unknown>) => {
     if (previewReady.current) {
@@ -727,22 +736,31 @@ export function PageBuilder() {
   // Restore MY draft for the active page (once, after the published page is loaded).
   useEffect(() => {
     if (loading || activePage === '__blog__') return;
-    if (pageBlocks[activePage] === undefined) return;       // wait for published load
-    if (!pageBaseSnapshot[activePage]) return;               // base captured means load done
+    if (pageBlocks[activePage] === undefined) return;
+    if (!pageBaseSnapshot[activePage]) return;
+    if (draftRestoredPages.current.has(activePage)) return; // once per page
     let cancelled = false;
     (async () => {
       try {
         const draft = await getMyDraft(activePage);
-        if (cancelled || !draft) return;
-        draftBaseSent.current.add(activePage); // draft already exists → don't resend base
-        commit({ ...state, pageBlocks: { ...pageBlocks, [activePage]: (draft.blocks ?? []) as Block[] } });
-        if (draft.theme && Object.keys(draft.theme).length) setTheme({ ...DEFAULT_THEME, ...(draft.theme as Theme) });
-        setRestoredDraftAt(draft.updatedAt);
+        if (cancelled) return;
+        if (draft) {
+          draftBaseSent.current.add(activePage);
+          const cur = stateRef.current;
+          commit({ ...cur, pageBlocks: { ...cur.pageBlocks, [activePage]: (draft.blocks ?? []) as Block[] } });
+          if (draft.theme && Object.keys(draft.theme).length) setTheme({ ...DEFAULT_THEME, ...(draft.theme as Theme) });
+          setRestoredDraftAt(draft.updatedAt);
+          lastSavedContent.current[activePage] = JSON.stringify({ blocks: draft.blocks ?? [], theme: draft.theme ?? {} });
+        } else {
+          const base = pageBaseSnapshot[activePage];
+          lastSavedContent.current[activePage] = JSON.stringify({ blocks: base?.blocks ?? [], theme: base?.theme ?? {} });
+        }
       } catch { /* ignore */ }
+      finally { if (!cancelled) draftRestoredPages.current.add(activePage); }
     })();
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage, loading, pageBaseSnapshot[activePage] !== undefined]);
+  }, [activePage, loading, pageBaseSnapshot, pageBlocks]);
 
   // Click outside right panel to deselect
   useEffect(() => {
@@ -938,7 +956,11 @@ export function PageBuilder() {
               : 'Draft'}
           </span>
           <button
-            onClick={async () => { await saveDraftNow(); toast.success('Draft saved'); }}
+            onClick={async () => {
+              if (activePage === '__blog__') return;
+              const ok = await saveDraftNow();
+              if (ok) toast.success('Draft saved'); else toast.error('Could not save draft');
+            }}
             className="px-3 py-1.5 text-sm rounded-md border border-slate-600 hover:bg-slate-800 pb-transition"
           >
             Save draft
@@ -987,8 +1009,10 @@ export function PageBuilder() {
               if (base) {
                 commit({ ...state, pageBlocks: { ...pageBlocks, [activePage]: base.blocks } });
                 setTheme({ ...DEFAULT_THEME, ...(base.theme as Theme) });
+                lastSavedContent.current[activePage] = JSON.stringify({ blocks: base.blocks, theme: base.theme });
               }
               draftBaseSent.current.delete(activePage);
+              draftRestoredPages.current.add(activePage);
               setRestoredDraftAt(null);
             }}
             className="px-2.5 py-1 rounded-md text-xs font-semibold text-white bg-slate-600 hover:bg-slate-500 pb-transition"
