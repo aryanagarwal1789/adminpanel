@@ -1008,6 +1008,7 @@ export function PageBuilder() {
           <button
             onClick={async () => {
               if (activePage === '__blog__') return;
+              if (!draftRestoredPages.current.has(activePage)) { toast('Still loading this page…'); return; }
               const ok = await saveDraftNow();
               if (ok) toast.success('Draft saved'); else toast.error('Could not save draft');
             }}

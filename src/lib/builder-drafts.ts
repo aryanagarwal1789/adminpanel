@@ -29,10 +29,20 @@ export function getEditorIdentity(): EditorIdentity {
 
 export async function getMyDraft(pageKey: string): Promise<DraftDto | null> {
   const { ownerId } = getEditorIdentity();
-  const res = await fetch(`${BASE}/${pageKey}/draft?ownerId=${encodeURIComponent(ownerId)}`);
-  if (!res.ok) return null;
-  const { draft } = (await res.json()) as { draft: DraftDto | null };
-  return draft;
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), 10000);
+  try {
+    const res = await fetch(`${BASE}/${pageKey}/draft?ownerId=${encodeURIComponent(ownerId)}`, { signal: c.signal });
+    if (!res.ok) return null;
+    const { draft } = (await res.json()) as { draft: DraftDto | null };
+    return draft;
+  } catch {
+    // Hung/aborted request — treat as "no draft" so callers (restore effect) still
+    // proceed and mark the page as restored instead of hanging forever.
+    return null;
+  } finally {
+    clearTimeout(t);
+  }
 }
 
 export async function saveMyDraft(
