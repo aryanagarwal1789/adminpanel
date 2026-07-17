@@ -1,4 +1,3 @@
-import { getAuth } from '@/lib/auth';
 import type { Block, Theme } from '@/components/builder/types';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
@@ -14,13 +13,18 @@ export interface DraftDto {
 export interface PresenceEntry { ownerId: string; ownerName: string; ownerEmail: string; updatedAt: string; isMe: boolean; }
 export interface DraftsResponse { page: { updatedAt: string | null; lastUpdatedBy?: string }; drafts: PresenceEntry[]; }
 
-/** Identity for the current editor, from the already-wired SSO session. */
+/** Identity for the current editor — the same anonymous localStorage identity
+ *  PageBuilder's edit-lock uses (pb_editor_id / pb_editor_name), so drafts and
+ *  the lock always agree on who "you" are. */
 export function getEditorIdentity(): EditorIdentity {
-  const auth = getAuth();
-  const email = auth?.email ?? '';
-  const ownerId = auth?.userId ?? email ?? 'anonymous';
-  const ownerName = email ? email.split('@')[0] : ownerId;
-  return { ownerId, ownerEmail: email, ownerName };
+  let ownerId: string;
+  try {
+    ownerId = localStorage.getItem('pb_editor_id') ?? '';
+    if (!ownerId) { ownerId = crypto.randomUUID(); localStorage.setItem('pb_editor_id', ownerId); }
+  } catch { ownerId = 'anonymous'; }
+  let ownerName = 'Editor';
+  try { ownerName = localStorage.getItem('pb_editor_name') || 'Editor'; } catch { /* ignore */ }
+  return { ownerId, ownerEmail: '', ownerName };
 }
 
 export async function getMyDraft(pageKey: string): Promise<DraftDto | null> {
@@ -87,4 +91,19 @@ export async function publishPage(
     return { ok: false, conflict: true, updatedAt: body.updatedAt, updatedBy: body.updatedBy };
   }
   return { ok: false, conflict: false, status: res.status };
+}
+
+/** Rebase this editor's draft onto a newer published base (used by the
+ *  proactive-republish flow — a later task). Sends the editor's current
+ *  blocks/theme to be re-saved as a draft against the latest published page. */
+export async function rebaseSaveDraft(pageKey: string, blocks: Block[], theme: Theme): Promise<DraftDto | null> {
+  const id = getEditorIdentity();
+  const res = await fetch(`${BASE}/${pageKey}/rebase-save`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...id, blocks, theme }),
+  });
+  if (!res.ok) throw new Error(`rebaseSaveDraft failed: ${res.status}`);
+  const { draft } = (await res.json()) as { draft: DraftDto };
+  return draft;
 }
