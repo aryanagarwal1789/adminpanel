@@ -21,6 +21,7 @@ import {
   type Block, type BlockStyle, type BlockType, type LayoutVariant, type Page, type Theme,
 } from "./types";
 import { getMyDraft, saveMyDraft, deleteMyDraft } from "@/lib/builder-drafts";
+import { PresenceBanner } from "@/components/builder/PresenceBanner";
 
 // Recursively find a widget by id in a widget array (handles row nesting)
 function findWidgetInArray(widgets: Widget[], id: string): Widget | null {
@@ -257,6 +258,9 @@ export function PageBuilder() {
   const lastSavedContent = useRef<Record<string, string>>({}); // pageKey -> JSON of last-saved {blocks,theme}
   const stateRef = useRef(state);
   stateRef.current = state;
+
+  // Presence: the latest known head of the published page, refreshed by PresenceBanner's poll.
+  const [pageHead, setPageHead] = useState<{ updatedAt: string | null; lastUpdatedBy?: string }>({ updatedAt: null });
 
   const acquireLock = useCallback(async (pageKey: string, force = false): Promise<boolean> => {
     const { id, name } = getEditor();
@@ -984,6 +988,9 @@ export function PageBuilder() {
           </button>
         </div>
       </header>
+
+      {/* Presence — who else has a draft for this page */}
+      {activePage !== '__blog__' && <PresenceBanner pageKey={activePage} onHead={setPageHead} />}
 
       {/* Save conflict — someone else saved this page after we last loaded/saved it */}
       {saveConflict && saveConflict.pageKey === activePage && (
