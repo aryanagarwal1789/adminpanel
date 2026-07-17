@@ -1239,6 +1239,7 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
     headingPre:    'From the ',
     headingAccent: 'SalesCode',
     headingSuffix: ' think tank',
+    selectedBlogSlugs: [],
   },
   'slick-sc-data-safety': {
     heading:       'Your Data is Safe with Us',

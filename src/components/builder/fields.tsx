@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
 import type { ButtonField, LinkField } from "./defaults";
+import { useBlogPosts } from "./useBlogPosts";
 
 const fieldBase =
   "w-full text-sm rounded-md px-2.5 py-1.5 outline-none pb-transition focus:border-blue-500";
@@ -336,6 +337,102 @@ export function Repeater<T>({
       <button onClick={add} className="mt-2 w-full flex items-center justify-center gap-1.5 text-xs text-slate-300 hover:text-white border border-dashed border-slate-700 hover:border-slate-500 rounded-md py-2 pb-transition">
         <Plus size={12} /> Add item
       </button>
+    </div>
+  );
+}
+
+/**
+ * BlogPicker — hand-pick published blog posts (by slug) for a block instance.
+ * Value is an ordered string[] of slugs. Empty = renderer auto-shows newest posts.
+ * Fetches the blog list via the shared cached `useBlogPosts` hook.
+ */
+export function BlogPicker({ label, value, onChange }: { label: string; value: string[]; onChange: (slugs: string[]) => void }) {
+  const { posts, loading, error, reload } = useBlogPosts();
+  const [query, setQuery] = useState("");
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+
+  const published = posts.filter((p) => p.status === "published");
+  const bySlug = new Map(published.map((p) => [p.slug, p]));
+
+  const reorder = (to: number) => {
+    if (dragIdx === null || dragIdx === to) return;
+    const arr = [...value];
+    const [m] = arr.splice(dragIdx, 1);
+    arr.splice(to, 0, m);
+    onChange(arr);
+    setDragIdx(null);
+  };
+  const removeAt = (i: number) => onChange(value.filter((_, x) => x !== i));
+  const addSlug = (slug: string) => { if (!value.includes(slug)) onChange([...value, slug]); };
+
+  const q = query.trim().toLowerCase();
+  const available = published.filter((p) => !value.includes(p.slug) && (!q || p.title.toLowerCase().includes(q)));
+
+  return (
+    <div>
+      <Label>{label}</Label>
+      {loading ? (
+        <p className="text-xs text-slate-500 py-2">Loading posts…</p>
+      ) : error ? (
+        <div className="text-xs text-slate-400 py-2">
+          Couldn’t load posts. <button onClick={reload} className="text-blue-400 hover:underline">Retry</button>
+        </div>
+      ) : (
+        <>
+          {value.length > 0 && (
+            <div className="space-y-1.5 mb-2">
+              {value.map((slug, i) => {
+                const post = bySlug.get(slug);
+                return (
+                  <div
+                    key={slug}
+                    draggable
+                    onDragStart={() => setDragIdx(i)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => reorder(i)}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-md border border-slate-700 bg-slate-800/40"
+                  >
+                    <GripVertical size={13} className="text-slate-500 cursor-grab shrink-0" />
+                    <span className="flex-1 text-xs text-slate-200 truncate">
+                      {post ? post.title : `${slug} (missing)`}
+                    </span>
+                    <button onClick={() => removeAt(i)} className="text-slate-500 hover:text-red-400 shrink-0"><Trash2 size={12} /></button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search posts to add…"
+            className={fieldBase}
+            style={fieldStyle}
+          />
+          {published.length === 0 ? (
+            <p className="text-xs text-slate-500 py-2">No published posts yet.</p>
+          ) : (
+            <div className="mt-1.5 max-h-52 overflow-y-auto space-y-1 pr-1">
+              {available.length === 0 ? (
+                <p className="text-xs text-slate-500 py-2">{q ? "No matches." : "All posts added."}</p>
+              ) : (
+                available.map((p) => (
+                  <button
+                    key={p.slug}
+                    onClick={() => addSlug(p.slug)}
+                    className="w-full flex items-center gap-1.5 text-left text-xs text-slate-300 hover:text-white px-2 py-1.5 rounded-md hover:bg-slate-800/60"
+                  >
+                    <Plus size={12} className="text-slate-500 shrink-0" />
+                    <span className="truncate">{p.title}</span>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+          <p className="text-[11px] text-slate-500 mt-1.5">Leave empty to auto-show the 6 newest published posts.</p>
+        </>
+      )}
     </div>
   );
 }
