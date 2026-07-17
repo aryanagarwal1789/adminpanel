@@ -32,6 +32,15 @@ export function mergePage(
   for (const id of allIds) {
     const inBase = base.has(id), inTheirs = theirs.has(id), inMine = mine.has(id);
 
+    // Both added the same id (not in base, present in both) — conflict, mine wins.
+    if (!inBase && inMine && inTheirs) {
+      if (!sameContent(theirs.get(id), mine.get(id))) {
+        const ch: MergeChange = { id: key('add', id), origin: 'conflict', kind: 'add', blockId: id, label: `Both added block ${id} (conflict)` };
+        changes.push(ch);
+        if (!disabled.has(ch.id)) merged.set(id, mine.get(id)!);
+      }
+      continue;
+    }
     // I added it (not in base, in mine).
     if (!inBase && inMine && !theirs.has(id)) {
       const ch: MergeChange = { id: key('add', id), origin: 'mine', kind: 'add', blockId: id, label: `Added block ${id}` };
@@ -69,18 +78,28 @@ export function mergePage(
     }
   }
 
-  // --- Ordering: follow mine for ids present in mine; append theirs-only in theirs order.
-  const mineOrder = mineBlocks.map((x) => x.id).filter((id) => merged.has(id));
-  const theirsOnly = theirsBlocks.map((x) => x.id).filter((id) => merged.has(id) && !mine.has(id));
-  const orderedIds = [...mineOrder, ...theirsOnly.filter((id) => !mineOrder.includes(id))];
-  // include any merged ids not yet placed (e.g. my adds already in mineOrder; safety net)
-  for (const id of merged.keys()) if (!orderedIds.includes(id)) orderedIds.push(id);
-
-  const commonBaseOrder = baseBlocks.map((x) => x.id).filter((id) => mine.has(id));
-  const commonMineOrder = mineBlocks.map((x) => x.id).filter((id) => base.has(id));
-  if (!eq(commonBaseOrder, commonMineOrder)) {
-    changes.push({ id: key('reorder', 'blocks'), origin: 'mine', kind: 'reorder', label: 'Reordered blocks' });
+  // --- Reorder detection: mine's order of ids common to mine AND theirs, vs theirs' order of them.
+  const mineCommonOrder = mineBlocks.map((x) => x.id).filter((id) => theirs.has(id));
+  const theirsCommonOrder = theirsBlocks.map((x) => x.id).filter((id) => mine.has(id));
+  const reorderId = key('reorder', 'blocks');
+  let reorderDisabled = false;
+  if (!eq(mineCommonOrder, theirsCommonOrder)) {
+    changes.push({ id: reorderId, origin: 'mine', kind: 'reorder', label: 'Reordered blocks' });
+    reorderDisabled = disabled.has(reorderId);
   }
+
+  // --- Ordering: mine-wins by default; fall back to theirs' order when the reorder change is disabled.
+  let orderedIds: string[];
+  if (reorderDisabled) {
+    const theirsOrder = theirsBlocks.map((x) => x.id).filter((id) => merged.has(id));
+    const mineOnly = mineBlocks.map((x) => x.id).filter((id) => merged.has(id) && !theirs.has(id));
+    orderedIds = [...theirsOrder, ...mineOnly];
+  } else {
+    const mineOrder = mineBlocks.map((x) => x.id).filter((id) => merged.has(id));
+    const theirsOnly = theirsBlocks.map((x) => x.id).filter((id) => merged.has(id) && !mine.has(id));
+    orderedIds = [...mineOrder, ...theirsOnly];
+  }
+  for (const id of merged.keys()) if (!orderedIds.includes(id)) orderedIds.push(id);
 
   const mergedBlocks: Block[] = orderedIds.map((id, i) => ({ ...(merged.get(id) as Block), order: i }));
 

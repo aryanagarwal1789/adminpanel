@@ -68,3 +68,42 @@ describe('mergePage — theme', () => {
     expect(r.changes.some((c) => c.kind === 'theme' && c.field === 'accent' && c.origin === 'conflict')).toBe(true);
   });
 });
+
+describe('mergePage — reorder', () => {
+  it('flags reorder when my order of common blocks differs from theirs', () => {
+    const base = [b('a', 0), b('b', 1)];
+    const theirs = [b('a', 0), b('b', 1)];
+    const mine = [b('b', 0), b('a', 1)];
+    const r = mergePage(base, theirs, mine, {} as Theme, {} as Theme, {} as Theme);
+    expect(r.mergedBlocks.map((x) => x.id)).toEqual(['b', 'a']);
+    expect(r.changes.some((c) => c.kind === 'reorder')).toBe(true);
+  });
+  it('does NOT flag reorder when my order equals theirs', () => {
+    const base = [b('a', 0), b('b', 1)];
+    const theirs = [b('b', 0), b('a', 1)];
+    const mine = [b('b', 0), b('a', 1)];
+    const r = mergePage(base, theirs, mine, {} as Theme, {} as Theme, {} as Theme);
+    expect(r.changes.some((c) => c.kind === 'reorder')).toBe(false);
+  });
+  it('disabling the reorder change falls back to theirs order', () => {
+    const base = [b('a', 0), b('b', 1)];
+    const theirs = [b('a', 0), b('b', 1)];
+    const mine = [b('b', 0), b('a', 1)];
+    const first = mergePage(base, theirs, mine, {} as Theme, {} as Theme, {} as Theme);
+    const rid = first.changes.find((c) => c.kind === 'reorder')!.id;
+    const r = mergePage(base, theirs, mine, {} as Theme, {} as Theme, {} as Theme, { disabledChangeIds: new Set([rid]) });
+    expect(r.mergedBlocks.map((x) => x.id)).toEqual(['a', 'b']);
+  });
+});
+
+describe('mergePage — same-id add collision', () => {
+  it('mine wins and flags a conflict when both add the same id with different content', () => {
+    const base = [b('a', 0)];
+    const theirs = [b('a', 0), b('z', 1, { t: 'theirs' })];
+    const mine = [b('a', 0), b('z', 1, { t: 'mine' })];
+    const r = mergePage(base, theirs, mine, {} as Theme, {} as Theme, {} as Theme);
+    const z = r.mergedBlocks.find((x) => x.id === 'z')!;
+    expect((z.fields as any).t).toBe('mine');
+    expect(r.changes.some((c) => c.blockId === 'z' && c.origin === 'conflict')).toBe(true);
+  });
+});
