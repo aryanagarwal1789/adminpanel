@@ -7,6 +7,7 @@ import {
   ListOrdered, CreditCard, MessageSquareQuote, Users, TrendingUp,
   ArrowRightCircle, Zap, ShoppingCart, Puzzle, BookOpen, PanelBottom,
   List, Tag, MessageSquare, BarChart3, GitBranch, Download, Layers, Mic,
+  Languages,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { TemplateBlockType, LayoutVariant } from "./types";
@@ -315,10 +316,14 @@ const GROUPS: Group[] = [
     { type: "slick-scai-pilot",       label: "SCAI — Pilot Results",  Icon: TrendingUp },
     { type: "slick-scai-revenue",     label: "SCAI — Revenue Loss",   Icon: BarChart3  },
     { type: "slick-scai-quick-guide", label: "SCAI — Quick Guide",       Icon: BookOpen   },
+    { type: "slick-scai-multilingual", label: "SCAI — Multilingual Voice Agent", Icon: Languages },
+    { type: "slick-scai-final-cta",   label: "SCAI — Final CTA Banner",       Icon: Megaphone },
     { type: "slick-scai-industry",    label: "SCAI — Industry Categories", Icon: Grid       },
     { type: "slick-scai-human-test",     label: "SCAI — Human Test",       Icon: MonitorPlay },
     { type: "slick-scai-global-showcase",  label: "SCAI — Global Showcase",  Icon: MonitorPlay },
     { type: "slick-scai-whatsapp-agent",   label: "SCAI — WhatsApp Agent",   Icon: MessageSquare },
+    { type: "slick-scai-best-agent",       label: "SCAI — World's Best AI Sales Agent", Icon: BarChart3 },
+    { type: "slick-scai-hoardings",        label: "SCAI — Sells Better than Humans", Icon: ImageIcon },
   ]},
   { name: "Urban SFA", items: [
     { type: "slick-su-hero",      label: "Urban SFA — Hero",             Icon: Sparkles },

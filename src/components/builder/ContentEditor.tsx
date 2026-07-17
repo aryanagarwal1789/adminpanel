@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import {
-  ButtonEditor, ColorPicker, ImageField, LinkItemEditor, NumberInput, Repeater, Select, TextInput, Textarea, Toggle,
+  ButtonEditor, ColorPicker, ImageField, LinkItemEditor, NumberInput, Repeater, Select, TextInput, Textarea, Toggle, VideoField,
 } from "./fields";
 import type { ButtonField, LinkField } from "./defaults";
 import type { Block } from "./types";
@@ -3080,7 +3080,8 @@ function renderBlockFields(
           <TextInput label="Heading accent (gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
           <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
           <TextInput label="Italic subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
-          <ImageField label="Screen image (replaces slider)" value={f.imgScreen as string ?? ''} onChange={(v) => set('imgScreen', v)} />
+          <ImageField label="Standard DMS screen image (left/before side of slider)" value={f.imgScreenOld as string ?? ''} onChange={(v) => set('imgScreenOld', v)} />
+          <ImageField label="NextGen DMS screen image (right/after side of slider)" value={f.imgScreenNew as string ?? ''} onChange={(v) => set('imgScreenNew', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Left panel label (Standard DMS)" value={f.oldLabel as string ?? ''} onChange={(v) => set('oldLabel', v)} />
           <Repeater<CmpRow>
@@ -3163,6 +3164,7 @@ function renderBlockFields(
           <TextInput label="Panel title (plain part)" value={f.panelTitlePre as string ?? ''} onChange={(v) => set('panelTitlePre', v)} />
           <TextInput label="Panel title (bold part)" value={f.panelTitleBold as string ?? ''} onChange={(v) => set('panelTitleBold', v)} />
           <Textarea label="Panel subtitle" value={f.panelSub as string ?? ''} onChange={(v) => set('panelSub', v)} />
+          <ImageField label="Panel background image (fills whole panel; defaults to black if empty)" value={f.panelBgUrl as string ?? ''} onChange={(v) => set('panelBgUrl', v)} />
           <ImageField label="Center mic image (defaults to a mic icon if empty)" value={f.micImageUrl as string ?? ''} onChange={(v) => set('micImageUrl', v)} />
           <TextInput label="Mic image alt" value={f.micImageAlt as string ?? ''} onChange={(v) => set('micImageAlt', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -5078,8 +5080,102 @@ function renderBlockFields(
       );
     }
 
+    case 'slick-scai-hoardings': {
+      type HoardImg = { url?: string; alt?: string };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading — part 1 (teal)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
+          <TextInput label="Heading — part 2 (navy)" value={f.headingMid as string ?? ''} onChange={(v) => set('headingMid', v)} />
+          <TextInput label="Heading — part 3 (red)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <NumberInput label="Scroll duration (seconds, higher = slower)" value={(f.speed as number) ?? 40} onChange={(v) => set('speed', v)} />
+          <Repeater<HoardImg>
+            label="Marquee images"
+            items={(f.images as HoardImg[]) ?? []}
+            onChange={(v) => set('images', v)}
+            newItem={() => ({ url: '', alt: '' })}
+            itemPreview={(im) => im.alt || im.url || 'Image'}
+            renderItem={(im, u) => (
+              <div className="space-y-2">
+                <ImageField label="Image" value={im.url ?? ''} onChange={(v) => u({ ...im, url: v })} />
+                <TextInput label="Alt text" value={im.alt ?? ''} onChange={(v) => u({ ...im, alt: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-scai-best-agent': {
+      type ChartField = { scaiValue?: number; scaiLabel?: string; compValue?: number; compLabel1?: string; compLabel2?: string; yAxisLabel?: string };
+      type BulletField = { title?: string; desc?: string };
+      type TabField = {
+        tabLabel?: string; headingBold?: string; headingSemi1?: string; headingNormal?: string; headingSemi2?: string;
+        body?: string; bigStat?: string; bigStatLabel?: string; bullets?: BulletField[]; chart?: ChartField;
+      };
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Subtitle (plain)" value={f.subtitlePre as string ?? ''} onChange={(v) => set('subtitlePre', v)} />
+          <TextInput label="Subtitle accent (teal)" value={f.subtitleAccent as string ?? ''} onChange={(v) => set('subtitleAccent', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<TabField>
+            label="Comparison tabs (4)"
+            items={(f.tabs as TabField[]) ?? []}
+            onChange={(v) => set('tabs', v)}
+            newItem={() => ({
+              tabLabel: 'New Tab', headingBold: 'SCAI ', headingSemi1: 'does', headingNormal: ' something', headingSemi2: ' better.',
+              body: 'Description of this capability.', bigStat: '0', bigStatLabel: 'Stat label',
+              bullets: [{ title: 'Bullet title', desc: 'Bullet description' }, { title: 'Bullet title', desc: 'Bullet description' }],
+              chart: { scaiValue: 1, scaiLabel: 'SCAI', compValue: 1, compLabel1: 'Nearest', compLabel2: 'Competitor', yAxisLabel: 'Metric' },
+            })}
+            itemPreview={(t) => t.tabLabel || '(untitled)'}
+            renderItem={(t, u) => (
+              <div className="space-y-2">
+                <TextInput label="Tab label" value={t.tabLabel ?? ''} onChange={(v) => u({ ...t, tabLabel: v })} />
+                <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+                <p className="text-xs text-slate-500 font-medium">Heading (4 parts, in order)</p>
+                <TextInput label="Bold word (teal, e.g. 'SCAI ')" value={t.headingBold ?? ''} onChange={(v) => u({ ...t, headingBold: v })} />
+                <TextInput label="Semi-bold part 1 (e.g. 'responds')" value={t.headingSemi1 ?? ''} onChange={(v) => u({ ...t, headingSemi1: v })} />
+                <TextInput label="Normal part (e.g. ' to customers in')" value={t.headingNormal ?? ''} onChange={(v) => u({ ...t, headingNormal: v })} />
+                <TextInput label="Semi-bold part 2 (e.g. ' real time.')" value={t.headingSemi2 ?? ''} onChange={(v) => u({ ...t, headingSemi2: v })} />
+                <Textarea label="Body paragraph" value={t.body ?? ''} onChange={(v) => u({ ...t, body: v })} />
+                <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+                <TextInput label="Big stat (e.g. '< 1 sec')" value={t.bigStat ?? ''} onChange={(v) => u({ ...t, bigStat: v })} />
+                <Textarea label="Big stat label" value={t.bigStatLabel ?? ''} onChange={(v) => u({ ...t, bigStatLabel: v })} />
+                <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+                <Repeater<BulletField>
+                  label="Bullets (2)"
+                  items={t.bullets ?? []}
+                  onChange={(v) => u({ ...t, bullets: v })}
+                  newItem={() => ({ title: 'Bullet title', desc: 'Bullet description' })}
+                  itemPreview={(b) => b.title || '(empty)'}
+                  renderItem={(b, ub) => (
+                    <div className="space-y-2">
+                      <TextInput label="Title" value={b.title ?? ''} onChange={(v) => ub({ ...b, title: v })} />
+                      <Textarea label="Description" value={b.desc ?? ''} onChange={(v) => ub({ ...b, desc: v })} />
+                    </div>
+                  )}
+                />
+                <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+                <p className="text-xs text-slate-500 font-medium">Chart (bar comparison)</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <NumberInput label="SCAI value" value={t.chart?.scaiValue ?? 1} onChange={(v) => u({ ...t, chart: { ...t.chart, scaiValue: v } })} />
+                  <NumberInput label="Competitor value" value={t.chart?.compValue ?? 1} onChange={(v) => u({ ...t, chart: { ...t.chart, compValue: v } })} />
+                </div>
+                <TextInput label="SCAI bar label" value={t.chart?.scaiLabel ?? ''} onChange={(v) => u({ ...t, chart: { ...t.chart, scaiLabel: v } })} />
+                <TextInput label="Competitor bar label (line 1)" value={t.chart?.compLabel1 ?? ''} onChange={(v) => u({ ...t, chart: { ...t.chart, compLabel1: v } })} />
+                <TextInput label="Competitor bar label (line 2)" value={t.chart?.compLabel2 ?? ''} onChange={(v) => u({ ...t, chart: { ...t.chart, compLabel2: v } })} />
+                <TextInput label="Y-axis label" value={t.chart?.yAxisLabel ?? ''} onChange={(v) => u({ ...t, chart: { ...t.chart, yAxisLabel: v } })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
     case 'slick-scai-global-showcase': {
-      type GSPanel = { thumbnailUrl: string; alt: string };
+      type GSPanel = { thumbnailUrl: string; videoUrl?: string; alt: string };
       return (
         <div className="space-y-4">
           <TextInput label="Heading (white)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
@@ -5089,11 +5185,12 @@ function renderBlockFields(
             label="Video panels"
             items={(f.panels as GSPanel[]) ?? []}
             onChange={(v) => set('panels', v)}
-            newItem={() => ({ thumbnailUrl: '', alt: 'Showcase panel' })}
+            newItem={() => ({ thumbnailUrl: '', videoUrl: '', alt: 'Showcase panel' })}
             itemPreview={(p) => p.alt || '(empty)'}
             renderItem={(p, u) => (
               <div className="space-y-2">
                 <ImageField label="Thumbnail" value={p.thumbnailUrl} onChange={(v) => u({ ...p, thumbnailUrl: v })} />
+                <TextInput label="Video URL (YouTube or direct .mp4)" value={p.videoUrl ?? ''} onChange={(v) => u({ ...p, videoUrl: v })} />
                 <TextInput label="Alt text" value={p.alt} onChange={(v) => u({ ...p, alt: v })} />
               </div>
             )}
@@ -5103,7 +5200,7 @@ function renderBlockFields(
     }
 
     case 'slick-scai-human-test': {
-      type HTClip = { thumbnailUrl: string };
+      type HTClip = { thumbnailUrl: string; videoUrl?: string };
       type HTMetric = { label: string; labelBold: string; value: string };
       return (
         <div className="space-y-4">
@@ -5123,10 +5220,13 @@ function renderBlockFields(
             label="Video clips"
             items={(f.clips as HTClip[]) ?? []}
             onChange={(v) => set('clips', v)}
-            newItem={() => ({ thumbnailUrl: '' })}
+            newItem={() => ({ thumbnailUrl: '', videoUrl: '' })}
             itemPreview={(c) => c.thumbnailUrl ? 'Clip (has thumbnail)' : 'Clip (placeholder)'}
             renderItem={(c, u) => (
-              <ImageField label="Thumbnail" value={c.thumbnailUrl} onChange={(v) => u({ ...c, thumbnailUrl: v })} />
+              <div className="space-y-2">
+                <ImageField label="Thumbnail" value={c.thumbnailUrl} onChange={(v) => u({ ...c, thumbnailUrl: v })} />
+                <TextInput label="Video URL (YouTube Short / mp4 — click to play)" value={c.videoUrl ?? ''} onChange={(v) => u({ ...c, videoUrl: v })} />
+              </div>
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -5190,16 +5290,16 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <TextInput label="Heading prefix (white)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading middle (white)" value={f.headingMid as string ?? ''} onChange={(v) => set('headingMid', v)} />
           <TextInput label="Heading bold (white bold)" value={f.headingBold as string ?? ''} onChange={(v) => set('headingBold', v)} />
+          <TextInput label="Heading middle (white)" value={f.headingMid as string ?? ''} onChange={(v) => set('headingMid', v)} />
+          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Primary CTA label" value={f.primaryCtaLabel as string ?? ''} onChange={(v) => set('primaryCtaLabel', v)} />
           <TextInput label="Primary CTA URL" value={f.primaryCtaUrl as string ?? ''} onChange={(v) => set('primaryCtaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ghostCtaLabel as string ?? ''} onChange={(v) => set('ghostCtaLabel', v)} />
-          <TextInput label="Ghost CTA URL" value={f.ghostCtaUrl as string ?? ''} onChange={(v) => set('ghostCtaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Video thumbnail" value={f.thumbnailUrl as string ?? ''} onChange={(v) => set('thumbnailUrl', v)} />
+          <VideoField label="Upload video" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <TextInput label="…or paste a video URL (YouTube / .mp4)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <TextInput label="Video caption" value={f.videoCaption as string ?? ''} onChange={(v) => set('videoCaption', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<QGStep>
@@ -5215,6 +5315,35 @@ function renderBlockFields(
               </div>
             )}
           />
+        </div>
+      );
+    }
+
+    case 'slick-scai-multilingual': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Left card text" value={f.leftCardText as string ?? ''} onChange={(v) => set('leftCardText', v)} />
+          <TextInput label="Center bold line" value={f.centerBold as string ?? ''} onChange={(v) => set('centerBold', v)} />
+          <TextInput label="Center sub line" value={f.centerSub as string ?? ''} onChange={(v) => set('centerSub', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <ImageField label="Right image" value={f.rightImageUrl as string ?? ''} onChange={(v) => set('rightImageUrl', v)} />
+          <TextInput label="Right image alt text" value={f.rightImageAlt as string ?? ''} onChange={(v) => set('rightImageAlt', v)} />
+        </div>
+      );
+    }
+
+    case 'slick-scai-final-cta': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading line 1 (white)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
+          <TextInput label="Heading line 2 (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <TextInput label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="CTA bold suffix" value={f.ctaBold as string ?? ''} onChange={(v) => set('ctaBold', v)} />
+          <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <ImageField label="Background image" value={f.bgImageUrl as string ?? ''} onChange={(v) => set('bgImageUrl', v)} />
         </div>
       );
     }
@@ -5426,8 +5555,9 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <TextInput label="Heading line 1" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
-          <TextInput label="Badge label" value={f.badgeLabel as string ?? ''} onChange={(v) => set('badgeLabel', v)} />
-          <TextInput label="Body bold opener" value={f.bodyBold as string ?? ''} onChange={(v) => set('bodyBold', v)} />
+          <TextInput label="Badge text" value={f.badgePre as string ?? ''} onChange={(v) => set('badgePre', v)} />
+          <TextInput label="Badge highlight pill (shimmer)" value={f.badgeHighlight as string ?? ''} onChange={(v) => set('badgeHighlight', v)} />
+          <TextInput label="Body bold opener (optional)" value={f.bodyBold as string ?? ''} onChange={(v) => set('bodyBold', v)} />
           <TextInput label="Body text" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
           <TextInput label="Primary CTA label" value={f.primaryCtaLabel as string ?? ''} onChange={(v) => set('primaryCtaLabel', v)} />
           <TextInput label="Primary CTA URL" value={f.primaryCtaUrl as string ?? ''} onChange={(v) => set('primaryCtaUrl', v)} />
@@ -5436,11 +5566,11 @@ function renderBlockFields(
           <TextInput label="Credits label" value={f.creditsLabel as string ?? ''} onChange={(v) => set('creditsLabel', v)} />
           <TextInput label="Credits highlight (teal)" value={f.creditsHighlight as string ?? ''} onChange={(v) => set('creditsHighlight', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Avatar caption — accent (teal)" value={f.avatarCaptionAccent as string ?? ''} onChange={(v) => set('avatarCaptionAccent', v)} />
-          <TextInput label="Avatar caption — main (white bold)" value={f.avatarCaptionMain as string ?? ''} onChange={(v) => set('avatarCaptionMain', v)} />
-          <TextInput label="Avatar caption — suffix (thin)" value={f.avatarCaptionSuffix as string ?? ''} onChange={(v) => set('avatarCaptionSuffix', v)} />
-          <TextInput label="Avatar caption — danger (red)" value={f.avatarCaptionDanger as string ?? ''} onChange={(v) => set('avatarCaptionDanger', v)} />
           <ImageField label="Avatar image" value={f.avatarUrl as string ?? ''} onChange={(v) => set('avatarUrl', v)} />
+          <TextInput label="Mic label (Tap to Talk)" value={f.micLabel as string ?? ''} onChange={(v) => set('micLabel', v)} />
+          <TextInput label="Mic sub-label" value={f.micSub as string ?? ''} onChange={(v) => set('micSub', v)} />
+          <TextInput label="Language label" value={f.langLabel as string ?? ''} onChange={(v) => set('langLabel', v)} />
+          <ImageField label="Language flag URL" value={f.langFlag as string ?? ''} onChange={(v) => set('langFlag', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<string>
             label="Typewriter phrases"

@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import {
   Undo2, Redo2, Plus, Eye, EyeOff, Trash2, GripVertical, Copy, Clipboard,
   X, Palette, Play, FileText, ChevronLeft, PenLine, Paintbrush, Settings, Layers, Globe, Search,
+  LogOut,
 } from "lucide-react";
 import { defaultBlock } from "./blocks";
 import { AddSectionDrawer } from "./AddSectionDrawer";
@@ -232,6 +233,12 @@ export function PageBuilder() {
   // ── Edit-lock (soft TTL lease) ──
   // lockedBy = name of another editor currently holding this page (null = free / mine).
   const [lockedBy, setLockedBy] = useState<string | null>(null);
+
+  // updatedAt (per pageKey) as of the last time this client loaded/saved that page —
+  // used to detect if someone else has saved since, even after the lock has been released.
+  const [pageUpdatedAt, setPageUpdatedAt] = useState<Record<string, string>>({});
+  // Save conflict: someone else's newer save was detected when we tried to publish.
+  const [saveConflict, setSaveConflict] = useState<{ pageKey: string; updatedAt: string; updatedBy?: string } | null>(null);
   const heldByMe = useRef(false);
   const activePageRef = useRef(activePage);
   useEffect(() => { activePageRef.current = activePage; }, [activePage]);
@@ -256,6 +263,56 @@ export function PageBuilder() {
     setLockedBy(null);
     return true;
   }, []);
+
+  const publishPage = useCallback(async (pageKey: string, blocksToSave: Block[], themeToSave: Theme, hostnames: string[]) => {
+    try {
+      const { id, name } = getEditor();
+      const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          blocks: blocksToSave, theme: themeToSave, hostnames, editorId: id, editorName: name,
+          lastKnownUpdatedAt: pageUpdatedAt[pageKey],
+        }),
+      });
+      if (res.status === 423) {
+        const d = await res.json().catch(() => ({}));
+        setLockedBy(d.lockedBy || "another editor");
+        heldByMe.current = false;
+        toast.error(`Locked by ${d.lockedBy || "another editor"} — can't publish.`);
+        return;
+      }
+      if (res.status === 409) {
+        const d = await res.json().catch(() => ({}));
+        setSaveConflict({ pageKey, updatedAt: d.updatedAt, updatedBy: d.updatedBy });
+        return;
+      }
+      if (!res.ok) throw new Error(`${res.status}`);
+      const { page } = await res.json().catch(() => ({ page: undefined }));
+      if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [pageKey]: page.updatedAt as string }));
+      setSaveConflict(null);
+      toast.success("Page published successfully");
+    } catch (err) {
+      toast.error(`Publish failed — is the backend running? (${err})`);
+    }
+  }, [pageUpdatedAt]);
+
+  const reloadActivePage = useCallback(async (pageKey: string) => {
+    try {
+      const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}`);
+      const { page } = await res.json();
+      commit({
+        ...state,
+        pageBlocks: { ...pageBlocks, [pageKey]: (page?.blocks ?? []) as Block[] },
+      });
+      if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [pageKey]: page.updatedAt as string }));
+      setSaveConflict(null);
+      toast.success("Reloaded the latest version of this page.");
+    } catch (err) {
+      toast.error(`Reload failed — is the backend running? (${err})`);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, pageBlocks]);
 
   const releaseLock = useCallback((pageKey: string) => {
     const { id } = getEditor();
@@ -551,12 +608,13 @@ export function PageBuilder() {
         const firstKey = builtPages[0].id;
         const pageRes = await fetch(`${BACKEND}/site/builder/pages/${firstKey}`);
         if (!pageRes.ok) throw new Error(`Failed to load page: ${pageRes.status}`);
-        const { page } = await pageRes.json() as { page: { blocks: Block[]; theme?: Theme } };
+        const { page } = await pageRes.json() as { page: { blocks: Block[]; theme?: Theme; updatedAt?: string } };
 
         commit({
           pages: builtPages,
           pageBlocks: { [firstKey]: page.blocks ?? [] },
         });
+        if (page.updatedAt) setPageUpdatedAt((m) => ({ ...m, [firstKey]: page.updatedAt as string }));
         if (page.theme && Object.keys(page.theme).length) {
           // Normalize theme — backend may have old field names from a previous editor
           const raw = page.theme as unknown as Record<string, unknown>;
@@ -593,6 +651,7 @@ export function PageBuilder() {
           ...state,
           pageBlocks: { ...pageBlocks, [activePage]: (page?.blocks ?? []) as Block[] },
         });
+        if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [activePage]: page.updatedAt as string }));
         if (page?.theme && Object.keys(page.theme).length) {
           const raw = page.theme as unknown as Record<string, unknown>;
           setTheme({ ...DEFAULT_THEME, ...(raw.accent      ? { accent: raw.accent }           : raw.accentColor    ? { accent: raw.accentColor }      : {}),
@@ -798,36 +857,39 @@ export function PageBuilder() {
             <Play size={13} /> Preview
           </button>
           <button
-            disabled={!!lockedBy}
-            title={lockedBy ? `Locked by ${lockedBy}` : undefined}
-            onClick={async () => {
-              try {
-                const { id } = getEditor();
-                const res = await fetch(`${BACKEND}/site/builder/pages/${activePage}`, {
-                  method: "PUT",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ blocks, theme, hostnames: currentPage.hostnames ?? [], editorId: id }),
-                });
-                if (res.status === 423) {
-                  const d = await res.json().catch(() => ({}));
-                  setLockedBy(d.lockedBy || "another editor");
-                  heldByMe.current = false;
-                  toast.error(`Locked by ${d.lockedBy || "another editor"} — can't publish.`);
-                  return;
-                }
-                if (!res.ok) throw new Error(`${res.status}`);
-                toast.success("Page published successfully");
-              } catch (err) {
-                toast.error(`Publish failed — is the backend running? (${err})`);
-              }
-            }}
+            disabled={!!lockedBy || (!!saveConflict && saveConflict.pageKey === activePage)}
+            title={lockedBy ? `Locked by ${lockedBy}` : saveConflict?.pageKey === activePage ? "Reload the latest version before publishing" : undefined}
+            onClick={() => publishPage(activePage, blocks, theme, currentPage.hostnames ?? [])}
             className="px-3 py-1.5 text-sm rounded-md font-medium text-white pb-transition hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: "#22c55e" }}
           >
             Publish
           </button>
+          <button
+            onClick={() => {
+              localStorage.clear();
+              window.location.href = "/login";
+            }}
+            title="Log out"
+            className="p-2 rounded hover:bg-slate-800 pb-transition"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </header>
+
+      {/* Save conflict — someone else saved this page after we last loaded/saved it */}
+      {saveConflict && saveConflict.pageKey === activePage && (
+        <div className="flex items-center justify-center gap-3 px-4 py-2 text-sm font-medium text-red-900 bg-red-100 border-b border-red-300">
+          <span>⚠️ This page was updated{saveConflict.updatedBy ? ` by ${saveConflict.updatedBy}` : ""} since you loaded it. Reload to see the latest version before you can publish.</span>
+          <button
+            onClick={() => reloadActivePage(activePage)}
+            className="px-2.5 py-1 rounded-md text-xs font-semibold text-white bg-slate-700 hover:bg-slate-800 pb-transition"
+          >
+            Reload latest
+          </button>
+        </div>
+      )}
 
       {/* Edit-lock banner — page is being edited by someone else (view-only) */}
       {lockedBy && (

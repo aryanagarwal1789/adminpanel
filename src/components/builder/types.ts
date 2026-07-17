@@ -72,10 +72,14 @@ export type TemplateBlockType =
   | 'slick-scai-pilot'
   | 'slick-scai-revenue'
   | 'slick-scai-quick-guide'
+  | 'slick-scai-multilingual'
+  | 'slick-scai-final-cta'
   | 'slick-scai-industry'
   | 'slick-scai-human-test'
   | 'slick-scai-global-showcase'
   | 'slick-scai-whatsapp-agent'
+  | 'slick-scai-best-agent'
+  | 'slick-scai-hoardings'
   | 'slick-scai-vision-hero'
   | 'slick-scai-vision-insights'
   | 'slick-scai-vision-actions'
@@ -450,10 +454,14 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-scai-pilot': 'SCAI — Pilot Results',
   'slick-scai-revenue': 'SCAI — Revenue Loss',
   'slick-scai-quick-guide': 'SCAI — Quick Guide',
+  'slick-scai-multilingual': 'SCAI — Multilingual Voice Agent',
+  'slick-scai-final-cta': 'SCAI — Final CTA Banner',
   'slick-scai-industry': 'SCAI — Industry Categories',
   'slick-scai-human-test': 'SCAI — Human Test',
   'slick-scai-global-showcase': 'SCAI — Global Showcase',
   'slick-scai-whatsapp-agent': 'SCAI — WhatsApp Agent',
+  'slick-scai-best-agent': "SCAI — World's Best AI Sales Agent",
+  'slick-scai-hoardings': 'SCAI — Sells Better than Humans',
   'slick-scai-vision-hero': 'SCAI Vision — Hero',
   'slick-scai-vision-insights': 'SCAI Vision — Insights',
   'slick-scai-vision-actions':       'SCAI Vision — Actions Grid',
