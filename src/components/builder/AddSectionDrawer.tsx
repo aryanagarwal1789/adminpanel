@@ -235,6 +235,7 @@ const GROUPS: Group[] = [
     { type: "slick-pe-split",        label: "Promo Engine — Lifecycle Split", Icon: Columns },
     { type: "slick-pe-impact",       label: "Promo Engine — Impact Cards",   Icon: TrendingUp },
     { type: "slick-pe-proof",        label: "Promo Engine — Reported Impact", Icon: BarChart3 },
+    { type: "slick-pe-outcome-flow", label: "Promo Engine — Outcome Flow",  Icon: ListOrdered },
   ]},
   { name: "SCAI Vision (eB2B)", items: [
     { type: "slick-sv-hero",      label: "SCAI Vision — Hero",             Icon: Sparkles },
@@ -284,6 +285,7 @@ const GROUPS: Group[] = [
     { type: "slick-sfa-showcase", label: "SFA — AI Native Showcase", Icon: Sparkles },
     { type: "slick-sfa-ai-engine-v2", label: "SFA — AI Engine V2", Icon: Grid2x2 },
     { type: "slick-sfa-guarantee-v2", label: "SFA — Guarantee V2", Icon: TrendingUp },
+    { type: "slick-sfa-sales-team-cost", label: "SFA — Cost of a Legacy Sales Team", Icon: Users },
   ]},
   { name: "Slick Blocks", items: [
     { type: "slick-hero-split", label: "Hero Split Gradient", Icon: Sparkles },
@@ -318,6 +320,7 @@ const GROUPS: Group[] = [
     { type: "slick-scai-quick-guide", label: "SCAI — Quick Guide",       Icon: BookOpen   },
     { type: "slick-scai-multilingual", label: "SCAI — Multilingual Voice Agent", Icon: Languages },
     { type: "slick-scai-final-cta",   label: "SCAI — Final CTA Banner",       Icon: Megaphone },
+    { type: "slick-dare-to-compare",  label: "Dare to Compare",               Icon: TrendingUp },
     { type: "slick-scai-industry",    label: "SCAI — Industry Categories", Icon: Grid       },
     { type: "slick-scai-human-test",     label: "SCAI — Human Test",       Icon: MonitorPlay },
     { type: "slick-scai-global-showcase",  label: "SCAI — Global Showcase",  Icon: MonitorPlay },
