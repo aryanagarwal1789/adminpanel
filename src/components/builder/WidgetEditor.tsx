@@ -27,6 +27,9 @@ import {
   Slider, TextInput, Textarea, Toggle,
 } from "./fields";
 import type { ButtonField } from "./defaults";
+import { RichTextInput } from "./RichTextInput";
+import { RichFieldGroup } from "./RichFieldGroup";
+import { richItemProps, type RichValue } from "./rich-text";
 import { defaultWidget, EDITABLE_TYPES, WIDGET_REGISTRY, type Widget, type WidgetType } from "./widgets";
 
 type Align = "left" | "center" | "right";
@@ -139,12 +142,9 @@ export function WidgetEditor({
     case "rich-heading":
       return (
         <div className="space-y-3">
-          <Textarea label="Text — wrap words in **double asterisks** for accent color" rows={3} value={p.text as string ?? ''} onChange={(v) => set("text", v)} />
-          <div style={{ fontSize: 11, color: '#64748b', marginTop: -8, padding: '0 2px' }}>
-            Example: <code style={{ background: '#1e293b', padding: '1px 4px', borderRadius: 3 }}>First **Cloud Distribution** Platform</code>
-          </div>
+          <RichTextInput label="Text" value={p.text as RichValue} onChange={(v) => set("text", v)} />
           <ColorPicker label="Default text color" value={p.color as string || '#ffffff'} onChange={(v) => set("color", v)} />
-          <ColorPicker label="Accent color (**highlighted** words)" value={p.accentColor as string || '#00C6B1'} onChange={(v) => set("accentColor", v)} />
+          <ColorPicker label="Accent color (legacy **word**)" value={p.accentColor as string || '#00C6B1'} onChange={(v) => set("accentColor", v)} />
           <Select label="Heading level" value={(p.level as "h1") || "h2"} onChange={(v) => set("level", v)} options={LEVEL_OPTS as unknown as { value: "h1"; label: string }[]} />
           <Select label="Alignment" value={(p.align as Align) || "left"} onChange={(v) => set("align", v)} options={ALIGN_OPTS} />
           <NumberInput label="Font size (px, 0 = auto)" value={(p.fontSize as number) || 0} onChange={(v) => set("fontSize", v || undefined)} />
@@ -156,12 +156,9 @@ export function WidgetEditor({
     case "rich-paragraph":
       return (
         <div className="space-y-3">
-          <Textarea label="Text — use **word** for accent color" rows={5} value={p.text as string ?? ''} onChange={(v) => set("text", v)} />
-          <div style={{ fontSize: 11, color: '#64748b', marginTop: -8, padding: '0 2px' }}>
-            Example: <code style={{ background: '#1e293b', padding: '1px 4px', borderRadius: 3 }}>To create **1M+ stores** with **digital commerce**</code>
-          </div>
+          <RichTextInput label="Text" value={p.text as RichValue} onChange={(v) => set("text", v)} />
           <ColorPicker label="Default text color" value={p.color as string || '#e2e8f0'} onChange={(v) => set("color", v)} />
-          <ColorPicker label="Accent color (**highlighted** words)" value={p.accentColor as string || '#00C6B1'} onChange={(v) => set("accentColor", v)} />
+          <ColorPicker label="Accent color (legacy **word**)" value={p.accentColor as string || '#00C6B1'} onChange={(v) => set("accentColor", v)} />
           <Select label="Alignment" value={(p.align as Align) || "left"} onChange={(v) => set("align", v)} options={ALIGN_OPTS} />
           <NumberInput label="Font size (px)" value={(p.fontSize as number) || 18} onChange={(v) => set("fontSize", v)} />
           <NumberInput label="Line height" value={(p.lineHeight as number) || 1.7} onChange={(v) => set("lineHeight", v)} />
@@ -172,7 +169,7 @@ export function WidgetEditor({
     case "section-header":
       return (
         <div className="space-y-3">
-          <TextInput label="Text" value={p.text as string} onChange={(v) => set("text", v)} />
+          <RichFieldGroup label="Text" f={p} set={set} base="text" segments={[{ key: 'text' }]} />
           <Select label="Level" value={(p.level as "h1") || "h2"} onChange={(v) => set("level", v)} options={LEVEL_OPTS as unknown as { value: "h1"; label: string }[]} />
           <Select label="Alignment" value={(p.align as Align) || "left"} onChange={(v) => set("align", v)} options={ALIGN_OPTS} />
           <ColorPicker label="Color" value={p.color as string} onChange={(v) => set("color", v)} />
@@ -211,7 +208,7 @@ export function WidgetEditor({
     case "button":
       return (
         <div className="space-y-3">
-          <TextInput label="Label" value={p.label as string} onChange={(v) => set("label", v)} />
+          <RichFieldGroup label="Label" f={p} set={set} base="label" segments={[{ key: 'label' }]} />
           <TextInput label="URL" value={p.url as string} onChange={(v) => set("url", v)} />
           <Select label="Variant" value={(p.variant as Variant) || "primary"} onChange={(v) => set("variant", v)} options={VARIANT_OPTS} />
           <Select label="Alignment" value={(p.align as Align) || "left"} onChange={(v) => set("align", v)} options={ALIGN_OPTS} />
@@ -286,7 +283,7 @@ export function WidgetEditor({
       const fields = (p.fields as FormField[]) ?? [];
       return (
         <div className="space-y-3">
-          <TextInput label="Form title (optional)" value={p.title as string ?? ''} onChange={(v) => set("title", v)} />
+          <RichFieldGroup label="Form title (optional)" f={p} set={set} base="title" segments={[{ key: 'title' }]} />
           <Repeater<FormField>
             label="Fields"
             items={fields}
@@ -297,7 +294,7 @@ export function WidgetEditor({
               <>
                 <Select label="Field type" value={it.type as "text"} onChange={(v) => u({ ...it, type: v })}
                   options={[{value:'text',label:'Text'},{value:'email',label:'Email'},{value:'phone',label:'Phone'},{value:'textarea',label:'Textarea'},{value:'dropdown',label:'Dropdown'},{value:'checkbox',label:'Checkbox'}] as {value:"text";label:string}[]} />
-                <TextInput label="Label" value={it.label} onChange={(v) => u({ ...it, label: v })} />
+                <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
                 {it.type !== 'checkbox' && <TextInput label="Placeholder" value={it.placeholder ?? ''} onChange={(v) => u({ ...it, placeholder: v })} />}
                 {it.type === 'dropdown' && <Textarea label="Options (one per line)" rows={3} value={it.options ?? ''} onChange={(v) => u({ ...it, options: v })} />}
                 <Select label="Width" value={it.width as "full"} onChange={(v) => u({ ...it, width: v })}
@@ -306,7 +303,7 @@ export function WidgetEditor({
               </>
             )}
           />
-          <TextInput label="Submit button label" value={p.submitLabel as string ?? 'Submit'} onChange={(v) => set("submitLabel", v)} />
+          <RichFieldGroup label="Submit button label" f={p} set={set} base="submitLabel" segments={[{ key: 'submitLabel' }]} />
           <ColorPicker label="Button background" value={p.submitBgColor as string || '#00C6B1'} onChange={(v) => set("submitBgColor", v)} />
           <ColorPicker label="Button text color" value={p.submitTextColor as string || '#ffffff'} onChange={(v) => set("submitTextColor", v)} />
           <ColorPicker label="Form background" value={p.bgColor as string || '#ffffff'} onChange={(v) => set("bgColor", v)} />
@@ -367,7 +364,7 @@ export function WidgetEditor({
           </SubSection>
 
           <SubSection label="📝 Title">
-            <TextInput   label="Text"          value={(p.title as string) || ''}                    onChange={(v) => set('title', v)} />
+            <RichFieldGroup label="Text" f={p} set={set} base="title" segments={[{ key: 'title' }]} />
             <ColorPicker label="Color"         value={(titleSt.color      as string) || '#0f172a'}  onChange={upd('titleStyle',  titleSt, 'color')} />
             <NumberInput label="Font size (px)"value={(titleSt.fontSize   as number) ?? 0}          onChange={upd('titleStyle',  titleSt, 'fontSize')} />
             <Select      label="Font weight"   value={(titleSt.fontWeight as '700') || '700'}       onChange={upd('titleStyle',  titleSt, 'fontWeight')} options={WEIGHTS} />
@@ -384,7 +381,7 @@ export function WidgetEditor({
           </SubSection>
 
           <SubSection label="🔘 Button">
-            <TextInput   label="Label"         value={(p.buttonLabel as string) || ''}              onChange={(v) => set('buttonLabel', v)} />
+            <RichFieldGroup label="Label" f={p} set={set} base="buttonLabel" segments={[{ key: 'buttonLabel' }]} />
             <TextInput   label="URL"           value={(p.buttonUrl   as string) || '#'}             onChange={(v) => set('buttonUrl', v)} />
             <Toggle      label="Hide button"   value={(btnSt.hidden  as boolean) || false}          onChange={upd('buttonStyle', btnSt, 'hidden')} />
             <ColorPicker label="Background"    value={(btnSt.bgColor     as string) || ''}          onChange={upd('buttonStyle', btnSt, 'bgColor')} />
@@ -427,8 +424,8 @@ export function WidgetEditor({
     case "form":
       return (
         <div className="space-y-3">
-          <TextInput label="Form name" value={p.name as string} onChange={(v) => set("name", v)} />
-          <TextInput label="Submit button label" value={p.submitLabel as string} onChange={(v) => set("submitLabel", v)} />
+          <RichFieldGroup label="Form name" f={p} set={set} base="name" segments={[{ key: 'name' }]} />
+          <RichFieldGroup label="Submit button label" f={p} set={set} base="submitLabel" segments={[{ key: 'submitLabel' }]} />
         </div>
       );
     case "list":
@@ -456,8 +453,8 @@ export function WidgetEditor({
             itemPreview={(it) => it.title}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
-                <Textarea label="Body" value={it.body} onChange={(x) => u({ ...it, body: x })} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Body" {...richItemProps(it, 'body', u)} />
               </>
             )}
           />
@@ -467,8 +464,8 @@ export function WidgetEditor({
     case "pricing-card":
       return (
         <div className="space-y-3">
-          <TextInput label="Plan name" value={p.plan as string} onChange={(v) => set("plan", v)} />
-          <TextInput label="Price" value={p.price as string} onChange={(v) => set("price", v)} />
+          <RichFieldGroup label="Plan name" f={p} set={set} base="plan" segments={[{ key: 'plan' }]} />
+          <RichFieldGroup label="Price" f={p} set={set} base="price" segments={[{ key: 'price' }]} />
           <Select label="Period" value={(p.period as "/mo") || "/mo"} onChange={(v) => set("period", v)} options={[{ value: "/mo", label: "Per month" }, { value: "/yr", label: "Per year" }, { value: "one-time", label: "One-time" }] as { value: "/mo"; label: string }[]} />
           <Repeater<{ text: string }>
             label="Features"
@@ -492,9 +489,9 @@ export function WidgetEditor({
           itemPreview={(it) => `${it.number} ${it.label}`}
           renderItem={(it, u) => (
             <>
-              <TextInput label="Number" value={it.number} onChange={(x) => u({ ...it, number: x })} />
-              <TextInput label="Label" value={it.label} onChange={(x) => u({ ...it, label: x })} />
-              <Textarea label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
+              <RichTextInput label="Number" {...richItemProps(it, 'number', u)} />
+              <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
+              <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
             </>
           )}
         />
@@ -528,9 +525,9 @@ export function WidgetEditor({
           itemPreview={(it) => it.author}
           renderItem={(it, u) => (
             <>
-              <Textarea label="Quote" value={it.quote} onChange={(x) => u({ ...it, quote: x })} />
-              <TextInput label="Author" value={it.author} onChange={(x) => u({ ...it, author: x })} />
-              <TextInput label="Role" value={it.role} onChange={(x) => u({ ...it, role: x })} />
+              <RichTextInput label="Quote" {...richItemProps(it, 'quote', u)} />
+              <RichTextInput label="Author" {...richItemProps(it, 'author', u)} />
+              <RichTextInput label="Role" {...richItemProps(it, 'role', u)} />
               <ImageField label="Avatar URL" value={it.avatar} onChange={(x) => u({ ...it, avatar: x })} />
             </>
           )}
@@ -547,7 +544,7 @@ export function WidgetEditor({
           renderItem={(it, u) => (
             <>
               <TextInput label="Icon (emoji)" value={it.icon} onChange={(x) => u({ ...it, icon: x })} />
-              <TextInput label="Text" value={it.text} onChange={(x) => u({ ...it, text: x })} />
+              <RichTextInput label="Text" {...richItemProps(it, 'text', u)} />
             </>
           )}
         />
@@ -564,8 +561,8 @@ export function WidgetEditor({
     case "countdown":
       return (
         <div className="space-y-3">
-          <TextInput label="Label" value={p.label as string} onChange={(v) => set("label", v)} />
-          <TextInput label="Target date (YYYY-MM-DD HH:MM)" value={p.targetDate as string} onChange={(v) => set("targetDate", v)} />
+          <RichFieldGroup label="Label" f={p} set={set} base="label" segments={[{ key: 'label' }]} />
+          <RichFieldGroup label="Target date (YYYY-MM-DD HH:MM)" f={p} set={set} base="targetDate" segments={[{ key: 'targetDate' }]} />
           <ColorPicker label="Background color" value={p.bgColor as string} onChange={(v) => set("bgColor", v)} />
           <ColorPicker label="Text color" value={p.textColor as string} onChange={(v) => set("textColor", v)} />
           <ColorPicker label="Label color" value={p.labelColor as string} onChange={(v) => set("labelColor", v)} />
@@ -582,8 +579,8 @@ export function WidgetEditor({
             itemPreview={(it) => it.title}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
-                <Textarea label="Content" value={it.content} onChange={(x) => u({ ...it, content: x })} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Content" {...richItemProps(it, 'content', u)} />
               </>
             )}
           />
@@ -603,17 +600,17 @@ export function WidgetEditor({
       return (
         <div className="space-y-3">
           <TextInput label="ID" value={p.id as string} onChange={(v) => set("id", v)} />
-          <TextInput label="Label (optional)" value={p.label as string} onChange={(v) => set("label", v)} />
+          <RichFieldGroup label="Label (optional)" f={p} set={set} base="label" segments={[{ key: 'label' }]} />
         </div>
       );
     case "image-text":
       return (
         <div className="space-y-3">
           <ImageField label="Image URL" value={p.image as string} onChange={(v) => set("image", v)} />
-          <TextInput label="Heading" value={p.heading as string} onChange={(v) => set("heading", v)} />
-          <Textarea label="Text" value={p.text as string} onChange={(v) => set("text", v)} />
+          <RichFieldGroup label="Heading" f={p} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Text" f={p} set={set} base="text" segments={[{ key: 'text' }]} />
           <Select label="Layout" value={(p.layout as "left") || "left"} onChange={(v) => set("layout", v)} options={[{ value: "left", label: "Image left" }, { value: "right", label: "Image right" }] as { value: "left"; label: string }[]} />
-          <TextInput label="CTA label" value={p.ctaLabel as string} onChange={(v) => set("ctaLabel", v)} />
+          <RichFieldGroup label="CTA label" f={p} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={p.ctaUrl as string} onChange={(v) => set("ctaUrl", v)} />
         </div>
       );
@@ -629,7 +626,7 @@ export function WidgetEditor({
             itemPreview={(it) => it.label}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Label" value={it.label} onChange={(x) => u({ ...it, label: x })} />
+                <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
                 <TextInput label="URL" value={it.url} onChange={(x) => u({ ...it, url: x })} />
               </>
             )}
@@ -709,7 +706,7 @@ export function WidgetEditor({
       return (
         <div className="space-y-3">
           <TextInput label="Placeholder" value={p.placeholder as string} onChange={(v) => set("placeholder", v)} />
-          <TextInput label="Button label" value={p.buttonLabel as string} onChange={(v) => set("buttonLabel", v)} />
+          <RichFieldGroup label="Button label" f={p} set={set} base="buttonLabel" segments={[{ key: 'buttonLabel' }]} />
           <ColorPicker label="Background color" value={p.bgColor as string} onChange={(v) => set("bgColor", v)} />
           <ColorPicker label="Border color" value={p.borderColor as string} onChange={(v) => set("borderColor", v)} />
         </div>
@@ -717,7 +714,7 @@ export function WidgetEditor({
     case "recent-blog-posts":
       return (
         <div className="space-y-3">
-          <TextInput label="Title" value={p.title as string} onChange={(v) => set("title", v)} />
+          <RichFieldGroup label="Title" f={p} set={set} base="title" segments={[{ key: 'title' }]} />
           <NumberInput label="Count (1–6)" value={p.count as number} onChange={(v) => set("count", v)} />
           <Select label="Columns" value={String(p.columns || 3) as "3"} onChange={(v) => set("columns", Number(v))} options={[{ value: "2", label: "2" }, { value: "3", label: "3" }] as { value: "3"; label: string }[]} />
         </div>
@@ -725,17 +722,17 @@ export function WidgetEditor({
     case "post-listing":
       return (
         <div className="space-y-3">
-          <TextInput label="Title" value={p.title as string} onChange={(v) => set("title", v)} />
+          <RichFieldGroup label="Title" f={p} set={set} base="title" segments={[{ key: 'title' }]} />
           <Select label="Columns" value={String(p.columns || 3) as "3"} onChange={(v) => set("columns", Number(v))} options={[{ value: "2", label: "2" }, { value: "3", label: "3" }] as { value: "3"; label: string }[]} />
         </div>
       );
     case "blog-email-subscription":
       return (
         <div className="space-y-3">
-          <TextInput label="Title" value={p.title as string} onChange={(v) => set("title", v)} />
-          <TextInput label="Subtitle" value={p.subtitle as string} onChange={(v) => set("subtitle", v)} />
+          <RichFieldGroup label="Title" f={p} set={set} base="title" segments={[{ key: 'title' }]} />
+          <RichFieldGroup label="Subtitle" f={p} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <TextInput label="Placeholder" value={p.placeholder as string} onChange={(v) => set("placeholder", v)} />
-          <TextInput label="Button label" value={p.buttonLabel as string} onChange={(v) => set("buttonLabel", v)} />
+          <RichFieldGroup label="Button label" f={p} set={set} base="buttonLabel" segments={[{ key: 'buttonLabel' }]} />
           <ColorPicker label="Background color" value={p.bgColor as string} onChange={(v) => set("bgColor", v)} />
           <ColorPicker label="Accent color" value={p.accentColor as string} onChange={(v) => set("accentColor", v)} />
         </div>
@@ -752,18 +749,18 @@ export function WidgetEditor({
             renderItem={(it, u) => (
               <>
                 <TextInput label="Code" value={it.code} onChange={(x) => u({ ...it, code: x })} />
-                <TextInput label="Label" value={it.label} onChange={(x) => u({ ...it, label: x })} />
+                <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
               </>
             )}
           />
-          <TextInput label="Current language code" value={p.current as string} onChange={(v) => set("current", v)} />
+          <RichFieldGroup label="Current language code" f={p} set={set} base="current" segments={[{ key: 'current' }]} />
         </div>
       );
     case "audio-player":
       return (
         <div className="space-y-3">
           <TextInput label="Audio URL" value={p.src as string} onChange={(v) => set("src", v)} />
-          <TextInput label="Title" value={p.title as string} onChange={(v) => set("title", v)} />
+          <RichFieldGroup label="Title" f={p} set={set} base="title" segments={[{ key: 'title' }]} />
           <ColorPicker label="Background color" value={p.bgColor as string} onChange={(v) => set("bgColor", v)} />
           <ColorPicker label="Text color" value={p.textColor as string} onChange={(v) => set("textColor", v)} />
         </div>
@@ -771,7 +768,7 @@ export function WidgetEditor({
     case "site-header":
       return (
         <div className="space-y-3">
-          <TextInput label="Logo text" value={p.logoText as string} onChange={(v) => set("logoText", v)} />
+          <RichFieldGroup label="Logo text" f={p} set={set} base="logoText" segments={[{ key: 'logoText' }]} />
           <ImageField label="Logo image URL" value={p.logoImage as string} onChange={(v) => set("logoImage", v)} />
           <Repeater<{ label: string; url: string }>
             label="Nav links"
@@ -781,12 +778,12 @@ export function WidgetEditor({
             itemPreview={(it) => it.label}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Label" value={it.label} onChange={(x) => u({ ...it, label: x })} />
+                <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
                 <TextInput label="URL" value={it.url} onChange={(x) => u({ ...it, url: x })} />
               </>
             )}
           />
-          <TextInput label="CTA label" value={p.ctaLabel as string} onChange={(v) => set("ctaLabel", v)} />
+          <RichFieldGroup label="CTA label" f={p} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={p.ctaUrl as string} onChange={(v) => set("ctaUrl", v)} />
           <ColorPicker label="Background color" value={p.bgColor as string} onChange={(v) => set("bgColor", v)} />
           <ColorPicker label="Text color" value={p.textColor as string} onChange={(v) => set("textColor", v)} />
@@ -802,7 +799,7 @@ export function WidgetEditor({
             newItem={() => ({ label: "Tag" })}
             itemPreview={(it) => it.label}
             renderItem={(it, u) => (
-              <TextInput label="Label" value={it.label} onChange={(x) => u({ ...it, label: x })} />
+              <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
             )}
           />
           <ColorPicker label="Active color" value={p.activeColor as string} onChange={(v) => set("activeColor", v)} />
@@ -812,7 +809,7 @@ export function WidgetEditor({
       return (
         <div className="space-y-3">
           <TextInput label="Feed URL" value={p.feedUrl as string} onChange={(v) => set("feedUrl", v)} />
-          <TextInput label="Title" value={p.title as string} onChange={(v) => set("title", v)} />
+          <RichFieldGroup label="Title" f={p} set={set} base="title" segments={[{ key: 'title' }]} />
           <NumberInput label="Count" value={p.count as number} onChange={(v) => set("count", v)} />
         </div>
       );
@@ -820,8 +817,8 @@ export function WidgetEditor({
       return (
         <div className="space-y-3">
           <TextInput label="Embed URL" value={p.embedUrl as string} onChange={(v) => set("embedUrl", v)} />
-          <TextInput label="Title" value={p.title as string} onChange={(v) => set("title", v)} />
-          <TextInput label="Button label" value={p.buttonLabel as string} onChange={(v) => set("buttonLabel", v)} />
+          <RichFieldGroup label="Title" f={p} set={set} base="title" segments={[{ key: 'title' }]} />
+          <RichFieldGroup label="Button label" f={p} set={set} base="buttonLabel" segments={[{ key: 'buttonLabel' }]} />
           <TextInput label="Button URL" value={p.buttonUrl as string} onChange={(v) => set("buttonUrl", v)} />
           <ColorPicker label="Background color" value={p.bgColor as string} onChange={(v) => set("bgColor", v)} />
         </div>
@@ -829,10 +826,10 @@ export function WidgetEditor({
     case "payment":
       return (
         <div className="space-y-3">
-          <TextInput label="Title" value={p.title as string} onChange={(v) => set("title", v)} />
-          <TextInput label="Amount" value={p.amount as string} onChange={(v) => set("amount", v)} />
-          <Textarea label="Description" value={p.description as string} onChange={(v) => set("description", v)} />
-          <TextInput label="Button label" value={p.buttonLabel as string} onChange={(v) => set("buttonLabel", v)} />
+          <RichFieldGroup label="Title" f={p} set={set} base="title" segments={[{ key: 'title' }]} />
+          <RichFieldGroup label="Amount" f={p} set={set} base="amount" segments={[{ key: 'amount' }]} />
+          <RichFieldGroup label="Description" f={p} set={set} base="description" segments={[{ key: 'description' }]} />
+          <RichFieldGroup label="Button label" f={p} set={set} base="buttonLabel" segments={[{ key: 'buttonLabel' }]} />
           <ColorPicker label="Background color" value={p.bgColor as string} onChange={(v) => set("bgColor", v)} />
           <ColorPicker label="Accent color" value={p.accentColor as string} onChange={(v) => set("accentColor", v)} />
         </div>
@@ -840,13 +837,13 @@ export function WidgetEditor({
     case "product":
       return (
         <div className="space-y-3">
-          <TextInput label="Name" value={p.name as string} onChange={(v) => set("name", v)} />
-          <TextInput label="Price" value={p.price as string} onChange={(v) => set("price", v)} />
+          <RichFieldGroup label="Name" f={p} set={set} base="name" segments={[{ key: 'name' }]} />
+          <RichFieldGroup label="Price" f={p} set={set} base="price" segments={[{ key: 'price' }]} />
           <ImageField label="Image URL" value={p.image as string} onChange={(v) => set("image", v)} />
-          <Textarea label="Description" value={p.description as string} onChange={(v) => set("description", v)} />
-          <TextInput label="CTA label" value={p.ctaLabel as string} onChange={(v) => set("ctaLabel", v)} />
+          <RichFieldGroup label="Description" f={p} set={set} base="description" segments={[{ key: 'description' }]} />
+          <RichFieldGroup label="CTA label" f={p} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={p.ctaUrl as string} onChange={(v) => set("ctaUrl", v)} />
-          <TextInput label="Badge" value={p.badge as string} onChange={(v) => set("badge", v)} />
+          <RichFieldGroup label="Badge" f={p} set={set} base="badge" segments={[{ key: 'badge' }]} />
           <ColorPicker label="Background color" value={p.bgColor as string} onChange={(v) => set("bgColor", v)} />
         </div>
       );

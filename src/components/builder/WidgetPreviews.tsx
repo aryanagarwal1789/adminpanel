@@ -1,11 +1,18 @@
 import React from "react";
+import { renderRichText, type RichValue } from "./rich-text";
 
 /* ----------------------------- helpers ----------------------------- */
 
 type P = Record<string, unknown>;
 
 const str = (v: unknown, fallback = ""): string =>
-  typeof v === "string" ? v : v == null ? fallback : String(v);
+  typeof v === "string"
+    ? v
+    : v == null
+      ? fallback
+      : React.isValidElement(v)
+        ? (v as unknown as string) // resolved rich node — renders fine as JSX children
+        : String(v);
 
 const num = (v: unknown, fallback: number): number => {
   const n = typeof v === "number" ? v : typeof v === "string" ? parseFloat(v) : NaN;
@@ -167,6 +174,63 @@ export function ParagraphWidget({ p }: { p: P }) {
     >
       {text}
     </p>
+  );
+}
+
+export function RichHeadingWidget({ p }: { p: P }) {
+  const level = (str(p.level, "h2") as "h1" | "h2" | "h3" | "h4");
+  const color = str(p.color, "");
+  const accentColor = str(p.accentColor, "") || undefined;
+  const fontSize = num(p.fontSize, 0);
+  const fontWeight = str(p.fontWeight, "");
+  const lineHeight = num(p.lineHeight, 0);
+  const letterSpacing = num(p.letterSpacing, 0);
+  const sizes: Record<string, string> = {
+    h1: "text-3xl font-bold tracking-tight",
+    h2: "text-2xl font-semibold tracking-tight",
+    h3: "text-xl font-semibold",
+    h4: "text-base font-semibold",
+  };
+  const Tag = level as React.ElementType;
+  const style: React.CSSProperties = {
+    ...(color ? { color } : {}),
+    ...(fontSize ? { fontSize: `${fontSize}px` } : {}),
+    ...(fontWeight ? { fontWeight } : {}),
+    ...(lineHeight ? { lineHeight } : {}),
+    ...(letterSpacing ? { letterSpacing: `${letterSpacing}px` } : {}),
+  };
+  return (
+    <div className={alignClass(p.align)}>
+      <Tag className={sizes[level] ?? sizes.h2} style={Object.keys(style).length ? style : undefined}>
+        {renderRichText(p.text as RichValue, { accentColor, inline: true })}
+      </Tag>
+    </div>
+  );
+}
+
+export function RichParagraphWidget({ p }: { p: P }) {
+  const color = str(p.color, "");
+  const accentColor = str(p.accentColor, "") || undefined;
+  const fontSize = num(p.fontSize, 0);
+  const lineHeight = num(p.lineHeight, 0);
+  const style: React.CSSProperties = {
+    ...(color ? { color } : {}),
+    ...(fontSize ? { fontSize: `${fontSize}px` } : {}),
+    ...(lineHeight ? { lineHeight } : {}),
+  };
+  return (
+    <div
+      className={`${alignClass(p.align)} pb-rte-render leading-relaxed`}
+      style={Object.keys(style).length ? style : undefined}
+    >
+      {renderRichText(p.text as RichValue, { accentColor })}
+      <style>{`
+        .pb-rte-render ul { list-style: disc; padding-left: 1.5rem; }
+        .pb-rte-render ol { list-style: decimal; padding-left: 1.5rem; }
+        .pb-rte-render p { margin: 0 0 0.5rem; }
+        .pb-rte-render p:last-child { margin-bottom: 0; }
+      `}</style>
+    </div>
   );
 }
 
@@ -1245,6 +1309,8 @@ export const WIDGET_PREVIEW_MAP: Record<string, React.ComponentType<{ p: Record<
   paragraph: ParagraphWidget,
   text: ParagraphWidget,
   "rich-text": ParagraphWidget,
+  "rich-heading": RichHeadingWidget,
+  "rich-paragraph": RichParagraphWidget,
   image: ImageWidget,
   button: ButtonWidget,
   divider: DividerWidget,

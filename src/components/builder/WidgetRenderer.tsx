@@ -1,8 +1,11 @@
 import { WIDGET_REGISTRY, type Widget } from "./widgets";
 import { WIDGET_PREVIEW_MAP } from "./WidgetPreviews";
+import { resolveRichFields } from "./rich-text";
+import { RenderErrorBoundary } from "./RenderErrorBoundary";
 
 export function WidgetRenderer({ widget }: { widget: Widget }) {
-  const p = widget.props;
+  // Resolve any `${key}Rich` fields to rendered nodes (inert when none exist).
+  const p = resolveRichFields(widget.props as Record<string, unknown>);
   const Preview = WIDGET_PREVIEW_MAP[widget.type];
 
   // Stable CSS ID for scoped style injection
@@ -42,7 +45,9 @@ export function WidgetRenderer({ widget }: { widget: Widget }) {
     <>
       {css && <style>{css}</style>}
       <div id={wid} style={wrapStyle}>
-        <Preview p={p} />
+        <RenderErrorBoundary label={`widget: ${widget.type}`} editMode resetKey={JSON.stringify(widget.props)}>
+          <Preview p={p} />
+        </RenderErrorBoundary>
       </div>
     </>
   );

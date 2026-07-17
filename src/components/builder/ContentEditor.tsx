@@ -1,3 +1,6 @@
+import { RichFieldGroup } from "./RichFieldGroup";
+import { RichTextInput } from "./RichTextInput";
+import { richItemProps } from "./rich-text";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import {
@@ -88,7 +91,7 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <ImageField label="Logo image URL" value={f.logoImage as string} onChange={(v) => set("logoImage", v)} />
-          <TextInput label="Logo text" value={f.logoText as string} onChange={(v) => set("logoText", v)} />
+          <RichFieldGroup label="Logo text" f={f} set={set} base="logoText" segments={[{ key: 'logoText' }]} />
           <ButtonEditor label="Primary CTA" value={f.cta as ButtonField} onChange={(v) => set("cta", v)} />
           <ButtonEditor label="Secondary CTA" value={f.ctaSecondary as ButtonField} onChange={(v) => set("ctaSecondary", v)} />
           <Repeater<LinkField>
@@ -105,7 +108,7 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <ImageField label="Logo image URL" value={f.logoImage as string} onChange={(v) => set("logoImage", v)} />
-          <TextInput label="Logo text" value={f.logoText as string} onChange={(v) => set("logoText", v)} />
+          <RichFieldGroup label="Logo text" f={f} set={set} base="logoText" segments={[{ key: 'logoText' }]} />
           <Repeater<LinkField>
             label="Nav links" items={(f.links as LinkField[]) ?? []} onChange={(v) => set("links", v)}
             newItem={newLink} itemPreview={linkPreview}
@@ -117,8 +120,8 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <ImageField label="Logo image URL" value={f.logoImage as string} onChange={(v) => set("logoImage", v)} />
-          <TextInput label="Logo text" value={f.logoText as string} onChange={(v) => set("logoText", v)} />
-          <TextInput label="Copyright text" value={f.copyright as string} onChange={(v) => set("copyright", v)} />
+          <RichFieldGroup label="Logo text" f={f} set={set} base="logoText" segments={[{ key: 'logoText' }]} />
+          <RichFieldGroup label="Copyright text" f={f} set={set} base="copyright" segments={[{ key: 'copyright' }]} />
           <Repeater<LinkField>
             label="Links" items={(f.links as LinkField[]) ?? []} onChange={(v) => set("links", v)}
             newItem={newLink} itemPreview={linkPreview}
@@ -130,9 +133,9 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <ImageField label="Logo image URL" value={f.logoImage as string} onChange={(v) => set("logoImage", v)} />
-          <TextInput label="Logo text" value={f.logoText as string} onChange={(v) => set("logoText", v)} />
-          <Textarea label="Tagline" value={f.tagline as string} onChange={(v) => set("tagline", v)} />
-          <TextInput label="Copyright text" value={f.copyright as string} onChange={(v) => set("copyright", v)} />
+          <RichFieldGroup label="Logo text" f={f} set={set} base="logoText" segments={[{ key: 'logoText' }]} />
+          <RichFieldGroup label="Tagline" f={f} set={set} base="tagline" segments={[{ key: 'tagline' }]} />
+          <RichFieldGroup label="Copyright text" f={f} set={set} base="copyright" segments={[{ key: 'copyright' }]} />
           {[1, 2, 3].map((n) => (
             <div key={n} className="space-y-3 pt-3 border-t border-slate-800">
               <TextInput label={`Column ${n} title`} value={f[`col${n}Title`] as string} onChange={(v) => set(`col${n}Title`, v)} />
@@ -150,8 +153,8 @@ function renderBlockFields(
     case "hero-centered":
       return (
         <div className="space-y-4">
-          <TextInput label="Headline" value={f.headline as string} onChange={(v) => set("headline", v)} />
-          <Textarea label="Subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
+          <RichFieldGroup label="Headline" f={f} set={set} base="headline" segments={[{ key: 'headline' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <ButtonEditor label="Primary CTA" value={f.primaryCta as ButtonField} onChange={(v) => set("primaryCta", v)} />
           <ButtonEditor label="Secondary CTA" value={f.secondaryCta as ButtonField} onChange={(v) => set("secondaryCta", v)} />
           <ImageField label="Background image URL" value={f.bgImage as string} onChange={(v) => set("bgImage", v)} />
@@ -160,8 +163,8 @@ function renderBlockFields(
     case "hero-split":
       return (
         <div className="space-y-4">
-          <TextInput label="Headline" value={f.headline as string} onChange={(v) => set("headline", v)} />
-          <Textarea label="Subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
+          <RichFieldGroup label="Headline" f={f} set={set} base="headline" segments={[{ key: 'headline' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <ButtonEditor label="CTA" value={f.cta as ButtonField} onChange={(v) => set("cta", v)} />
           <ImageField label="Image URL" value={f.image as string} onChange={(v) => set("image", v)} />
           <Toggle label="Image on right" value={f.imageRight as boolean} onChange={(v) => set("imageRight", v)} />
@@ -171,8 +174,8 @@ function renderBlockFields(
     case "features-4col":
       return (
         <div className="space-y-4">
-          <TextInput label="Section title" value={f.title as string} onChange={(v) => set("title", v)} />
-          <Textarea label="Section subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
+          <RichFieldGroup label="Section title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
+          <RichFieldGroup label="Section subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <Repeater<{ icon: string; title: string; description: string }>
             label="Features"
             items={(f.features as { icon: string; title: string; description: string }[]) ?? []}
@@ -182,8 +185,8 @@ function renderBlockFields(
             renderItem={(it, u) => (
               <>
                 <TextInput label="Icon (emoji)" value={it.icon} onChange={(x) => u({ ...it, icon: x })} />
-                <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
-                <Textarea label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
               </>
             )}
           />
@@ -192,8 +195,8 @@ function renderBlockFields(
     case "text-image":
       return (
         <div className="space-y-4">
-          <TextInput label="Headline" value={f.headline as string} onChange={(v) => set("headline", v)} />
-          <Textarea label="Subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
+          <RichFieldGroup label="Headline" f={f} set={set} base="headline" segments={[{ key: 'headline' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <ImageField label="Image URL" value={f.image as string} onChange={(v) => set("image", v)} />
           <Toggle label="Image on right" value={f.imageRight as boolean} onChange={(v) => set("imageRight", v)} />
         </div>
@@ -209,10 +212,10 @@ function renderBlockFields(
             itemPreview={(it) => `${it.prefix}${it.number}${it.suffix} ${it.label}`}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Number" value={it.number} onChange={(x) => u({ ...it, number: x })} />
-                <TextInput label="Label" value={it.label} onChange={(x) => u({ ...it, label: x })} />
-                <TextInput label="Prefix (optional)" value={it.prefix} onChange={(x) => u({ ...it, prefix: x })} />
-                <TextInput label="Suffix (optional)" value={it.suffix} onChange={(x) => u({ ...it, suffix: x })} />
+                <RichTextInput label="Number" {...richItemProps(it, 'number', u)} />
+                <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
+                <RichTextInput label="Prefix (optional)" {...richItemProps(it, 'prefix', u)} />
+                <RichTextInput label="Suffix (optional)" {...richItemProps(it, 'suffix', u)} />
               </>
             )}
           />
@@ -229,9 +232,9 @@ function renderBlockFields(
             itemPreview={(it) => it.author}
             renderItem={(it, u) => (
               <>
-                <Textarea label="Quote" value={it.quote} onChange={(x) => u({ ...it, quote: x })} />
-                <TextInput label="Author name" value={it.author} onChange={(x) => u({ ...it, author: x })} />
-                <TextInput label="Role / company" value={it.role} onChange={(x) => u({ ...it, role: x })} />
+                <RichTextInput label="Quote" {...richItemProps(it, 'quote', u)} />
+                <RichTextInput label="Author name" {...richItemProps(it, 'author', u)} />
+                <RichTextInput label="Role / company" {...richItemProps(it, 'role', u)} />
                 <ImageField label="Avatar URL" value={it.avatar} onChange={(x) => u({ ...it, avatar: x })} />
               </>
             )}
@@ -241,7 +244,7 @@ function renderBlockFields(
     case "logo-grid":
       return (
         <div className="space-y-4">
-          <TextInput label="Section title" value={f.title as string} onChange={(v) => set("title", v)} />
+          <RichFieldGroup label="Section title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
           <Repeater<{ src: string; alt: string }>
             label="Logos"
             items={(f.logos as { src: string; alt: string }[]) ?? []}
@@ -260,15 +263,15 @@ function renderBlockFields(
     case "cta-banner":
       return (
         <div className="space-y-4">
-          <TextInput label="Headline" value={f.headline as string} onChange={(v) => set("headline", v)} />
-          <Textarea label="Subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
+          <RichFieldGroup label="Headline" f={f} set={set} base="headline" segments={[{ key: 'headline' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <ButtonEditor label="Button" value={f.button as ButtonField} onChange={(v) => set("button", v)} />
         </div>
       );
     case "faq":
       return (
         <div className="space-y-4">
-          <TextInput label="Section title" value={f.title as string} onChange={(v) => set("title", v)} />
+          <RichFieldGroup label="Section title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
           <Repeater<{ question: string; answer: string }>
             label="FAQ items"
             items={(f.items as { question: string; answer: string }[]) ?? []}
@@ -277,8 +280,8 @@ function renderBlockFields(
             itemPreview={(it) => it.question}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Question" value={it.question} onChange={(x) => u({ ...it, question: x })} />
-                <Textarea label="Answer" value={it.answer} onChange={(x) => u({ ...it, answer: x })} />
+                <RichTextInput label="Question" {...richItemProps(it, 'question', u)} />
+                <RichTextInput label="Answer" {...richItemProps(it, 'answer', u)} />
               </>
             )}
           />
@@ -287,8 +290,8 @@ function renderBlockFields(
     case "blog-preview":
       return (
         <div className="space-y-4">
-          <TextInput label="Section title" value={f.title as string} onChange={(v) => set("title", v)} />
-          <TextInput label="Subtitle" value={f.subtitle as string} onChange={(v) => set("subtitle", v)} />
+          <RichFieldGroup label="Section title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div>
             <label className="text-xs text-slate-400 mb-2 block">Number of posts</label>
             <div className="flex gap-2">
@@ -315,9 +318,9 @@ function renderBlockFields(
     case "hero-gradient":
       return (
         <div className="space-y-4">
-          <TextInput label="Badge text" value={f.badge as string} onChange={(v) => set("badge", v)} />
-          <Textarea label="Headline" value={f.headline as string} onChange={(v) => set("headline", v)} />
-          <Textarea label="Subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
+          <RichFieldGroup label="Badge text" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Headline" f={f} set={set} base="headline" segments={[{ key: 'headline' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <ButtonEditor label="Primary CTA" value={f.primaryCta as ButtonField} onChange={(v) => set("primaryCta", v)} />
           <ButtonEditor label="Secondary CTA" value={f.secondaryCta as ButtonField} onChange={(v) => set("secondaryCta", v)} />
           <ImageField label="Product image URL (optional)" value={f.image as string} onChange={(v) => set("image", v)} />
@@ -327,9 +330,9 @@ function renderBlockFields(
     case "hero-centered-image":
       return (
         <div className="space-y-4">
-          <TextInput label="Badge text" value={f.badge as string} onChange={(v) => set("badge", v)} />
-          <Textarea label="Headline" value={f.headline as string} onChange={(v) => set("headline", v)} />
-          <Textarea label="Subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
+          <RichFieldGroup label="Badge text" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Headline" f={f} set={set} base="headline" segments={[{ key: 'headline' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <ButtonEditor label="Primary CTA" value={f.primaryCta as ButtonField} onChange={(v) => set("primaryCta", v)} />
           <ButtonEditor label="Secondary CTA" value={f.secondaryCta as ButtonField} onChange={(v) => set("secondaryCta", v)} />
           <ImageField label="Screenshot / product image URL" value={f.image as string} onChange={(v) => set("image", v)} />
@@ -339,8 +342,8 @@ function renderBlockFields(
     case "features-alternating":
       return (
         <div className="space-y-4">
-          <TextInput label="Section title" value={f.title as string} onChange={(v) => set("title", v)} />
-          <Textarea label="Section subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
+          <RichFieldGroup label="Section title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
+          <RichFieldGroup label="Section subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <Repeater<{ tag: string; title: string; description: string; image: string; ctaLabel: string; ctaUrl: string }>
             label="Feature rows"
             items={(f.items as { tag: string; title: string; description: string; image: string; ctaLabel: string; ctaUrl: string }[]) ?? []}
@@ -349,11 +352,11 @@ function renderBlockFields(
             itemPreview={(it) => it.title}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Category tag" value={it.tag} onChange={(x) => u({ ...it, tag: x })} />
-                <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
-                <Textarea label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
+                <RichTextInput label="Category tag" {...richItemProps(it, 'tag', u)} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
                 <ImageField label="Image URL" value={it.image} onChange={(x) => u({ ...it, image: x })} />
-                <TextInput label="CTA label" value={it.ctaLabel} onChange={(x) => u({ ...it, ctaLabel: x })} />
+                <RichTextInput label="CTA label" {...richItemProps(it, 'ctaLabel', u)} />
                 <TextInput label="CTA URL" value={it.ctaUrl} onChange={(x) => u({ ...it, ctaUrl: x })} />
               </>
             )}
@@ -364,8 +367,8 @@ function renderBlockFields(
     case "features-icon-cards":
       return (
         <div className="space-y-4">
-          <TextInput label="Section title" value={f.title as string} onChange={(v) => set("title", v)} />
-          <Textarea label="Section subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
+          <RichFieldGroup label="Section title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
+          <RichFieldGroup label="Section subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <Repeater<{ icon: string; iconBg: string; title: string; description: string }>
             label="Feature cards"
             items={(f.features as { icon: string; iconBg: string; title: string; description: string }[]) ?? []}
@@ -375,9 +378,9 @@ function renderBlockFields(
             renderItem={(it, u) => (
               <>
                 <TextInput label="Icon (emoji)" value={it.icon} onChange={(x) => u({ ...it, icon: x })} />
-                <TextInput label="Icon background color" value={it.iconBg} onChange={(x) => u({ ...it, iconBg: x })} />
-                <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
-                <Textarea label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
+                <RichTextInput label="Icon background color" {...richItemProps(it, 'iconBg', u)} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
               </>
             )}
           />
@@ -387,8 +390,8 @@ function renderBlockFields(
     case "pricing-modern":
       return (
         <div className="space-y-4">
-          <TextInput label="Section title" value={f.title as string} onChange={(v) => set("title", v)} />
-          <Textarea label="Section subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
+          <RichFieldGroup label="Section title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
+          <RichFieldGroup label="Section subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <Repeater<{ name: string; price: string; period: string; description: string; highlighted: boolean; features: string[]; cta: ButtonField }>
             label="Pricing plans"
             items={(f.plans as { name: string; price: string; period: string; description: string; highlighted: boolean; features: string[]; cta: ButtonField }[]) ?? []}
@@ -397,10 +400,10 @@ function renderBlockFields(
             itemPreview={(it) => `${it.name} — ${it.price}`}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Plan name" value={it.name} onChange={(x) => u({ ...it, name: x })} />
-                <TextInput label="Price" value={it.price} onChange={(x) => u({ ...it, price: x })} />
-                <TextInput label="Billing period" value={it.period} onChange={(x) => u({ ...it, period: x })} />
-                <Textarea label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
+                <RichTextInput label="Plan name" {...richItemProps(it, 'name', u)} />
+                <RichTextInput label="Price" {...richItemProps(it, 'price', u)} />
+                <RichTextInput label="Billing period" {...richItemProps(it, 'period', u)} />
+                <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
                 <Toggle label="Highlighted (featured plan)" value={it.highlighted} onChange={(x) => u({ ...it, highlighted: x })} />
                 <Textarea label="Features (one per line)" value={it.features.join("\n")} onChange={(x) => u({ ...it, features: x.split("\n").filter(Boolean) })} />
                 <ButtonEditor label="CTA button" value={it.cta} onChange={(x) => u({ ...it, cta: x })} />
@@ -413,7 +416,7 @@ function renderBlockFields(
     case "testimonials-wall":
       return (
         <div className="space-y-4">
-          <TextInput label="Section title" value={f.title as string} onChange={(v) => set("title", v)} />
+          <RichFieldGroup label="Section title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
           <Repeater<{ quote: string; author: string; role: string; company: string; stars: number }>
             label="Testimonials"
             items={(f.items as { quote: string; author: string; role: string; company: string; stars: number }[]) ?? []}
@@ -422,10 +425,10 @@ function renderBlockFields(
             itemPreview={(it) => it.author}
             renderItem={(it, u) => (
               <>
-                <Textarea label="Quote" value={it.quote} onChange={(x) => u({ ...it, quote: x })} />
-                <TextInput label="Author name" value={it.author} onChange={(x) => u({ ...it, author: x })} />
-                <TextInput label="Role" value={it.role} onChange={(x) => u({ ...it, role: x })} />
-                <TextInput label="Company" value={it.company} onChange={(x) => u({ ...it, company: x })} />
+                <RichTextInput label="Quote" {...richItemProps(it, 'quote', u)} />
+                <RichTextInput label="Author name" {...richItemProps(it, 'author', u)} />
+                <RichTextInput label="Role" {...richItemProps(it, 'role', u)} />
+                <RichTextInput label="Company" {...richItemProps(it, 'company', u)} />
                 <NumberInput label="Stars (1–5)" value={it.stars} onChange={(x) => u({ ...it, stars: Math.min(5, Math.max(1, x)) })} />
               </>
             )}
@@ -436,8 +439,8 @@ function renderBlockFields(
     case "team-grid":
       return (
         <div className="space-y-4">
-          <TextInput label="Section title" value={f.title as string} onChange={(v) => set("title", v)} />
-          <Textarea label="Section subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
+          <RichFieldGroup label="Section title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
+          <RichFieldGroup label="Section subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <Repeater<{ name: string; role: string; avatar: string; linkedin: string }>
             label="Team members"
             items={(f.members as { name: string; role: string; avatar: string; linkedin: string }[]) ?? []}
@@ -446,8 +449,8 @@ function renderBlockFields(
             itemPreview={(it) => it.name}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Name" value={it.name} onChange={(x) => u({ ...it, name: x })} />
-                <TextInput label="Role" value={it.role} onChange={(x) => u({ ...it, role: x })} />
+                <RichTextInput label="Name" {...richItemProps(it, 'name', u)} />
+                <RichTextInput label="Role" {...richItemProps(it, 'role', u)} />
                 <ImageField label="Avatar image URL" value={it.avatar} onChange={(x) => u({ ...it, avatar: x })} />
                 <TextInput label="LinkedIn URL" value={it.linkedin} onChange={(x) => u({ ...it, linkedin: x })} />
               </>
@@ -459,7 +462,7 @@ function renderBlockFields(
     case "stats-bold":
       return (
         <div className="space-y-4">
-          <TextInput label="Section title (optional)" value={f.title as string} onChange={(v) => set("title", v)} />
+          <RichFieldGroup label="Section title (optional)" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
           <Repeater<{ number: string; suffix: string; label: string }>
             label="Stats"
             items={(f.stats as { number: string; suffix: string; label: string }[]) ?? []}
@@ -468,9 +471,9 @@ function renderBlockFields(
             itemPreview={(it) => `${it.number}${it.suffix} ${it.label}`}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Number" value={it.number} onChange={(x) => u({ ...it, number: x })} />
-                <TextInput label="Suffix (+, %, ★, etc.)" value={it.suffix} onChange={(x) => u({ ...it, suffix: x })} />
-                <TextInput label="Label" value={it.label} onChange={(x) => u({ ...it, label: x })} />
+                <RichTextInput label="Number" {...richItemProps(it, 'number', u)} />
+                <RichTextInput label="Suffix (+, %, ★, etc.)" {...richItemProps(it, 'suffix', u)} />
+                <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
               </>
             )}
           />
@@ -480,8 +483,8 @@ function renderBlockFields(
     case "steps-process":
       return (
         <div className="space-y-4">
-          <TextInput label="Section title" value={f.title as string} onChange={(v) => set("title", v)} />
-          <Textarea label="Section subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
+          <RichFieldGroup label="Section title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
+          <RichFieldGroup label="Section subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <Repeater<{ number: string; title: string; description: string }>
             label="Steps"
             items={(f.steps as { number: string; title: string; description: string }[]) ?? []}
@@ -490,9 +493,9 @@ function renderBlockFields(
             itemPreview={(it) => `${it.number} — ${it.title}`}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Step number" value={it.number} onChange={(x) => u({ ...it, number: x })} />
-                <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
-                <Textarea label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
+                <RichTextInput label="Step number" {...richItemProps(it, 'number', u)} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
               </>
             )}
           />
@@ -502,8 +505,8 @@ function renderBlockFields(
     case "cta-banner-gradient":
       return (
         <div className="space-y-4">
-          <Textarea label="Headline" value={f.headline as string} onChange={(v) => set("headline", v)} />
-          <Textarea label="Subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
+          <RichFieldGroup label="Headline" f={f} set={set} base="headline" segments={[{ key: 'headline' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <ButtonEditor label="Primary CTA" value={f.primaryCta as ButtonField} onChange={(v) => set("primaryCta", v)} />
           <ButtonEditor label="Secondary CTA" value={f.secondaryCta as ButtonField} onChange={(v) => set("secondaryCta", v)} />
         </div>
@@ -512,10 +515,10 @@ function renderBlockFields(
     case "hero-salescode":
       return (
         <div className="space-y-4">
-          <TextInput label="Badge text" value={f.badge as string} onChange={(v) => set("badge", v)} />
-          <TextInput label="Title" value={f.title as string} onChange={(v) => set("title", v)} />
-          <Textarea label="Description" value={f.description as string} onChange={(v) => set("description", v)} />
-          <TextInput label="CTA text" value={f.ctaText as string} onChange={(v) => set("ctaText", v)} />
+          <RichFieldGroup label="Badge text" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
+          <RichFieldGroup label="Description" f={f} set={set} base="description" segments={[{ key: 'description' }]} />
+          <RichFieldGroup label="CTA text" f={f} set={set} base="ctaText" segments={[{ key: 'ctaText' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string} onChange={(v) => set("ctaUrl", v)} />
           <TextInput label="Secondary CTA text" value={(f.ctaSecondaryText as string) ?? ""} onChange={(v) => set("ctaSecondaryText", v)} placeholder="e.g. Watch Demo (leave empty to hide)" />
           <TextInput label="Secondary CTA URL" value={(f.ctaSecondaryUrl as string) ?? ""} onChange={(v) => set("ctaSecondaryUrl", v)} placeholder="e.g. https://youtu.be/..." />
@@ -525,7 +528,7 @@ function renderBlockFields(
     case "impact-salescode":
       return (
         <div className="space-y-4">
-          <Textarea label="Title" value={f.title as string} onChange={(v) => set("title", v)} />
+          <RichFieldGroup label="Title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
           <ImageField label="Video" value={f.videoUrl as string} onChange={(v) => set("videoUrl", v)} />
           <Repeater<{ value: string; suffix: string; description: string }>
             label="Stats"
@@ -535,9 +538,9 @@ function renderBlockFields(
             itemPreview={(it) => `${it.value}${it.suffix} — ${it.description}`}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Value" value={it.value} onChange={(x) => u({ ...it, value: x })} />
-                <TextInput label="Suffix (%, x, etc.)" value={it.suffix} onChange={(x) => u({ ...it, suffix: x })} />
-                <TextInput label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
+                <RichTextInput label="Value" {...richItemProps(it, 'value', u)} />
+                <RichTextInput label="Suffix (%, x, etc.)" {...richItemProps(it, 'suffix', u)} />
+                <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
               </>
             )}
           />
@@ -547,7 +550,7 @@ function renderBlockFields(
     case "clients-salescode":
       return (
         <div className="space-y-4">
-          <TextInput label="Section title" value={f.title as string} onChange={(v) => set("title", v)} />
+          <RichFieldGroup label="Section title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
           <TextInput label="Section ID" value={f.sectionId as string} onChange={(v) => set("sectionId", v)} />
           <p className="text-xs text-slate-400 leading-relaxed">
             Logo images are managed via the Sections admin.
@@ -558,7 +561,7 @@ function renderBlockFields(
     case "security-salescode":
       return (
         <div className="space-y-4">
-          <TextInput label="Heading" value={f.heading as string} onChange={(v) => set("heading", v)} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <Repeater<{ url: string; alt: string }>
             label="Certificates"
             items={(f.certs as { url: string; alt: string }[]) ?? []}
@@ -578,8 +581,8 @@ function renderBlockFields(
     case "experience-video-salescode":
       return (
         <div className="space-y-4">
-          <TextInput label="Title" value={f.title as string} onChange={(v) => set("title", v)} />
-          <TextInput label="Subtitle (teal, below title)" value={(f.subtitle as string) ?? ""} onChange={(v) => set("subtitle", v)} />
+          <RichFieldGroup label="Title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
+          <RichFieldGroup label="Subtitle (teal, below title)" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <ImageField label="Video" value={f.videoUrl as string} onChange={(v) => set("videoUrl", v)} />
         </div>
       );
@@ -587,10 +590,10 @@ function renderBlockFields(
     case "cta-salescode":
       return (
         <div className="space-y-4">
-          <TextInput label="Badge text" value={f.badge as string} onChange={(v) => set("badge", v)} />
-          <TextInput label="Heading" value={f.heading as string} onChange={(v) => set("heading", v)} />
-          <Textarea label="Subtext" value={f.subtext as string} onChange={(v) => set("subtext", v)} />
-          <TextInput label="CTA text" value={f.ctaText as string} onChange={(v) => set("ctaText", v)} />
+          <RichFieldGroup label="Badge text" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
+          <RichFieldGroup label="CTA text" f={f} set={set} base="ctaText" segments={[{ key: 'ctaText' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string} onChange={(v) => set("ctaUrl", v)} />
         </div>
       );
@@ -632,7 +635,7 @@ function renderBlockFields(
             itemPreview={(it) => it.label}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Label" value={it.label} onChange={(x) => u({ ...it, label: x })} />
+                <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
                 <TextInput label="URL (e.g. /about)" value={it.href} onChange={(x) => u({ ...it, href: x })} />
               </>
             )}
@@ -705,18 +708,18 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Headline start" value={f.headlineStart as string ?? ''} onChange={(v) => set('headlineStart', v)} />
-          <TextInput label="Headline accent (bold)" value={f.headlineAccent as string ?? ''} onChange={(v) => set('headlineAccent', v)} />
-          <TextInput label="Headline end" value={f.headlineEnd as string ?? ''} onChange={(v) => set('headlineEnd', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
-          <TextInput label="Primary CTA label" value={f.primaryCtaLabel as string ?? ''} onChange={(v) => set('primaryCtaLabel', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Headline Start" f={f} set={set} base="headlineStart" segments={[{ key: 'headlineStart' }]} />
+          <RichFieldGroup label="Headline Accent" f={f} set={set} base="headlineAccent" segments={[{ key: 'headlineAccent' }]} />
+          <RichFieldGroup label="Headline End" f={f} set={set} base="headlineEnd" segments={[{ key: 'headlineEnd' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="primaryCtaLabel" segments={[{ key: 'primaryCtaLabel' }]} />
           <TextInput label="Primary CTA href" value={f.primaryCtaHref as string ?? ''} onChange={(v) => set('primaryCtaHref', v)} />
-          <TextInput label="Secondary CTA label" value={f.secondaryCtaLabel as string ?? ''} onChange={(v) => set('secondaryCtaLabel', v)} />
+          <RichFieldGroup label="Secondary CTA label" f={f} set={set} base="secondaryCtaLabel" segments={[{ key: 'secondaryCtaLabel' }]} />
           <TextInput label="Secondary CTA href" value={f.secondaryCtaHref as string ?? ''} onChange={(v) => set('secondaryCtaHref', v)} />
           <ImageField label="Mockup image URL" value={f.mockupImageUrl as string ?? ''} onChange={(v) => set('mockupImageUrl', v)} />
           <TextInput label="Mockup alt text" value={f.mockupAlt as string ?? ''} onChange={(v) => set('mockupAlt', v)} />
-          <TextInput label="Trust label" value={f.trustLabel as string ?? ''} onChange={(v) => set('trustLabel', v)} />
+          <RichFieldGroup label="Trust label" f={f} set={set} base="trustLabel" segments={[{ key: 'trustLabel' }]} />
         </div>
       );
 
@@ -770,14 +773,14 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Headline top" value={f.headlineTop as string ?? ''} onChange={(v) => set('headlineTop', v)} />
-          <TextInput label="Headline accent" value={f.headlineAccent as string ?? ''} onChange={(v) => set('headlineAccent', v)} />
-          <TextInput label="Headline bottom" value={f.headlineBottom as string ?? ''} onChange={(v) => set('headlineBottom', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
-          <TextInput label="Primary CTA label" value={f.primaryCtaLabel as string ?? ''} onChange={(v) => set('primaryCtaLabel', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Headline top" f={f} set={set} base="headlineTop" segments={[{ key: 'headlineTop' }]} />
+          <RichFieldGroup label="Headline accent" f={f} set={set} base="headlineAccent" segments={[{ key: 'headlineAccent' }]} />
+          <RichFieldGroup label="Headline bottom" f={f} set={set} base="headlineBottom" segments={[{ key: 'headlineBottom' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="primaryCtaLabel" segments={[{ key: 'primaryCtaLabel' }]} />
           <TextInput label="Primary CTA href" value={f.primaryCtaHref as string ?? ''} onChange={(v) => set('primaryCtaHref', v)} />
-          <TextInput label="Secondary CTA label" value={f.secondaryCtaLabel as string ?? ''} onChange={(v) => set('secondaryCtaLabel', v)} />
+          <RichFieldGroup label="Secondary CTA label" f={f} set={set} base="secondaryCtaLabel" segments={[{ key: 'secondaryCtaLabel' }]} />
           <ImageField label="Video poster image" value={f.videoPoster as string ?? ''} onChange={(v) => set('videoPoster', v)} />
           <ImageField label="Video (mp4)" value={f.videoSrc as string ?? ''} onChange={(v) => set('videoSrc', v)} />
           <Repeater<{ value: string; label: string }>
@@ -788,8 +791,8 @@ function renderBlockFields(
             itemPreview={(it) => `${it.value} ${it.label}`}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Value (e.g. 10K+)" value={it.value} onChange={(x) => u({ ...it, value: x })} />
-                <TextInput label="Label" value={it.label} onChange={(x) => u({ ...it, label: x })} />
+                <RichTextInput label="Value (e.g. 10K+)" {...richItemProps(it, 'value', u)} />
+                <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
               </>
             )}
           />
@@ -846,10 +849,10 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="subheading" segments={[{ key: 'subheading' }]} />
           <Repeater<{ icon: string; title: string; description: string; tone: string; span: string }>
             label="Features"
             items={(f.features as { icon: string; title: string; description: string; tone: string; span: string }[]) ?? []}
@@ -860,8 +863,8 @@ function renderBlockFields(
             renderItem={(it, u) => (
               <>
                 <TextInput label="Icon (emoji)" value={it.icon} onChange={(x) => u({ ...it, icon: x })} />
-                <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
-                <Textarea label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
                 <div>
                   <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Card tone</span>
                   <select value={it.tone ?? 'lime'} onChange={(e) => u({ ...it, tone: e.target.value })}
@@ -944,11 +947,11 @@ function renderBlockFields(
             openIndex={focusedItem?.itemKey === 'rows' ? focusedItem.itemIndex : undefined}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Tag chip" value={it.tag} onChange={(x) => u({ ...it, tag: x })} />
-                <TextInput label="Headline" value={it.headline} onChange={(x) => u({ ...it, headline: x })} />
-                <TextInput label="Headline accent" value={it.headlineAccent} onChange={(x) => u({ ...it, headlineAccent: x })} />
-                <Textarea label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
-                <TextInput label="CTA label" value={it.ctaLabel} onChange={(x) => u({ ...it, ctaLabel: x })} />
+                <RichTextInput label="Tag chip" {...richItemProps(it, 'tag', u)} />
+                <RichTextInput label="Headline" {...richItemProps(it, 'headline', u)} />
+                <RichTextInput label="Headline accent" {...richItemProps(it, 'headlineAccent', u)} />
+                <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
+                <RichTextInput label="CTA label" {...richItemProps(it, 'ctaLabel', u)} />
                 <TextInput label="CTA href" value={(it as { ctaHref?: string }).ctaHref ?? ''} onChange={(x) => u({ ...it, ctaHref: x })} />
                 <ImageField label="Image URL" value={it.imageUrl} onChange={(x) => u({ ...it, imageUrl: x })} />
                 <TextInput label="Image alt text" value={(it as { imageAlt?: string }).imageAlt ?? ''} onChange={(x) => u({ ...it, imageAlt: x })} />
@@ -1018,11 +1021,11 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
-          <TextInput label="Currency symbol" value={(f.currency as string) ?? '$'} onChange={(v) => set('currency', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="subheading" segments={[{ key: 'subheading' }]} />
+          <RichFieldGroup label="Currency symbol" f={f} set={set} base="currency" segments={[{ key: 'currency' }]} />
           <Repeater<{ name: string; description: string; monthlyPrice: number; annualPrice: number; features: string[]; ctaLabel: string; ctaHref: string; highlighted: boolean; badge: string }>
             label="Plans"
             openIndex={focusedItem?.itemKey === 'plans' ? focusedItem.itemIndex : undefined}
@@ -1032,8 +1035,8 @@ function renderBlockFields(
             itemPreview={(it) => `${it.name} — $${it.monthlyPrice}/mo`}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Plan name" value={it.name} onChange={(x) => u({ ...it, name: x })} />
-                <Textarea label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
+                <RichTextInput label="Plan name" {...richItemProps(it, 'name', u)} />
+                <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
                 <div className="grid grid-cols-2 gap-2">
                   <NumberInput label="Monthly price" value={it.monthlyPrice ?? 0} onChange={(x) => u({ ...it, monthlyPrice: x })} />
                   <NumberInput label="Annual price" value={it.annualPrice ?? 0} onChange={(x) => u({ ...it, annualPrice: x })} />
@@ -1048,9 +1051,9 @@ function renderBlockFields(
                     <TextInput label="Feature" value={feat} onChange={onFeat} />
                   )}
                 />
-                <TextInput label="CTA label" value={it.ctaLabel} onChange={(x) => u({ ...it, ctaLabel: x })} />
+                <RichTextInput label="CTA label" {...richItemProps(it, 'ctaLabel', u)} />
                 <TextInput label="CTA href" value={it.ctaHref} onChange={(x) => u({ ...it, ctaHref: x })} />
-                <TextInput label="Badge (e.g. ★ MOST POPULAR)" value={it.badge ?? ''} onChange={(x) => u({ ...it, badge: x })} />
+                <RichTextInput label="Badge (e.g. ★ MOST POPULAR)" {...richItemProps(it, 'badge', u)} />
                 <Toggle label="Highlighted (dark card)" value={it.highlighted} onChange={(x) => u({ ...it, highlighted: x })} />
               </>
             )}
@@ -1108,9 +1111,9 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <Repeater<{ quote: string; name: string; role: string; company: string; avatarUrl: string; rating?: number }>
             label="Testimonials"
             items={(f.testimonials as { quote: string; name: string; role: string; company: string; avatarUrl: string; rating?: number }[]) ?? []}
@@ -1120,10 +1123,10 @@ function renderBlockFields(
             openIndex={focusedItem?.itemKey === 'testimonials' ? focusedItem.itemIndex : undefined}
             renderItem={(it, u) => (
               <>
-                <Textarea label="Quote" value={it.quote} onChange={(x) => u({ ...it, quote: x })} />
-                <TextInput label="Name" value={it.name} onChange={(x) => u({ ...it, name: x })} />
-                <TextInput label="Role" value={it.role} onChange={(x) => u({ ...it, role: x })} />
-                <TextInput label="Company" value={it.company} onChange={(x) => u({ ...it, company: x })} />
+                <RichTextInput label="Quote" {...richItemProps(it, 'quote', u)} />
+                <RichTextInput label="Name" {...richItemProps(it, 'name', u)} />
+                <RichTextInput label="Role" {...richItemProps(it, 'role', u)} />
+                <RichTextInput label="Company" {...richItemProps(it, 'company', u)} />
                 <ImageField label="Avatar URL" value={it.avatarUrl} onChange={(x) => u({ ...it, avatarUrl: x })} />
                 <NumberInput label="Rating (1–5)" value={(it as { rating?: number }).rating ?? 5} onChange={(x) => u({ ...it, rating: x })} />
               </>
@@ -1182,13 +1185,13 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Quote" value={f.quote as string ?? ''} onChange={(v) => set('quote', v)} />
-          <TextInput label="Author name" value={f.authorName as string ?? ''} onChange={(v) => set('authorName', v)} />
-          <TextInput label="Author role" value={f.authorRole as string ?? ''} onChange={(v) => set('authorRole', v)} />
-          <TextInput label="Author company" value={f.authorCompany as string ?? ''} onChange={(v) => set('authorCompany', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Quote" f={f} set={set} base="quote" segments={[{ key: 'quote' }]} />
+          <RichFieldGroup label="Author name" f={f} set={set} base="authorName" segments={[{ key: 'authorName' }]} />
+          <RichFieldGroup label="Author role" f={f} set={set} base="authorRole" segments={[{ key: 'authorRole' }]} />
+          <RichFieldGroup label="Author company" f={f} set={set} base="authorCompany" segments={[{ key: 'authorCompany' }]} />
           <ImageField label="Author avatar URL" value={f.authorAvatarUrl as string ?? ''} onChange={(v) => set('authorAvatarUrl', v)} />
           <Repeater<{ name: string; src: string }>
             label="Company logos"
@@ -1198,7 +1201,7 @@ function renderBlockFields(
             itemPreview={(it) => it.name}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Company name" value={it.name} onChange={(x) => u({ ...it, name: x })} />
+                <RichTextInput label="Company name" {...richItemProps(it, 'name', u)} />
                 <ImageField label="Logo URL" value={it.src} onChange={(x) => u({ ...it, src: x })} />
               </>
             )}
@@ -1256,10 +1259,10 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Description" value={f.description as string ?? ''} onChange={(v) => set('description', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Description" f={f} set={set} base="description" segments={[{ key: 'description' }]} />
           <Repeater<{ value: string; suffix: string; label: string }>
             label="Stats"
             items={(f.stats as { value: string; suffix: string; label: string }[]) ?? []}
@@ -1269,9 +1272,9 @@ function renderBlockFields(
             openIndex={focusedItem?.itemKey === 'stats' ? focusedItem.itemIndex : undefined}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Value" value={it.value} onChange={(x) => u({ ...it, value: x })} />
-                <TextInput label="Suffix (e.g. +, %, x)" value={it.suffix ?? ''} onChange={(x) => u({ ...it, suffix: x })} />
-                <TextInput label="Label" value={it.label} onChange={(x) => u({ ...it, label: x })} />
+                <RichTextInput label="Value" {...richItemProps(it, 'value', u)} />
+                <RichTextInput label="Suffix (e.g. +, %, x)" {...richItemProps(it, 'suffix', u)} />
+                <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
               </>
             )}
           />
@@ -1328,11 +1331,11 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
-          <TextInput label="Contact CTA label" value={f.contactCtaLabel as string ?? ''} onChange={(v) => set('contactCtaLabel', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="subheading" segments={[{ key: 'subheading' }]} />
+          <RichFieldGroup label="Contact CTA label" f={f} set={set} base="contactCtaLabel" segments={[{ key: 'contactCtaLabel' }]} />
           <TextInput label="Contact CTA href" value={f.contactCtaHref as string ?? ''} onChange={(v) => set('contactCtaHref', v)} />
           <Repeater<{ category: string; question: string; answer: string }>
             label="FAQ items"
@@ -1343,9 +1346,9 @@ function renderBlockFields(
             itemPreview={(it) => it.question}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Category" value={it.category} onChange={(x) => u({ ...it, category: x })} />
-                <TextInput label="Question" value={it.question} onChange={(x) => u({ ...it, question: x })} />
-                <Textarea label="Answer" value={it.answer} onChange={(x) => u({ ...it, answer: x })} />
+                <RichTextInput label="Category" {...richItemProps(it, 'category', u)} />
+                <RichTextInput label="Question" {...richItemProps(it, 'question', u)} />
+                <RichTextInput label="Answer" {...richItemProps(it, 'answer', u)} />
               </>
             )}
           />
@@ -1402,13 +1405,13 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtext" value={f.subtext as string ?? ''} onChange={(v) => set('subtext', v)} />
-          <TextInput label="Primary CTA label" value={f.primaryCtaLabel as string ?? ''} onChange={(v) => set('primaryCtaLabel', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="primaryCtaLabel" segments={[{ key: 'primaryCtaLabel' }]} />
           <TextInput label="Primary CTA href" value={f.primaryCtaHref as string ?? ''} onChange={(v) => set('primaryCtaHref', v)} />
-          <TextInput label="Secondary CTA label" value={f.secondaryCtaLabel as string ?? ''} onChange={(v) => set('secondaryCtaLabel', v)} />
+          <RichFieldGroup label="Secondary CTA label" f={f} set={set} base="secondaryCtaLabel" segments={[{ key: 'secondaryCtaLabel' }]} />
           <TextInput label="Secondary CTA href" value={f.secondaryCtaHref as string ?? ''} onChange={(v) => set('secondaryCtaHref', v)} />
         </div>
       );
@@ -1463,10 +1466,10 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="subheading" segments={[{ key: 'subheading' }]} />
           <Repeater<{ name: string; role: string; bio: string; avatarUrl: string; linkedinUrl: string; accent: string }>
             label="Team members"
             openIndex={focusedItem?.itemKey === 'members' ? focusedItem.itemIndex : undefined}
@@ -1476,9 +1479,9 @@ function renderBlockFields(
             itemPreview={(it) => it.name}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Name" value={it.name} onChange={(x) => u({ ...it, name: x })} />
-                <TextInput label="Role" value={it.role} onChange={(x) => u({ ...it, role: x })} />
-                <Textarea label="Bio" value={it.bio} onChange={(x) => u({ ...it, bio: x })} />
+                <RichTextInput label="Name" {...richItemProps(it, 'name', u)} />
+                <RichTextInput label="Role" {...richItemProps(it, 'role', u)} />
+                <RichTextInput label="Bio" {...richItemProps(it, 'bio', u)} />
                 <ImageField label="Avatar URL" value={it.avatarUrl} onChange={(x) => u({ ...it, avatarUrl: x })} />
                 <TextInput label="LinkedIn URL" value={it.linkedinUrl ?? ''} onChange={(x) => u({ ...it, linkedinUrl: x })} />
                 <div>
@@ -1544,11 +1547,11 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="subheading" segments={[{ key: 'subheading' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA href" value={f.ctaHref as string ?? ''} onChange={(v) => set('ctaHref', v)} />
           <Repeater<{ name: string; src: string }>
             label="Integration logos"
@@ -1558,7 +1561,7 @@ function renderBlockFields(
             itemPreview={(it) => it.name}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Name" value={it.name} onChange={(x) => u({ ...it, name: x })} />
+                <RichTextInput label="Name" {...richItemProps(it, 'name', u)} />
                 <ImageField label="Logo URL" value={it.src} onChange={(x) => u({ ...it, src: x })} />
               </>
             )}
@@ -1616,11 +1619,11 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="subheading" segments={[{ key: 'subheading' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA href" value={f.ctaHref as string ?? ''} onChange={(v) => set('ctaHref', v)} />
           <Repeater<{ coverUrl: string; tag: string; title: string; excerpt: string; authorName: string; authorAvatarUrl?: string; readTime?: string; date: string; href: string }>
             label="Blog posts"
@@ -1632,13 +1635,13 @@ function renderBlockFields(
             renderItem={(it, u) => (
               <>
                 <ImageField label="Cover image URL" value={it.coverUrl} onChange={(x) => u({ ...it, coverUrl: x })} />
-                <TextInput label="Tag" value={it.tag} onChange={(x) => u({ ...it, tag: x })} />
-                <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
-                <Textarea label="Excerpt" value={it.excerpt} onChange={(x) => u({ ...it, excerpt: x })} />
-                <TextInput label="Author name" value={it.authorName} onChange={(x) => u({ ...it, authorName: x })} />
+                <RichTextInput label="Tag" {...richItemProps(it, 'tag', u)} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Excerpt" {...richItemProps(it, 'excerpt', u)} />
+                <RichTextInput label="Author name" {...richItemProps(it, 'authorName', u)} />
                 <ImageField label="Author avatar URL" value={(it as { authorAvatarUrl?: string }).authorAvatarUrl ?? ''} onChange={(x) => u({ ...it, authorAvatarUrl: x })} />
                 <TextInput label="Read time (e.g. 5 min)" value={(it as { readTime?: string }).readTime ?? ''} onChange={(x) => u({ ...it, readTime: x })} />
-                <TextInput label="Date" value={it.date} onChange={(x) => u({ ...it, date: x })} />
+                <RichTextInput label="Date" {...richItemProps(it, 'date', u)} />
                 <TextInput label="Link href" value={it.href} onChange={(x) => u({ ...it, href: x })} />
               </>
             )}
@@ -1696,10 +1699,10 @@ function renderBlockFields(
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="subheading" segments={[{ key: 'subheading' }]} />
           <Repeater<{ icon: string; title: string; description: string }>
             label="Steps"
             items={(f.steps as { icon: string; title: string; description: string }[]) ?? []}
@@ -1710,8 +1713,8 @@ function renderBlockFields(
             renderItem={(it, u) => (
               <>
                 <TextInput label="Icon (emoji)" value={it.icon} onChange={(x) => u({ ...it, icon: x })} />
-                <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
-                <Textarea label="Description" value={it.description} onChange={(x) => u({ ...it, description: x })} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
               </>
             )}
           />
@@ -1767,9 +1770,9 @@ function renderBlockFields(
             </div>
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
-          <TextInput label="Brand name" value={f.brandName as string ?? ''} onChange={(v) => set('brandName', v)} />
-          <Textarea label="Tagline" value={f.tagline as string ?? ''} onChange={(v) => set('tagline', v)} />
-          <TextInput label="Giant background word" value={f.giantBrandWord as string ?? ''} onChange={(v) => set('giantBrandWord', v)} />
+          <RichFieldGroup label="Brand name" f={f} set={set} base="brandName" segments={[{ key: 'brandName' }]} />
+          <RichFieldGroup label="Tagline" f={f} set={set} base="tagline" segments={[{ key: 'tagline' }]} />
+          <RichFieldGroup label="Giant background word" f={f} set={set} base="giantBrandWord" segments={[{ key: 'giantBrandWord' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
           <div>
             <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#475569', display: 'block', marginBottom: 8 }}>Link Columns</span>
@@ -1781,7 +1784,7 @@ function renderBlockFields(
               onChange={(v) => set('columns', v)}
               renderItem={(col, onChange) => (
                 <div className="space-y-2">
-                  <TextInput label="Column title" value={col.title} onChange={(v) => onChange({ ...col, title: v })} />
+                  <RichTextInput label="Column title" {...richItemProps(col, 'title', onChange)} />
                   <Repeater<{ label: string; href: string }>
                     label="Links"
                     items={col.links}
@@ -1790,7 +1793,7 @@ function renderBlockFields(
                     onChange={(links) => onChange({ ...col, links })}
                     renderItem={(link, onLinkChange) => (
                       <div className="space-y-1">
-                        <TextInput label="Label" value={link.label} onChange={(v) => onLinkChange({ ...link, label: v })} />
+                        <RichTextInput label="Label" {...richItemProps(link, 'label', onLinkChange)} />
                         <TextInput label="URL" value={link.href} onChange={(v) => onLinkChange({ ...link, href: v })} />
                       </div>
                     )}
@@ -1826,11 +1829,11 @@ function renderBlockFields(
             />
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
-          <TextInput label="Newsletter heading" value={f.newsletterHeading as string ?? ''} onChange={(v) => set('newsletterHeading', v)} />
-          <TextInput label="Newsletter subtext" value={f.newsletterSubtext as string ?? ''} onChange={(v) => set('newsletterSubtext', v)} />
-          <TextInput label="Newsletter CTA label" value={f.newsletterCtaLabel as string ?? ''} onChange={(v) => set('newsletterCtaLabel', v)} />
+          <RichFieldGroup label="Newsletter heading" f={f} set={set} base="newsletterHeading" segments={[{ key: 'newsletterHeading' }]} />
+          <RichFieldGroup label="Newsletter subtext" f={f} set={set} base="newsletterSubtext" segments={[{ key: 'newsletterSubtext' }]} />
+          <RichFieldGroup label="Newsletter CTA label" f={f} set={set} base="newsletterCtaLabel" segments={[{ key: 'newsletterCtaLabel' }]} />
           <TextInput label="Newsletter placeholder" value={f.newsletterPlaceholder as string ?? ''} onChange={(v) => set('newsletterPlaceholder', v)} />
-          <TextInput label="Copyright" value={f.copyright as string ?? ''} onChange={(v) => set('copyright', v)} />
+          <RichFieldGroup label="Copyright" f={f} set={set} base="copyright" segments={[{ key: 'copyright' }]} />
           <TextInput label="Accent color (override buttons/highlights)" value={(f.accentColor as string) ?? ''} onChange={(v) => set('accentColor', v)} />
         </div>
       );
@@ -1884,10 +1887,10 @@ function renderBlockFields(
             </div>
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtext" value={f.subtext as string ?? ''} onChange={(v) => set('subtext', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <Repeater<{ badgeImage: string; storeUrl: string; deviceLabel: string; qrImage: string; qrLabel: string }>
             label="Stores"
             items={(f.stores as { badgeImage: string; storeUrl: string; deviceLabel: string; qrImage: string; qrLabel: string }[]) ?? []}
@@ -1898,9 +1901,9 @@ function renderBlockFields(
               <>
                 <ImageField label="Badge image" value={it.badgeImage} onChange={(x) => u({ ...it, badgeImage: x })} />
                 <TextInput label="Store URL" value={it.storeUrl} onChange={(x) => u({ ...it, storeUrl: x })} />
-                <TextInput label="Device label" value={it.deviceLabel} onChange={(x) => u({ ...it, deviceLabel: x })} />
+                <RichTextInput label="Device label" {...richItemProps(it, 'deviceLabel', u)} />
                 <ImageField label="QR code image" value={it.qrImage} onChange={(x) => u({ ...it, qrImage: x })} />
-                <TextInput label="QR label" value={it.qrLabel} onChange={(x) => u({ ...it, qrLabel: x })} />
+                <RichTextInput label="QR label" {...richItemProps(it, 'qrLabel', u)} />
               </>
             )}
           />
@@ -1910,10 +1913,10 @@ function renderBlockFields(
     case 'slick-app-showcase':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Tagline (bottom)" value={f.tagline as string ?? ''} onChange={(v) => set('tagline', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Tagline (bottom)" f={f} set={set} base="tagline" segments={[{ key: 'tagline' }]} />
           <div className="grid grid-cols-2 gap-2">
             <NumberInput label="Speed (s, lower=faster)" value={(f.speed as number) ?? 35} onChange={(v) => set('speed', v)} />
             <NumberInput label="Card width (px)" value={(f.cardWidth as number) ?? 260} onChange={(v) => set('cardWidth', v)} />
@@ -1928,8 +1931,8 @@ function renderBlockFields(
             itemPreview={(it) => it.title}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
-                <TextInput label="Subtitle" value={it.subtitle} onChange={(x) => u({ ...it, subtitle: x })} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Subtitle" {...richItemProps(it, 'subtitle', u)} />
                 <ImageField label="Phone screenshot" value={it.image} onChange={(x) => u({ ...it, image: x })} />
                 <ColorPicker label="Card background" value={it.cardBg || '#0A3028'} onChange={(x: string) => u({ ...it, cardBg: x })} />
               </>
@@ -1961,14 +1964,14 @@ function renderBlockFields(
             </div>
           </div>
           <div style={{ height: 1, background: '#1e293b', margin: '8px 0 4px' }} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <div>
             <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Heading color</span>
             <input type="color" value={(f.headingColor as string) || '#FFD700'}
               onChange={(e) => set('headingColor', e.target.value)}
               style={{ width: '100%', height: 32, borderRadius: 4, border: '1px solid #334155', cursor: 'pointer', background: 'none' }} />
           </div>
-          <TextInput label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="subheading" segments={[{ key: 'subheading' }]} />
           <Repeater<string>
             label="Steps"
             items={(f.steps as string[]) ?? []}
@@ -1979,7 +1982,7 @@ function renderBlockFields(
               <TextInput label="Step text" value={s} onChange={u} />
             )}
           />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA href" value={f.ctaHref as string ?? ''} onChange={(v) => set('ctaHref', v)} />
           <ImageField label="Right-side image URL" value={f.image as string ?? ''} onChange={(v) => set('image', v)} />
           <div>
@@ -1994,18 +1997,18 @@ function renderBlockFields(
     case 'slick-dv-hero-v2':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill prefix" value={f.pillPre as string ?? ''} onChange={(v) => set('pillPre', v)} />
-          <TextInput label="Pill bold text" value={f.pillBold as string ?? ''} onChange={(v) => set('pillBold', v)} />
-          <TextInput label="Pill suffix" value={f.pillSuffix as string ?? ''} onChange={(v) => set('pillSuffix', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient word" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
-          <Textarea label="Sub (before bold)" value={f.subNormal as string ?? ''} onChange={(v) => set('subNormal', v)} />
-          <TextInput label="Sub bold phrase" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Sub (after bold)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill Pre" f={f} set={set} base="pillPre" segments={[{ key: 'pillPre' }]} />
+          <RichFieldGroup label="Pill Bold" f={f} set={set} base="pillBold" segments={[{ key: 'pillBold' }]} />
+          <RichFieldGroup label="Pill Suffix" f={f} set={set} base="pillSuffix" segments={[{ key: 'pillSuffix' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Sub Normal" f={f} set={set} base="subNormal" segments={[{ key: 'subNormal' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Center image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
@@ -2013,21 +2016,21 @@ function renderBlockFields(
           <ImageField label="Bottom-right card" value={f.imgBottomRight as string ?? ''} onChange={(v) => set('imgBottomRight', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Floating chips</p>
-          <TextInput label="Chip 1 — value" value={f.chip1Val as string ?? ''} onChange={(v) => set('chip1Val', v)} />
-          <TextInput label="Chip 1 — unit (teal)" value={f.chip1Unit as string ?? ''} onChange={(v) => set('chip1Unit', v)} />
-          <TextInput label="Chip 1 — label" value={f.chip1Lbl as string ?? ''} onChange={(v) => set('chip1Lbl', v)} />
+          <RichFieldGroup label="Chip 1 — value" f={f} set={set} base="chip1Val" segments={[{ key: 'chip1Val' }]} />
+          <RichFieldGroup label="Chip 1 — unit (teal)" f={f} set={set} base="chip1Unit" segments={[{ key: 'chip1Unit' }]} />
+          <RichFieldGroup label="Chip 1 — label" f={f} set={set} base="chip1Lbl" segments={[{ key: 'chip1Lbl' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Chip 2 — value" value={f.chip2Val as string ?? ''} onChange={(v) => set('chip2Val', v)} />
-          <TextInput label="Chip 2 — unit (teal)" value={f.chip2Unit as string ?? ''} onChange={(v) => set('chip2Unit', v)} />
-          <TextInput label="Chip 2 — label" value={f.chip2Lbl as string ?? ''} onChange={(v) => set('chip2Lbl', v)} />
+          <RichFieldGroup label="Chip 2 — value" f={f} set={set} base="chip2Val" segments={[{ key: 'chip2Val' }]} />
+          <RichFieldGroup label="Chip 2 — unit (teal)" f={f} set={set} base="chip2Unit" segments={[{ key: 'chip2Unit' }]} />
+          <RichFieldGroup label="Chip 2 — label" f={f} set={set} base="chip2Lbl" segments={[{ key: 'chip2Lbl' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Chip 3 — value" value={f.chip3Val as string ?? ''} onChange={(v) => set('chip3Val', v)} />
-          <TextInput label="Chip 3 — unit (teal)" value={f.chip3Unit as string ?? ''} onChange={(v) => set('chip3Unit', v)} />
-          <TextInput label="Chip 3 — label" value={f.chip3Lbl as string ?? ''} onChange={(v) => set('chip3Lbl', v)} />
+          <RichFieldGroup label="Chip 3 — value" f={f} set={set} base="chip3Val" segments={[{ key: 'chip3Val' }]} />
+          <RichFieldGroup label="Chip 3 — unit (teal)" f={f} set={set} base="chip3Unit" segments={[{ key: 'chip3Unit' }]} />
+          <RichFieldGroup label="Chip 3 — label" f={f} set={set} base="chip3Lbl" segments={[{ key: 'chip3Lbl' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Chip 4 — value" value={f.chip4Val as string ?? ''} onChange={(v) => set('chip4Val', v)} />
-          <TextInput label="Chip 4 — unit (teal)" value={f.chip4Unit as string ?? ''} onChange={(v) => set('chip4Unit', v)} />
-          <TextInput label="Chip 4 — label" value={f.chip4Lbl as string ?? ''} onChange={(v) => set('chip4Lbl', v)} />
+          <RichFieldGroup label="Chip 4 — value" f={f} set={set} base="chip4Val" segments={[{ key: 'chip4Val' }]} />
+          <RichFieldGroup label="Chip 4 — unit (teal)" f={f} set={set} base="chip4Unit" segments={[{ key: 'chip4Unit' }]} />
+          <RichFieldGroup label="Chip 4 — label" f={f} set={set} base="chip4Lbl" segments={[{ key: 'chip4Lbl' }]} />
         </div>
       );
 
@@ -2037,21 +2040,21 @@ function renderBlockFields(
           <ImageField label="Logo URL" value={f.logo as string ?? ''} onChange={(v) => set('logo', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <div style={{ fontSize: 11, color: '#94a3b8' }}>Heading</div>
-          <TextInput label="Prefix (white)" value={f.headingPrefix as string ?? ''} onChange={(v) => set('headingPrefix', v)} />
-          <TextInput label="Accent (teal, wraps naturally)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Last line (white)" value={f.headingLastLine as string ?? ''} onChange={(v) => set('headingLastLine', v)} />
+          <RichFieldGroup label="Heading Prefix" f={f} set={set} base="headingPrefix" segments={[{ key: 'headingPrefix' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Last Line" f={f} set={set} base="headingLastLine" segments={[{ key: 'headingLastLine' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Primary CTA label" value={f.ctaPrimaryLabel as string ?? ''} onChange={(v) => set('ctaPrimaryLabel', v)} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="ctaPrimaryLabel" segments={[{ key: 'ctaPrimaryLabel' }]} />
           <TextInput label="Primary CTA href" value={f.ctaPrimaryHref as string ?? ''} onChange={(v) => set('ctaPrimaryHref', v)} />
-          <TextInput label="Secondary CTA label" value={f.ctaSecondaryLabel as string ?? ''} onChange={(v) => set('ctaSecondaryLabel', v)} />
+          <RichFieldGroup label="Secondary CTA label" f={f} set={set} base="ctaSecondaryLabel" segments={[{ key: 'ctaSecondaryLabel' }]} />
           <TextInput label="Demo video URL (embed)" value={f.demoVideoUrl as string ?? ''} onChange={(v) => set('demoVideoUrl', v)} />
           <TextInput label="Google Play URL" value={f.googlePlayUrl as string ?? ''} onChange={(v) => set('googlePlayUrl', v)} />
           <TextInput label="App Store URL" value={f.appStoreUrl as string ?? ''} onChange={(v) => set('appStoreUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <div style={{ fontSize: 11, color: '#94a3b8' }}>Trust stats (e.g. "25+ companies")</div>
-          <TextInput label="Stat 1" value={f.stat1Text as string ?? ''} onChange={(v) => set('stat1Text', v)} />
-          <TextInput label="Stat 2" value={f.stat2Text as string ?? ''} onChange={(v) => set('stat2Text', v)} />
-          <TextInput label="Stat 3" value={f.stat3Text as string ?? ''} onChange={(v) => set('stat3Text', v)} />
+          <RichFieldGroup label="Stat 1" f={f} set={set} base="stat1Text" segments={[{ key: 'stat1Text' }]} />
+          <RichFieldGroup label="Stat 2" f={f} set={set} base="stat2Text" segments={[{ key: 'stat2Text' }]} />
+          <RichFieldGroup label="Stat 3" f={f} set={set} base="stat3Text" segments={[{ key: 'stat3Text' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Phone mockup image URL" value={f.mockupImage as string ?? ''} onChange={(v) => set('mockupImage', v)} />
         </div>
@@ -2060,15 +2063,15 @@ function renderBlockFields(
     case 'slick-dv-video-split':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (plain text)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal bold)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Body text" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Body text" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA href" value={f.ctaHref as string ?? ''} onChange={(v) => set('ctaHref', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Video thumbnail URL" value={f.videoThumb as string ?? ''} onChange={(v) => set('videoThumb', v)} />
-          <TextInput label="Video caption" value={f.videoLabel as string ?? ''} onChange={(v) => set('videoLabel', v)} />
+          <RichFieldGroup label="Video caption" f={f} set={set} base="videoLabel" segments={[{ key: 'videoLabel' }]} />
           <TextInput label="Video embed URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
         </div>
       );
@@ -2076,19 +2079,19 @@ function renderBlockFields(
     case 'slick-dv-vision':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Vision text (wrap **text** in double asterisks for teal bold)" value={f.visionText as string ?? ''} onChange={(v) => set('visionText', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Vision text (wrap **text** in double asterisks for teal bold)" f={f} set={set} base="visionText" segments={[{ key: 'visionText' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <div style={{ fontSize: 11, color: '#94a3b8' }}>Stats</div>
           <div className="grid grid-cols-2 gap-2">
-            <TextInput label="Stat 1 value" value={f.stat1Value as string ?? ''} onChange={(v) => set('stat1Value', v)} />
-            <TextInput label="Stat 1 label" value={f.stat1Label as string ?? ''} onChange={(v) => set('stat1Label', v)} />
-            <TextInput label="Stat 2 value" value={f.stat2Value as string ?? ''} onChange={(v) => set('stat2Value', v)} />
-            <TextInput label="Stat 2 label" value={f.stat2Label as string ?? ''} onChange={(v) => set('stat2Label', v)} />
-            <TextInput label="Stat 3 value" value={f.stat3Value as string ?? ''} onChange={(v) => set('stat3Value', v)} />
-            <TextInput label="Stat 3 label" value={f.stat3Label as string ?? ''} onChange={(v) => set('stat3Label', v)} />
-            <TextInput label="Stat 4 value" value={f.stat4Value as string ?? ''} onChange={(v) => set('stat4Value', v)} />
-            <TextInput label="Stat 4 label" value={f.stat4Label as string ?? ''} onChange={(v) => set('stat4Label', v)} />
+            <RichFieldGroup label="Stat 1 value" f={f} set={set} base="stat1Value" segments={[{ key: 'stat1Value' }]} />
+            <RichFieldGroup label="Stat 1 label" f={f} set={set} base="stat1Label" segments={[{ key: 'stat1Label' }]} />
+            <RichFieldGroup label="Stat 2 value" f={f} set={set} base="stat2Value" segments={[{ key: 'stat2Value' }]} />
+            <RichFieldGroup label="Stat 2 label" f={f} set={set} base="stat2Label" segments={[{ key: 'stat2Label' }]} />
+            <RichFieldGroup label="Stat 3 value" f={f} set={set} base="stat3Value" segments={[{ key: 'stat3Value' }]} />
+            <RichFieldGroup label="Stat 3 label" f={f} set={set} base="stat3Label" segments={[{ key: 'stat3Label' }]} />
+            <RichFieldGroup label="Stat 4 value" f={f} set={set} base="stat4Value" segments={[{ key: 'stat4Value' }]} />
+            <RichFieldGroup label="Stat 4 label" f={f} set={set} base="stat4Label" segments={[{ key: 'stat4Label' }]} />
           </div>
         </div>
       );
@@ -2096,9 +2099,9 @@ function renderBlockFields(
     case 'slick-dv-carousel':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (plain)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<{ image: string; alt: string; title: string; subtitle: string }>
             label="Carousel cards"
@@ -2108,8 +2111,8 @@ function renderBlockFields(
             itemPreview={(it) => it.title || it.alt || 'Card'}
             renderItem={(it, u) => (
               <>
-                <TextInput label="Card title" value={it.title ?? ''} onChange={(x) => u({ ...it, title: x })} />
-                <TextInput label="Card subtitle" value={it.subtitle ?? ''} onChange={(x) => u({ ...it, subtitle: x })} />
+                <RichTextInput label="Card title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Card subtitle" {...richItemProps(it, 'subtitle', u)} />
                 <ImageField label="Screenshot image" value={it.image} onChange={(x) => u({ ...it, image: x })} />
                 <TextInput label="Alt text" value={it.alt} onChange={(x) => u({ ...it, alt: x })} />
               </>
@@ -2121,10 +2124,10 @@ function renderBlockFields(
     case 'slick-dv-split':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (plain)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<string>
             label="Screenshots (auto-advances every 3s)"
@@ -2142,7 +2145,7 @@ function renderBlockFields(
             newItem={() => ({ label: 'Feature' })}
             itemPreview={(it) => it.label || 'Feature'}
             renderItem={(it, u) => (
-              <TextInput label="Label" value={it.label} onChange={(x) => u({ ...it, label: x })} />
+              <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
             )}
           />
         </div>
@@ -2151,11 +2154,11 @@ function renderBlockFields(
     case 'slick-dv-agent':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (plain)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal bold)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Body text" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Body text" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA href" value={f.ctaHref as string ?? ''} onChange={(v) => set('ctaHref', v)} />
           <ColorPicker label="Background color" value={(f.bgColor as string) || '#0b0d0d'} onChange={(v: string) => set('bgColor', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -2182,10 +2185,10 @@ function renderBlockFields(
     case 'slick-dv-download':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (plain)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Subtext" value={f.subtext as string ?? ''} onChange={(v) => set('subtext', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Android store URL" value={f.androidStoreUrl as string ?? ''} onChange={(v) => set('androidStoreUrl', v)} />
           <ImageField label="Android QR image (optional)" value={f.androidQrUrl as string ?? ''} onChange={(v) => set('androidQrUrl', v)} />
@@ -2201,9 +2204,9 @@ function renderBlockFields(
       type WhoCard = { title?: string; description?: string; image?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (plain, underlined)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<WhoCard>
             label="Cards"
@@ -2213,8 +2216,8 @@ function renderBlockFields(
             itemPreview={(c) => c.title || '(empty)'}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <TextInput label="Description" value={c.description ?? ''} onChange={(v) => u({ ...c, description: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(c, 'description', u)} />
                 <ImageField label="Card image" value={c.image ?? ''} onChange={(v) => u({ ...c, image: v })} />
               </div>
             )}
@@ -2226,14 +2229,14 @@ function renderBlockFields(
     case 'slick-dv-register':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (plain)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Body text" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
-          <TextInput label="Form title" value={f.formTitle as string ?? ''} onChange={(v) => set('formTitle', v)} />
-          <TextInput label="Form subtext" value={f.formSubtext as string ?? ''} onChange={(v) => set('formSubtext', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
-          <TextInput label="API endpoint (POST)" value={f.apiEndpoint as string ?? ''} onChange={(v) => set('apiEndpoint', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Body text" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
+          <RichFieldGroup label="Form title" f={f} set={set} base="formTitle" segments={[{ key: 'formTitle' }]} />
+          <RichFieldGroup label="Form subtext" f={f} set={set} base="formSubtext" segments={[{ key: 'formSubtext' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <RichFieldGroup label="API endpoint (POST)" f={f} set={set} base="apiEndpoint" segments={[{ key: 'apiEndpoint' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<string>
             label="Bullet points"
@@ -2268,10 +2271,10 @@ function renderBlockFields(
       type PcCard = { title?: string; description?: string; logoImg?: string; logoAlt?: string; logoText?: string; logoColor?: string; href?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow pill" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading suffix" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <RichFieldGroup label="Eyebrow pill" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading suffix" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<PcCard>
             label="Cards"
@@ -2281,11 +2284,11 @@ function renderBlockFields(
             itemPreview={(c) => c.title || '(untitled)'}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(x) => u({ ...c, title: x })} />
-                <Textarea label="Description" value={c.description ?? ''} onChange={(x) => u({ ...c, description: x })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(c, 'description', u)} />
                 <TextInput label="Logo image URL" value={c.logoImg ?? ''} onChange={(x) => u({ ...c, logoImg: x })} />
                 <TextInput label="Logo alt text" value={c.logoAlt ?? ''} onChange={(x) => u({ ...c, logoAlt: x })} />
-                <TextInput label="Logo text (if no image)" value={c.logoText ?? ''} onChange={(x) => u({ ...c, logoText: x })} />
+                <RichTextInput label="Logo text (if no image)" {...richItemProps(c, 'logoText', u)} />
                 <TextInput label="Logo colour (hex)" value={c.logoColor ?? ''} onChange={(x) => u({ ...c, logoColor: x })} />
                 <TextInput label="Link URL" value={c.href ?? ''} onChange={(x) => u({ ...c, href: x })} />
               </div>
@@ -2299,10 +2302,10 @@ function renderBlockFields(
       type PsCard = { title?: string; ctaLabel?: string; ctaUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading suffix (bold)" value={f.headingGradient as string ?? ''} onChange={(v) => set('headingGradient', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Gradient" f={f} set={set} base="headingGradient" segments={[{ key: 'headingGradient' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<PsCard>
             label="Cards (3 slots: IR Recognition · AI Sales Agent · AI Coach)"
@@ -2312,8 +2315,8 @@ function renderBlockFields(
             itemPreview={(c) => c.title || '(untitled)'}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Card title" value={c.title ?? ''} onChange={(x) => u({ ...c, title: x })} />
-                <TextInput label="CTA label" value={c.ctaLabel ?? ''} onChange={(x) => u({ ...c, ctaLabel: x })} />
+                <RichTextInput label="Card title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="CTA label" {...richItemProps(c, 'ctaLabel', u)} />
                 <TextInput label="CTA URL" value={c.ctaUrl ?? ''} onChange={(x) => u({ ...c, ctaUrl: x })} />
               </div>
             )}
@@ -2326,10 +2329,10 @@ function renderBlockFields(
       type AcsCard = { kicker?: string; title?: string; copy?: string; ctaUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGradient as string ?? ''} onChange={(v) => set('headingGradient', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Gradient" f={f} set={set} base="headingGradient" segments={[{ key: 'headingGradient' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<AcsCard>
             label="Cards (6 slots, illustrations are hardcoded per slot)"
@@ -2339,9 +2342,9 @@ function renderBlockFields(
             itemPreview={(c) => c.title || c.kicker || '(untitled)'}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Kicker (category label)" value={c.kicker ?? ''} onChange={(x) => u({ ...c, kicker: x })} />
-                <TextInput label="Card title" value={c.title ?? ''} onChange={(x) => u({ ...c, title: x })} />
-                <Textarea label="Copy" value={c.copy ?? ''} onChange={(x) => u({ ...c, copy: x })} />
+                <RichTextInput label="Kicker (category label)" {...richItemProps(c, 'kicker', u)} />
+                <RichTextInput label="Card title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Copy" {...richItemProps(c, 'copy', u)} />
                 <TextInput label="CTA URL" value={c.ctaUrl ?? ''} onChange={(x) => u({ ...c, ctaUrl: x })} />
               </div>
             )}
@@ -2354,11 +2357,11 @@ function renderBlockFields(
       type TileField = { imageUrl?: string; alt?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGradient as string ?? ''} onChange={(v) => set('headingGradient', v)} />
-          <TextInput label="Heading suffix (optional)" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Gradient" f={f} set={set} base="headingGradient" segments={[{ key: 'headingGradient' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<TileField>
             label="Integration tiles (up to 12)"
@@ -2374,7 +2377,7 @@ function renderBlockFields(
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -2384,10 +2387,10 @@ function renderBlockFields(
       type StatField = { target: number; prefix?: string; suffix: string; label: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGradient as string ?? ''} onChange={(v) => set('headingGradient', v)} />
-          <TextInput label="Heading suffix (optional)" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Gradient" f={f} set={set} base="headingGradient" segments={[{ key: 'headingGradient' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<StatField>
             label="Stats"
@@ -2398,9 +2401,9 @@ function renderBlockFields(
             renderItem={(s, u) => (
               <div className="space-y-2">
                 <NumberInput label="Target number" value={s.target} onChange={(x) => u({ ...s, target: x })} />
-                <TextInput label="Prefix (optional, e.g. $)" value={s.prefix ?? ''} onChange={(x) => u({ ...s, prefix: x })} />
-                <TextInput label="Suffix (e.g. +, M+, B+)" value={s.suffix} onChange={(x) => u({ ...s, suffix: x })} />
-                <TextInput label="Label" value={s.label} onChange={(x) => u({ ...s, label: x })} />
+                <RichTextInput label="Prefix (optional, e.g. $)" {...richItemProps(s, 'prefix', u)} />
+                <RichTextInput label="Suffix (e.g. +, M+, B+)" {...richItemProps(s, 'suffix', u)} />
+                <RichTextInput label="Label" {...richItemProps(s, 'label', u)} />
               </div>
             )}
           />
@@ -2416,10 +2419,10 @@ function renderBlockFields(
       };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<StoryField>
             label="Stories"
@@ -2436,20 +2439,20 @@ function renderBlockFields(
             itemPreview={(s) => s.speakerName || s.brandName || '(unnamed)'}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Brand name" value={s.brandName} onChange={(x) => u({ ...s, brandName: x })} />
+                <RichTextInput label="Brand name" {...richItemProps(s, 'brandName', u)} />
                 <ColorPicker label="Brand color" value={s.brandColor} onChange={(x) => u({ ...s, brandColor: x })} />
-                <TextInput label="Category tag" value={s.categoryLabel} onChange={(x) => u({ ...s, categoryLabel: x })} />
-                <TextInput label="Card title" value={s.title} onChange={(x) => u({ ...s, title: x })} />
-                <Textarea label="Description" value={s.description} onChange={(x) => u({ ...s, description: x })} />
-                <TextInput label="Speaker initials" value={s.speakerInitials} onChange={(x) => u({ ...s, speakerInitials: x })} />
-                <TextInput label="Speaker name" value={s.speakerName} onChange={(x) => u({ ...s, speakerName: x })} />
-                <TextInput label="Speaker role" value={s.speakerRole} onChange={(x) => u({ ...s, speakerRole: x })} />
+                <RichTextInput label="Category tag" {...richItemProps(s, 'categoryLabel', u)} />
+                <RichTextInput label="Card title" {...richItemProps(s, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(s, 'description', u)} />
+                <RichTextInput label="Speaker initials" {...richItemProps(s, 'speakerInitials', u)} />
+                <RichTextInput label="Speaker name" {...richItemProps(s, 'speakerName', u)} />
+                <RichTextInput label="Speaker role" {...richItemProps(s, 'speakerRole', u)} />
                 <TextInput label="Story URL (optional)" value={s.storyUrl ?? ''} onChange={(x) => u({ ...s, storyUrl: x })} />
               </div>
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -2459,11 +2462,11 @@ function renderBlockFields(
       type LogoField = { imageUrl: string; alt: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGradient as string ?? ''} onChange={(v) => set('headingGradient', v)} />
-          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
-          <TextInput label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Gradient" f={f} set={set} base="headingGradient" segments={[{ key: 'headingGradient' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<LogoField>
             label="Logos"
@@ -2479,9 +2482,9 @@ function renderBlockFields(
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="CTA note" value={f.ctaNote as string ?? ''} onChange={(v) => set('ctaNote', v)} />
+          <RichFieldGroup label="CTA note" f={f} set={set} base="ctaNote" segments={[{ key: 'ctaNote' }]} />
         </div>
       );
     }
@@ -2490,9 +2493,9 @@ function renderBlockFields(
       type StatField = { value?: string; suffix?: string; label?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading prefix (use \\n for line break)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<StatField>
             label="Stats"
@@ -2502,9 +2505,9 @@ function renderBlockFields(
             itemPreview={(s) => `${s.value ?? ''}${s.suffix ?? ''} — ${s.label ?? ''}`}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.value ?? ''} onChange={(x) => u({ ...s, value: x })} />
-                <TextInput label="Suffix (e.g. %)" value={s.suffix ?? ''} onChange={(x) => u({ ...s, suffix: x })} />
-                <TextInput label="Label (use \\n for line break)" value={s.label ?? ''} onChange={(x) => u({ ...s, label: x })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'value', u)} />
+                <RichTextInput label="Suffix (e.g. %)" {...richItemProps(s, 'suffix', u)} />
+                <RichTextInput label="Label (use \\n for line break)" {...richItemProps(s, 'label', u)} />
               </div>
             )}
           />
@@ -2515,10 +2518,10 @@ function renderBlockFields(
     case 'slick-sc-think-tank': {
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
           <p style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
             Posts are pulled from the <strong>Featured Blogs</strong> CMS section (same source as the Blogs section). Manage them there.
           </p>
@@ -2530,9 +2533,9 @@ function renderBlockFields(
       type BadgeField = { imageUrl?: string; alt?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Subtitle line 1" value={f.subtitleLine1 as string ?? ''} onChange={(v) => set('subtitleLine1', v)} />
-          <TextInput label="Subtitle line 2" value={f.subtitleLine2 as string ?? ''} onChange={(v) => set('subtitleLine2', v)} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtitle line 1" f={f} set={set} base="subtitleLine1" segments={[{ key: 'subtitleLine1' }]} />
+          <RichFieldGroup label="Subtitle line 2" f={f} set={set} base="subtitleLine2" segments={[{ key: 'subtitleLine2' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<BadgeField>
             label="Certification badges"
@@ -2555,10 +2558,10 @@ function renderBlockFields(
       type AiCardField = { title?: string; description?: string; thumbnailUrl?: string; videoUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading line 1" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
-          <TextInput label="Heading line 2" value={f.headingLine2 as string ?? ''} onChange={(v) => set('headingLine2', v)} />
-          <TextInput label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
-          <TextInput label="CTA label (trailing space = gap)" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Heading line 1" f={f} set={set} base="headingLine1" segments={[{ key: 'headingLine1' }]} />
+          <RichFieldGroup label="Heading line 2" f={f} set={set} base="headingLine2" segments={[{ key: 'headingLine2' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
+          <RichFieldGroup label="CTA label (trailing space = gap)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<AiCardField>
@@ -2569,8 +2572,8 @@ function renderBlockFields(
             itemPreview={(c) => c.title || '(untitled)'}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(x) => u({ ...c, title: x })} />
-                <TextInput label="Description" value={c.description ?? ''} onChange={(x) => u({ ...c, description: x })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(c, 'description', u)} />
                 <ImageField label="Thumbnail image" value={c.thumbnailUrl ?? ''} onChange={(x) => u({ ...c, thumbnailUrl: x })} />
                 <TextInput label="Video URL (YouTube, YouTube Shorts, or direct mp4)" value={c.videoUrl ?? ''} onChange={(x) => u({ ...c, videoUrl: x })} />
               </div>
@@ -2584,10 +2587,10 @@ function renderBlockFields(
       type CardField = { title?: string; description?: string; imageUrl?: string; imageAlt?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<CardField>
             label="Cards"
@@ -2597,8 +2600,8 @@ function renderBlockFields(
             itemPreview={(c) => c.title || '(untitled)'}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(x) => u({ ...c, title: x })} />
-                <TextInput label="Description" value={c.description ?? ''} onChange={(x) => u({ ...c, description: x })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(c, 'description', u)} />
                 <ImageField label="Screenshot image" value={c.imageUrl ?? ''} onChange={(x) => u({ ...c, imageUrl: x })} />
                 <TextInput label="Image alt text" value={c.imageAlt ?? ''} onChange={(x) => u({ ...c, imageAlt: x })} />
               </div>
@@ -2612,11 +2615,11 @@ function renderBlockFields(
       type PostField = { badge?: string; title?: string; ctaLabel?: string; ctaUrl?: string; imageUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs text-slate-400 font-semibold uppercase tracking-widest">Featured post</p>
           {(() => {
@@ -2641,16 +2644,16 @@ function renderBlockFields(
             itemPreview={(p) => p.title?.slice(0, 40) || '(untitled)'}
             renderItem={(p, u) => (
               <div className="space-y-2">
-                <TextInput label="Badge" value={p.badge ?? ''} onChange={(v) => u({ ...p, badge: v })} />
-                <Textarea label="Title" value={p.title ?? ''} onChange={(v) => u({ ...p, title: v })} />
+                <RichTextInput label="Badge" {...richItemProps(p, 'badge', u)} />
+                <RichTextInput label="Title" {...richItemProps(p, 'title', u)} />
                 <ImageField label="Image" value={p.imageUrl ?? ''} onChange={(v) => u({ ...p, imageUrl: v })} />
-                <TextInput label="CTA label" value={p.ctaLabel ?? ''} onChange={(v) => u({ ...p, ctaLabel: v })} />
+                <RichTextInput label="CTA label" {...richItemProps(p, 'ctaLabel', u)} />
                 <TextInput label="CTA URL" value={p.ctaUrl ?? ''} onChange={(v) => u({ ...p, ctaUrl: v })} />
               </div>
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="View all label" value={f.viewAllLabel as string ?? ''} onChange={(v) => set('viewAllLabel', v)} />
+          <RichFieldGroup label="View all label" f={f} set={set} base="viewAllLabel" segments={[{ key: 'viewAllLabel' }]} />
           <TextInput label="View all URL" value={f.viewAllUrl as string ?? ''} onChange={(v) => set('viewAllUrl', v)} />
         </div>
       );
@@ -2659,62 +2662,62 @@ function renderBlockFields(
     case 'slick-sfa-hero':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading suffix (optional)" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
-          <TextInput label="Subtitle bold part" value={f.subtitleBold as string ?? ''} onChange={(v) => set('subtitleBold', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
+          <RichFieldGroup label="Subtitle Bold" f={f} set={set} base="subtitleBold" segments={[{ key: 'subtitleBold' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <TextInput label="Input placeholder" value={f.ctaPlaceholder as string ?? ''} onChange={(v) => set('ctaPlaceholder', v)} />
-          <TextInput label="Trust line" value={f.trustText as string ?? ''} onChange={(v) => set('trustText', v)} />
+          <RichFieldGroup label="Trust line" f={f} set={set} base="trustText" segments={[{ key: 'trustText' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <Textarea label="Subtitle suffix" value={f.subtitleSuffix as string ?? ''} onChange={(v) => set('subtitleSuffix', v)} />
+          <RichFieldGroup label="Subtitle suffix" f={f} set={set} base="subtitleSuffix" segments={[{ key: 'subtitleSuffix' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Phone time" value={f.phoneTime as string ?? ''} onChange={(v) => set('phoneTime', v)} />
-          <TextInput label="Phone greeting" value={f.phoneGreeting as string ?? ''} onChange={(v) => set('phoneGreeting', v)} />
-          <TextInput label="Phone date" value={f.phoneDate as string ?? ''} onChange={(v) => set('phoneDate', v)} />
-          <TextInput label="Phone region badge" value={f.phoneRegionBadge as string ?? ''} onChange={(v) => set('phoneRegionBadge', v)} />
-          <TextInput label="Phone score card footer" value={f.phoneScoreCardFooter as string ?? ''} onChange={(v) => set('phoneScoreCardFooter', v)} />
-          <TextInput label="Phone analytics label" value={f.phoneAnalyticsLabel as string ?? ''} onChange={(v) => set('phoneAnalyticsLabel', v)} />
-          <TextInput label="Phone body greeting" value={f.phoneBodyGreeting as string ?? ''} onChange={(v) => set('phoneBodyGreeting', v)} />
-          <TextInput label="Phone body sub" value={f.phoneBodySub as string ?? ''} onChange={(v) => set('phoneBodySub', v)} />
+          <RichFieldGroup label="Phone time" f={f} set={set} base="phoneTime" segments={[{ key: 'phoneTime' }]} />
+          <RichFieldGroup label="Phone greeting" f={f} set={set} base="phoneGreeting" segments={[{ key: 'phoneGreeting' }]} />
+          <RichFieldGroup label="Phone date" f={f} set={set} base="phoneDate" segments={[{ key: 'phoneDate' }]} />
+          <RichFieldGroup label="Phone region badge" f={f} set={set} base="phoneRegionBadge" segments={[{ key: 'phoneRegionBadge' }]} />
+          <RichFieldGroup label="Phone score card footer" f={f} set={set} base="phoneScoreCardFooter" segments={[{ key: 'phoneScoreCardFooter' }]} />
+          <RichFieldGroup label="Phone analytics label" f={f} set={set} base="phoneAnalyticsLabel" segments={[{ key: 'phoneAnalyticsLabel' }]} />
+          <RichFieldGroup label="Phone body greeting" f={f} set={set} base="phoneBodyGreeting" segments={[{ key: 'phoneBodyGreeting' }]} />
+          <RichFieldGroup label="Phone body sub" f={f} set={set} base="phoneBodySub" segments={[{ key: 'phoneBodySub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Task 1 badge" value={f.phoneTask1Badge as string ?? ''} onChange={(v) => set('phoneTask1Badge', v)} />
-          <TextInput label="Task 1 title" value={f.phoneTask1Title as string ?? ''} onChange={(v) => set('phoneTask1Title', v)} />
-          <TextInput label="Task 1 title sub" value={f.phoneTask1TitleSub as string ?? ''} onChange={(v) => set('phoneTask1TitleSub', v)} />
-          <TextInput label="Task 1 sub" value={f.phoneTask1Sub as string ?? ''} onChange={(v) => set('phoneTask1Sub', v)} />
-          <TextInput label="Task 1 incentive" value={f.phoneTask1Incentive as string ?? ''} onChange={(v) => set('phoneTask1Incentive', v)} />
-          <TextInput label="Task 1 ring label" value={f.phoneTask1RingLabel as string ?? ''} onChange={(v) => set('phoneTask1RingLabel', v)} />
-          <TextInput label="Task 1 ring sub" value={f.phoneTask1RingSub as string ?? ''} onChange={(v) => set('phoneTask1RingSub', v)} />
-          <TextInput label="Task 1 ring value" value={f.phoneTask1RingValue as string ?? ''} onChange={(v) => set('phoneTask1RingValue', v)} />
+          <RichFieldGroup label="Task 1 badge" f={f} set={set} base="phoneTask1Badge" segments={[{ key: 'phoneTask1Badge' }]} />
+          <RichFieldGroup label="Task 1 title" f={f} set={set} base="phoneTask1Title" segments={[{ key: 'phoneTask1Title' }]} />
+          <RichFieldGroup label="Task 1 title sub" f={f} set={set} base="phoneTask1TitleSub" segments={[{ key: 'phoneTask1TitleSub' }]} />
+          <RichFieldGroup label="Task 1 sub" f={f} set={set} base="phoneTask1Sub" segments={[{ key: 'phoneTask1Sub' }]} />
+          <RichFieldGroup label="Task 1 incentive" f={f} set={set} base="phoneTask1Incentive" segments={[{ key: 'phoneTask1Incentive' }]} />
+          <RichFieldGroup label="Task 1 ring label" f={f} set={set} base="phoneTask1RingLabel" segments={[{ key: 'phoneTask1RingLabel' }]} />
+          <RichFieldGroup label="Task 1 ring sub" f={f} set={set} base="phoneTask1RingSub" segments={[{ key: 'phoneTask1RingSub' }]} />
+          <RichFieldGroup label="Task 1 ring value" f={f} set={set} base="phoneTask1RingValue" segments={[{ key: 'phoneTask1RingValue' }]} />
           <TextInput label="Task 1 ring total" value={String(f.phoneTask1RingTotal ?? '')} onChange={(v) => set('phoneTask1RingTotal', Number(v) || 100)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Task 2 badge" value={f.phoneTask2Badge as string ?? ''} onChange={(v) => set('phoneTask2Badge', v)} />
-          <TextInput label="Task 2 title" value={f.phoneTask2Title as string ?? ''} onChange={(v) => set('phoneTask2Title', v)} />
-          <TextInput label="Task 2 title sub" value={f.phoneTask2TitleSub as string ?? ''} onChange={(v) => set('phoneTask2TitleSub', v)} />
-          <TextInput label="Task 2 sub" value={f.phoneTask2Sub as string ?? ''} onChange={(v) => set('phoneTask2Sub', v)} />
-          <TextInput label="Task 2 incentive" value={f.phoneTask2Incentive as string ?? ''} onChange={(v) => set('phoneTask2Incentive', v)} />
-          <TextInput label="Task 2 ring label" value={f.phoneTask2RingLabel as string ?? ''} onChange={(v) => set('phoneTask2RingLabel', v)} />
-          <TextInput label="Task 2 ring sub" value={f.phoneTask2RingSub as string ?? ''} onChange={(v) => set('phoneTask2RingSub', v)} />
-          <TextInput label="Task 2 ring value" value={f.phoneTask2RingValue as string ?? ''} onChange={(v) => set('phoneTask2RingValue', v)} />
+          <RichFieldGroup label="Task 2 badge" f={f} set={set} base="phoneTask2Badge" segments={[{ key: 'phoneTask2Badge' }]} />
+          <RichFieldGroup label="Task 2 title" f={f} set={set} base="phoneTask2Title" segments={[{ key: 'phoneTask2Title' }]} />
+          <RichFieldGroup label="Task 2 title sub" f={f} set={set} base="phoneTask2TitleSub" segments={[{ key: 'phoneTask2TitleSub' }]} />
+          <RichFieldGroup label="Task 2 sub" f={f} set={set} base="phoneTask2Sub" segments={[{ key: 'phoneTask2Sub' }]} />
+          <RichFieldGroup label="Task 2 incentive" f={f} set={set} base="phoneTask2Incentive" segments={[{ key: 'phoneTask2Incentive' }]} />
+          <RichFieldGroup label="Task 2 ring label" f={f} set={set} base="phoneTask2RingLabel" segments={[{ key: 'phoneTask2RingLabel' }]} />
+          <RichFieldGroup label="Task 2 ring sub" f={f} set={set} base="phoneTask2RingSub" segments={[{ key: 'phoneTask2RingSub' }]} />
+          <RichFieldGroup label="Task 2 ring value" f={f} set={set} base="phoneTask2RingValue" segments={[{ key: 'phoneTask2RingValue' }]} />
           <TextInput label="Task 2 ring total" value={String(f.phoneTask2RingTotal ?? '')} onChange={(v) => set('phoneTask2RingTotal', Number(v) || 60)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Left card 1 title" value={f.cardL1Title as string ?? ''} onChange={(v) => set('cardL1Title', v)} />
-          <TextInput label="Left card 1 sub" value={f.cardL1Sub as string ?? ''} onChange={(v) => set('cardL1Sub', v)} />
-          <TextInput label="Left card 2 stat" value={f.cardL2Stat as string ?? ''} onChange={(v) => set('cardL2Stat', v)} />
-          <TextInput label="Left card 2 title" value={f.cardL2Title as string ?? ''} onChange={(v) => set('cardL2Title', v)} />
-          <TextInput label="Left card 2 sub" value={f.cardL2Sub as string ?? ''} onChange={(v) => set('cardL2Sub', v)} />
-          <TextInput label="Right card 1 badge" value={f.cardR1Badge as string ?? ''} onChange={(v) => set('cardR1Badge', v)} />
-          <TextInput label="Right card 1 body" value={f.cardR1Body as string ?? ''} onChange={(v) => set('cardR1Body', v)} />
-          <TextInput label="Right card 1 body highlight" value={f.cardR1BodyHighlight as string ?? ''} onChange={(v) => set('cardR1BodyHighlight', v)} />
-          <TextInput label="Right card 2 title" value={f.cardR2Title as string ?? ''} onChange={(v) => set('cardR2Title', v)} />
-          <TextInput label="Right card 2 sub" value={f.cardR2Sub as string ?? ''} onChange={(v) => set('cardR2Sub', v)} />
-          <TextInput label="Right card 3 stat" value={f.cardR3Stat as string ?? ''} onChange={(v) => set('cardR3Stat', v)} />
-          <TextInput label="Right card 3 title" value={f.cardR3Title as string ?? ''} onChange={(v) => set('cardR3Title', v)} />
-          <TextInput label="Right card 3 sub" value={f.cardR3Sub as string ?? ''} onChange={(v) => set('cardR3Sub', v)} />
+          <RichFieldGroup label="Left card 1 title" f={f} set={set} base="cardL1Title" segments={[{ key: 'cardL1Title' }]} />
+          <RichFieldGroup label="Left card 1 sub" f={f} set={set} base="cardL1Sub" segments={[{ key: 'cardL1Sub' }]} />
+          <RichFieldGroup label="Left card 2 stat" f={f} set={set} base="cardL2Stat" segments={[{ key: 'cardL2Stat' }]} />
+          <RichFieldGroup label="Left card 2 title" f={f} set={set} base="cardL2Title" segments={[{ key: 'cardL2Title' }]} />
+          <RichFieldGroup label="Left card 2 sub" f={f} set={set} base="cardL2Sub" segments={[{ key: 'cardL2Sub' }]} />
+          <RichFieldGroup label="Right card 1 badge" f={f} set={set} base="cardR1Badge" segments={[{ key: 'cardR1Badge' }]} />
+          <RichFieldGroup label="Right card 1 body" f={f} set={set} base="cardR1Body" segments={[{ key: 'cardR1Body' }]} />
+          <RichFieldGroup label="Right card 1 body highlight" f={f} set={set} base="cardR1BodyHighlight" segments={[{ key: 'cardR1BodyHighlight' }]} />
+          <RichFieldGroup label="Right card 2 title" f={f} set={set} base="cardR2Title" segments={[{ key: 'cardR2Title' }]} />
+          <RichFieldGroup label="Right card 2 sub" f={f} set={set} base="cardR2Sub" segments={[{ key: 'cardR2Sub' }]} />
+          <RichFieldGroup label="Right card 3 stat" f={f} set={set} base="cardR3Stat" segments={[{ key: 'cardR3Stat' }]} />
+          <RichFieldGroup label="Right card 3 title" f={f} set={set} base="cardR3Title" segments={[{ key: 'cardR3Title' }]} />
+          <RichFieldGroup label="Right card 3 sub" f={f} set={set} base="cardR3Sub" segments={[{ key: 'cardR3Sub' }]} />
         </div>
       );
 
@@ -2723,11 +2726,11 @@ function renderBlockFields(
       const aiTabs = (f.tabs as AiTab[]) ?? [];
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading suffix (optional)" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<AiTab>
             label="Tabs"
@@ -2737,14 +2740,14 @@ function renderBlockFields(
             itemPreview={(t) => t.label || '(untitled)'}
             renderItem={(t, u) => (
               <div className="space-y-2">
-                <TextInput label="Tab label" value={t.label ?? ''} onChange={(v) => u({ ...t, label: v })} />
-                <TextInput label="Tag badge" value={t.tag ?? ''} onChange={(v) => u({ ...t, tag: v })} />
-                <TextInput label="Panel heading" value={t.heading ?? ''} onChange={(v) => u({ ...t, heading: v })} />
-                <Textarea label="Description" value={t.description ?? ''} onChange={(v) => u({ ...t, description: v })} />
+                <RichTextInput label="Tab label" {...richItemProps(t, 'label', u)} />
+                <RichTextInput label="Tag badge" {...richItemProps(t, 'tag', u)} />
+                <RichTextInput label="Panel heading" {...richItemProps(t, 'heading', u)} />
+                <RichTextInput label="Description" {...richItemProps(t, 'description', u)} />
                 <Textarea label="Features (one per line)" value={(t.features ?? []).join('\n')} onChange={(v) => u({ ...t, features: v.split('\n').filter(Boolean) })} />
-                <TextInput label="Impact value" value={t.impactValue ?? ''} onChange={(v) => u({ ...t, impactValue: v })} />
-                <TextInput label="Impact label" value={t.impactLabel ?? ''} onChange={(v) => u({ ...t, impactLabel: v })} />
-                <TextInput label="Impact sub-label" value={t.impactSub ?? ''} onChange={(v) => u({ ...t, impactSub: v })} />
+                <RichTextInput label="Impact value" {...richItemProps(t, 'impactValue', u)} />
+                <RichTextInput label="Impact label" {...richItemProps(t, 'impactLabel', u)} />
+                <RichTextInput label="Impact sub-label" {...richItemProps(t, 'impactSub', u)} />
               </div>
             )}
           />
@@ -2756,16 +2759,16 @@ function renderBlockFields(
       type ResultField = { country?: string; value?: string; label?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
-          <TextInput label="Refund pill text" value={f.refundText as string ?? ''} onChange={(v) => set('refundText', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
+          <RichFieldGroup label="Refund pill text" f={f} set={set} base="refundText" segments={[{ key: 'refundText' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Proof section label" value={f.proofLabel as string ?? ''} onChange={(v) => set('proofLabel', v)} />
+          <RichFieldGroup label="Proof section label" f={f} set={set} base="proofLabel" segments={[{ key: 'proofLabel' }]} />
           <Repeater<ResultField>
             label="Country results"
             items={(f.results as ResultField[]) ?? []}
@@ -2774,9 +2777,9 @@ function renderBlockFields(
             itemPreview={(r) => `${r.country ?? ''} — ${r.value ?? ''}`}
             renderItem={(r, u) => (
               <div className="space-y-2">
-                <TextInput label="Country name" value={r.country ?? ''} onChange={(v) => u({ ...r, country: v })} />
-                <TextInput label="Uplift value (e.g. 7%)" value={r.value ?? ''} onChange={(v) => u({ ...r, value: v })} />
-                <TextInput label="Sub-label" value={r.label ?? ''} onChange={(v) => u({ ...r, label: v })} />
+                <RichTextInput label="Country name" {...richItemProps(r, 'country', u)} />
+                <RichTextInput label="Uplift value (e.g. 7%)" {...richItemProps(r, 'value', u)} />
+                <RichTextInput label="Sub-label" {...richItemProps(r, 'label', u)} />
               </div>
             )}
           />
@@ -2789,12 +2792,12 @@ function renderBlockFields(
     case 'slick-sfa-guarantee-v2':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
-          <Textarea label="Sub (\\n for line break)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Sub (\\n for line break)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -2802,10 +2805,10 @@ function renderBlockFields(
       type AEV2Tab = { label?: string; tag?: string; headingGrad?: string; headingSuffix?: string; description?: string; features?: string[]; impactValue?: string; impactLabel?: string; impactSub?: string; img?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<AEV2Tab>
             label="Tabs"
@@ -2815,15 +2818,15 @@ function renderBlockFields(
             itemPreview={(t) => t.label || '(unnamed)'}
             renderItem={(t, u) => (
               <div className="space-y-2">
-                <TextInput label="Tab label" value={t.label ?? ''} onChange={(v) => u({ ...t, label: v })} />
-                <TextInput label="Tag pill" value={t.tag ?? ''} onChange={(v) => u({ ...t, tag: v })} />
-                <TextInput label="Heading (teal part)" value={t.headingGrad ?? ''} onChange={(v) => u({ ...t, headingGrad: v })} />
-                <TextInput label="Heading (dark suffix)" value={t.headingSuffix ?? ''} onChange={(v) => u({ ...t, headingSuffix: v })} />
-                <Textarea label="Description" value={t.description ?? ''} onChange={(v) => u({ ...t, description: v })} />
+                <RichTextInput label="Tab label" {...richItemProps(t, 'label', u)} />
+                <RichTextInput label="Tag pill" {...richItemProps(t, 'tag', u)} />
+                <RichTextInput label="Heading (teal part)" {...richItemProps(t, 'headingGrad', u)} />
+                <RichTextInput label="Heading (dark suffix)" {...richItemProps(t, 'headingSuffix', u)} />
+                <RichTextInput label="Description" {...richItemProps(t, 'description', u)} />
                 <Textarea label="Features (one per line)" value={(t.features ?? []).join('\n')} onChange={(v) => u({ ...t, features: v.split('\n').filter(Boolean) })} />
-                <TextInput label="Impact value" value={t.impactValue ?? ''} onChange={(v) => u({ ...t, impactValue: v })} />
-                <TextInput label="Impact label" value={t.impactLabel ?? ''} onChange={(v) => u({ ...t, impactLabel: v })} />
-                <TextInput label="Impact sub" value={t.impactSub ?? ''} onChange={(v) => u({ ...t, impactSub: v })} />
+                <RichTextInput label="Impact value" {...richItemProps(t, 'impactValue', u)} />
+                <RichTextInput label="Impact label" {...richItemProps(t, 'impactLabel', u)} />
+                <RichTextInput label="Impact sub" {...richItemProps(t, 'impactSub', u)} />
                 <ImageField label="Tab image (right panel)" value={t.img ?? ''} onChange={(v) => u({ ...t, img: v })} />
               </div>
             )}
@@ -2834,24 +2837,24 @@ function renderBlockFields(
     case 'slick-sfa-showcase':
       return (
         <div className="space-y-4">
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Sub paragraph (\\n for line break)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Sub paragraph (\\n for line break)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Centre image (phone group)" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Label — top left" value={f.labelTL as string ?? ''} onChange={(v) => set('labelTL', v)} />
-          <TextInput label="Label — bottom left" value={f.labelBL as string ?? ''} onChange={(v) => set('labelBL', v)} />
-          <TextInput label="Label — top right" value={f.labelTR as string ?? ''} onChange={(v) => set('labelTR', v)} />
-          <TextInput label="Label — bottom right" value={f.labelBR as string ?? ''} onChange={(v) => set('labelBR', v)} />
+          <RichFieldGroup label="Label — top left" f={f} set={set} base="labelTL" segments={[{ key: 'labelTL' }]} />
+          <RichFieldGroup label="Label — bottom left" f={f} set={set} base="labelBL" segments={[{ key: 'labelBL' }]} />
+          <RichFieldGroup label="Label — top right" f={f} set={set} base="labelTR" segments={[{ key: 'labelTR' }]} />
+          <RichFieldGroup label="Label — bottom right" f={f} set={set} base="labelBR" segments={[{ key: 'labelBR' }]} />
         </div>
       );
     case 'slick-sfa-typical': {
       type TypSlide = { imageUrl?: string; imageAlt?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (red)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
           <NumberInput label="Autoplay interval (ms, 0 = off)" value={f.autoplayMs as number ?? 3000} onChange={(v) => set('autoplayMs', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<TypSlide>
@@ -2868,22 +2871,22 @@ function renderBlockFields(
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Label — top left" value={f.labelTL as string ?? ''} onChange={(v) => set('labelTL', v)} />
-          <TextInput label="Label — bottom left" value={f.labelBL as string ?? ''} onChange={(v) => set('labelBL', v)} />
-          <TextInput label="Label — top right" value={f.labelTR as string ?? ''} onChange={(v) => set('labelTR', v)} />
-          <TextInput label="Label — bottom right" value={f.labelBR as string ?? ''} onChange={(v) => set('labelBR', v)} />
+          <RichFieldGroup label="Label — top left" f={f} set={set} base="labelTL" segments={[{ key: 'labelTL' }]} />
+          <RichFieldGroup label="Label — bottom left" f={f} set={set} base="labelBL" segments={[{ key: 'labelBL' }]} />
+          <RichFieldGroup label="Label — top right" f={f} set={set} base="labelTR" segments={[{ key: 'labelTR' }]} />
+          <RichFieldGroup label="Label — bottom right" f={f} set={set} base="labelBR" segments={[{ key: 'labelBR' }]} />
         </div>
       );
     }
     case 'slick-sfa-revenue-loss':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading line 1" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
-          <TextInput label="Heading line 2 (before gradient)" value={f.headingLine2Pre as string ?? ''} onChange={(v) => set('headingLine2Pre', v)} />
-          <TextInput label="Heading gradient text (red)" value={f.headingLine2Grad as string ?? ''} onChange={(v) => set('headingLine2Grad', v)} />
-          <Textarea label="Sub paragraph (use \\n for line break)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading line 1" f={f} set={set} base="headingLine1" segments={[{ key: 'headingLine1' }]} />
+          <RichFieldGroup label="Heading Line2 Pre" f={f} set={set} base="headingLine2Pre" segments={[{ key: 'headingLine2Pre' }]} />
+          <RichFieldGroup label="Heading Line2 Grad" f={f} set={set} base="headingLine2Grad" segments={[{ key: 'headingLine2Grad' }]} />
+          <RichFieldGroup label="Sub paragraph (use \\n for line break)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -2891,11 +2894,11 @@ function renderBlockFields(
       type InsightCard = { name?: string; role?: string; logoImg?: string; logoAlt?: string; logoText?: string; logoColor?: string; thumbnail?: string; videoUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
-          <Textarea label="Lead paragraph" value={f.lead as string ?? ''} onChange={(v) => set('lead', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Lead paragraph" f={f} set={set} base="lead" segments={[{ key: 'lead' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<InsightCard>
             label="Video Cards"
@@ -2905,11 +2908,11 @@ function renderBlockFields(
             itemPreview={(c) => c.name || c.logoText || '(unnamed)'}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Name" value={c.name ?? ''} onChange={(v) => u({ ...c, name: v })} />
-                <Textarea label="Role (use newline for line break)" value={c.role ?? ''} onChange={(v) => u({ ...c, role: v })} />
+                <RichTextInput label="Name" {...richItemProps(c, 'name', u)} />
+                <RichTextInput label="Role (use newline for line break)" {...richItemProps(c, 'role', u)} />
                 <ImageField label="Logo image" value={c.logoImg ?? ''} onChange={(v) => u({ ...c, logoImg: v })} />
                 <TextInput label="Logo alt text" value={c.logoAlt ?? ''} onChange={(v) => u({ ...c, logoAlt: v })} />
-                <TextInput label="Logo text (fallback)" value={c.logoText ?? ''} onChange={(v) => u({ ...c, logoText: v })} />
+                <RichTextInput label="Logo text (fallback)" {...richItemProps(c, 'logoText', u)} />
                 <ColorPicker label="Logo text color" value={c.logoColor ?? '#082B4B'} onChange={(v) => u({ ...c, logoColor: v })} />
                 <ImageField label="Video thumbnail" value={c.thumbnail ?? ''} onChange={(v) => u({ ...c, thumbnail: v })} />
                 <TextInput label="Video URL" value={c.videoUrl ?? ''} onChange={(v) => u({ ...c, videoUrl: v })} />
@@ -2924,16 +2927,16 @@ function renderBlockFields(
       type TrustItem = { value?: string; label?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
-          <Textarea label="Subtitle text (before bold)" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
-          <TextInput label="Subtitle bold phrase" value={f.subtitleBold as string ?? ''} onChange={(v) => set('subtitleBold', v)} />
-          <Textarea label="Subtitle suffix text" value={f.subtitleSuffix as string ?? ''} onChange={(v) => set('subtitleSuffix', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Subtitle text (before bold)" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
+          <RichFieldGroup label="Subtitle Bold" f={f} set={set} base="subtitleBold" segments={[{ key: 'subtitleBold' }]} />
+          <RichFieldGroup label="Subtitle Suffix" f={f} set={set} base="subtitleSuffix" segments={[{ key: 'subtitleSuffix' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="CTA input placeholder" value={f.ctaPlaceholder as string ?? ''} onChange={(v) => set('ctaPlaceholder', v)} />
-          <TextInput label="CTA button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<TrustItem>
@@ -2944,25 +2947,25 @@ function renderBlockFields(
             itemPreview={(t) => [t.value, t.label].filter(Boolean).join(' ') || '(empty)'}
             renderItem={(t, u) => (
               <div className="space-y-2">
-                <TextInput label="Value (bold, e.g. 3M+)" value={t.value ?? ''} onChange={(v) => u({ ...t, value: v })} />
-                <TextInput label="Label" value={t.label ?? ''} onChange={(v) => u({ ...t, label: v })} />
+                <RichTextInput label="Value (bold, e.g. 3M+)" {...richItemProps(t, 'value', u)} />
+                <RichTextInput label="Label" {...richItemProps(t, 'label', u)} />
               </div>
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="AI Plan card title" value={f.planTitle as string ?? ''} onChange={(v) => set('planTitle', v)} />
-          <TextInput label="AI Plan card subtitle" value={f.planSub as string ?? ''} onChange={(v) => set('planSub', v)} />
+          <RichFieldGroup label="AI Plan card title" f={f} set={set} base="planTitle" segments={[{ key: 'planTitle' }]} />
+          <RichFieldGroup label="AI Plan card subtitle" f={f} set={set} base="planSub" segments={[{ key: 'planSub' }]} />
           <TextInput label="Plan row 1 — key" value={f.planRow1Key as string ?? ''} onChange={(v) => set('planRow1Key', v)} />
-          <TextInput label="Plan row 1 — value" value={f.planRow1Val as string ?? ''} onChange={(v) => set('planRow1Val', v)} />
+          <RichFieldGroup label="Plan row 1 — value" f={f} set={set} base="planRow1Val" segments={[{ key: 'planRow1Val' }]} />
           <TextInput label="Plan row 2 — key" value={f.planRow2Key as string ?? ''} onChange={(v) => set('planRow2Key', v)} />
-          <TextInput label="Plan row 2 — value" value={f.planRow2Val as string ?? ''} onChange={(v) => set('planRow2Val', v)} />
+          <RichFieldGroup label="Plan row 2 — value" f={f} set={set} base="planRow2Val" segments={[{ key: 'planRow2Val' }]} />
           <TextInput label="Plan row 3 — key" value={f.planRow3Key as string ?? ''} onChange={(v) => set('planRow3Key', v)} />
-          <TextInput label="Plan row 3 — value" value={f.planRow3Val as string ?? ''} onChange={(v) => set('planRow3Val', v)} />
+          <RichFieldGroup label="Plan row 3 — value" f={f} set={set} base="planRow3Val" segments={[{ key: 'planRow3Val' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Agent card name" value={f.agentName as string ?? ''} onChange={(v) => set('agentName', v)} />
-          <TextInput label="Agent message (before bold)" value={f.agentMsgPre as string ?? ''} onChange={(v) => set('agentMsgPre', v)} />
-          <TextInput label="Agent message bold phrase" value={f.agentMsgBold as string ?? ''} onChange={(v) => set('agentMsgBold', v)} />
-          <TextInput label="Agent message (after bold)" value={f.agentMsgPost as string ?? ''} onChange={(v) => set('agentMsgPost', v)} />
+          <RichFieldGroup label="Agent card name" f={f} set={set} base="agentName" segments={[{ key: 'agentName' }]} />
+          <RichFieldGroup label="Agent Msg Pre" f={f} set={set} base="agentMsgPre" segments={[{ key: 'agentMsgPre' }]} />
+          <RichFieldGroup label="Agent Msg Bold" f={f} set={set} base="agentMsgBold" segments={[{ key: 'agentMsgBold' }]} />
+          <RichFieldGroup label="Agent message (after bold)" f={f} set={set} base="agentMsgPost" segments={[{ key: 'agentMsgPost' }]} />
         </div>
       );
     }
@@ -2970,37 +2973,37 @@ function renderBlockFields(
     case 'slick-dms-hero-v2':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading line 1 prefix" value={f.headingLine1Pre as string ?? ''} onChange={(v) => set('headingLine1Pre', v)} />
-          <TextInput label="Heading line 1 gradient word" value={f.headingLine1Grad as string ?? ''} onChange={(v) => set('headingLine1Grad', v)} />
-          <TextInput label="Heading line 2" value={f.headingLine2 as string ?? ''} onChange={(v) => set('headingLine2', v)} />
-          <Textarea label="Sub (before bold)" value={f.subNormal as string ?? ''} onChange={(v) => set('subNormal', v)} />
-          <TextInput label="Sub bold phrase" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Sub (after bold)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Line1 Pre" f={f} set={set} base="headingLine1Pre" segments={[{ key: 'headingLine1Pre' }]} />
+          <RichFieldGroup label="Heading Line1 Grad" f={f} set={set} base="headingLine1Grad" segments={[{ key: 'headingLine1Grad' }]} />
+          <RichFieldGroup label="Heading line 2" f={f} set={set} base="headingLine2" segments={[{ key: 'headingLine2' }]} />
+          <RichFieldGroup label="Sub Normal" f={f} set={set} base="subNormal" segments={[{ key: 'subNormal' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Center image (dashboard)" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
           <ImageField label="Left card image" value={f.imgLeft as string ?? ''} onChange={(v) => set('imgLeft', v)} />
           <ImageField label="Right card image" value={f.imgRight as string ?? ''} onChange={(v) => set('imgRight', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Floating chips</p>
-          <TextInput label="Chip 1 — value" value={f.chip1Val as string ?? ''} onChange={(v) => set('chip1Val', v)} />
-          <TextInput label="Chip 1 — unit (teal)" value={f.chip1Unit as string ?? ''} onChange={(v) => set('chip1Unit', v)} />
-          <TextInput label="Chip 1 — label" value={f.chip1Label as string ?? ''} onChange={(v) => set('chip1Label', v)} />
+          <RichFieldGroup label="Chip 1 — value" f={f} set={set} base="chip1Val" segments={[{ key: 'chip1Val' }]} />
+          <RichFieldGroup label="Chip 1 — unit (teal)" f={f} set={set} base="chip1Unit" segments={[{ key: 'chip1Unit' }]} />
+          <RichFieldGroup label="Chip 1 — label" f={f} set={set} base="chip1Label" segments={[{ key: 'chip1Label' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Chip 2 — value" value={f.chip2Val as string ?? ''} onChange={(v) => set('chip2Val', v)} />
-          <TextInput label="Chip 2 — unit (teal)" value={f.chip2Unit as string ?? ''} onChange={(v) => set('chip2Unit', v)} />
-          <TextInput label="Chip 2 — label" value={f.chip2Label as string ?? ''} onChange={(v) => set('chip2Label', v)} />
+          <RichFieldGroup label="Chip 2 — value" f={f} set={set} base="chip2Val" segments={[{ key: 'chip2Val' }]} />
+          <RichFieldGroup label="Chip 2 — unit (teal)" f={f} set={set} base="chip2Unit" segments={[{ key: 'chip2Unit' }]} />
+          <RichFieldGroup label="Chip 2 — label" f={f} set={set} base="chip2Label" segments={[{ key: 'chip2Label' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Chip 3 — value" value={f.chip3Val as string ?? ''} onChange={(v) => set('chip3Val', v)} />
-          <TextInput label="Chip 3 — unit (teal)" value={f.chip3Unit as string ?? ''} onChange={(v) => set('chip3Unit', v)} />
-          <TextInput label="Chip 3 — label" value={f.chip3Label as string ?? ''} onChange={(v) => set('chip3Label', v)} />
+          <RichFieldGroup label="Chip 3 — value" f={f} set={set} base="chip3Val" segments={[{ key: 'chip3Val' }]} />
+          <RichFieldGroup label="Chip 3 — unit (teal)" f={f} set={set} base="chip3Unit" segments={[{ key: 'chip3Unit' }]} />
+          <RichFieldGroup label="Chip 3 — label" f={f} set={set} base="chip3Label" segments={[{ key: 'chip3Label' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Chip 4 — value" value={f.chip4Val as string ?? ''} onChange={(v) => set('chip4Val', v)} />
-          <TextInput label="Chip 4 — unit (teal)" value={f.chip4Unit as string ?? ''} onChange={(v) => set('chip4Unit', v)} />
-          <TextInput label="Chip 4 — label" value={f.chip4Label as string ?? ''} onChange={(v) => set('chip4Label', v)} />
+          <RichFieldGroup label="Chip 4 — value" f={f} set={set} base="chip4Val" segments={[{ key: 'chip4Val' }]} />
+          <RichFieldGroup label="Chip 4 — unit (teal)" f={f} set={set} base="chip4Unit" segments={[{ key: 'chip4Unit' }]} />
+          <RichFieldGroup label="Chip 4 — label" f={f} set={set} base="chip4Label" segments={[{ key: 'chip4Label' }]} />
         </div>
       );
 
@@ -3008,11 +3011,11 @@ function renderBlockFields(
       type DmsFV2Tab = { label?: string; headingPre?: string; headingGrad?: string; body?: string; bullets?: string[]; statValue?: string; statLabel?: string; statSuffix?: string; img?: string; };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading line 1 (dark)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading line 2 (gradient)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
-          <TextInput label="Footer text" value={f.footerText as string ?? ''} onChange={(v) => set('footerText', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
+          <RichFieldGroup label="Footer text" f={f} set={set} base="footerText" segments={[{ key: 'footerText' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<DmsFV2Tab>
             label="Tabs"
@@ -3022,14 +3025,14 @@ function renderBlockFields(
             itemPreview={(t) => t.label || '(untitled)'}
             renderItem={(t, u) => (
               <div className="space-y-2">
-                <TextInput label="Tab label" value={t.label ?? ''} onChange={(v) => u({ ...t, label: v })} />
-                <TextInput label="Panel heading (dark)" value={t.headingPre ?? ''} onChange={(v) => u({ ...t, headingPre: v })} />
-                <TextInput label="Panel heading (gradient)" value={t.headingGrad ?? ''} onChange={(v) => u({ ...t, headingGrad: v })} />
-                <Textarea label="Body text" value={t.body ?? ''} onChange={(v) => u({ ...t, body: v })} />
+                <RichTextInput label="Tab label" {...richItemProps(t, 'label', u)} />
+                <RichTextInput label="Panel heading (dark)" {...richItemProps(t, 'headingPre', u)} />
+                <RichTextInput label="Panel heading (gradient)" {...richItemProps(t, 'headingGrad', u)} />
+                <RichTextInput label="Body text" {...richItemProps(t, 'body', u)} />
                 <Textarea label="Bullets (one per line)" value={(t.bullets ?? []).join('\n')} onChange={(v) => u({ ...t, bullets: v.split('\n').filter(Boolean) })} />
-                <TextInput label="Stat value (e.g. 3%)" value={t.statValue ?? ''} onChange={(v) => u({ ...t, statValue: v })} />
-                <TextInput label="Stat label" value={t.statLabel ?? ''} onChange={(v) => u({ ...t, statLabel: v })} />
-                <TextInput label="Stat suffix" value={t.statSuffix ?? ''} onChange={(v) => u({ ...t, statSuffix: v })} />
+                <RichTextInput label="Stat value (e.g. 3%)" {...richItemProps(t, 'statValue', u)} />
+                <RichTextInput label="Stat label" {...richItemProps(t, 'statLabel', u)} />
+                <RichTextInput label="Stat suffix" {...richItemProps(t, 'statSuffix', u)} />
                 <ImageField label="Tab image" value={t.img ?? ''} onChange={(v) => u({ ...t, img: v })} />
               </div>
             )}
@@ -3042,10 +3045,10 @@ function renderBlockFields(
       type DmsFTab = { label?: string; headingPre?: string; headingGrad?: string; body?: string; bullets?: string[]; statValue?: string; statLabel?: string; statSuffix?: string; img?: string; };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Lede paragraph" value={f.lede as string ?? ''} onChange={(v) => set('lede', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Lede paragraph" f={f} set={set} base="lede" segments={[{ key: 'lede' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<DmsFTab>
             label="Tabs (4 supported)"
@@ -3055,14 +3058,14 @@ function renderBlockFields(
             itemPreview={(t) => t.label || '(untitled)'}
             renderItem={(t, u) => (
               <div className="space-y-2">
-                <TextInput label="Tab label" value={t.label ?? ''} onChange={(v) => u({ ...t, label: v })} />
-                <TextInput label="Panel heading (dark)" value={t.headingPre ?? ''} onChange={(v) => u({ ...t, headingPre: v })} />
-                <TextInput label="Panel heading (gradient)" value={t.headingGrad ?? ''} onChange={(v) => u({ ...t, headingGrad: v })} />
-                <Textarea label="Body text" value={t.body ?? ''} onChange={(v) => u({ ...t, body: v })} />
+                <RichTextInput label="Tab label" {...richItemProps(t, 'label', u)} />
+                <RichTextInput label="Panel heading (dark)" {...richItemProps(t, 'headingPre', u)} />
+                <RichTextInput label="Panel heading (gradient)" {...richItemProps(t, 'headingGrad', u)} />
+                <RichTextInput label="Body text" {...richItemProps(t, 'body', u)} />
                 <Textarea label="Bullets (one per line)" value={(t.bullets ?? []).join('\n')} onChange={(v) => u({ ...t, bullets: v.split('\n').filter(Boolean) })} />
-                <TextInput label="Stat value (e.g. 3%)" value={t.statValue ?? ''} onChange={(v) => u({ ...t, statValue: v })} />
-                <TextInput label="Stat label" value={t.statLabel ?? ''} onChange={(v) => u({ ...t, statLabel: v })} />
-                <TextInput label="Stat suffix" value={t.statSuffix ?? ''} onChange={(v) => u({ ...t, statSuffix: v })} />
+                <RichTextInput label="Stat value (e.g. 3%)" {...richItemProps(t, 'statValue', u)} />
+                <RichTextInput label="Stat label" {...richItemProps(t, 'statLabel', u)} />
+                <RichTextInput label="Stat suffix" {...richItemProps(t, 'statSuffix', u)} />
                 <ImageField label="Tab image" value={t.img ?? ''} onChange={(v) => u({ ...t, img: v })} />
               </div>
             )}
@@ -3075,15 +3078,15 @@ function renderBlockFields(
       type CmpRow = { title?: string; sub?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
-          <TextInput label="Italic subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Italic subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <ImageField label="Standard DMS screen image (left/before side of slider)" value={f.imgScreenOld as string ?? ''} onChange={(v) => set('imgScreenOld', v)} />
           <ImageField label="NextGen DMS screen image (right/after side of slider)" value={f.imgScreenNew as string ?? ''} onChange={(v) => set('imgScreenNew', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Left panel label (Standard DMS)" value={f.oldLabel as string ?? ''} onChange={(v) => set('oldLabel', v)} />
+          <RichFieldGroup label="Left panel label (Standard DMS)" f={f} set={set} base="oldLabel" segments={[{ key: 'oldLabel' }]} />
           <Repeater<CmpRow>
             label="Standard DMS rows"
             items={(f.oldRows as CmpRow[]) ?? []}
@@ -3092,13 +3095,13 @@ function renderBlockFields(
             itemPreview={(r) => r.title || '(empty)'}
             renderItem={(r, u) => (
               <div className="space-y-2">
-                <TextInput label="Row title" value={r.title ?? ''} onChange={(v) => u({ ...r, title: v })} />
-                <TextInput label="Row sub-text" value={r.sub ?? ''} onChange={(v) => u({ ...r, sub: v })} />
+                <RichTextInput label="Row title" {...richItemProps(r, 'title', u)} />
+                <RichTextInput label="Row sub-text" {...richItemProps(r, 'sub', u)} />
               </div>
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Right panel label (NextGen DMS)" value={f.newLabel as string ?? ''} onChange={(v) => set('newLabel', v)} />
+          <RichFieldGroup label="Right panel label (NextGen DMS)" f={f} set={set} base="newLabel" segments={[{ key: 'newLabel' }]} />
           <Repeater<CmpRow>
             label="NextGen DMS rows"
             items={(f.newRows as CmpRow[]) ?? []}
@@ -3107,8 +3110,8 @@ function renderBlockFields(
             itemPreview={(r) => r.title || '(empty)'}
             renderItem={(r, u) => (
               <div className="space-y-2">
-                <TextInput label="Row title" value={r.title ?? ''} onChange={(v) => u({ ...r, title: v })} />
-                <TextInput label="Row sub-text" value={r.sub ?? ''} onChange={(v) => u({ ...r, sub: v })} />
+                <RichTextInput label="Row title" {...richItemProps(r, 'title', u)} />
+                <RichTextInput label="Row sub-text" {...richItemProps(r, 'sub', u)} />
               </div>
             )}
           />
@@ -3120,10 +3123,10 @@ function renderBlockFields(
       type DmsAgtItem = { name?: string; img?: string; lede?: string; benefits?: string[] };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Lede paragraph" value={f.lede as string ?? ''} onChange={(v) => set('lede', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Lede paragraph" f={f} set={set} base="lede" segments={[{ key: 'lede' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<DmsAgtItem>
             label="Agents (4 supported)"
@@ -3133,18 +3136,18 @@ function renderBlockFields(
             itemPreview={(a) => a.name || '(untitled)'}
             renderItem={(a, u) => (
               <div className="space-y-2">
-                <TextInput label="Agent name" value={a.name ?? ''} onChange={(v) => u({ ...a, name: v })} />
+                <RichTextInput label="Agent name" {...richItemProps(a, 'name', u)} />
                 <ImageField label="Agent image (overrides mockup)" value={a.img ?? ''} onChange={(v) => u({ ...a, img: v })} />
-                <Textarea label="Short description" value={a.lede ?? ''} onChange={(v) => u({ ...a, lede: v })} />
+                <RichTextInput label="Short description" {...richItemProps(a, 'lede', u)} />
                 <TextInput label="Benefit 1" value={(a.benefits as string[] | undefined)?.[0] ?? ''} onChange={(v) => u({ ...a, benefits: [v, ...((a.benefits as string[] | undefined ?? []).slice(1))] })} />
                 <TextInput label="Benefit 2" value={(a.benefits as string[] | undefined)?.[1] ?? ''} onChange={(v) => u({ ...a, benefits: [((a.benefits as string[] | undefined ?? [])[0]) ?? '', v] })} />
               </div>
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Agent kicker label" value={f.kickerLabel as string ?? ''} onChange={(v) => set('kickerLabel', v)} />
-          <TextInput label="Features section label" value={f.featuresLabel as string ?? ''} onChange={(v) => set('featuresLabel', v)} />
-          <TextInput label="Benefits section label" value={f.benefitsLabel as string ?? ''} onChange={(v) => set('benefitsLabel', v)} />
+          <RichFieldGroup label="Agent kicker label" f={f} set={set} base="kickerLabel" segments={[{ key: 'kickerLabel' }]} />
+          <RichFieldGroup label="Features section label" f={f} set={set} base="featuresLabel" segments={[{ key: 'featuresLabel' }]} />
+          <RichFieldGroup label="Benefits section label" f={f} set={set} base="benefitsLabel" segments={[{ key: 'benefitsLabel' }]} />
         </div>
       );
     }
@@ -3153,17 +3156,17 @@ function renderBlockFields(
       type VoiceAgent = { imageUrl?: string; imageAlt?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Logo (top-left badge)" value={f.logoUrl as string ?? ''} onChange={(v) => set('logoUrl', v)} />
           <TextInput label="Logo alt" value={f.logoAlt as string ?? ''} onChange={(v) => set('logoAlt', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Panel title (plain part)" value={f.panelTitlePre as string ?? ''} onChange={(v) => set('panelTitlePre', v)} />
-          <TextInput label="Panel title (bold part)" value={f.panelTitleBold as string ?? ''} onChange={(v) => set('panelTitleBold', v)} />
-          <Textarea label="Panel subtitle" value={f.panelSub as string ?? ''} onChange={(v) => set('panelSub', v)} />
+          <RichFieldGroup label="Panel Title Pre" f={f} set={set} base="panelTitlePre" segments={[{ key: 'panelTitlePre' }]} />
+          <RichFieldGroup label="Panel Title Bold" f={f} set={set} base="panelTitleBold" segments={[{ key: 'panelTitleBold' }]} />
+          <RichFieldGroup label="Panel subtitle" f={f} set={set} base="panelSub" segments={[{ key: 'panelSub' }]} />
           <ImageField label="Panel background image (fills whole panel; defaults to black if empty)" value={f.panelBgUrl as string ?? ''} onChange={(v) => set('panelBgUrl', v)} />
           <ImageField label="Center mic image (defaults to a mic icon if empty)" value={f.micImageUrl as string ?? ''} onChange={(v) => set('micImageUrl', v)} />
           <TextInput label="Mic image alt" value={f.micImageAlt as string ?? ''} onChange={(v) => set('micImageAlt', v)} />
@@ -3189,7 +3192,7 @@ function renderBlockFields(
       type DmsFaqItem = { q?: string; a?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Section heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Section heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<DmsFaqItem>
             label="FAQ items"
@@ -3199,8 +3202,8 @@ function renderBlockFields(
             itemPreview={(item) => item.q || '(untitled)'}
             renderItem={(item, u) => (
               <div className="space-y-2">
-                <TextInput label="Question" value={item.q ?? ''} onChange={(v) => u({ ...item, q: v })} />
-                <Textarea label="Answer" value={item.a ?? ''} onChange={(v) => u({ ...item, a: v })} />
+                <RichTextInput label="Question" {...richItemProps(item, 'q', u)} />
+                <RichTextInput label="Answer" {...richItemProps(item, 'a', u)} />
               </div>
             )}
           />
@@ -3212,8 +3215,8 @@ function renderBlockFields(
       type DeployMetric = { value?: number; unit?: string; label?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading rest (deep)" value={f.headingRest as string ?? ''} onChange={(v) => set('headingRest', v)} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Rest" f={f} set={set} base="headingRest" segments={[{ key: 'headingRest' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<DeployMetric>
             label="Metrics (4 supported)"
@@ -3224,8 +3227,8 @@ function renderBlockFields(
             renderItem={(m, u) => (
               <div className="space-y-2">
                 <TextInput label="Value" value={String(m.value ?? 0)} onChange={(v) => u({ ...m, value: parseInt(v) || 0 })} />
-                <TextInput label="Unit (min / hrs)" value={m.unit ?? ''} onChange={(v) => u({ ...m, unit: v })} />
-                <TextInput label="Label" value={m.label ?? ''} onChange={(v) => u({ ...m, label: v })} />
+                <RichTextInput label="Unit (min / hrs)" {...richItemProps(m, 'unit', u)} />
+                <RichTextInput label="Label" {...richItemProps(m, 'label', u)} />
               </div>
             )}
           />
@@ -3236,35 +3239,35 @@ function renderBlockFields(
     case 'slick-dms-cta':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill eyebrow text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading line 1 (white)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading line 2 (teal gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Pill eyebrow text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Primary CTA label" value={f.primaryCtaLabel as string ?? ''} onChange={(v) => set('primaryCtaLabel', v)} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="primaryCtaLabel" segments={[{ key: 'primaryCtaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.primaryCtaUrl as string ?? ''} onChange={(v) => set('primaryCtaUrl', v)} />
-          <TextInput label="Secondary CTA label" value={f.secondaryCtaLabel as string ?? ''} onChange={(v) => set('secondaryCtaLabel', v)} />
+          <RichFieldGroup label="Secondary CTA label" f={f} set={set} base="secondaryCtaLabel" segments={[{ key: 'secondaryCtaLabel' }]} />
           <TextInput label="Secondary CTA URL" value={f.secondaryCtaUrl as string ?? ''} onChange={(v) => set('secondaryCtaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Trust tagline" value={f.trustText as string ?? ''} onChange={(v) => set('trustText', v)} />
+          <RichFieldGroup label="Trust tagline" f={f} set={set} base="trustText" segments={[{ key: 'trustText' }]} />
         </div>
       );
 
     case 'slick-dms-guarantee':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill / eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix (white, optional)" value={f.titlePre as string ?? ''} onChange={(v) => set('titlePre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.titleAccent as string ?? ''} onChange={(v) => set('titleAccent', v)} />
-          <TextInput label="Heading suffix (white)" value={f.titlePost as string ?? ''} onChange={(v) => set('titlePost', v)} />
-          <Textarea label="Body copy" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill / eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Title Pre" f={f} set={set} base="titlePre" segments={[{ key: 'titlePre' }]} />
+          <RichFieldGroup label="Title Accent" f={f} set={set} base="titleAccent" segments={[{ key: 'titleAccent' }]} />
+          <RichFieldGroup label="Heading suffix (white)" f={f} set={set} base="titlePost" segments={[{ key: 'titlePost' }]} />
+          <RichFieldGroup label="Body copy" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Stamp percentage text" value={f.stampPercent as string ?? ''} onChange={(v) => set('stampPercent', v)} />
-          <TextInput label="Stamp label text" value={f.stampLabel as string ?? ''} onChange={(v) => set('stampLabel', v)} />
+          <RichFieldGroup label="Stamp percentage text" f={f} set={set} base="stampPercent" segments={[{ key: 'stampPercent' }]} />
+          <RichFieldGroup label="Stamp label text" f={f} set={set} base="stampLabel" segments={[{ key: 'stampLabel' }]} />
           <ImageField label="Stamp image (replaces the animated stamp when set)" value={f.stampImageUrl as string ?? ''} onChange={(v) => set('stampImageUrl', v)} />
           <TextInput label="Stamp image alt" value={f.stampImageAlt as string ?? ''} onChange={(v) => set('stampImageAlt', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -3272,10 +3275,10 @@ function renderBlockFields(
     case 'slick-dms-integrations-v2':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Main screenshot" value={f.screenshotUrl as string ?? ''} onChange={(v) => set('screenshotUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -3287,66 +3290,66 @@ function renderBlockFields(
     case 'slick-dms-integrations':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Lede paragraph" value={f.lede as string ?? ''} onChange={(v) => set('lede', v)} />
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Lede paragraph" f={f} set={set} base="lede" segments={[{ key: 'lede' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Integration 1 letter" value={f.integration1Letter as string ?? ''} onChange={(v) => set('integration1Letter', v)} />
-          <TextInput label="Integration 1 name" value={f.integration1Name as string ?? ''} onChange={(v) => set('integration1Name', v)} />
-          <TextInput label="Integration 1 sub" value={f.integration1Sub as string ?? ''} onChange={(v) => set('integration1Sub', v)} />
-          <TextInput label="Integration 2 letter" value={f.integration2Letter as string ?? ''} onChange={(v) => set('integration2Letter', v)} />
-          <TextInput label="Integration 2 name" value={f.integration2Name as string ?? ''} onChange={(v) => set('integration2Name', v)} />
-          <TextInput label="Integration 2 sub" value={f.integration2Sub as string ?? ''} onChange={(v) => set('integration2Sub', v)} />
-          <TextInput label="Sync status text" value={f.syncText as string ?? ''} onChange={(v) => set('syncText', v)} />
+          <RichFieldGroup label="Integration 1 letter" f={f} set={set} base="integration1Letter" segments={[{ key: 'integration1Letter' }]} />
+          <RichFieldGroup label="Integration 1 name" f={f} set={set} base="integration1Name" segments={[{ key: 'integration1Name' }]} />
+          <RichFieldGroup label="Integration 1 sub" f={f} set={set} base="integration1Sub" segments={[{ key: 'integration1Sub' }]} />
+          <RichFieldGroup label="Integration 2 letter" f={f} set={set} base="integration2Letter" segments={[{ key: 'integration2Letter' }]} />
+          <RichFieldGroup label="Integration 2 name" f={f} set={set} base="integration2Name" segments={[{ key: 'integration2Name' }]} />
+          <RichFieldGroup label="Integration 2 sub" f={f} set={set} base="integration2Sub" segments={[{ key: 'integration2Sub' }]} />
+          <RichFieldGroup label="Sync status text" f={f} set={set} base="syncText" segments={[{ key: 'syncText' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="KPI 1 label" value={f.kpi1Label as string ?? ''} onChange={(v) => set('kpi1Label', v)} />
-          <TextInput label="KPI 1 value" value={f.kpi1Value as string ?? ''} onChange={(v) => set('kpi1Value', v)} />
-          <TextInput label="KPI 1 unit" value={f.kpi1Unit as string ?? ''} onChange={(v) => set('kpi1Unit', v)} />
-          <TextInput label="KPI 2 label" value={f.kpi2Label as string ?? ''} onChange={(v) => set('kpi2Label', v)} />
-          <TextInput label="KPI 2 value" value={f.kpi2Value as string ?? ''} onChange={(v) => set('kpi2Value', v)} />
-          <TextInput label="KPI 2 unit" value={f.kpi2Unit as string ?? ''} onChange={(v) => set('kpi2Unit', v)} />
-          <TextInput label="KPI 3 label" value={f.kpi3Label as string ?? ''} onChange={(v) => set('kpi3Label', v)} />
-          <TextInput label="KPI 3 value" value={f.kpi3Value as string ?? ''} onChange={(v) => set('kpi3Value', v)} />
-          <TextInput label="Chart label" value={f.chartLabel as string ?? ''} onChange={(v) => set('chartLabel', v)} />
+          <RichFieldGroup label="KPI 1 label" f={f} set={set} base="kpi1Label" segments={[{ key: 'kpi1Label' }]} />
+          <RichFieldGroup label="KPI 1 value" f={f} set={set} base="kpi1Value" segments={[{ key: 'kpi1Value' }]} />
+          <RichFieldGroup label="KPI 1 unit" f={f} set={set} base="kpi1Unit" segments={[{ key: 'kpi1Unit' }]} />
+          <RichFieldGroup label="KPI 2 label" f={f} set={set} base="kpi2Label" segments={[{ key: 'kpi2Label' }]} />
+          <RichFieldGroup label="KPI 2 value" f={f} set={set} base="kpi2Value" segments={[{ key: 'kpi2Value' }]} />
+          <RichFieldGroup label="KPI 2 unit" f={f} set={set} base="kpi2Unit" segments={[{ key: 'kpi2Unit' }]} />
+          <RichFieldGroup label="KPI 3 label" f={f} set={set} base="kpi3Label" segments={[{ key: 'kpi3Label' }]} />
+          <RichFieldGroup label="KPI 3 value" f={f} set={set} base="kpi3Value" segments={[{ key: 'kpi3Value' }]} />
+          <RichFieldGroup label="Chart label" f={f} set={set} base="chartLabel" segments={[{ key: 'chartLabel' }]} />
         </div>
       );
 
     case 'slick-eb2b-hero':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading suffix" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subheading" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Subheading bold text" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <Textarea label="Subheading tail text" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading suffix" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
-          <TextInput label="Trust text" value={f.trustText as string ?? ''} onChange={(v) => set('trustText', v)} />
+          <RichFieldGroup label="Trust text" f={f} set={set} base="trustText" segments={[{ key: 'trustText' }]} />
         </div>
       );
 
     case 'slick-eb2b-hero-v2':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading line 1" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading line 2 prefix" value={f.headingIn as string ?? ''} onChange={(v) => set('headingIn', v)} />
-          <TextInput label="Heading gradient word" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Subheading bold" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <Textarea label="Subheading tail" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading line 1" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading line 2 prefix" f={f} set={set} base="headingIn" segments={[{ key: 'headingIn' }]} />
+          <RichFieldGroup label="Heading gradient word" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
         </div>
       );
@@ -3354,17 +3357,17 @@ function renderBlockFields(
     case 'slick-sfa-hero-v2':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading line 1" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
-          <TextInput label="Heading line 2 prefix" value={f.headingLine2Pre as string ?? ''} onChange={(v) => set('headingLine2Pre', v)} />
-          <TextInput label="Heading gradient word" value={f.headingLine2Grad as string ?? ''} onChange={(v) => set('headingLine2Grad', v)} />
-          <Textarea label="Subheading normal" value={f.subNormal as string ?? ''} onChange={(v) => set('subNormal', v)} />
-          <TextInput label="Subheading bold" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Subheading tail" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading line 1" f={f} set={set} base="headingLine1" segments={[{ key: 'headingLine1' }]} />
+          <RichFieldGroup label="Heading Line2 Pre" f={f} set={set} base="headingLine2Pre" segments={[{ key: 'headingLine2Pre' }]} />
+          <RichFieldGroup label="Heading Line2 Grad" f={f} set={set} base="headingLine2Grad" segments={[{ key: 'headingLine2Grad' }]} />
+          <RichFieldGroup label="Sub Normal" f={f} set={set} base="subNormal" segments={[{ key: 'subNormal' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Left card 1 (top)" value={f.imgCl1 as string ?? ''} onChange={(v) => set('imgCl1', v)} />
@@ -3381,9 +3384,9 @@ function renderBlockFields(
       type ScaleStat = { num?: string; label?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<ScaleStat>
             label="Stats (4 cards)"
@@ -3393,8 +3396,8 @@ function renderBlockFields(
             itemPreview={(s) => s.label || '(untitled)'}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
-                <TextInput label="Label" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'num', u)} />
+                <RichTextInput label="Label" {...richItemProps(s, 'label', u)} />
               </div>
             )}
           />
@@ -3409,8 +3412,8 @@ function renderBlockFields(
               <div className="space-y-2">
                 <ImageField label="Logo image (overrides text)" value={it.img ?? ''} onChange={(v) => u({ ...it, img: v })} />
                 <TextInput label="Alt text" value={it.alt ?? ''} onChange={(v) => u({ ...it, alt: v })} />
-                <TextInput label="Text fallback" value={it.text ?? ''} onChange={(v) => u({ ...it, text: v })} />
-                <TextInput label="Sub (optional)" value={it.sub ?? ''} onChange={(v) => u({ ...it, sub: v })} />
+                <RichTextInput label="Text fallback" {...richItemProps(it, 'text', u)} />
+                <RichTextInput label="Sub (optional)" {...richItemProps(it, 'sub', u)} />
               </div>
             )}
           />
@@ -3421,21 +3424,21 @@ function renderBlockFields(
     case 'slick-eb2b-why':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient 1" value={f.headingGrad1 as string ?? ''} onChange={(v) => set('headingGrad1', v)} />
-          <TextInput label="Heading middle" value={f.headingMid as string ?? ''} onChange={(v) => set('headingMid', v)} />
-          <TextInput label="Heading gradient 2" value={f.headingGrad2 as string ?? ''} onChange={(v) => set('headingGrad2', v)} />
-          <Textarea label="Body copy" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad1" f={f} set={set} base="headingGrad1" segments={[{ key: 'headingGrad1' }]} />
+          <RichFieldGroup label="Heading Mid" f={f} set={set} base="headingMid" segments={[{ key: 'headingMid' }]} />
+          <RichFieldGroup label="Heading Grad2" f={f} set={set} base="headingGrad2" segments={[{ key: 'headingGrad2' }]} />
+          <RichFieldGroup label="Body copy" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Video URL (YouTube embed or direct)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <ImageField label="Video thumbnail" value={f.videoThumb as string ?? ''} onChange={(v) => set('videoThumb', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Media card title" value={f.mediaTitle as string ?? ''} onChange={(v) => set('mediaTitle', v)} />
-          <TextInput label="Media card title highlight" value={f.mediaTitleHighlight as string ?? ''} onChange={(v) => set('mediaTitleHighlight', v)} />
-          <TextInput label="Media card title suffix" value={f.mediaTitlePost as string ?? ''} onChange={(v) => set('mediaTitlePost', v)} />
+          <RichFieldGroup label="Media Title" f={f} set={set} base="mediaTitle" segments={[{ key: 'mediaTitle' }]} />
+          <RichFieldGroup label="Media Title Highlight" f={f} set={set} base="mediaTitleHighlight" segments={[{ key: 'mediaTitleHighlight' }]} />
+          <RichFieldGroup label="Media card title suffix" f={f} set={set} base="mediaTitlePost" segments={[{ key: 'mediaTitlePost' }]} />
           <Repeater<{ n: string; l: string }>
             label="Media stats"
             items={(f.mediaStats as { n: string; l: string }[]) ?? []}
@@ -3444,22 +3447,22 @@ function renderBlockFields(
             itemPreview={(it) => `${it.n} ${it.l}`}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={it.n ?? ''} onChange={(v) => u({ ...it, n: v })} />
-                <TextInput label="Label" value={it.l ?? ''} onChange={(v) => u({ ...it, l: v })} />
+                <RichTextInput label="Number" {...richItemProps(it, 'n', u)} />
+                <RichTextInput label="Label" {...richItemProps(it, 'l', u)} />
               </div>
             )}
           />
-          <TextInput label="Media footer brand" value={f.mediaFooterBrand as string ?? ''} onChange={(v) => set('mediaFooterBrand', v)} />
-          <TextInput label="Media footer sub" value={f.mediaFooterSub as string ?? ''} onChange={(v) => set('mediaFooterSub', v)} />
+          <RichFieldGroup label="Media footer brand" f={f} set={set} base="mediaFooterBrand" segments={[{ key: 'mediaFooterBrand' }]} />
+          <RichFieldGroup label="Media footer sub" f={f} set={set} base="mediaFooterSub" segments={[{ key: 'mediaFooterSub' }]} />
         </div>
       );
 
     case 'slick-eb2b-features':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<{ title: string; body: string; stat: string; image?: string }>
             label="Features"
@@ -3469,9 +3472,9 @@ function renderBlockFields(
             itemPreview={(it) => it.title || '(untitled)'}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
-                <Textarea label="Body" value={it.body ?? ''} onChange={(v) => u({ ...it, body: v })} />
-                <TextInput label="Stat" value={it.stat ?? ''} onChange={(v) => u({ ...it, stat: v })} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Body" {...richItemProps(it, 'body', u)} />
+                <RichTextInput label="Stat" {...richItemProps(it, 'stat', u)} />
                 <ImageField label="Card image (overrides coded mockup)" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
               </div>
             )}
@@ -3482,12 +3485,12 @@ function renderBlockFields(
     case 'slick-eb2b-integrations':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill badge text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading (white part)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <Textarea label="Heading (teal part, use newline to break)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Body copy" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill badge text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Body copy" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Hub centre text" value={f.hubText as string ?? ''} onChange={(v) => set('hubText', v)} />
+          <RichFieldGroup label="Hub centre text" f={f} set={set} base="hubText" segments={[{ key: 'hubText' }]} />
           <Repeater<{ label?: string; image?: string }>
             label="Satellite nodes (max 6)"
             items={(f.nodes as { label?: string; image?: string }[]) ?? []}
@@ -3496,7 +3499,7 @@ function renderBlockFields(
             itemPreview={(it) => it.label || '(untitled)'}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Label (shown if no image)" value={it.label ?? ''} onChange={(v) => u({ ...it, label: v })} />
+                <RichTextInput label="Label (shown if no image)" {...richItemProps(it, 'label', u)} />
                 <ImageField label="Logo image" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
               </div>
             )}
@@ -3507,10 +3510,10 @@ function renderBlockFields(
     case 'slick-eb2b-impact':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow / pill text" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Eyebrow / pill text" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<{ title: string; body: string; image?: string; metricValue: string; metricLabel: string; metricSub: string; stat: string; statLabel?: string; statSub?: string }>
             label="Cards"
@@ -3520,15 +3523,15 @@ function renderBlockFields(
             itemPreview={(it) => it.title || '(untitled)'}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
-                <Textarea label="Body" value={it.body ?? ''} onChange={(v) => u({ ...it, body: v })} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Body" {...richItemProps(it, 'body', u)} />
                 <ImageField label="Card image" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
-                <TextInput label="Metric 1 value" value={it.metricValue ?? ''} onChange={(v) => u({ ...it, metricValue: v })} />
-                <TextInput label="Metric 1 label" value={it.metricLabel ?? ''} onChange={(v) => u({ ...it, metricLabel: v })} />
-                <TextInput label="Metric 1 sub" value={it.metricSub ?? ''} onChange={(v) => u({ ...it, metricSub: v })} />
-                <TextInput label="Metric 2 value" value={it.stat ?? ''} onChange={(v) => u({ ...it, stat: v })} />
-                <TextInput label="Metric 2 label" value={it.statLabel ?? ''} onChange={(v) => u({ ...it, statLabel: v })} />
-                <TextInput label="Metric 2 sub" value={it.statSub ?? ''} onChange={(v) => u({ ...it, statSub: v })} />
+                <RichTextInput label="Metric 1 value" {...richItemProps(it, 'metricValue', u)} />
+                <RichTextInput label="Metric 1 label" {...richItemProps(it, 'metricLabel', u)} />
+                <RichTextInput label="Metric 1 sub" {...richItemProps(it, 'metricSub', u)} />
+                <RichTextInput label="Metric 2 value" {...richItemProps(it, 'stat', u)} />
+                <RichTextInput label="Metric 2 label" {...richItemProps(it, 'statLabel', u)} />
+                <RichTextInput label="Metric 2 sub" {...richItemProps(it, 'statSub', u)} />
               </div>
             )}
           />
@@ -3538,11 +3541,11 @@ function renderBlockFields(
     case 'slick-eb2b-deployments':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow / pill text" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading suffix" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Body copy" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Eyebrow / pill text" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading suffix" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Body copy" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<{ value: string; label: string }>
             label="Stats (3 boxes)"
@@ -3552,8 +3555,8 @@ function renderBlockFields(
             itemPreview={(it) => it.value || '(untitled)'}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Value" value={it.value ?? ''} onChange={(v) => u({ ...it, value: v })} />
-                <TextInput label="Label" value={it.label ?? ''} onChange={(v) => u({ ...it, label: v })} />
+                <RichTextInput label="Value" {...richItemProps(it, 'value', u)} />
+                <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
               </div>
             )}
           />
@@ -3565,9 +3568,9 @@ function renderBlockFields(
     case 'slick-eb2b-faq':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<{ q: string; a: string }>
             label="FAQs"
@@ -3577,8 +3580,8 @@ function renderBlockFields(
             itemPreview={(it) => it.q || '(untitled)'}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Question" value={it.q ?? ''} onChange={(v) => u({ ...it, q: v })} />
-                <Textarea label="Answer" value={it.a ?? ''} onChange={(v) => u({ ...it, a: v })} />
+                <RichTextInput label="Question" {...richItemProps(it, 'q', u)} />
+                <RichTextInput label="Answer" {...richItemProps(it, 'a', u)} />
               </div>
             )}
           />
@@ -3588,23 +3591,23 @@ function renderBlockFields(
     case 'slick-contact-hero':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading prefix (dark)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading teal word" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <TextInput label="Sub line 1" value={f.subLine1 as string ?? ''} onChange={(v) => set('subLine1', v)} />
-          <TextInput label="Sub line 2 (before bold)" value={f.subLine2Pre as string ?? ''} onChange={(v) => set('subLine2Pre', v)} />
-          <TextInput label="Sub line 2 bold" value={f.subLine2Bold as string ?? ''} onChange={(v) => set('subLine2Bold', v)} />
-          <TextInput label="Sub line 2 (after bold)" value={f.subLine2Tail as string ?? ''} onChange={(v) => set('subLine2Tail', v)} />
-          <TextInput label="Trusted by label" value={f.trustedLabel as string ?? ''} onChange={(v) => set('trustedLabel', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Sub line 1" f={f} set={set} base="subLine1" segments={[{ key: 'subLine1' }]} />
+          <RichFieldGroup label="Sub Line2 Pre" f={f} set={set} base="subLine2Pre" segments={[{ key: 'subLine2Pre' }]} />
+          <RichFieldGroup label="Sub Line2 Bold" f={f} set={set} base="subLine2Bold" segments={[{ key: 'subLine2Bold' }]} />
+          <RichFieldGroup label="Sub Line2 Tail" f={f} set={set} base="subLine2Tail" segments={[{ key: 'subLine2Tail' }]} />
+          <RichFieldGroup label="Trusted by label" f={f} set={set} base="trustedLabel" segments={[{ key: 'trustedLabel' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Stat 1 value" value={f.stat1Val as string ?? ''} onChange={(v) => set('stat1Val', v)} />
-          <TextInput label="Stat 1 label" value={f.stat1Label as string ?? ''} onChange={(v) => set('stat1Label', v)} />
-          <TextInput label="Stat 2 value" value={f.stat2Val as string ?? ''} onChange={(v) => set('stat2Val', v)} />
-          <TextInput label="Stat 2 label" value={f.stat2Label as string ?? ''} onChange={(v) => set('stat2Label', v)} />
-          <TextInput label="Stat 3 value" value={f.stat3Val as string ?? ''} onChange={(v) => set('stat3Val', v)} />
-          <TextInput label="Stat 3 label" value={f.stat3Label as string ?? ''} onChange={(v) => set('stat3Label', v)} />
-          <TextInput label="Stat 4 value" value={f.stat4Val as string ?? ''} onChange={(v) => set('stat4Val', v)} />
-          <TextInput label="Stat 4 label" value={f.stat4Label as string ?? ''} onChange={(v) => set('stat4Label', v)} />
+          <RichFieldGroup label="Stat 1 value" f={f} set={set} base="stat1Val" segments={[{ key: 'stat1Val' }]} />
+          <RichFieldGroup label="Stat 1 label" f={f} set={set} base="stat1Label" segments={[{ key: 'stat1Label' }]} />
+          <RichFieldGroup label="Stat 2 value" f={f} set={set} base="stat2Val" segments={[{ key: 'stat2Val' }]} />
+          <RichFieldGroup label="Stat 2 label" f={f} set={set} base="stat2Label" segments={[{ key: 'stat2Label' }]} />
+          <RichFieldGroup label="Stat 3 value" f={f} set={set} base="stat3Val" segments={[{ key: 'stat3Val' }]} />
+          <RichFieldGroup label="Stat 3 label" f={f} set={set} base="stat3Label" segments={[{ key: 'stat3Label' }]} />
+          <RichFieldGroup label="Stat 4 value" f={f} set={set} base="stat4Val" segments={[{ key: 'stat4Val' }]} />
+          <RichFieldGroup label="Stat 4 label" f={f} set={set} base="stat4Label" segments={[{ key: 'stat4Label' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Logo 1" value={f.logo1 as string ?? ''} onChange={(v) => set('logo1', v)} />
           <ImageField label="Logo 2" value={f.logo2 as string ?? ''} onChange={(v) => set('logo2', v)} />
@@ -3620,18 +3623,18 @@ function renderBlockFields(
     case 'slick-experience-hero':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading line 1 (dark)" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
-          <TextInput label="Heading teal word" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <TextInput label="Heading line 2 suffix (dark)" value={f.headingLine2Mid as string ?? ''} onChange={(v) => set('headingLine2Mid', v)} />
-          <TextInput label="Heading line 3 (dark)" value={f.headingLine3 as string ?? ''} onChange={(v) => set('headingLine3', v)} />
-          <Textarea label="Sub (before bold)" value={f.subNormal as string ?? ''} onChange={(v) => set('subNormal', v)} />
-          <TextInput label="Sub bold phrase" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Sub (after bold)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Line1" f={f} set={set} base="headingLine1" segments={[{ key: 'headingLine1' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Heading line 2 suffix (dark)" f={f} set={set} base="headingLine2Mid" segments={[{ key: 'headingLine2Mid' }]} />
+          <RichFieldGroup label="Heading line 3 (dark)" f={f} set={set} base="headingLine3" segments={[{ key: 'headingLine3' }]} />
+          <RichFieldGroup label="Sub Normal" f={f} set={set} base="subNormal" segments={[{ key: 'subNormal' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
         </div>
       );
@@ -3647,10 +3650,10 @@ function renderBlockFields(
     case 'slick-experience-testimonials':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (before accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <Repeater<{ thumbnail: string; videoUrl: string; name: string; role: string; company: string; logoUrl: string; logoAlt: string }>
             label="Testimonials"
             items={(f.testimonials as { thumbnail: string; videoUrl: string; name: string; role: string; company: string; logoUrl: string; logoAlt: string }[]) ?? []}
@@ -3661,15 +3664,15 @@ function renderBlockFields(
               <>
                 <ImageField label="Thumbnail URL" value={it.thumbnail} onChange={(x) => u({ ...it, thumbnail: x })} />
                 <TextInput label="Video URL (mp4)" value={it.videoUrl} onChange={(x) => u({ ...it, videoUrl: x })} />
-                <TextInput label="Name" value={it.name} onChange={(x) => u({ ...it, name: x })} />
-                <TextInput label="Role" value={it.role} onChange={(x) => u({ ...it, role: x })} />
-                <TextInput label="Company" value={it.company} onChange={(x) => u({ ...it, company: x })} />
+                <RichTextInput label="Name" {...richItemProps(it, 'name', u)} />
+                <RichTextInput label="Role" {...richItemProps(it, 'role', u)} />
+                <RichTextInput label="Company" {...richItemProps(it, 'company', u)} />
                 <ImageField label="Company logo URL" value={it.logoUrl} onChange={(x) => u({ ...it, logoUrl: x })} />
                 <TextInput label="Logo alt text" value={it.logoAlt} onChange={(x) => u({ ...it, logoAlt: x })} />
               </>
             )}
           />
-          <TextInput label="Logos strip label" value={f.logosLabel as string ?? ''} onChange={(v) => set('logosLabel', v)} />
+          <RichFieldGroup label="Logos strip label" f={f} set={set} base="logosLabel" segments={[{ key: 'logosLabel' }]} />
           <Repeater<{ url: string; alt: string }>
             label="Leader logos"
             items={(f.logos as { url: string; alt: string }[]) ?? []}
@@ -3689,10 +3692,10 @@ function renderBlockFields(
     case 'slick-experience-topics':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (before accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <Repeater<{ icon: string; iconShape: string; title: string }>
             label="Topics"
             items={(f.topics as { icon: string; iconShape: string; title: string }[]) ?? []}
@@ -3711,11 +3714,11 @@ function renderBlockFields(
                   <option value="square">Square</option>
                   <option value="diamond">Diamond</option>
                 </select>
-                <Textarea label="Title text" value={it.title} onChange={(x) => u({ ...it, title: x })} />
+                <RichTextInput label="Title text" {...richItemProps(it, 'title', u)} />
               </>
             )}
           />
-          <TextInput label="CTA label (**bold** supported)" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label (**bold** supported)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -3723,34 +3726,34 @@ function renderBlockFields(
     case 'slick-exp-two-ways':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading (white)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
-          <TextInput label="Heading (teal)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <Textarea label="Subtext" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Panel 1 — Immersive Sessions</p>
-          <TextInput label="Tab label" value={f.p1Tab as string ?? ''} onChange={(v) => set('p1Tab', v)} />
+          <RichFieldGroup label="Tab label" f={f} set={set} base="p1Tab" segments={[{ key: 'p1Tab' }]} />
           <TextInput label="Image 1 URL" value={f.p1Img1 as string ?? ''} onChange={(v) => set('p1Img1', v)} />
           <TextInput label="Image 2 URL" value={f.p1Img2 as string ?? ''} onChange={(v) => set('p1Img2', v)} />
           <TextInput label="Image 3 URL" value={f.p1Img3 as string ?? ''} onChange={(v) => set('p1Img3', v)} />
-          <Textarea label="Body text (**bold**=teal)" value={f.p1Body as string ?? ''} onChange={(v) => set('p1Body', v)} />
-          <Textarea label="Bullet 1" value={f.p1B1 as string ?? ''} onChange={(v) => set('p1B1', v)} />
-          <Textarea label="Bullet 2" value={f.p1B2 as string ?? ''} onChange={(v) => set('p1B2', v)} />
-          <Textarea label="Bullet 3" value={f.p1B3 as string ?? ''} onChange={(v) => set('p1B3', v)} />
-          <Textarea label="Bullet 4" value={f.p1B4 as string ?? ''} onChange={(v) => set('p1B4', v)} />
+          <RichFieldGroup label="Body text (**bold**=teal)" f={f} set={set} base="p1Body" segments={[{ key: 'p1Body' }]} />
+          <RichFieldGroup label="Bullet 1" f={f} set={set} base="p1B1" segments={[{ key: 'p1B1' }]} />
+          <RichFieldGroup label="Bullet 2" f={f} set={set} base="p1B2" segments={[{ key: 'p1B2' }]} />
+          <RichFieldGroup label="Bullet 3" f={f} set={set} base="p1B3" segments={[{ key: 'p1B3' }]} />
+          <RichFieldGroup label="Bullet 4" f={f} set={set} base="p1B4" segments={[{ key: 'p1B4' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Panel 2 — Leadership Workshops</p>
-          <TextInput label="Tab label" value={f.p2Tab as string ?? ''} onChange={(v) => set('p2Tab', v)} />
+          <RichFieldGroup label="Tab label" f={f} set={set} base="p2Tab" segments={[{ key: 'p2Tab' }]} />
           <TextInput label="Image 1 URL" value={f.p2Img1 as string ?? ''} onChange={(v) => set('p2Img1', v)} />
           <TextInput label="Image 2 URL" value={f.p2Img2 as string ?? ''} onChange={(v) => set('p2Img2', v)} />
           <TextInput label="Image 3 URL" value={f.p2Img3 as string ?? ''} onChange={(v) => set('p2Img3', v)} />
-          <Textarea label="Body text (**bold**=teal)" value={f.p2Body as string ?? ''} onChange={(v) => set('p2Body', v)} />
-          <Textarea label="Bullet 1" value={f.p2B1 as string ?? ''} onChange={(v) => set('p2B1', v)} />
-          <Textarea label="Bullet 2" value={f.p2B2 as string ?? ''} onChange={(v) => set('p2B2', v)} />
-          <Textarea label="Bullet 3" value={f.p2B3 as string ?? ''} onChange={(v) => set('p2B3', v)} />
-          <Textarea label="Bullet 4" value={f.p2B4 as string ?? ''} onChange={(v) => set('p2B4', v)} />
+          <RichFieldGroup label="Body text (**bold**=teal)" f={f} set={set} base="p2Body" segments={[{ key: 'p2Body' }]} />
+          <RichFieldGroup label="Bullet 1" f={f} set={set} base="p2B1" segments={[{ key: 'p2B1' }]} />
+          <RichFieldGroup label="Bullet 2" f={f} set={set} base="p2B2" segments={[{ key: 'p2B2' }]} />
+          <RichFieldGroup label="Bullet 3" f={f} set={set} base="p2B3" segments={[{ key: 'p2B3' }]} />
+          <RichFieldGroup label="Bullet 4" f={f} set={set} base="p2B4" segments={[{ key: 'p2B4' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA label (**bold**=dark)" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label (**bold**=dark)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -3758,10 +3761,10 @@ function renderBlockFields(
     case 'slick-exp-ai-stack':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading (white)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
-          <TextInput label="Heading (teal)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <Textarea label="Subtext" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           {([1,2,3,4,5,6] as const).map(n => (
             <div key={n} className="space-y-2">
@@ -3779,23 +3782,23 @@ function renderBlockFields(
     case 'slick-blogs-hero':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading prefix (dark)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading inline teal word" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <TextInput label="Heading line 2 (teal gradient)" value={f.headingLine2 as string ?? ''} onChange={(v) => set('headingLine2', v)} />
-          <Textarea label="Sub (before bold)" value={f.subNormal as string ?? ''} onChange={(v) => set('subNormal', v)} />
-          <TextInput label="Sub bold phrase" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Sub (after bold)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Heading Line2" f={f} set={set} base="headingLine2" segments={[{ key: 'headingLine2' }]} />
+          <RichFieldGroup label="Sub Normal" f={f} set={set} base="subNormal" segments={[{ key: 'subNormal' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
         </div>
       );
 
     case 'slick-careers-life':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (before accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <Repeater<{ url: string; alt: string; tall: boolean }>
             label="Photos"
             items={(f.photos as { url: string; alt: string; tall: boolean }[]) ?? []}
@@ -3819,10 +3822,10 @@ function renderBlockFields(
     case 'slick-careers-awards':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading prefix" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading tail" value={f.headingTail as string ?? ''} onChange={(v) => set('headingTail', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading prefix" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Tail" f={f} set={set} base="headingTail" segments={[{ key: 'headingTail' }]} />
           <Repeater<{ imgUrl: string; imgAlt: string; title: string }>
             label="Awards"
             items={(f.awards as { imgUrl: string; imgAlt: string; title: string }[]) ?? []}
@@ -3833,7 +3836,7 @@ function renderBlockFields(
               <>
                 <ImageField label="Award image URL" value={it.imgUrl} onChange={(x) => u({ ...it, imgUrl: x })} />
                 <TextInput label="Alt text" value={it.imgAlt} onChange={(x) => u({ ...it, imgAlt: x })} />
-                <TextInput label="Title" value={it.title} onChange={(x) => u({ ...it, title: x })} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
               </>
             )}
           />
@@ -3843,9 +3846,9 @@ function renderBlockFields(
     case 'slick-careers-process':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <p className="text-xs text-slate-400">Steps use built-in defaults. To customise, edit the component directly.</p>
         </div>
       );
@@ -3853,10 +3856,10 @@ function renderBlockFields(
     case 'slick-careers-expect':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (before accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <p className="text-xs text-slate-400">Cards use built-in defaults. To customise, edit the component directly.</p>
         </div>
       );
@@ -3864,10 +3867,10 @@ function renderBlockFields(
     case 'slick-careers-culture':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (before accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <p className="text-xs text-slate-400">Principle cards use built-in defaults. To customise, edit the component directly.</p>
         </div>
       );
@@ -3875,9 +3878,9 @@ function renderBlockFields(
     case 'slick-careers-about':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Body (use **bold** for bold words)" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Body (use **bold** for bold words)" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
         </div>
       );
 
@@ -3885,27 +3888,27 @@ function renderBlockFields(
     case 'slick-ab-hero-v2':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading line 1 (dark)" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
-          <TextInput label="Heading line 2 (teal)" value={f.headingLine2 as string ?? ''} onChange={(v) => set('headingLine2', v)} />
-          <Textarea label="Sub (before bold)" value={f.subNormal as string ?? ''} onChange={(v) => set('subNormal', v)} />
-          <TextInput label="Sub bold phrase" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Sub (after bold)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading line 1 (dark)" f={f} set={set} base="headingLine1" segments={[{ key: 'headingLine1' }]} />
+          <RichFieldGroup label="Heading line 2 (teal)" f={f} set={set} base="headingLine2" segments={[{ key: 'headingLine2' }]} />
+          <RichFieldGroup label="Sub Normal" f={f} set={set} base="subNormal" segments={[{ key: 'subNormal' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Stat 1 value" value={f.stat1Val as string ?? ''} onChange={(v) => set('stat1Val', v)} />
-          <TextInput label="Stat 1 label" value={f.stat1Label as string ?? ''} onChange={(v) => set('stat1Label', v)} />
-          <TextInput label="Stat 2 value" value={f.stat2Val as string ?? ''} onChange={(v) => set('stat2Val', v)} />
-          <TextInput label="Stat 2 label" value={f.stat2Label as string ?? ''} onChange={(v) => set('stat2Label', v)} />
-          <TextInput label="Stat 3 value" value={f.stat3Val as string ?? ''} onChange={(v) => set('stat3Val', v)} />
-          <TextInput label="Stat 3 label" value={f.stat3Label as string ?? ''} onChange={(v) => set('stat3Label', v)} />
-          <TextInput label="Stat 4 value" value={f.stat4Val as string ?? ''} onChange={(v) => set('stat4Val', v)} />
-          <TextInput label="Stat 4 label" value={f.stat4Label as string ?? ''} onChange={(v) => set('stat4Label', v)} />
+          <RichFieldGroup label="Stat 1 value" f={f} set={set} base="stat1Val" segments={[{ key: 'stat1Val' }]} />
+          <RichFieldGroup label="Stat 1 label" f={f} set={set} base="stat1Label" segments={[{ key: 'stat1Label' }]} />
+          <RichFieldGroup label="Stat 2 value" f={f} set={set} base="stat2Val" segments={[{ key: 'stat2Val' }]} />
+          <RichFieldGroup label="Stat 2 label" f={f} set={set} base="stat2Label" segments={[{ key: 'stat2Label' }]} />
+          <RichFieldGroup label="Stat 3 value" f={f} set={set} base="stat3Val" segments={[{ key: 'stat3Val' }]} />
+          <RichFieldGroup label="Stat 3 label" f={f} set={set} base="stat3Label" segments={[{ key: 'stat3Label' }]} />
+          <RichFieldGroup label="Stat 4 value" f={f} set={set} base="stat4Val" segments={[{ key: 'stat4Val' }]} />
+          <RichFieldGroup label="Stat 4 label" f={f} set={set} base="stat4Label" segments={[{ key: 'stat4Label' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Brands section label" value={f.brandsLabel as string ?? ''} onChange={(v) => set('brandsLabel', v)} />
+          <RichFieldGroup label="Brands section label" f={f} set={set} base="brandsLabel" segments={[{ key: 'brandsLabel' }]} />
           <ImageField label="Logo 1" value={f.logo1 as string ?? ''} onChange={(v) => set('logo1', v)} />
           <ImageField label="Logo 2" value={f.logo2 as string ?? ''} onChange={(v) => set('logo2', v)} />
           <ImageField label="Logo 3" value={f.logo3 as string ?? ''} onChange={(v) => set('logo3', v)} />
@@ -3920,10 +3923,10 @@ function renderBlockFields(
     case 'slick-clients-testimonials':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (dark)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <p className="text-xs text-slate-400">Testimonials use built-in defaults. To customise, edit the component directly.</p>
         </div>
       );
@@ -3931,10 +3934,10 @@ function renderBlockFields(
     case 'slick-clients-grid':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (dark)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle (use **bold** for bold)" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle (use **bold** for bold)" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <Repeater<{ url: string; alt: string }>
             label="Client logos"
             items={(f.logos as { url: string; alt: string }[]) ?? []}
@@ -3954,37 +3957,37 @@ function renderBlockFields(
     case 'slick-clients-hero':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading badge (highlighted word)" value={f.headingBadge as string ?? ''} onChange={(v) => set('headingBadge', v)} />
-          <TextInput label="Heading suffix (line 2)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Sub (before bold)" value={f.subNormal as string ?? ''} onChange={(v) => set('subNormal', v)} />
-          <TextInput label="Sub bold phrase" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Sub (after bold)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Badge" f={f} set={set} base="headingBadge" segments={[{ key: 'headingBadge' }]} />
+          <RichFieldGroup label="Heading Post" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Sub Normal" f={f} set={set} base="subNormal" segments={[{ key: 'subNormal' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Stat 1 value" value={f.stat1Val as string ?? ''} onChange={(v) => set('stat1Val', v)} />
-          <TextInput label="Stat 1 label" value={f.stat1Label as string ?? ''} onChange={(v) => set('stat1Label', v)} />
-          <TextInput label="Stat 2 value" value={f.stat2Val as string ?? ''} onChange={(v) => set('stat2Val', v)} />
-          <TextInput label="Stat 2 label" value={f.stat2Label as string ?? ''} onChange={(v) => set('stat2Label', v)} />
-          <TextInput label="Stat 3 value" value={f.stat3Val as string ?? ''} onChange={(v) => set('stat3Val', v)} />
-          <TextInput label="Stat 3 label" value={f.stat3Label as string ?? ''} onChange={(v) => set('stat3Label', v)} />
-          <TextInput label="Stat 4 value" value={f.stat4Val as string ?? ''} onChange={(v) => set('stat4Val', v)} />
-          <TextInput label="Stat 4 label" value={f.stat4Label as string ?? ''} onChange={(v) => set('stat4Label', v)} />
+          <RichFieldGroup label="Stat 1 value" f={f} set={set} base="stat1Val" segments={[{ key: 'stat1Val' }]} />
+          <RichFieldGroup label="Stat 1 label" f={f} set={set} base="stat1Label" segments={[{ key: 'stat1Label' }]} />
+          <RichFieldGroup label="Stat 2 value" f={f} set={set} base="stat2Val" segments={[{ key: 'stat2Val' }]} />
+          <RichFieldGroup label="Stat 2 label" f={f} set={set} base="stat2Label" segments={[{ key: 'stat2Label' }]} />
+          <RichFieldGroup label="Stat 3 value" f={f} set={set} base="stat3Val" segments={[{ key: 'stat3Val' }]} />
+          <RichFieldGroup label="Stat 3 label" f={f} set={set} base="stat3Label" segments={[{ key: 'stat3Label' }]} />
+          <RichFieldGroup label="Stat 4 value" f={f} set={set} base="stat4Val" segments={[{ key: 'stat4Val' }]} />
+          <RichFieldGroup label="Stat 4 label" f={f} set={set} base="stat4Label" segments={[{ key: 'stat4Label' }]} />
         </div>
       );
 
     case 'slick-ab-hero':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading suffix" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtext" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading suffix" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <TextInput label="Hero image URL" value={f.heroImageUrl as string ?? ''} onChange={(v) => set('heroImageUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Hero image alt text" value={f.heroImageAlt as string ?? ''} onChange={(v) => set('heroImageAlt', v)} />
@@ -3995,7 +3998,7 @@ function renderBlockFields(
             newItem={() => ({ label: 'New pill' })}
             itemPreview={(it) => it.label || '(untitled)'}
             renderItem={(it, u) => (
-              <TextInput label="Label" value={it.label ?? ''} onChange={(v) => u({ ...it, label: v })} />
+              <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
             )}
           />
         </div>
@@ -4005,19 +4008,19 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Mission row</p>
-          <TextInput label="Mission pill" value={f.missionPill as string ?? ''} onChange={(v) => set('missionPill', v)} />
-          <TextInput label="Heading prefix (dark)" value={f.missionHeadingPre as string ?? ''} onChange={(v) => set('missionHeadingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.missionHeadingTeal as string ?? ''} onChange={(v) => set('missionHeadingTeal', v)} />
-          <TextInput label="Heading suffix (dark)" value={f.missionHeadingTail as string ?? ''} onChange={(v) => set('missionHeadingTail', v)} />
-          <Textarea label="Sub text" value={f.missionSub as string ?? ''} onChange={(v) => set('missionSub', v)} />
+          <RichFieldGroup label="Mission pill" f={f} set={set} base="missionPill" segments={[{ key: 'missionPill' }]} />
+          <RichFieldGroup label="Mission Heading Pre" f={f} set={set} base="missionHeadingPre" segments={[{ key: 'missionHeadingPre' }]} />
+          <RichFieldGroup label="Mission Heading Teal" f={f} set={set} base="missionHeadingTeal" segments={[{ key: 'missionHeadingTeal' }]} />
+          <RichFieldGroup label="Mission Heading Tail" f={f} set={set} base="missionHeadingTail" segments={[{ key: 'missionHeadingTail' }]} />
+          <RichFieldGroup label="Sub text" f={f} set={set} base="missionSub" segments={[{ key: 'missionSub' }]} />
           <ImageField label="Mission image" value={f.missionImg as string ?? ''} onChange={(v) => set('missionImg', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Vision row</p>
-          <TextInput label="Vision pill" value={f.visionPill as string ?? ''} onChange={(v) => set('visionPill', v)} />
-          <TextInput label="Heading prefix (dark)" value={f.visionHeadingPre as string ?? ''} onChange={(v) => set('visionHeadingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.visionHeadingTeal as string ?? ''} onChange={(v) => set('visionHeadingTeal', v)} />
-          <TextInput label="Heading suffix (dark)" value={f.visionHeadingTail as string ?? ''} onChange={(v) => set('visionHeadingTail', v)} />
-          <Textarea label="Sub text" value={f.visionSub as string ?? ''} onChange={(v) => set('visionSub', v)} />
+          <RichFieldGroup label="Vision pill" f={f} set={set} base="visionPill" segments={[{ key: 'visionPill' }]} />
+          <RichFieldGroup label="Vision Heading Pre" f={f} set={set} base="visionHeadingPre" segments={[{ key: 'visionHeadingPre' }]} />
+          <RichFieldGroup label="Vision Heading Teal" f={f} set={set} base="visionHeadingTeal" segments={[{ key: 'visionHeadingTeal' }]} />
+          <RichFieldGroup label="Vision Heading Tail" f={f} set={set} base="visionHeadingTail" segments={[{ key: 'visionHeadingTail' }]} />
+          <RichFieldGroup label="Sub text" f={f} set={set} base="visionSub" segments={[{ key: 'visionSub' }]} />
           <ImageField label="Vision image" value={f.visionImg as string ?? ''} onChange={(v) => set('visionImg', v)} />
         </div>
       );
@@ -4025,25 +4028,25 @@ function renderBlockFields(
     case 'slick-ab-intro':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Paragraph — alternating normal / bold</p>
-          <TextInput label="Text 1 (normal)" value={f.textSeg1 as string ?? ''} onChange={(v) => set('textSeg1', v)} />
-          <TextInput label="Text 1 (bold)" value={f.textBold1 as string ?? ''} onChange={(v) => set('textBold1', v)} />
-          <TextInput label="Text 2 (normal)" value={f.textSeg2 as string ?? ''} onChange={(v) => set('textSeg2', v)} />
-          <Textarea label="Text 2 (bold)" value={f.textBold2 as string ?? ''} onChange={(v) => set('textBold2', v)} />
-          <TextInput label="Text 3 (normal)" value={f.textSeg3 as string ?? ''} onChange={(v) => set('textSeg3', v)} />
-          <TextInput label="Text 3 (bold)" value={f.textBold3 as string ?? ''} onChange={(v) => set('textBold3', v)} />
-          <TextInput label="Text 4 (normal)" value={f.textSeg4 as string ?? ''} onChange={(v) => set('textSeg4', v)} />
-          <TextInput label="Text 4 (bold)" value={f.textBold4 as string ?? ''} onChange={(v) => set('textBold4', v)} />
-          <TextInput label="Text 5 (normal)" value={f.textSeg5 as string ?? ''} onChange={(v) => set('textSeg5', v)} />
-          <TextInput label="Text 5 (bold)" value={f.textBold5 as string ?? ''} onChange={(v) => set('textBold5', v)} />
-          <TextInput label="Text 6 (normal)" value={f.textSeg6 as string ?? ''} onChange={(v) => set('textSeg6', v)} />
+          <RichFieldGroup label="Text 1 (normal)" f={f} set={set} base="textSeg1" segments={[{ key: 'textSeg1' }]} />
+          <RichFieldGroup label="Text 1 (bold)" f={f} set={set} base="textBold1" segments={[{ key: 'textBold1' }]} />
+          <RichFieldGroup label="Text 2 (normal)" f={f} set={set} base="textSeg2" segments={[{ key: 'textSeg2' }]} />
+          <RichFieldGroup label="Text 2 (bold)" f={f} set={set} base="textBold2" segments={[{ key: 'textBold2' }]} />
+          <RichFieldGroup label="Text 3 (normal)" f={f} set={set} base="textSeg3" segments={[{ key: 'textSeg3' }]} />
+          <RichFieldGroup label="Text 3 (bold)" f={f} set={set} base="textBold3" segments={[{ key: 'textBold3' }]} />
+          <RichFieldGroup label="Text 4 (normal)" f={f} set={set} base="textSeg4" segments={[{ key: 'textSeg4' }]} />
+          <RichFieldGroup label="Text 4 (bold)" f={f} set={set} base="textBold4" segments={[{ key: 'textBold4' }]} />
+          <RichFieldGroup label="Text 5 (normal)" f={f} set={set} base="textSeg5" segments={[{ key: 'textSeg5' }]} />
+          <RichFieldGroup label="Text 5 (bold)" f={f} set={set} base="textBold5" segments={[{ key: 'textBold5' }]} />
+          <RichFieldGroup label="Text 6 (normal)" f={f} set={set} base="textSeg6" segments={[{ key: 'textSeg6' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Video poster" value={f.posterUrl as string ?? ''} onChange={(v) => set('posterUrl', v)} />
           <TextInput label="Video URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -4051,10 +4054,10 @@ function renderBlockFields(
     case 'slick-ab-founder-banner':
       return (
         <div className="space-y-4">
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading bold" value={f.headingBold as string ?? ''} onChange={(v) => set('headingBold', v)} />
-          <TextInput label="Heading suffix" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtext" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Bold" f={f} set={set} base="headingBold" segments={[{ key: 'headingBold' }]} />
+          <RichFieldGroup label="Heading suffix" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<{ text: string; cls?: string }>
             label="Logos"
@@ -4064,8 +4067,8 @@ function renderBlockFields(
             itemPreview={(it) => it.text || '(untitled)'}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Text" value={it.text ?? ''} onChange={(v) => u({ ...it, text: v })} />
-                <TextInput label="CSS class (optional)" value={it.cls ?? ''} onChange={(v) => u({ ...it, cls: v })} />
+                <RichTextInput label="Text" {...richItemProps(it, 'text', u)} />
+                <RichTextInput label="CSS class (optional)" {...richItemProps(it, 'cls', u)} />
               </div>
             )}
           />
@@ -4077,9 +4080,9 @@ function renderBlockFields(
             itemPreview={(it) => `${it.n} ${it.l}`}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Prefix (optional)" value={it.pre ?? ''} onChange={(v) => u({ ...it, pre: v })} />
-                <TextInput label="Number" value={it.n ?? ''} onChange={(v) => u({ ...it, n: v })} />
-                <TextInput label="Label" value={it.l ?? ''} onChange={(v) => u({ ...it, l: v })} />
+                <RichTextInput label="Prefix (optional)" {...richItemProps(it, 'pre', u)} />
+                <RichTextInput label="Number" {...richItemProps(it, 'n', u)} />
+                <RichTextInput label="Label" {...richItemProps(it, 'l', u)} />
               </div>
             )}
           />
@@ -4097,9 +4100,9 @@ function renderBlockFields(
             itemPreview={(it) => `${it.num} ${it.label}`}
             renderItem={(item, update) => (
               <>
-                <TextInput label="Number" value={item.num ?? ''} onChange={(v) => update({ ...item, num: v })} />
-                <TextInput label="Label" value={item.label ?? ''} onChange={(v) => update({ ...item, label: v })} />
-                <TextInput label="Sub-label" value={item.sub ?? ''} onChange={(v) => update({ ...item, sub: v })} />
+                <RichTextInput label="Number" {...richItemProps(item, 'num', update)} />
+                <RichTextInput label="Label" {...richItemProps(item, 'label', update)} />
+                <RichTextInput label="Sub-label" {...richItemProps(item, 'sub', update)} />
               </>
             )}
           />
@@ -4109,16 +4112,16 @@ function renderBlockFields(
     case 'slick-ab-story':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Paragraph 1 (HTML)" value={f.p1 as string ?? ''} onChange={(v) => set('p1', v)} />
-          <Textarea label="Paragraph 2 (HTML)" value={f.p2 as string ?? ''} onChange={(v) => set('p2', v)} />
-          <Textarea label="Paragraph 3 (HTML)" value={f.p3 as string ?? ''} onChange={(v) => set('p3', v)} />
-          <Textarea label="Quote text" value={f.quoteText as string ?? ''} onChange={(v) => set('quoteText', v)} />
-          <TextInput label="Quote author name" value={f.quoteAuthorName as string ?? ''} onChange={(v) => set('quoteAuthorName', v)} />
-          <TextInput label="Quote author title" value={f.quoteAuthorTitle as string ?? ''} onChange={(v) => set('quoteAuthorTitle', v)} />
-          <TextInput label="Author initials" value={f.quoteAuthorInitials as string ?? ''} onChange={(v) => set('quoteAuthorInitials', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Paragraph 1 (HTML)" f={f} set={set} base="p1" segments={[{ key: 'p1' }]} />
+          <RichFieldGroup label="Paragraph 2 (HTML)" f={f} set={set} base="p2" segments={[{ key: 'p2' }]} />
+          <RichFieldGroup label="Paragraph 3 (HTML)" f={f} set={set} base="p3" segments={[{ key: 'p3' }]} />
+          <RichFieldGroup label="Quote text" f={f} set={set} base="quoteText" segments={[{ key: 'quoteText' }]} />
+          <RichFieldGroup label="Quote author name" f={f} set={set} base="quoteAuthorName" segments={[{ key: 'quoteAuthorName' }]} />
+          <RichFieldGroup label="Quote author title" f={f} set={set} base="quoteAuthorTitle" segments={[{ key: 'quoteAuthorTitle' }]} />
+          <RichFieldGroup label="Author initials" f={f} set={set} base="quoteAuthorInitials" segments={[{ key: 'quoteAuthorInitials' }]} />
         </div>
       );
 
@@ -4126,36 +4129,36 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <TextInput label="Video URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
-          <TextInput label="Aria label" value={f.ariaLabel as string ?? ''} onChange={(v) => set('ariaLabel', v)} />
+          <RichFieldGroup label="Aria label" f={f} set={set} base="ariaLabel" segments={[{ key: 'ariaLabel' }]} />
         </div>
       );
 
     case 'slick-ab-awards':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
         </div>
       );
 
     case 'slick-ab-founders-v2':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading (dark)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
-          <TextInput label="Heading (teal)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <Textarea label="Sub text" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Sub text" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Founder 1</p>
           <ImageField label="Photo" value={f.f1Photo as string ?? ''} onChange={(v) => set('f1Photo', v)} />
-          <TextInput label="Name" value={f.f1Name as string ?? ''} onChange={(v) => set('f1Name', v)} />
-          <TextInput label="Role" value={f.f1Role as string ?? ''} onChange={(v) => set('f1Role', v)} />
+          <RichFieldGroup label="Name" f={f} set={set} base="f1Name" segments={[{ key: 'f1Name' }]} />
+          <RichFieldGroup label="Role" f={f} set={set} base="f1Role" segments={[{ key: 'f1Role' }]} />
           <TextInput label="LinkedIn URL" value={f.f1LinkedIn as string ?? ''} onChange={(v) => set('f1LinkedIn', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Founder 2</p>
           <ImageField label="Photo" value={f.f2Photo as string ?? ''} onChange={(v) => set('f2Photo', v)} />
-          <TextInput label="Name" value={f.f2Name as string ?? ''} onChange={(v) => set('f2Name', v)} />
-          <TextInput label="Role" value={f.f2Role as string ?? ''} onChange={(v) => set('f2Role', v)} />
+          <RichFieldGroup label="Name" f={f} set={set} base="f2Name" segments={[{ key: 'f2Name' }]} />
+          <RichFieldGroup label="Role" f={f} set={set} base="f2Role" segments={[{ key: 'f2Role' }]} />
           <TextInput label="LinkedIn URL" value={f.f2LinkedIn as string ?? ''} onChange={(v) => set('f2LinkedIn', v)} />
         </div>
       );
@@ -4163,23 +4166,23 @@ function renderBlockFields(
     case 'slick-ab-founders':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subtext" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
         </div>
       );
 
     case 'slick-ab-investors':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subtext" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Show more label" value={f.toggleMoreLabel as string ?? ''} onChange={(v) => set('toggleMoreLabel', v)} />
-          <TextInput label="Show less label" value={f.toggleLessLabel as string ?? ''} onChange={(v) => set('toggleLessLabel', v)} />
-          <TextInput label="Biz team section label" value={f.bizTeamLabel as string ?? ''} onChange={(v) => set('bizTeamLabel', v)} />
-          <TextInput label="Tech team section label" value={f.techTeamLabel as string ?? ''} onChange={(v) => set('techTeamLabel', v)} />
+          <RichFieldGroup label="Show more label" f={f} set={set} base="toggleMoreLabel" segments={[{ key: 'toggleMoreLabel' }]} />
+          <RichFieldGroup label="Show less label" f={f} set={set} base="toggleLessLabel" segments={[{ key: 'toggleLessLabel' }]} />
+          <RichFieldGroup label="Biz team section label" f={f} set={set} base="bizTeamLabel" segments={[{ key: 'bizTeamLabel' }]} />
+          <RichFieldGroup label="Tech team section label" f={f} set={set} base="techTeamLabel" segments={[{ key: 'techTeamLabel' }]} />
           <Repeater<{ name: string; role: string; prevRole: string; linkedinUrl?: string }>
             label="Biz team members"
             items={(f.bizTeam as { name: string; role: string; prevRole: string; linkedinUrl?: string }[]) ?? []}
@@ -4188,9 +4191,9 @@ function renderBlockFields(
             itemPreview={(it) => it.name || '(untitled)'}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Name" value={it.name ?? ''} onChange={(v) => u({ ...it, name: v })} />
-                <TextInput label="Role" value={it.role ?? ''} onChange={(v) => u({ ...it, role: v })} />
-                <TextInput label="Previous role" value={it.prevRole ?? ''} onChange={(v) => u({ ...it, prevRole: v })} />
+                <RichTextInput label="Name" {...richItemProps(it, 'name', u)} />
+                <RichTextInput label="Role" {...richItemProps(it, 'role', u)} />
+                <RichTextInput label="Previous role" {...richItemProps(it, 'prevRole', u)} />
                 <TextInput label="LinkedIn URL" value={it.linkedinUrl ?? ''} onChange={(v) => u({ ...it, linkedinUrl: v })} />
               </div>
             )}
@@ -4203,9 +4206,9 @@ function renderBlockFields(
             itemPreview={(it) => it.name || '(untitled)'}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Name" value={it.name ?? ''} onChange={(v) => u({ ...it, name: v })} />
-                <TextInput label="Role" value={it.role ?? ''} onChange={(v) => u({ ...it, role: v })} />
-                <TextInput label="Previous role" value={it.prevRole ?? ''} onChange={(v) => u({ ...it, prevRole: v })} />
+                <RichTextInput label="Name" {...richItemProps(it, 'name', u)} />
+                <RichTextInput label="Role" {...richItemProps(it, 'role', u)} />
+                <RichTextInput label="Previous role" {...richItemProps(it, 'prevRole', u)} />
                 <TextInput label="LinkedIn URL" value={it.linkedinUrl ?? ''} onChange={(v) => u({ ...it, linkedinUrl: v })} />
               </div>
             )}
@@ -4216,10 +4219,10 @@ function renderBlockFields(
     case 'slick-ab-investors-v2':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading (white part)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
-          <TextInput label="Heading (teal part)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <Textarea label="Subtext" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           {([1,2,3,4,5,6,7,8,9,10] as const).map(n => (
             <div key={n} className="space-y-2">
@@ -4237,12 +4240,12 @@ function renderBlockFields(
     case 'slick-ab-team-section':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading (dark part)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
-          <TextInput label="Heading (teal part)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <Textarea label="Subtext" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Tech team label" value={f.techLabel as string ?? ''} onChange={(v) => set('techLabel', v)} />
-          <TextInput label="Biz team label" value={f.bizLabel as string ?? ''} onChange={(v) => set('bizLabel', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Tech team label" f={f} set={set} base="techLabel" segments={[{ key: 'techLabel' }]} />
+          <RichFieldGroup label="Biz team label" f={f} set={set} base="bizLabel" segments={[{ key: 'bizLabel' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Core Tech Team</p>
           {([1,2,3,4,5,6,7,8] as const).map(n => (
@@ -4273,11 +4276,11 @@ function renderBlockFields(
     case 'slick-ab-journey':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading part 1 (white)" value={f.headingPart1 as string ?? ''} onChange={(v) => set('headingPart1', v)} />
-          <TextInput label="Heading teal part" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <TextInput label="Heading part 2 (white)" value={f.headingPart2 as string ?? ''} onChange={(v) => set('headingPart2', v)} />
-          <Textarea label="Subtext" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Part1" f={f} set={set} base="headingPart1" segments={[{ key: 'headingPart1' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Heading Part2" f={f} set={set} base="headingPart2" segments={[{ key: 'headingPart2' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           {([1,2,3,4,5,6] as const).map(n => (
             <div key={n} className="space-y-2">
@@ -4294,9 +4297,9 @@ function renderBlockFields(
     case 'slick-ab-cta':
       return (
         <div className="space-y-4">
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subtext" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -4304,17 +4307,17 @@ function renderBlockFields(
     case 'slick-sc-hero-v2':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill prefix" value={f.pillPre as string ?? ''} onChange={(v) => set('pillPre', v)} />
-          <TextInput label="Pill bold (teal)" value={f.pillBold as string ?? ''} onChange={(v) => set('pillBold', v)} />
-          <TextInput label="Pill suffix" value={f.pillSuffix as string ?? ''} onChange={(v) => set('pillSuffix', v)} />
+          <RichFieldGroup label="Pill Pre" f={f} set={set} base="pillPre" segments={[{ key: 'pillPre' }]} />
+          <RichFieldGroup label="Pill Bold" f={f} set={set} base="pillBold" segments={[{ key: 'pillBold' }]} />
+          <RichFieldGroup label="Pill Suffix" f={f} set={set} base="pillSuffix" segments={[{ key: 'pillSuffix' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Heading line 1" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
-          <TextInput label="Heading line 2 prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading line 2 teal" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
+          <RichFieldGroup label="Heading Line1" f={f} set={set} base="headingLine1" segments={[{ key: 'headingLine1' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <Textarea label="Sub (use **text** for bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Sub (use **text** for bold)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Center image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
@@ -4325,16 +4328,16 @@ function renderBlockFields(
     case 'slick-sc-hero-v3':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Heading line 1" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <RichFieldGroup label="Heading Line1" f={f} set={set} base="headingLine1" segments={[{ key: 'headingLine1' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Sub normal text" value={f.subNormal as string ?? ''} onChange={(v) => set('subNormal', v)} />
-          <TextInput label="Sub bold text" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Sub tail text" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <RichFieldGroup label="Sub Normal" f={f} set={set} base="subNormal" segments={[{ key: 'subNormal' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Center image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
@@ -4347,12 +4350,12 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <ImageField label="Logo image" value={f.logoSrc as string ?? ''} onChange={(v) => set('logoSrc', v)} />
-          <TextInput label="CTA button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Solutions mega-menu</p>
-          <TextInput label="Footer note" value={f.footerNote as string ?? ''} onChange={(v) => set('footerNote', v)} />
-          <TextInput label="Browse-all label" value={f.browseAllLabel as string ?? ''} onChange={(v) => set('browseAllLabel', v)} />
+          <RichFieldGroup label="Footer note" f={f} set={set} base="footerNote" segments={[{ key: 'footerNote' }]} />
+          <RichFieldGroup label="Browse-all label" f={f} set={set} base="browseAllLabel" segments={[{ key: 'browseAllLabel' }]} />
           <TextInput label="Browse-all URL" value={f.browseAllUrl as string ?? ''} onChange={(v) => set('browseAllUrl', v)} />
           <Repeater<NavCat>
             label="Categories"
@@ -4362,8 +4365,8 @@ function renderBlockFields(
             itemPreview={(c) => c.label}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Label" value={c.label ?? ''} onChange={(v) => u({ ...c, label: v })} />
-                <TextInput label="Subtitle" value={c.sub ?? ''} onChange={(v) => u({ ...c, sub: v })} />
+                <RichTextInput label="Label" {...richItemProps(c, 'label', u)} />
+                <RichTextInput label="Subtitle" {...richItemProps(c, 'sub', u)} />
                 <TextInput label="Accent hex (e.g. #00a392)" value={c.accent ?? ''} onChange={(v) => u({ ...c, accent: v })} />
                 <TextInput label="Icon key (stack, users, handshake, scan, robot, puzzle, plug)" value={c.iconKey ?? ''} onChange={(v) => u({ ...c, iconKey: v })} />
                 <Toggle label="Flagship (star badge + divider after)" value={Boolean(c.flagship)} onChange={(v) => u({ ...c, flagship: v })} />
@@ -4375,8 +4378,8 @@ function renderBlockFields(
                   itemPreview={(it) => it.name}
                   renderItem={(it, ui) => (
                     <div className="space-y-2">
-                      <TextInput label="Name" value={it.name ?? ''} onChange={(v) => ui({ ...it, name: v })} />
-                      <TextInput label="Description" value={it.desc ?? ''} onChange={(v) => ui({ ...it, desc: v })} />
+                      <RichTextInput label="Name" {...richItemProps(it, 'name', ui)} />
+                      <RichTextInput label="Description" {...richItemProps(it, 'desc', ui)} />
                       <TextInput label="Link URL" value={it.href ?? ''} onChange={(v) => ui({ ...it, href: v })} />
                       <TextInput label="Icon key" value={it.iconKey ?? ''} onChange={(v) => ui({ ...it, iconKey: v })} />
                       <Toggle label="Show AI badge" value={Boolean(it.ai)} onChange={(v) => ui({ ...it, ai: v })} />
@@ -4393,17 +4396,17 @@ function renderBlockFields(
     case 'slick-sc-footer':
       return (
         <div className="space-y-4">
-          <TextInput label="CTA eyebrow" value={f.ctaEyebrow as string ?? ''} onChange={(v) => set('ctaEyebrow', v)} />
-          <TextInput label="CTA heading prefix" value={f.ctaHeadingPre as string ?? ''} onChange={(v) => set('ctaHeadingPre', v)} />
-          <TextInput label="CTA heading accent" value={f.ctaHeadingGrad as string ?? ''} onChange={(v) => set('ctaHeadingGrad', v)} />
-          <TextInput label="CTA heading suffix" value={f.ctaHeadingPost as string ?? ''} onChange={(v) => set('ctaHeadingPost', v)} />
-          <Textarea label="CTA subtext" value={f.ctaSub as string ?? ''} onChange={(v) => set('ctaSub', v)} />
-          <TextInput label="CTA button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA eyebrow" f={f} set={set} base="ctaEyebrow" segments={[{ key: 'ctaEyebrow' }]} />
+          <RichFieldGroup label="Cta Heading Pre" f={f} set={set} base="ctaHeadingPre" segments={[{ key: 'ctaHeadingPre' }]} />
+          <RichFieldGroup label="Cta Heading Grad" f={f} set={set} base="ctaHeadingGrad" segments={[{ key: 'ctaHeadingGrad' }]} />
+          <RichFieldGroup label="CTA heading suffix" f={f} set={set} base="ctaHeadingPost" segments={[{ key: 'ctaHeadingPost' }]} />
+          <RichFieldGroup label="CTA subtext" f={f} set={set} base="ctaSub" segments={[{ key: 'ctaSub' }]} />
+          <RichFieldGroup label="CTA button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Email" value={f.email as string ?? ''} onChange={(v) => set('email', v)} />
-          <TextInput label="Phone" value={f.phone as string ?? ''} onChange={(v) => set('phone', v)} />
-          <TextInput label="Phone hours" value={f.phoneHours as string ?? ''} onChange={(v) => set('phoneHours', v)} />
+          <RichFieldGroup label="Email" f={f} set={set} base="email" segments={[{ key: 'email' }]} />
+          <RichFieldGroup label="Phone" f={f} set={set} base="phone" segments={[{ key: 'phone' }]} />
+          <RichFieldGroup label="Phone hours" f={f} set={set} base="phoneHours" segments={[{ key: 'phoneHours' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="LinkedIn URL" value={f.linkedinUrl as string ?? ''} onChange={(v) => set('linkedinUrl', v)} />
           <TextInput label="X / Twitter URL" value={f.xUrl as string ?? ''} onChange={(v) => set('xUrl', v)} />
@@ -4411,7 +4414,7 @@ function renderBlockFields(
           <TextInput label="YouTube URL" value={f.youtubeUrl as string ?? ''} onChange={(v) => set('youtubeUrl', v)} />
           <TextInput label="Facebook URL" value={f.facebookUrl as string ?? ''} onChange={(v) => set('facebookUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Copyright text" value={f.copyright as string ?? ''} onChange={(v) => set('copyright', v)} />
+          <RichFieldGroup label="Copyright text" f={f} set={set} base="copyright" segments={[{ key: 'copyright' }]} />
         </div>
       );
 
@@ -4431,7 +4434,7 @@ function renderBlockFields(
             itemPreview={(l) => l.label}
             renderItem={(l, u) => (
               <div className="space-y-2">
-                <TextInput label="Label" value={l.label ?? ''} onChange={(v) => u({ ...l, label: v })} />
+                <RichTextInput label="Label" {...richItemProps(l, 'label', u)} />
                 <TextInput label="URL" value={l.href ?? ''} onChange={(v) => u({ ...l, href: v })} />
                 {withBadge && <TextInput label="Badge (new / hiring — optional)" value={l.badge ?? ''} onChange={(v) => u({ ...l, badge: v })} />}
               </div>
@@ -4441,19 +4444,19 @@ function renderBlockFields(
       );
       return (
         <div className="space-y-4">
-          <TextInput label="CTA badge" value={f.ctaBadge as string ?? ''} onChange={(v) => set('ctaBadge', v)} />
-          <TextInput label="CTA heading" value={f.ctaHeading as string ?? ''} onChange={(v) => set('ctaHeading', v)} />
-          <Textarea label="CTA body" value={f.ctaBody as string ?? ''} onChange={(v) => set('ctaBody', v)} />
-          <TextInput label="CTA button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA badge" f={f} set={set} base="ctaBadge" segments={[{ key: 'ctaBadge' }]} />
+          <RichFieldGroup label="CTA heading" f={f} set={set} base="ctaHeading" segments={[{ key: 'ctaHeading' }]} />
+          <RichFieldGroup label="CTA body" f={f} set={set} base="ctaBody" segments={[{ key: 'ctaBody' }]} />
+          <RichFieldGroup label="CTA button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Logo URL" value={f.logoSrc as string ?? ''} onChange={(v) => set('logoSrc', v)} />
-          <Textarea label="Tagline" value={f.tagline as string ?? ''} onChange={(v) => set('tagline', v)} />
+          <RichFieldGroup label="Tagline" f={f} set={set} base="tagline" segments={[{ key: 'tagline' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Phone" value={f.phone as string ?? ''} onChange={(v) => set('phone', v)} />
-          <TextInput label="Phone hours" value={f.phoneHours as string ?? ''} onChange={(v) => set('phoneHours', v)} />
-          <TextInput label="Email" value={f.email as string ?? ''} onChange={(v) => set('email', v)} />
-          <TextInput label="Email label" value={f.emailLabel as string ?? ''} onChange={(v) => set('emailLabel', v)} />
+          <RichFieldGroup label="Phone" f={f} set={set} base="phone" segments={[{ key: 'phone' }]} />
+          <RichFieldGroup label="Phone hours" f={f} set={set} base="phoneHours" segments={[{ key: 'phoneHours' }]} />
+          <RichFieldGroup label="Email" f={f} set={set} base="email" segments={[{ key: 'email' }]} />
+          <RichFieldGroup label="Email label" f={f} set={set} base="emailLabel" segments={[{ key: 'emailLabel' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           {linkColumn('Products', 'products', 'productsTitle', true)}
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -4461,7 +4464,7 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           {linkColumn('Company', 'company', 'companyTitle', true)}
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Social — column title" value={f.socialTitle as string ?? ''} onChange={(v) => set('socialTitle', v)} />
+          <RichFieldGroup label="Social — column title" f={f} set={set} base="socialTitle" segments={[{ key: 'socialTitle' }]} />
           <Repeater<SLink>
             label="Social links"
             items={(f.social as SLink[]) ?? []}
@@ -4471,13 +4474,13 @@ function renderBlockFields(
             renderItem={(s, u) => (
               <div className="space-y-2">
                 <TextInput label="Icon (li / ig / yt)" value={s.icon ?? ''} onChange={(v) => u({ ...s, icon: v })} />
-                <TextInput label="Label" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
+                <RichTextInput label="Label" {...richItemProps(s, 'label', u)} />
                 <TextInput label="URL" value={s.href ?? ''} onChange={(v) => u({ ...s, href: v })} />
               </div>
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Trust bar label" value={f.trustLabel as string ?? ''} onChange={(v) => set('trustLabel', v)} />
+          <RichFieldGroup label="Trust bar label" f={f} set={set} base="trustLabel" segments={[{ key: 'trustLabel' }]} />
           <Repeater<string>
             label="Trust pills"
             items={(f.trust as string[]) ?? []}
@@ -4487,7 +4490,7 @@ function renderBlockFields(
             renderItem={(t, u) => <TextInput label="Pill" value={t ?? ''} onChange={(v) => u(v)} />}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Copyright text" value={f.copyright as string ?? ''} onChange={(v) => set('copyright', v)} />
+          <RichFieldGroup label="Copyright text" f={f} set={set} base="copyright" segments={[{ key: 'copyright' }]} />
           <Repeater<FLink>
             label="Legal links (bottom bar)"
             items={(f.legal as FLink[]) ?? []}
@@ -4496,7 +4499,7 @@ function renderBlockFields(
             itemPreview={(l) => l.label}
             renderItem={(l, u) => (
               <div className="space-y-2">
-                <TextInput label="Label" value={l.label ?? ''} onChange={(v) => u({ ...l, label: v })} />
+                <RichTextInput label="Label" {...richItemProps(l, 'label', u)} />
                 <TextInput label="URL" value={l.href ?? ''} onChange={(v) => u({ ...l, href: v })} />
               </div>
             )}
@@ -4509,8 +4512,8 @@ function renderBlockFields(
       type OV2 = { city?: string; address?: string; icon?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<OV2>
             label="Offices"
@@ -4520,9 +4523,9 @@ function renderBlockFields(
             itemPreview={(o) => o.city || '(empty)'}
             renderItem={(o, u) => (
               <div className="space-y-2">
-                <TextInput label="City name (uppercase)" value={o.city ?? ''} onChange={(v) => u({ ...o, city: v })} />
+                <RichTextInput label="City name (uppercase)" {...richItemProps(o, 'city', u)} />
                 <TextInput label="Icon (dubai/auckland/mumbai/brazil/mexico/gurgaon)" value={o.icon ?? ''} onChange={(v) => u({ ...o, icon: v })} />
-                <TextInput label="Address" value={o.address ?? ''} onChange={(v) => u({ ...o, address: v })} />
+                <RichTextInput label="Address" {...richItemProps(o, 'address', u)} />
               </div>
             )}
           />
@@ -4533,31 +4536,31 @@ function renderBlockFields(
     case 'slick-offices':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading line 1" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
-          <TextInput label="Heading line 2 prefix" value={f.headingLine2Pre as string ?? ''} onChange={(v) => set('headingLine2Pre', v)} />
-          <TextInput label="Heading line 2 gradient" value={f.headingLine2Grad as string ?? ''} onChange={(v) => set('headingLine2Grad', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading line 1" f={f} set={set} base="headingLine1" segments={[{ key: 'headingLine1' }]} />
+          <RichFieldGroup label="Heading Line2 Pre" f={f} set={set} base="headingLine2Pre" segments={[{ key: 'headingLine2Pre' }]} />
+          <RichFieldGroup label="Heading Line2 Grad" f={f} set={set} base="headingLine2Grad" segments={[{ key: 'headingLine2Grad' }]} />
           <TextInput label="LinkedIn URL" value={f.linkedinUrl as string ?? ''} onChange={(v) => set('linkedinUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Get directions link label" value={f.directionsLabel as string ?? ''} onChange={(v) => set('directionsLabel', v)} />
-          <TextInput label="LinkedIn section title" value={f.linkedinTitle as string ?? ''} onChange={(v) => set('linkedinTitle', v)} />
-          <Textarea label="LinkedIn section description" value={f.linkedinDesc as string ?? ''} onChange={(v) => set('linkedinDesc', v)} />
-          <TextInput label="LinkedIn link label" value={f.linkedinLinkLabel as string ?? ''} onChange={(v) => set('linkedinLinkLabel', v)} />
+          <RichFieldGroup label="Get directions link label" f={f} set={set} base="directionsLabel" segments={[{ key: 'directionsLabel' }]} />
+          <RichFieldGroup label="LinkedIn section title" f={f} set={set} base="linkedinTitle" segments={[{ key: 'linkedinTitle' }]} />
+          <RichFieldGroup label="LinkedIn section description" f={f} set={set} base="linkedinDesc" segments={[{ key: 'linkedinDesc' }]} />
+          <RichFieldGroup label="LinkedIn link label" f={f} set={set} base="linkedinLinkLabel" segments={[{ key: 'linkedinLinkLabel' }]} />
         </div>
       );
 
     case 'slick-lets-talk':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Sub text" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Sub text" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Sub bold/gradient text" value={f.subCode as string ?? ''} onChange={(v) => set('subCode', v)} />
-          <TextInput label="Sub suffix text" value={f.subSuffix as string ?? ''} onChange={(v) => set('subSuffix', v)} />
+          <RichFieldGroup label="Sub bold/gradient text" f={f} set={set} base="subCode" segments={[{ key: 'subCode' }]} />
+          <RichFieldGroup label="Sub suffix text" f={f} set={set} base="subSuffix" segments={[{ key: 'subSuffix' }]} />
           <Repeater<string>
             label="Nav step labels"
             items={(f.navLabels as string[]) ?? []}
@@ -4569,9 +4572,9 @@ function renderBlockFields(
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Final card eyebrow" value={f.finalEyebrow as string ?? ''} onChange={(v) => set('finalEyebrow', v)} />
-          <TextInput label="Final card title" value={f.finalTitle as string ?? ''} onChange={(v) => set('finalTitle', v)} />
-          <Textarea label="Final card description" value={f.finalDesc as string ?? ''} onChange={(v) => set('finalDesc', v)} />
+          <RichFieldGroup label="Final card eyebrow" f={f} set={set} base="finalEyebrow" segments={[{ key: 'finalEyebrow' }]} />
+          <RichFieldGroup label="Final card title" f={f} set={set} base="finalTitle" segments={[{ key: 'finalTitle' }]} />
+          <RichFieldGroup label="Final card description" f={f} set={set} base="finalDesc" segments={[{ key: 'finalDesc' }]} />
         </div>
       );
 
@@ -4580,34 +4583,34 @@ function renderBlockFields(
         <div className="space-y-4">
           <TextInput label="HubSpot Portal ID" value={f.portalId as string ?? ''} onChange={(v) => set('portalId', v)} />
           <TextInput label="HubSpot Form ID (GUID)" value={f.formId as string ?? ''} onChange={(v) => set('formId', v)} />
-          <TextInput label="HubSpot Region (e.g. na1, eu1)" value={f.region as string ?? ''} onChange={(v) => set('region', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (gradient)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Lede" value={f.lede as string ?? ''} onChange={(v) => set('lede', v)} />
-          <TextInput label="Card title" value={f.cardTitle as string ?? ''} onChange={(v) => set('cardTitle', v)} />
-          <Textarea label="Card subtitle" value={f.cardSub as string ?? ''} onChange={(v) => set('cardSub', v)} />
+          <RichFieldGroup label="HubSpot Region (e.g. na1, eu1)" f={f} set={set} base="region" segments={[{ key: 'region' }]} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Lede" f={f} set={set} base="lede" segments={[{ key: 'lede' }]} />
+          <RichFieldGroup label="Card title" f={f} set={set} base="cardTitle" segments={[{ key: 'cardTitle' }]} />
+          <RichFieldGroup label="Card subtitle" f={f} set={set} base="cardSub" segments={[{ key: 'cardSub' }]} />
         </div>
       );
 
     case 'slick-contact':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading suffix" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Lede text" value={f.lede as string ?? ''} onChange={(v) => set('lede', v)} />
-          <TextInput label="Email" value={f.email as string ?? ''} onChange={(v) => set('email', v)} />
-          <TextInput label="Phone" value={f.phone as string ?? ''} onChange={(v) => set('phone', v)} />
-          <TextInput label="HQ" value={f.hq as string ?? ''} onChange={(v) => set('hq', v)} />
-          <TextInput label="Regional offices" value={f.regionalOffices as string ?? ''} onChange={(v) => set('regionalOffices', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading suffix" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Lede text" f={f} set={set} base="lede" segments={[{ key: 'lede' }]} />
+          <RichFieldGroup label="Email" f={f} set={set} base="email" segments={[{ key: 'email' }]} />
+          <RichFieldGroup label="Phone" f={f} set={set} base="phone" segments={[{ key: 'phone' }]} />
+          <RichFieldGroup label="HQ" f={f} set={set} base="hq" segments={[{ key: 'hq' }]} />
+          <RichFieldGroup label="Regional offices" f={f} set={set} base="regionalOffices" segments={[{ key: 'regionalOffices' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Form title" value={f.formTitle as string ?? ''} onChange={(v) => set('formTitle', v)} />
-          <Textarea label="Form sub" value={f.formSub as string ?? ''} onChange={(v) => set('formSub', v)} />
-          <TextInput label="Submit button label" value={f.submitLabel as string ?? ''} onChange={(v) => set('submitLabel', v)} />
-          <TextInput label="Success message" value={f.successMessage as string ?? ''} onChange={(v) => set('successMessage', v)} />
+          <RichFieldGroup label="Form title" f={f} set={set} base="formTitle" segments={[{ key: 'formTitle' }]} />
+          <RichFieldGroup label="Form sub" f={f} set={set} base="formSub" segments={[{ key: 'formSub' }]} />
+          <RichFieldGroup label="Submit button label" f={f} set={set} base="submitLabel" segments={[{ key: 'submitLabel' }]} />
+          <RichFieldGroup label="Success message" f={f} set={set} base="successMessage" segments={[{ key: 'successMessage' }]} />
           <Repeater<string>
             label="Product options"
             items={(f.productOptions as string[]) ?? []}
@@ -4629,29 +4632,29 @@ function renderBlockFields(
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Demo card title" value={f.demoTitle as string ?? ''} onChange={(v) => set('demoTitle', v)} />
-          <Textarea label="Demo card sub" value={f.demoSub as string ?? ''} onChange={(v) => set('demoSub', v)} />
-          <TextInput label="Contact rail heading" value={f.contactTitle as string ?? ''} onChange={(v) => set('contactTitle', v)} />
+          <RichFieldGroup label="Demo card title" f={f} set={set} base="demoTitle" segments={[{ key: 'demoTitle' }]} />
+          <RichFieldGroup label="Demo card sub" f={f} set={set} base="demoSub" segments={[{ key: 'demoSub' }]} />
+          <RichFieldGroup label="Contact rail heading" f={f} set={set} base="contactTitle" segments={[{ key: 'contactTitle' }]} />
         </div>
       );
 
     case 'slick-sc-video-showcase':
       return (
         <div className="space-y-4">
-          <TextInput label="Badge text" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
+          <RichFieldGroup label="Badge text" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (gradient)" value={f.headingGradient as string ?? ''} onChange={(v) => set('headingGradient', v)} />
-          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Gradient" f={f} set={set} base="headingGradient" segments={[{ key: 'headingGradient' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Subtitle normal text" value={f.subNormal as string ?? ''} onChange={(v) => set('subNormal', v)} />
-          <TextInput label="Subtitle bold text" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Subtitle tail text" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <RichFieldGroup label="Sub Normal" f={f} set={set} base="subNormal" segments={[{ key: 'subNormal' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Thumbnail image" value={f.thumbnailUrl as string ?? ''} onChange={(v) => set('thumbnailUrl', v)} />
           <TextInput label="Video URL (.mp4 / YouTube / Vimeo)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA label (prefix)" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label (prefix)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -4660,10 +4663,10 @@ function renderBlockFields(
       type SecBadge = { image?: string; alt?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (white)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<SecBadge>
             label="Certification badges"
@@ -4686,10 +4689,10 @@ function renderBlockFields(
       type ResultStat = { label?: string; value?: string; desc?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (dark)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<ResultStat>
             label="Stat cards"
@@ -4699,9 +4702,9 @@ function renderBlockFields(
             itemPreview={(s) => `${s.value ?? ''} — ${s.desc ?? '(empty)'}`}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Card label (e.g. Increase)" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
-                <TextInput label="Value (e.g. 2x)" value={s.value ?? ''} onChange={(v) => u({ ...s, value: v })} />
-                <TextInput label="Description" value={s.desc ?? ''} onChange={(v) => u({ ...s, desc: v })} />
+                <RichTextInput label="Card label (e.g. Increase)" {...richItemProps(s, 'label', u)} />
+                <RichTextInput label="Value (e.g. 2x)" {...richItemProps(s, 'value', u)} />
+                <RichTextInput label="Description" {...richItemProps(s, 'desc', u)} />
               </div>
             )}
           />
@@ -4713,8 +4716,8 @@ function renderBlockFields(
       type SBItem = { value?: string; label?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow (badge)" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Eyebrow (badge)" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<SBItem>
             label="Stats"
@@ -4724,8 +4727,8 @@ function renderBlockFields(
             itemPreview={(s) => `${s.value ?? ''} — ${s.label ?? '(empty)'}`}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Value (e.g. 95%+)" value={s.value ?? ''} onChange={(v) => u({ ...s, value: v })} />
-                <TextInput label="Label" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
+                <RichTextInput label="Value (e.g. 95%+)" {...richItemProps(s, 'value', u)} />
+                <RichTextInput label="Label" {...richItemProps(s, 'label', u)} />
               </div>
             )}
           />
@@ -4738,10 +4741,10 @@ function renderBlockFields(
       type MTab = { label?: string; headingPre?: string; headingAccent?: string; body?: string; bigValue?: string; bigLabel?: string; rows?: MRow[]; imageUrl?: string; imageAlt?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow (badge)" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Eyebrow (badge)" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<MTab>
             label="Tabs"
@@ -4751,12 +4754,12 @@ function renderBlockFields(
             itemPreview={(t) => t.label || '(tab)'}
             renderItem={(t, u) => (
               <div className="space-y-2">
-                <TextInput label="Tab label" value={t.label ?? ''} onChange={(v) => u({ ...t, label: v })} />
-                <TextInput label="Panel heading prefix" value={t.headingPre ?? ''} onChange={(v) => u({ ...t, headingPre: v })} />
-                <TextInput label="Panel heading accent (teal)" value={t.headingAccent ?? ''} onChange={(v) => u({ ...t, headingAccent: v })} />
-                <Textarea label="Body" value={t.body ?? ''} onChange={(v) => u({ ...t, body: v })} />
-                <TextInput label="Big value (e.g. 95%+)" value={t.bigValue ?? ''} onChange={(v) => u({ ...t, bigValue: v })} />
-                <TextInput label="Big value label" value={t.bigLabel ?? ''} onChange={(v) => u({ ...t, bigLabel: v })} />
+                <RichTextInput label="Tab label" {...richItemProps(t, 'label', u)} />
+                <RichTextInput label="Panel heading prefix" {...richItemProps(t, 'headingPre', u)} />
+                <RichTextInput label="Panel heading accent (teal)" {...richItemProps(t, 'headingAccent', u)} />
+                <RichTextInput label="Body" {...richItemProps(t, 'body', u)} />
+                <RichTextInput label="Big value (e.g. 95%+)" {...richItemProps(t, 'bigValue', u)} />
+                <RichTextInput label="Big value label" {...richItemProps(t, 'bigLabel', u)} />
                 <ImageField label="Panel image" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
                 <TextInput label="Image alt / placeholder caption" value={t.imageAlt ?? ''} onChange={(v) => u({ ...t, imageAlt: v })} />
                 <Repeater<MRow>
@@ -4767,10 +4770,10 @@ function renderBlockFields(
                   itemPreview={(r) => `${r.kPre ?? ''}${r.kHl ?? ''}${r.kPost ?? ''}`.trim() || '(row)'}
                   renderItem={(r, ur) => (
                     <div className="space-y-2">
-                      <TextInput label="Label — before highlight" value={r.kPre ?? ''} onChange={(v) => ur({ ...r, kPre: v })} />
-                      <TextInput label="Label — highlighted (teal)" value={r.kHl ?? ''} onChange={(v) => ur({ ...r, kHl: v })} />
-                      <TextInput label="Label — after highlight" value={r.kPost ?? ''} onChange={(v) => ur({ ...r, kPost: v })} />
-                      <TextInput label="Sub value" value={r.v ?? ''} onChange={(v) => ur({ ...r, v: v })} />
+                      <RichTextInput label="Label — before highlight" {...richItemProps(r, 'kPre', ur)} />
+                      <RichTextInput label="Label — highlighted (teal)" {...richItemProps(r, 'kHl', ur)} />
+                      <RichTextInput label="Label — after highlight" {...richItemProps(r, 'kPost', ur)} />
+                      <RichTextInput label="Sub value" {...richItemProps(r, 'v', ur)} />
                     </div>
                   )}
                 />
@@ -4785,10 +4788,10 @@ function renderBlockFields(
       type SVSCard = { title?: string; sub?: string; accuracy?: string; img?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading prefix (dark)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<SVSCard>
             label="Cards"
@@ -4798,9 +4801,9 @@ function renderBlockFields(
             itemPreview={(c) => c.title || '(card)'}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <TextInput label="Sub (e.g. 28 SKUs detected)" value={c.sub ?? ''} onChange={(v) => u({ ...c, sub: v })} />
-                <TextInput label="Accuracy badge (e.g. 89%)" value={c.accuracy ?? ''} onChange={(v) => u({ ...c, accuracy: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Sub (e.g. 28 SKUs detected)" {...richItemProps(c, 'sub', u)} />
+                <RichTextInput label="Accuracy badge (e.g. 89%)" {...richItemProps(c, 'accuracy', u)} />
                 <ImageField label="Card image" value={c.img ?? ''} onChange={(v) => u({ ...c, img: v })} />
               </div>
             )}
@@ -4815,11 +4818,11 @@ function renderBlockFields(
       type SVCRow = { badge?: string; headingPre?: string; headingGrad?: string; headingSuffix?: string; body?: string; tags?: string[]; img?: string; imgRight?: boolean };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading line 1 (dark)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading line 2 (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<SVCRow>
@@ -4830,11 +4833,11 @@ function renderBlockFields(
             itemPreview={(r) => r.badge || '(row)'}
             renderItem={(r, u) => (
               <div className="space-y-2">
-                <TextInput label="Badge label" value={r.badge ?? ''} onChange={(v) => u({ ...r, badge: v })} />
-                <TextInput label="Heading prefix (dark)" value={r.headingPre ?? ''} onChange={(v) => u({ ...r, headingPre: v })} />
-                <TextInput label="Heading gradient (teal)" value={r.headingGrad ?? ''} onChange={(v) => u({ ...r, headingGrad: v })} />
-                <TextInput label="Heading suffix (dark)" value={r.headingSuffix ?? ''} onChange={(v) => u({ ...r, headingSuffix: v })} />
-                <Textarea label="Body text" value={r.body ?? ''} onChange={(v) => u({ ...r, body: v })} />
+                <RichTextInput label="Badge label" {...richItemProps(r, 'badge', u)} />
+                <RichTextInput label="Heading prefix (dark)" {...richItemProps(r, 'headingPre', u)} />
+                <RichTextInput label="Heading gradient (teal)" {...richItemProps(r, 'headingGrad', u)} />
+                <RichTextInput label="Heading suffix (dark)" {...richItemProps(r, 'headingSuffix', u)} />
+                <RichTextInput label="Body text" {...richItemProps(r, 'body', u)} />
                 <Textarea label="Tags (one per line)" value={(r.tags ?? []).join('\n')} onChange={(v) => u({ ...r, tags: v.split('\n').filter(Boolean) })} />
                 <ImageField label="Row image" value={r.img ?? ''} onChange={(v) => u({ ...r, img: v })} />
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#94a3b8', cursor: 'pointer' }}>
@@ -4853,10 +4856,10 @@ function renderBlockFields(
       type SVPTab = { label?: string; headingGrad1?: string; headingMid?: string; headingGrad2?: string; headingSuffix?: string; body?: string; bigStat?: string; bigStatLabel?: string; metrics?: SVPMetric[] };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading prefix (white)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<SVPTab>
             label="Tabs"
@@ -4866,14 +4869,14 @@ function renderBlockFields(
             itemPreview={(t) => t.label || '(unnamed)'}
             renderItem={(t, u) => (
               <div className="space-y-2">
-                <TextInput label="Tab label" value={t.label ?? ''} onChange={(v) => u({ ...t, label: v })} />
-                <TextInput label="Heading teal word 1" value={t.headingGrad1 ?? ''} onChange={(v) => u({ ...t, headingGrad1: v })} />
-                <TextInput label="Heading middle text" value={t.headingMid ?? ''} onChange={(v) => u({ ...t, headingMid: v })} />
-                <TextInput label="Heading teal word 2" value={t.headingGrad2 ?? ''} onChange={(v) => u({ ...t, headingGrad2: v })} />
-                <TextInput label="Heading suffix (white)" value={t.headingSuffix ?? ''} onChange={(v) => u({ ...t, headingSuffix: v })} />
-                <Textarea label="Body text" value={t.body ?? ''} onChange={(v) => u({ ...t, body: v })} />
-                <TextInput label="Big stat" value={t.bigStat ?? ''} onChange={(v) => u({ ...t, bigStat: v })} />
-                <TextInput label="Big stat label" value={t.bigStatLabel ?? ''} onChange={(v) => u({ ...t, bigStatLabel: v })} />
+                <RichTextInput label="Tab label" {...richItemProps(t, 'label', u)} />
+                <RichTextInput label="Heading teal word 1" {...richItemProps(t, 'headingGrad1', u)} />
+                <RichTextInput label="Heading middle text" {...richItemProps(t, 'headingMid', u)} />
+                <RichTextInput label="Heading teal word 2" {...richItemProps(t, 'headingGrad2', u)} />
+                <RichTextInput label="Heading suffix (white)" {...richItemProps(t, 'headingSuffix', u)} />
+                <RichTextInput label="Body text" {...richItemProps(t, 'body', u)} />
+                <RichTextInput label="Big stat" {...richItemProps(t, 'bigStat', u)} />
+                <RichTextInput label="Big stat label" {...richItemProps(t, 'bigStatLabel', u)} />
                 <Repeater<SVPMetric>
                   label="Metrics"
                   items={t.metrics ?? []}
@@ -4882,9 +4885,9 @@ function renderBlockFields(
                   itemPreview={(m) => m.boldWord || '(metric)'}
                   renderItem={(m, um) => (
                     <div className="space-y-1">
-                      <TextInput label="Bold word (teal)" value={m.boldWord ?? ''} onChange={(v) => um({ ...m, boldWord: v })} />
-                      <TextInput label="Label (white)" value={m.label ?? ''} onChange={(v) => um({ ...m, label: v })} />
-                      <TextInput label="Value (grey)" value={m.value ?? ''} onChange={(v) => um({ ...m, value: v })} />
+                      <RichTextInput label="Bold word (teal)" {...richItemProps(m, 'boldWord', um)} />
+                      <RichTextInput label="Label (white)" {...richItemProps(m, 'label', um)} />
+                      <RichTextInput label="Value (grey)" {...richItemProps(m, 'value', um)} />
                     </div>
                   )}
                 />
@@ -4899,17 +4902,17 @@ function renderBlockFields(
       type SVRLStat = { stat?: string; label?: string; badge?: string; icon?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading line 1 (dark)" value={f.headingPre1 as string ?? ''} onChange={(v) => set('headingPre1', v)} />
-          <TextInput label="Heading line 2 prefix (dark)" value={f.headingPre2 as string ?? ''} onChange={(v) => set('headingPre2', v)} />
-          <TextInput label="Heading gradient (red)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subtitle (\\n for line break)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading line 1 (dark)" f={f} set={set} base="headingPre1" segments={[{ key: 'headingPre1' }]} />
+          <RichFieldGroup label="Heading Pre2" f={f} set={set} base="headingPre2" segments={[{ key: 'headingPre2' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Subtitle (\\n for line break)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Donut centre value" value={f.donutCenter as string ?? ''} onChange={(v) => set('donutCenter', v)} />
-          <TextInput label="Donut centre label" value={f.donutLabel as string ?? ''} onChange={(v) => set('donutLabel', v)} />
+          <RichFieldGroup label="Donut centre value" f={f} set={set} base="donutCenter" segments={[{ key: 'donutCenter' }]} />
+          <RichFieldGroup label="Donut centre label" f={f} set={set} base="donutLabel" segments={[{ key: 'donutLabel' }]} />
           <TextInput label="Loss percent (number)" value={String(f.lossPercent ?? 25)} onChange={(v) => set('lossPercent', Number(v) || 25)} />
-          <TextInput label="Legend — capture label" value={f.captureLabel as string ?? ''} onChange={(v) => set('captureLabel', v)} />
-          <TextInput label="Legend — loss label" value={f.lossLabel as string ?? ''} onChange={(v) => set('lossLabel', v)} />
+          <RichFieldGroup label="Legend — capture label" f={f} set={set} base="captureLabel" segments={[{ key: 'captureLabel' }]} />
+          <RichFieldGroup label="Legend — loss label" f={f} set={set} base="lossLabel" segments={[{ key: 'lossLabel' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<SVRLStat>
             label="Stat rows"
@@ -4919,9 +4922,9 @@ function renderBlockFields(
             itemPreview={(s) => s.stat || '(unnamed)'}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Stat value" value={s.stat ?? ''} onChange={(v) => u({ ...s, stat: v })} />
-                <TextInput label="Label" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
-                <TextInput label="Badge text" value={s.badge ?? ''} onChange={(v) => u({ ...s, badge: v })} />
+                <RichTextInput label="Stat value" {...richItemProps(s, 'stat', u)} />
+                <RichTextInput label="Label" {...richItemProps(s, 'label', u)} />
+                <RichTextInput label="Badge text" {...richItemProps(s, 'badge', u)} />
                 <TextInput label="Icon (clipboard/eye/clock/alert)" value={s.icon ?? ''} onChange={(v) => u({ ...s, icon: v })} />
               </div>
             )}
@@ -4934,11 +4937,11 @@ function renderBlockFields(
       type SCAIVACard = { title?: string; description?: string; img?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading line 1 (dark)" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading suffix (dark)" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading line 1 (dark)" f={f} set={set} base="headingLine1" segments={[{ key: 'headingLine1' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<SCAIVACard>
             label="Cards"
@@ -4948,8 +4951,8 @@ function renderBlockFields(
             itemPreview={(c) => c.title || '(unnamed)'}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Description" value={c.description ?? ''} onChange={(v) => u({ ...c, description: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(c, 'description', u)} />
                 <ImageField label="Card image" value={c.img ?? ''} onChange={(v) => u({ ...c, img: v })} />
               </div>
             )}
@@ -4962,12 +4965,12 @@ function renderBlockFields(
       type SCAIVITab = { label?: string; tag?: string; headingGrad?: string; headingSuffix?: string; body?: string; bullets?: string[]; whyHeading?: string; whyPre?: string; whyBold?: string; whyTail?: string; img?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading prefix (line 1)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (line 1)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading prefix (line 2)" value={f.headingPre2 as string ?? ''} onChange={(v) => set('headingPre2', v)} />
-          <TextInput label="Heading gradient (line 2)" value={f.headingGrad2 as string ?? ''} onChange={(v) => set('headingGrad2', v)} />
-          <Textarea label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading Pre2" f={f} set={set} base="headingPre2" segments={[{ key: 'headingPre2' }]} />
+          <RichFieldGroup label="Heading Grad2" f={f} set={set} base="headingGrad2" segments={[{ key: 'headingGrad2' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<SCAIVITab>
             label="Tabs"
@@ -4977,16 +4980,16 @@ function renderBlockFields(
             itemPreview={(t) => t.label || '(unnamed)'}
             renderItem={(t, u) => (
               <div className="space-y-2">
-                <TextInput label="Tab label" value={t.label ?? ''} onChange={(v) => u({ ...t, label: v })} />
-                <TextInput label="Tag badge" value={t.tag ?? ''} onChange={(v) => u({ ...t, tag: v })} />
-                <TextInput label="Heading (teal part)" value={t.headingGrad ?? ''} onChange={(v) => u({ ...t, headingGrad: v })} />
-                <TextInput label="Heading (dark suffix)" value={t.headingSuffix ?? ''} onChange={(v) => u({ ...t, headingSuffix: v })} />
-                <Textarea label="Body text" value={t.body ?? ''} onChange={(v) => u({ ...t, body: v })} />
+                <RichTextInput label="Tab label" {...richItemProps(t, 'label', u)} />
+                <RichTextInput label="Tag badge" {...richItemProps(t, 'tag', u)} />
+                <RichTextInput label="Heading (teal part)" {...richItemProps(t, 'headingGrad', u)} />
+                <RichTextInput label="Heading (dark suffix)" {...richItemProps(t, 'headingSuffix', u)} />
+                <RichTextInput label="Body text" {...richItemProps(t, 'body', u)} />
                 <Textarea label="Bullets (one per line)" value={(t.bullets ?? []).join('\n')} onChange={(v) => u({ ...t, bullets: v.split('\n').filter(Boolean) })} />
-                <TextInput label="Why heading" value={t.whyHeading ?? ''} onChange={(v) => u({ ...t, whyHeading: v })} />
-                <TextInput label="Why — text before bold" value={t.whyPre ?? ''} onChange={(v) => u({ ...t, whyPre: v })} />
-                <TextInput label="Why — bold text" value={t.whyBold ?? ''} onChange={(v) => u({ ...t, whyBold: v })} />
-                <TextInput label="Why — text after bold" value={t.whyTail ?? ''} onChange={(v) => u({ ...t, whyTail: v })} />
+                <RichTextInput label="Why heading" {...richItemProps(t, 'whyHeading', u)} />
+                <RichTextInput label="Why — text before bold" {...richItemProps(t, 'whyPre', u)} />
+                <RichTextInput label="Why — bold text" {...richItemProps(t, 'whyBold', u)} />
+                <RichTextInput label="Why — text after bold" {...richItemProps(t, 'whyTail', u)} />
                 <ImageField label="Tab image (right panel)" value={t.img ?? ''} onChange={(v) => u({ ...t, img: v })} />
               </div>
             )}
@@ -4998,19 +5001,19 @@ function renderBlockFields(
     case 'slick-scai-vision-hero':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Sub — before first bold" value={f.subPre as string ?? ''} onChange={(v) => set('subPre', v)} />
-          <TextInput label="Sub — bold 1" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Sub — middle text" value={f.subMid as string ?? ''} onChange={(v) => set('subMid', v)} />
-          <TextInput label="Sub — bold 2" value={f.subBold2 as string ?? ''} onChange={(v) => set('subBold2', v)} />
-          <TextInput label="Sub — tail text" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <RichFieldGroup label="Sub Pre" f={f} set={set} base="subPre" segments={[{ key: 'subPre' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Mid" f={f} set={set} base="subMid" segments={[{ key: 'subMid' }]} />
+          <RichFieldGroup label="Sub Bold2" f={f} set={set} base="subBold2" segments={[{ key: 'subBold2' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Centre phone" value={f.imgPhone as string ?? ''} onChange={(v) => set('imgPhone', v)} />
@@ -5018,21 +5021,21 @@ function renderBlockFields(
           <ImageField label="Bottom-right card (Task completed)" value={f.imgBottomRight as string ?? ''} onChange={(v) => set('imgBottomRight', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Floating chips</p>
-          <TextInput label="Chip 1 — value" value={f.chip1Val as string ?? ''} onChange={(v) => set('chip1Val', v)} />
-          <TextInput label="Chip 1 — unit (teal)" value={f.chip1Unit as string ?? ''} onChange={(v) => set('chip1Unit', v)} />
-          <TextInput label="Chip 1 — label" value={f.chip1Lbl as string ?? ''} onChange={(v) => set('chip1Lbl', v)} />
+          <RichFieldGroup label="Chip 1 — value" f={f} set={set} base="chip1Val" segments={[{ key: 'chip1Val' }]} />
+          <RichFieldGroup label="Chip 1 — unit (teal)" f={f} set={set} base="chip1Unit" segments={[{ key: 'chip1Unit' }]} />
+          <RichFieldGroup label="Chip 1 — label" f={f} set={set} base="chip1Lbl" segments={[{ key: 'chip1Lbl' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Chip 2 — value" value={f.chip2Val as string ?? ''} onChange={(v) => set('chip2Val', v)} />
-          <TextInput label="Chip 2 — unit (teal)" value={f.chip2Unit as string ?? ''} onChange={(v) => set('chip2Unit', v)} />
-          <TextInput label="Chip 2 — label" value={f.chip2Lbl as string ?? ''} onChange={(v) => set('chip2Lbl', v)} />
+          <RichFieldGroup label="Chip 2 — value" f={f} set={set} base="chip2Val" segments={[{ key: 'chip2Val' }]} />
+          <RichFieldGroup label="Chip 2 — unit (teal)" f={f} set={set} base="chip2Unit" segments={[{ key: 'chip2Unit' }]} />
+          <RichFieldGroup label="Chip 2 — label" f={f} set={set} base="chip2Lbl" segments={[{ key: 'chip2Lbl' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Chip 3 — value" value={f.chip3Val as string ?? ''} onChange={(v) => set('chip3Val', v)} />
-          <TextInput label="Chip 3 — unit (teal)" value={f.chip3Unit as string ?? ''} onChange={(v) => set('chip3Unit', v)} />
-          <TextInput label="Chip 3 — label" value={f.chip3Lbl as string ?? ''} onChange={(v) => set('chip3Lbl', v)} />
+          <RichFieldGroup label="Chip 3 — value" f={f} set={set} base="chip3Val" segments={[{ key: 'chip3Val' }]} />
+          <RichFieldGroup label="Chip 3 — unit (teal)" f={f} set={set} base="chip3Unit" segments={[{ key: 'chip3Unit' }]} />
+          <RichFieldGroup label="Chip 3 — label" f={f} set={set} base="chip3Lbl" segments={[{ key: 'chip3Lbl' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Chip 4 — value" value={f.chip4Val as string ?? ''} onChange={(v) => set('chip4Val', v)} />
-          <TextInput label="Chip 4 — unit (teal)" value={f.chip4Unit as string ?? ''} onChange={(v) => set('chip4Unit', v)} />
-          <TextInput label="Chip 4 — label" value={f.chip4Lbl as string ?? ''} onChange={(v) => set('chip4Lbl', v)} />
+          <RichFieldGroup label="Chip 4 — value" f={f} set={set} base="chip4Val" segments={[{ key: 'chip4Val' }]} />
+          <RichFieldGroup label="Chip 4 — unit (teal)" f={f} set={set} base="chip4Unit" segments={[{ key: 'chip4Unit' }]} />
+          <RichFieldGroup label="Chip 4 — label" f={f} set={set} base="chip4Lbl" segments={[{ key: 'chip4Lbl' }]} />
         </div>
       );
 
@@ -5041,13 +5044,13 @@ function renderBlockFields(
       type WALang = { label: string; flag: string; thumbnailUrl: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading white" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
-          <TextInput label="Tagline accent (teal)" value={f.taglineAccent as string ?? ''} onChange={(v) => set('taglineAccent', v)} />
-          <TextInput label="Tagline rest" value={f.taglineRest as string ?? ''} onChange={(v) => set('taglineRest', v)} />
-          <TextInput label="Primary CTA label" value={f.primaryCtaLabel as string ?? ''} onChange={(v) => set('primaryCtaLabel', v)} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Tagline Accent" f={f} set={set} base="taglineAccent" segments={[{ key: 'taglineAccent' }]} />
+          <RichFieldGroup label="Tagline Rest" f={f} set={set} base="taglineRest" segments={[{ key: 'taglineRest' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="primaryCtaLabel" segments={[{ key: 'primaryCtaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.primaryCtaUrl as string ?? ''} onChange={(v) => set('primaryCtaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ghostCtaLabel as string ?? ''} onChange={(v) => set('ghostCtaLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ghostCtaLabel" segments={[{ key: 'ghostCtaLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ghostCtaUrl as string ?? ''} onChange={(v) => set('ghostCtaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<WABullet>
@@ -5058,8 +5061,8 @@ function renderBlockFields(
             itemPreview={(b) => b.text.slice(0, 40) || '(empty)'}
             renderItem={(b, u) => (
               <div className="space-y-2">
-                <TextInput label="Text" value={b.text} onChange={(v) => u({ ...b, text: v })} />
-                <TextInput label="Highlight (teal)" value={b.highlight ?? ''} onChange={(v) => u({ ...b, highlight: v })} />
+                <RichTextInput label="Text" {...richItemProps(b, 'text', u)} />
+                <RichTextInput label="Highlight (teal)" {...richItemProps(b, 'highlight', u)} />
               </div>
             )}
           />
@@ -5072,8 +5075,8 @@ function renderBlockFields(
             itemPreview={(l) => `${l.flag} ${l.label}`}
             renderItem={(l, u) => (
               <div className="space-y-2">
-                <TextInput label="Flag emoji" value={l.flag} onChange={(v) => u({ ...l, flag: v })} />
-                <TextInput label="Label" value={l.label} onChange={(v) => u({ ...l, label: v })} />
+                <RichTextInput label="Flag emoji" {...richItemProps(l, 'flag', u)} />
+                <RichTextInput label="Label" {...richItemProps(l, 'label', u)} />
                 <ImageField label="Thumbnail" value={l.thumbnailUrl} onChange={(v) => u({ ...l, thumbnailUrl: v })} />
               </div>
             )}
@@ -5086,9 +5089,9 @@ function renderBlockFields(
       type HoardImg = { url?: string; alt?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading — part 1 (teal)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading — part 2 (navy)" value={f.headingMid as string ?? ''} onChange={(v) => set('headingMid', v)} />
-          <TextInput label="Heading — part 3 (red)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Mid" f={f} set={set} base="headingMid" segments={[{ key: 'headingMid' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <NumberInput label="Scroll duration (seconds, higher = slower)" value={(f.speed as number) ?? 40} onChange={(v) => set('speed', v)} />
           <Repeater<HoardImg>
             label="Marquee images"
@@ -5116,10 +5119,10 @@ function renderBlockFields(
       };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Subtitle (plain)" value={f.subtitlePre as string ?? ''} onChange={(v) => set('subtitlePre', v)} />
-          <TextInput label="Subtitle accent (teal)" value={f.subtitleAccent as string ?? ''} onChange={(v) => set('subtitleAccent', v)} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle Pre" f={f} set={set} base="subtitlePre" segments={[{ key: 'subtitlePre' }]} />
+          <RichFieldGroup label="Subtitle Accent" f={f} set={set} base="subtitleAccent" segments={[{ key: 'subtitleAccent' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<TabField>
             label="Comparison tabs (4)"
@@ -5134,17 +5137,17 @@ function renderBlockFields(
             itemPreview={(t) => t.tabLabel || '(untitled)'}
             renderItem={(t, u) => (
               <div className="space-y-2">
-                <TextInput label="Tab label" value={t.tabLabel ?? ''} onChange={(v) => u({ ...t, tabLabel: v })} />
+                <RichTextInput label="Tab label" {...richItemProps(t, 'tabLabel', u)} />
                 <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
                 <p className="text-xs text-slate-500 font-medium">Heading (4 parts, in order)</p>
-                <TextInput label="Bold word (teal, e.g. 'SCAI ')" value={t.headingBold ?? ''} onChange={(v) => u({ ...t, headingBold: v })} />
-                <TextInput label="Semi-bold part 1 (e.g. 'responds')" value={t.headingSemi1 ?? ''} onChange={(v) => u({ ...t, headingSemi1: v })} />
-                <TextInput label="Normal part (e.g. ' to customers in')" value={t.headingNormal ?? ''} onChange={(v) => u({ ...t, headingNormal: v })} />
-                <TextInput label="Semi-bold part 2 (e.g. ' real time.')" value={t.headingSemi2 ?? ''} onChange={(v) => u({ ...t, headingSemi2: v })} />
-                <Textarea label="Body paragraph" value={t.body ?? ''} onChange={(v) => u({ ...t, body: v })} />
+                <RichTextInput label="Bold word (teal, e.g. 'SCAI ')" {...richItemProps(t, 'headingBold', u)} />
+                <RichTextInput label="Semi-bold part 1 (e.g. 'responds')" {...richItemProps(t, 'headingSemi1', u)} />
+                <RichTextInput label="Normal part (e.g. ' to customers in')" {...richItemProps(t, 'headingNormal', u)} />
+                <RichTextInput label="Semi-bold part 2 (e.g. ' real time.')" {...richItemProps(t, 'headingSemi2', u)} />
+                <RichTextInput label="Body paragraph" {...richItemProps(t, 'body', u)} />
                 <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-                <TextInput label="Big stat (e.g. '< 1 sec')" value={t.bigStat ?? ''} onChange={(v) => u({ ...t, bigStat: v })} />
-                <Textarea label="Big stat label" value={t.bigStatLabel ?? ''} onChange={(v) => u({ ...t, bigStatLabel: v })} />
+                <RichTextInput label="Big stat (e.g. '< 1 sec')" {...richItemProps(t, 'bigStat', u)} />
+                <RichTextInput label="Big stat label" {...richItemProps(t, 'bigStatLabel', u)} />
                 <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
                 <Repeater<BulletField>
                   label="Bullets (2)"
@@ -5154,8 +5157,8 @@ function renderBlockFields(
                   itemPreview={(b) => b.title || '(empty)'}
                   renderItem={(b, ub) => (
                     <div className="space-y-2">
-                      <TextInput label="Title" value={b.title ?? ''} onChange={(v) => ub({ ...b, title: v })} />
-                      <Textarea label="Description" value={b.desc ?? ''} onChange={(v) => ub({ ...b, desc: v })} />
+                      <RichTextInput label="Title" {...richItemProps(b, 'title', ub)} />
+                      <RichTextInput label="Description" {...richItemProps(b, 'desc', ub)} />
                     </div>
                   )}
                 />
@@ -5180,8 +5183,8 @@ function renderBlockFields(
       type GSPanel = { thumbnailUrl: string; videoUrl?: string; alt: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading (white)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<GSPanel>
             label="Video panels"
@@ -5206,16 +5209,16 @@ function renderBlockFields(
       type HTMetric = { label: string; labelBold: string; value: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading accent 1 (teal)" value={f.headingAccent1 as string ?? ''} onChange={(v) => set('headingAccent1', v)} />
-          <TextInput label="Heading middle (white)" value={f.headingMid as string ?? ''} onChange={(v) => set('headingMid', v)} />
-          <TextInput label="Heading accent 2 (teal)" value={f.headingAccent2 as string ?? ''} onChange={(v) => set('headingAccent2', v)} />
-          <TextInput label="Subheading" value={f.subheading as string ?? ''} onChange={(v) => set('subheading', v)} />
+          <RichFieldGroup label="Heading accent 1 (teal)" f={f} set={set} base="headingAccent1" segments={[{ key: 'headingAccent1' }]} />
+          <RichFieldGroup label="Heading Mid" f={f} set={set} base="headingMid" segments={[{ key: 'headingMid' }]} />
+          <RichFieldGroup label="Heading Accent2" f={f} set={set} base="headingAccent2" segments={[{ key: 'headingAccent2' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="subheading" segments={[{ key: 'subheading' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Human test %" value={f.humanTestPercent as string ?? ''} onChange={(v) => set('humanTestPercent', v)} />
-          <TextInput label="Stat desc (normal)" value={f.statDescNormal as string ?? ''} onChange={(v) => set('statDescNormal', v)} />
-          <TextInput label="Stat desc (bold)" value={f.statDescBold as string ?? ''} onChange={(v) => set('statDescBold', v)} />
-          <TextInput label="Stat desc (italic teal)" value={f.statDescItalicAccent as string ?? ''} onChange={(v) => set('statDescItalicAccent', v)} />
-          <TextInput label="Primary CTA label" value={f.primaryCtaLabel as string ?? ''} onChange={(v) => set('primaryCtaLabel', v)} />
+          <RichFieldGroup label="Human test %" f={f} set={set} base="humanTestPercent" segments={[{ key: 'humanTestPercent' }]} />
+          <RichFieldGroup label="Stat Desc Normal" f={f} set={set} base="statDescNormal" segments={[{ key: 'statDescNormal' }]} />
+          <RichFieldGroup label="Stat Desc Bold" f={f} set={set} base="statDescBold" segments={[{ key: 'statDescBold' }]} />
+          <RichFieldGroup label="Stat desc (italic teal)" f={f} set={set} base="statDescItalicAccent" segments={[{ key: 'statDescItalicAccent' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="primaryCtaLabel" segments={[{ key: 'primaryCtaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.primaryCtaUrl as string ?? ''} onChange={(v) => set('primaryCtaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<HTClip>
@@ -5240,9 +5243,9 @@ function renderBlockFields(
             itemPreview={(m) => `${m.label}${m.labelBold} Rate — ${m.value}`}
             renderItem={(m, u) => (
               <div className="space-y-2">
-                <TextInput label="Label prefix" value={m.label} onChange={(v) => u({ ...m, label: v })} />
-                <TextInput label="Label bold" value={m.labelBold} onChange={(v) => u({ ...m, labelBold: v })} />
-                <TextInput label="Value" value={m.value} onChange={(v) => u({ ...m, value: v })} />
+                <RichTextInput label="Label prefix" {...richItemProps(m, 'label', u)} />
+                <RichTextInput label="Label bold" {...richItemProps(m, 'labelBold', u)} />
+                <RichTextInput label="Value" {...richItemProps(m, 'value', u)} />
               </div>
             )}
           />
@@ -5255,11 +5258,11 @@ function renderBlockFields(
       const ICON_OPTS = ['cupSoda','cookie','milk','candy','sparkles','wrench','pill','wheat','snowflake','croissant'] as const;
       return (
         <div className="space-y-4">
-          <TextInput label="Heading (white)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Primary CTA label" value={f.primaryCtaLabel as string ?? ''} onChange={(v) => set('primaryCtaLabel', v)} />
+          <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="primaryCtaLabel" segments={[{ key: 'primaryCtaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.primaryCtaUrl as string ?? ''} onChange={(v) => set('primaryCtaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ghostCtaLabel as string ?? ''} onChange={(v) => set('ghostCtaLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ghostCtaLabel" segments={[{ key: 'ghostCtaLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ghostCtaUrl as string ?? ''} onChange={(v) => set('ghostCtaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<IndustryCat>
@@ -5270,7 +5273,7 @@ function renderBlockFields(
             itemPreview={(c) => c.label || '(empty)'}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Label" value={c.label} onChange={(v) => u({ ...c, label: v })} />
+                <RichTextInput label="Label" {...richItemProps(c, 'label', u)} />
                 <div className="text-xs text-slate-400">Icon</div>
                 <div className="flex gap-1.5 flex-wrap">
                   {ICON_OPTS.map(ico => (
@@ -5291,18 +5294,18 @@ function renderBlockFields(
       type QGStep = { label: string; title: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading prefix (white)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading bold (white bold)" value={f.headingBold as string ?? ''} onChange={(v) => set('headingBold', v)} />
-          <TextInput label="Heading middle (white)" value={f.headingMid as string ?? ''} onChange={(v) => set('headingMid', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Bold" f={f} set={set} base="headingBold" segments={[{ key: 'headingBold' }]} />
+          <RichFieldGroup label="Heading Mid" f={f} set={set} base="headingMid" segments={[{ key: 'headingMid' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Primary CTA label" value={f.primaryCtaLabel as string ?? ''} onChange={(v) => set('primaryCtaLabel', v)} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="primaryCtaLabel" segments={[{ key: 'primaryCtaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.primaryCtaUrl as string ?? ''} onChange={(v) => set('primaryCtaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Video thumbnail" value={f.thumbnailUrl as string ?? ''} onChange={(v) => set('thumbnailUrl', v)} />
           <VideoField label="Upload video" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <TextInput label="…or paste a video URL (YouTube / .mp4)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
-          <TextInput label="Video caption" value={f.videoCaption as string ?? ''} onChange={(v) => set('videoCaption', v)} />
+          <RichFieldGroup label="Video caption" f={f} set={set} base="videoCaption" segments={[{ key: 'videoCaption' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<QGStep>
             label="Steps"
@@ -5312,8 +5315,8 @@ function renderBlockFields(
             itemPreview={(s) => s.title || '(empty)'}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Step label" value={s.label} onChange={(v) => u({ ...s, label: v })} />
-                <TextInput label="Step title" value={s.title} onChange={(v) => u({ ...s, title: v })} />
+                <RichTextInput label="Step label" {...richItemProps(s, 'label', u)} />
+                <RichTextInput label="Step title" {...richItemProps(s, 'title', u)} />
               </div>
             )}
           />
@@ -5324,9 +5327,9 @@ function renderBlockFields(
     case 'slick-scai-multilingual': {
       return (
         <div className="space-y-4">
-          <TextInput label="Left card text" value={f.leftCardText as string ?? ''} onChange={(v) => set('leftCardText', v)} />
-          <TextInput label="Center bold line" value={f.centerBold as string ?? ''} onChange={(v) => set('centerBold', v)} />
-          <TextInput label="Center sub line" value={f.centerSub as string ?? ''} onChange={(v) => set('centerSub', v)} />
+          <RichFieldGroup label="Left card text" f={f} set={set} base="leftCardText" segments={[{ key: 'leftCardText' }]} />
+          <RichFieldGroup label="Center bold line" f={f} set={set} base="centerBold" segments={[{ key: 'centerBold' }]} />
+          <RichFieldGroup label="Center sub line" f={f} set={set} base="centerSub" segments={[{ key: 'centerSub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Right image" value={f.rightImageUrl as string ?? ''} onChange={(v) => set('rightImageUrl', v)} />
           <TextInput label="Right image alt text" value={f.rightImageAlt as string ?? ''} onChange={(v) => set('rightImageAlt', v)} />
@@ -5337,12 +5340,12 @@ function renderBlockFields(
     case 'slick-scai-final-cta': {
       return (
         <div className="space-y-4">
-          <TextInput label="Heading line 1 (white)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
-          <TextInput label="Heading line 2 (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Subtitle" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
-          <TextInput label="CTA bold suffix" value={f.ctaBold as string ?? ''} onChange={(v) => set('ctaBold', v)} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <RichFieldGroup label="CTA bold suffix" f={f} set={set} base="ctaBold" segments={[{ key: 'ctaBold' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Background image" value={f.bgImageUrl as string ?? ''} onChange={(v) => set('bgImageUrl', v)} />
@@ -5354,8 +5357,8 @@ function renderBlockFields(
       type RLMetricField = { value: string; label: string; impact: string; icon: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading line 1 (white)" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
-          <TextInput label="Heading accent (red)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
+          <RichFieldGroup label="Heading Line1" f={f} set={set} base="headingLine1" segments={[{ key: 'headingLine1' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <TextInput label="Sales loss % (number)" value={String(f.salesLossPercent ?? 33)} onChange={(v) => set('salesLossPercent', Number(v))} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<RLMetricField>
@@ -5366,9 +5369,9 @@ function renderBlockFields(
             itemPreview={(m) => m.label || '(empty)'}
             renderItem={(m, u) => (
               <div className="space-y-2">
-                <TextInput label="Value" value={m.value} onChange={(v) => u({ ...m, value: v })} />
-                <TextInput label="Label" value={m.label} onChange={(v) => u({ ...m, label: v })} />
-                <TextInput label="Impact" value={m.impact} onChange={(v) => u({ ...m, impact: v })} />
+                <RichTextInput label="Value" {...richItemProps(m, 'value', u)} />
+                <RichTextInput label="Label" {...richItemProps(m, 'label', u)} />
+                <RichTextInput label="Impact" {...richItemProps(m, 'impact', u)} />
                 <div className="text-xs text-slate-400">Icon</div>
                 <div className="flex gap-2 flex-wrap">
                   {(['truck','map','userX','ban'] as const).map(ico => (
@@ -5389,9 +5392,9 @@ function renderBlockFields(
       type PilotMetricField = { value: string; label: string; comparison: string; comparedTo: string; icon: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading rest (white)" value={f.headingRest as string ?? ''} onChange={(v) => set('headingRest', v)} />
-          <TextInput label="Subtext" value={f.subtext as string ?? ''} onChange={(v) => set('subtext', v)} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Rest" f={f} set={set} base="headingRest" segments={[{ key: 'headingRest' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<PilotMetricField>
             label="Metric cards"
@@ -5401,10 +5404,10 @@ function renderBlockFields(
             itemPreview={(m) => m.label || '(empty)'}
             renderItem={(m, u) => (
               <div className="space-y-2">
-                <TextInput label="Value" value={m.value} onChange={(v) => u({ ...m, value: v })} />
-                <TextInput label="Label" value={m.label} onChange={(v) => u({ ...m, label: v })} />
-                <TextInput label="Comparison" value={m.comparison} onChange={(v) => u({ ...m, comparison: v })} />
-                <TextInput label="Compared to" value={m.comparedTo} onChange={(v) => u({ ...m, comparedTo: v })} />
+                <RichTextInput label="Value" {...richItemProps(m, 'value', u)} />
+                <RichTextInput label="Label" {...richItemProps(m, 'label', u)} />
+                <RichTextInput label="Comparison" {...richItemProps(m, 'comparison', u)} />
+                <RichTextInput label="Compared to" {...richItemProps(m, 'comparedTo', u)} />
                 <div className="text-xs text-slate-400">Icon</div>
                 <div className="flex gap-2 flex-wrap">
                   {(['callPickup','engagement','orderConversion','repeatCall'] as const).map(ico => (
@@ -5424,10 +5427,10 @@ function renderBlockFields(
     case 'slick-scai-capabilities':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading (white)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading (teal)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <Textarea label="Sub text" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Sub text" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <ImageField label="Diagram image" value={f.diagramImg as string ?? ''} onChange={(v) => set('diagramImg', v)} />
         </div>
       );
@@ -5435,46 +5438,46 @@ function renderBlockFields(
     case 'slick-scai-why':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading (white)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
-          <TextInput label="Heading (teal)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <Textarea label="Sub text" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Sub text" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 1 — Left tall (Ultra-Configurable Agents)</p>
-          <TextInput label="Title" value={f.c1Title as string ?? ''} onChange={(v) => set('c1Title', v)} />
-          <Textarea label="Body" value={f.c1Body as string ?? ''} onChange={(v) => set('c1Body', v)} />
+          <RichFieldGroup label="Title" f={f} set={set} base="c1Title" segments={[{ key: 'c1Title' }]} />
+          <RichFieldGroup label="Body" f={f} set={set} base="c1Body" segments={[{ key: 'c1Body' }]} />
           <ImageField label="Agent image" value={f.c1Image as string ?? ''} onChange={(v) => set('c1Image', v)} />
-          <TextInput label="Caption (teal line)" value={f.c1Caption as string ?? ''} onChange={(v) => set('c1Caption', v)} />
-          <TextInput label="Caption (bold line)" value={f.c1CaptionSub as string ?? ''} onChange={(v) => set('c1CaptionSub', v)} />
+          <RichFieldGroup label="Caption (teal line)" f={f} set={set} base="c1Caption" segments={[{ key: 'c1Caption' }]} />
+          <RichFieldGroup label="Caption (bold line)" f={f} set={set} base="c1CaptionSub" segments={[{ key: 'c1CaptionSub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 2 — Middle top (Instant Multi-Channel)</p>
-          <TextInput label="Title" value={f.c2Title as string ?? ''} onChange={(v) => set('c2Title', v)} />
-          <TextInput label="Body (before bold)" value={f.c2BodyPre as string ?? ''} onChange={(v) => set('c2BodyPre', v)} />
-          <TextInput label="Body (bold)" value={f.c2BodyBold as string ?? ''} onChange={(v) => set('c2BodyBold', v)} />
-          <TextInput label="Body (after bold)" value={f.c2BodyPost as string ?? ''} onChange={(v) => set('c2BodyPost', v)} />
+          <RichFieldGroup label="Title" f={f} set={set} base="c2Title" segments={[{ key: 'c2Title' }]} />
+          <RichFieldGroup label="C2 Body Pre" f={f} set={set} base="c2BodyPre" segments={[{ key: 'c2BodyPre' }]} />
+          <RichFieldGroup label="C2 Body Bold" f={f} set={set} base="c2BodyBold" segments={[{ key: 'c2BodyBold' }]} />
+          <RichFieldGroup label="Body (after bold)" f={f} set={set} base="c2BodyPost" segments={[{ key: 'c2BodyPost' }]} />
           <ImageField label="Side image" value={f.c2Image as string ?? ''} onChange={(v) => set('c2Image', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Banner — Agentic AI CTA</p>
-          <Textarea label="Heading text" value={f.bannerPre as string ?? ''} onChange={(v) => set('bannerPre', v)} />
-          <TextInput label="Big teal text (e.g. AGENTIC AI)" value={f.bannerBold3 as string ?? ''} onChange={(v) => set('bannerBold3', v)} />
-          <TextInput label="CTA button label" value={f.bannerCtaLabel as string ?? ''} onChange={(v) => set('bannerCtaLabel', v)} />
+          <RichFieldGroup label="Banner Pre" f={f} set={set} base="bannerPre" segments={[{ key: 'bannerPre' }]} />
+          <RichFieldGroup label="Banner Bold3" f={f} set={set} base="bannerBold3" segments={[{ key: 'bannerBold3' }]} />
+          <RichFieldGroup label="CTA button label" f={f} set={set} base="bannerCtaLabel" segments={[{ key: 'bannerCtaLabel' }]} />
           <TextInput label="CTA button URL" value={f.bannerCtaUrl as string ?? ''} onChange={(v) => set('bannerCtaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 3 — Middle bottom (Train Fast)</p>
-          <TextInput label="Title" value={f.c3Title as string ?? ''} onChange={(v) => set('c3Title', v)} />
-          <TextInput label="Body (before bold)" value={f.c3BodyPre as string ?? ''} onChange={(v) => set('c3BodyPre', v)} />
-          <TextInput label="Body (bold)" value={f.c3BodyBold as string ?? ''} onChange={(v) => set('c3BodyBold', v)} />
-          <TextInput label="Body (after bold)" value={f.c3BodyPost as string ?? ''} onChange={(v) => set('c3BodyPost', v)} />
+          <RichFieldGroup label="Title" f={f} set={set} base="c3Title" segments={[{ key: 'c3Title' }]} />
+          <RichFieldGroup label="C3 Body Pre" f={f} set={set} base="c3BodyPre" segments={[{ key: 'c3BodyPre' }]} />
+          <RichFieldGroup label="C3 Body Bold" f={f} set={set} base="c3BodyBold" segments={[{ key: 'c3BodyBold' }]} />
+          <RichFieldGroup label="Body (after bold)" f={f} set={set} base="c3BodyPost" segments={[{ key: 'c3BodyPost' }]} />
           <ImageField label="Side image" value={f.c3Image as string ?? ''} onChange={(v) => set('c3Image', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 4 — Right top (Embedded in RTM)</p>
-          <TextInput label="Title" value={f.c4Title as string ?? ''} onChange={(v) => set('c4Title', v)} />
-          <Textarea label="Body" value={f.c4Body as string ?? ''} onChange={(v) => set('c4Body', v)} />
+          <RichFieldGroup label="Title" f={f} set={set} base="c4Title" segments={[{ key: 'c4Title' }]} />
+          <RichFieldGroup label="Body" f={f} set={set} base="c4Body" segments={[{ key: 'c4Body' }]} />
           <ImageField label="Image" value={f.c4Image as string ?? ''} onChange={(v) => set('c4Image', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 5 — Right bottom (AI Agents)</p>
-          <TextInput label="Title" value={f.c5Title as string ?? ''} onChange={(v) => set('c5Title', v)} />
-          <Textarea label="Body" value={f.c5Body as string ?? ''} onChange={(v) => set('c5Body', v)} />
+          <RichFieldGroup label="Title" f={f} set={set} base="c5Title" segments={[{ key: 'c5Title' }]} />
+          <RichFieldGroup label="Body" f={f} set={set} base="c5Body" segments={[{ key: 'c5Body' }]} />
           <ImageField label="Visual image" value={f.c5Image as string ?? ''} onChange={(v) => set('c5Image', v)} />
         </div>
       );
@@ -5490,10 +5493,10 @@ function renderBlockFields(
     case 'slick-scai-agents':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading (white)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
-          <TextInput label="Heading (teal)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <Textarea label="Sub text" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Sub text" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           {([1,2,3,4,5,6,7,8] as const).map(n => (
             <div key={n}>
               <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -5511,10 +5514,10 @@ function renderBlockFields(
     case 'slick-scai-how-it-works':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading (white part)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading (teal part)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <Textarea label="Sub text" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Sub text" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Section image" value={f.sectionImg as string ?? ''} onChange={(v) => set('sectionImg', v)} />
         </div>
@@ -5523,55 +5526,55 @@ function renderBlockFields(
     case 'slick-scai-hero-v2':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading line 1 (dark)" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
-          <TextInput label="Heading line 2 (teal)" value={f.headingLine2 as string ?? ''} onChange={(v) => set('headingLine2', v)} />
-          <Textarea label="Sub (before bold)" value={f.subNormal as string ?? ''} onChange={(v) => set('subNormal', v)} />
-          <TextInput label="Sub bold phrase" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <Textarea label="Sub (after bold)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading line 1 (dark)" f={f} set={set} base="headingLine1" segments={[{ key: 'headingLine1' }]} />
+          <RichFieldGroup label="Heading line 2 (teal)" f={f} set={set} base="headingLine2" segments={[{ key: 'headingLine2' }]} />
+          <RichFieldGroup label="Sub Normal" f={f} set={set} base="subNormal" segments={[{ key: 'subNormal' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Promo (normal text)" value={f.promoNormal as string ?? ''} onChange={(v) => set('promoNormal', v)} />
-          <TextInput label="Promo (teal highlight)" value={f.promoTeal as string ?? ''} onChange={(v) => set('promoTeal', v)} />
+          <RichFieldGroup label="Promo Normal" f={f} set={set} base="promoNormal" segments={[{ key: 'promoNormal' }]} />
+          <RichFieldGroup label="Promo Teal" f={f} set={set} base="promoTeal" segments={[{ key: 'promoTeal' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Center agent image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
           <ImageField label="Left UI screenshot" value={f.imgLeft as string ?? ''} onChange={(v) => set('imgLeft', v)} />
           <ImageField label="Right UI screenshot" value={f.imgRight as string ?? ''} onChange={(v) => set('imgRight', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Card 1 value (top-left)" value={f.c1Val as string ?? ''} onChange={(v) => set('c1Val', v)} />
-          <TextInput label="Card 1 label" value={f.c1Lbl as string ?? ''} onChange={(v) => set('c1Lbl', v)} />
-          <TextInput label="Card 2 value (top-right)" value={f.c2Val as string ?? ''} onChange={(v) => set('c2Val', v)} />
-          <TextInput label="Card 2 label" value={f.c2Lbl as string ?? ''} onChange={(v) => set('c2Lbl', v)} />
-          <TextInput label="Card 3 value (bottom-left)" value={f.c3Val as string ?? ''} onChange={(v) => set('c3Val', v)} />
-          <TextInput label="Card 3 label" value={f.c3Lbl as string ?? ''} onChange={(v) => set('c3Lbl', v)} />
-          <TextInput label="Card 4 value (bottom-right)" value={f.c4Val as string ?? ''} onChange={(v) => set('c4Val', v)} />
-          <TextInput label="Card 4 label" value={f.c4Lbl as string ?? ''} onChange={(v) => set('c4Lbl', v)} />
+          <RichFieldGroup label="Card 1 value (top-left)" f={f} set={set} base="c1Val" segments={[{ key: 'c1Val' }]} />
+          <RichFieldGroup label="Card 1 label" f={f} set={set} base="c1Lbl" segments={[{ key: 'c1Lbl' }]} />
+          <RichFieldGroup label="Card 2 value (top-right)" f={f} set={set} base="c2Val" segments={[{ key: 'c2Val' }]} />
+          <RichFieldGroup label="Card 2 label" f={f} set={set} base="c2Lbl" segments={[{ key: 'c2Lbl' }]} />
+          <RichFieldGroup label="Card 3 value (bottom-left)" f={f} set={set} base="c3Val" segments={[{ key: 'c3Val' }]} />
+          <RichFieldGroup label="Card 3 label" f={f} set={set} base="c3Lbl" segments={[{ key: 'c3Lbl' }]} />
+          <RichFieldGroup label="Card 4 value (bottom-right)" f={f} set={set} base="c4Val" segments={[{ key: 'c4Val' }]} />
+          <RichFieldGroup label="Card 4 label" f={f} set={set} base="c4Lbl" segments={[{ key: 'c4Lbl' }]} />
         </div>
       );
 
     case 'slick-scai-hero':
       return (
         <div className="space-y-4">
-          <TextInput label="Heading line 1" value={f.headingLine1 as string ?? ''} onChange={(v) => set('headingLine1', v)} />
-          <TextInput label="Badge text" value={f.badgePre as string ?? ''} onChange={(v) => set('badgePre', v)} />
-          <TextInput label="Badge highlight pill (shimmer)" value={f.badgeHighlight as string ?? ''} onChange={(v) => set('badgeHighlight', v)} />
-          <TextInput label="Body bold opener (optional)" value={f.bodyBold as string ?? ''} onChange={(v) => set('bodyBold', v)} />
-          <TextInput label="Body text" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
-          <TextInput label="Primary CTA label" value={f.primaryCtaLabel as string ?? ''} onChange={(v) => set('primaryCtaLabel', v)} />
+          <RichFieldGroup label="Heading line 1" f={f} set={set} base="headingLine1" segments={[{ key: 'headingLine1' }]} />
+          <RichFieldGroup label="Badge Pre" f={f} set={set} base="badgePre" segments={[{ key: 'badgePre' }]} />
+          <RichFieldGroup label="Badge Highlight" f={f} set={set} base="badgeHighlight" segments={[{ key: 'badgeHighlight' }]} />
+          <RichFieldGroup label="Body Bold" f={f} set={set} base="bodyBold" segments={[{ key: 'bodyBold' }]} />
+          <RichFieldGroup label="Body" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="primaryCtaLabel" segments={[{ key: 'primaryCtaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.primaryCtaUrl as string ?? ''} onChange={(v) => set('primaryCtaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ghostCtaLabel as string ?? ''} onChange={(v) => set('ghostCtaLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ghostCtaLabel" segments={[{ key: 'ghostCtaLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ghostCtaUrl as string ?? ''} onChange={(v) => set('ghostCtaUrl', v)} />
-          <TextInput label="Credits label" value={f.creditsLabel as string ?? ''} onChange={(v) => set('creditsLabel', v)} />
-          <TextInput label="Credits highlight (teal)" value={f.creditsHighlight as string ?? ''} onChange={(v) => set('creditsHighlight', v)} />
+          <RichFieldGroup label="Credits label" f={f} set={set} base="creditsLabel" segments={[{ key: 'creditsLabel' }]} />
+          <RichFieldGroup label="Credits highlight (teal)" f={f} set={set} base="creditsHighlight" segments={[{ key: 'creditsHighlight' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Avatar image" value={f.avatarUrl as string ?? ''} onChange={(v) => set('avatarUrl', v)} />
-          <TextInput label="Mic label (Tap to Talk)" value={f.micLabel as string ?? ''} onChange={(v) => set('micLabel', v)} />
-          <TextInput label="Mic sub-label" value={f.micSub as string ?? ''} onChange={(v) => set('micSub', v)} />
-          <TextInput label="Language label" value={f.langLabel as string ?? ''} onChange={(v) => set('langLabel', v)} />
+          <RichFieldGroup label="Mic label (Tap to Talk)" f={f} set={set} base="micLabel" segments={[{ key: 'micLabel' }]} />
+          <RichFieldGroup label="Mic sub-label" f={f} set={set} base="micSub" segments={[{ key: 'micSub' }]} />
+          <RichFieldGroup label="Language label" f={f} set={set} base="langLabel" segments={[{ key: 'langLabel' }]} />
           <ImageField label="Language flag URL" value={f.langFlag as string ?? ''} onChange={(v) => set('langFlag', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<string>
@@ -5588,8 +5591,8 @@ function renderBlockFields(
     case 'slick-sc-privacy-policy':
       return (
         <div className="space-y-4">
-          <TextInput label="Hero subheading" value={f.heroSub as string ?? ''} onChange={(v) => set('heroSub', v)} />
-          <TextInput label="Effective date" value={f.effectiveDate as string ?? ''} onChange={(v) => set('effectiveDate', v)} />
+          <RichFieldGroup label="Hero subheading" f={f} set={set} base="heroSub" segments={[{ key: 'heroSub' }]} />
+          <RichFieldGroup label="Effective date" f={f} set={set} base="effectiveDate" segments={[{ key: 'effectiveDate' }]} />
         </div>
       );
 
@@ -5608,16 +5611,16 @@ function renderBlockFields(
       ] as const;
       return (
         <div className="space-y-4">
-          <TextInput label="Badge text" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
+          <RichFieldGroup label="Badge text" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Heading (plain)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Subheading" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Footer pre-text" value={f.ctaPreText as string ?? ''} onChange={(v) => set('ctaPreText', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Footer pre-text" f={f} set={set} base="ctaPreText" segments={[{ key: 'ctaPreText' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<PlatformItem>
@@ -5628,8 +5631,8 @@ function renderBlockFields(
             itemPreview={(it) => `${it.titleBold} ${it.titleLight}`}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Title (bold)" value={it.titleBold} onChange={(v) => u({ ...it, titleBold: v })} />
-                <TextInput label="Title (light)" value={it.titleLight} onChange={(v) => u({ ...it, titleLight: v })} />
+                <RichTextInput label="Title (bold)" {...richItemProps(it, 'titleBold', u)} />
+                <RichTextInput label="Title (light)" {...richItemProps(it, 'titleLight', u)} />
                 <TextInput label="Link URL" value={it.href} onChange={(v) => u({ ...it, href: v })} />
                 <div className="text-xs text-slate-400">Icon</div>
                 <div className="flex gap-1.5 flex-wrap">
@@ -5665,8 +5668,8 @@ function renderBlockFields(
         <div className="space-y-4">
           <ImageField label="Branding image (logo + heading as one image)" value={f.brandingImageSrc as string ?? ''} onChange={(v) => set('brandingImageSrc', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Date" value={f.date as string ?? ''} onChange={(v) => set('date', v)} />
-          <TextInput label="Venue" value={f.venue as string ?? ''} onChange={(v) => set('venue', v)} />
+          <RichFieldGroup label="Date" f={f} set={set} base="date" segments={[{ key: 'date' }]} />
+          <RichFieldGroup label="Venue" f={f} set={set} base="venue" segments={[{ key: 'venue' }]} />
           <p className="text-xs text-slate-400">Portrait photos (scrolling strip — add as many as needed)</p>
           {((f.photos as string[]) ?? []).map((src: string, i: number) => (
             <div key={i} className="flex items-center gap-2">
@@ -5684,8 +5687,8 @@ function renderBlockFields(
     case 'slick-conclave-speakers': {
       return (
         <div className="space-y-4">
-          <TextInput label="Heading part 1" value={f.heading1 as string ?? ''} onChange={(v) => set('heading1', v)} />
-          <TextInput label="Heading part 2 (teal)" value={f.heading2 as string ?? ''} onChange={(v) => set('heading2', v)} />
+          <RichFieldGroup label="Heading part 1" f={f} set={set} base="heading1" segments={[{ key: 'heading1' }]} />
+          <RichFieldGroup label="Heading part 2 (teal)" f={f} set={set} base="heading2" segments={[{ key: 'heading2' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<string>
             label="Photos"
@@ -5704,7 +5707,7 @@ function renderBlockFields(
     case 'slick-conclave-agenda':
       return (
         <div className="space-y-4">
-          <TextInput label="Section heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Section heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Agenda image" value={f.agendaImage as string ?? ''} onChange={(v) => set('agendaImage', v)} />
         </div>
@@ -5714,8 +5717,8 @@ function renderBlockFields(
       type Stat = { value: string; label: string; sublabel?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow line 1" value={f.eyebrow1 as string ?? ''} onChange={(v) => set('eyebrow1', v)} />
-          <TextInput label="Eyebrow line 2 (teal)" value={f.eyebrow2 as string ?? ''} onChange={(v) => set('eyebrow2', v)} />
+          <RichFieldGroup label="Eyebrow line 1" f={f} set={set} base="eyebrow1" segments={[{ key: 'eyebrow1' }]} />
+          <RichFieldGroup label="Eyebrow line 2 (teal)" f={f} set={set} base="eyebrow2" segments={[{ key: 'eyebrow2' }]} />
           <ImageField label="Banner image (full-width)" value={f.bannerImage as string ?? ''} onChange={(v) => set('bannerImage', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<Stat>
@@ -5726,9 +5729,9 @@ function renderBlockFields(
             itemPreview={(s) => `${s.value} ${s.label}`}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Value" value={s.value ?? ''} onChange={(v) => u({ ...s, value: v })} />
-                <TextInput label="Label" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
-                <TextInput label="Sublabel" value={s.sublabel ?? ''} onChange={(v) => u({ ...s, sublabel: v })} />
+                <RichTextInput label="Value" {...richItemProps(s, 'value', u)} />
+                <RichTextInput label="Label" {...richItemProps(s, 'label', u)} />
+                <RichTextInput label="Sublabel" {...richItemProps(s, 'sublabel', u)} />
               </div>
             )}
           />
@@ -5740,10 +5743,10 @@ function renderBlockFields(
       type Card = { image?: string; captionBold?: string; captionRest?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading pre" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading teal" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<Card>
             label="Cards"
@@ -5754,8 +5757,8 @@ function renderBlockFields(
             renderItem={(c, u) => (
               <div className="space-y-2">
                 <ImageField label="Image" value={c.image ?? ''} onChange={(v) => u({ ...c, image: v })} />
-                <TextInput label="Caption bold" value={c.captionBold ?? ''} onChange={(v) => u({ ...c, captionBold: v })} />
-                <TextInput label="Caption rest" value={c.captionRest ?? ''} onChange={(v) => u({ ...c, captionRest: v })} />
+                <RichTextInput label="Caption bold" {...richItemProps(c, 'captionBold', u)} />
+                <RichTextInput label="Caption rest" {...richItemProps(c, 'captionRest', u)} />
               </div>
             )}
           />
@@ -5768,7 +5771,7 @@ function renderBlockFields(
         <div className="space-y-4">
           <TextInput label="YouTube URL (overrides image)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <ImageField label="Section image (full-width)" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
-          <TextInput label="CTA label (HTML ok)" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label (HTML ok)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -5779,7 +5782,7 @@ function renderBlockFields(
         <div className="space-y-4">
           <TextInput label="YouTube URL (overrides image)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <ImageField label="Fallback image" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
-          <TextInput label="CTA label (HTML ok)" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label (HTML ok)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -5790,9 +5793,9 @@ function renderBlockFields(
       type FeatureItem = { label: string; text: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow pill" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (white part)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
-          <TextInput label="Heading (teal part)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
+          <RichFieldGroup label="Eyebrow pill" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<ProductItem>
             label="Products"
@@ -5802,10 +5805,10 @@ function renderBlockFields(
             itemPreview={(p) => `${p.headingWhite ?? ''} ${p.headingTeal ?? ''}`.trim() || '(empty)'}
             renderItem={(p, u) => (
               <div className="space-y-3">
-                <TextInput label="Pill tag" value={p.pill ?? ''} onChange={(v) => u({ ...p, pill: v })} />
-                <TextInput label="Heading (white)" value={p.headingWhite ?? ''} onChange={(v) => u({ ...p, headingWhite: v })} />
-                <TextInput label="Heading (teal)" value={p.headingTeal ?? ''} onChange={(v) => u({ ...p, headingTeal: v })} />
-                <Textarea label="Description" value={p.description ?? ''} onChange={(v) => u({ ...p, description: v })} />
+                <RichTextInput label="Pill tag" {...richItemProps(p, 'pill', u)} />
+                <RichTextInput label="Heading (white)" {...richItemProps(p, 'headingWhite', u)} />
+                <RichTextInput label="Heading (teal)" {...richItemProps(p, 'headingTeal', u)} />
+                <RichTextInput label="Description" {...richItemProps(p, 'description', u)} />
                 <Repeater<FeatureItem>
                   label="Features"
                   items={p.features ?? []}
@@ -5814,12 +5817,12 @@ function renderBlockFields(
                   itemPreview={(feat) => feat.label || '(empty)'}
                   renderItem={(feat, uf) => (
                     <div className="space-y-2">
-                      <TextInput label="Bold label" value={feat.label ?? ''} onChange={(v) => uf({ ...feat, label: v })} />
-                      <Textarea label="Description" value={feat.text ?? ''} onChange={(v) => uf({ ...feat, text: v })} />
+                      <RichTextInput label="Bold label" {...richItemProps(feat, 'label', uf)} />
+                      <RichTextInput label="Description" {...richItemProps(feat, 'text', uf)} />
                     </div>
                   )}
                 />
-                <TextInput label="CTA label" value={p.ctaLabel ?? ''} onChange={(v) => u({ ...p, ctaLabel: v })} />
+                <RichTextInput label="CTA label" {...richItemProps(p, 'ctaLabel', u)} />
                 <TextInput label="CTA URL" value={p.ctaHref ?? ''} onChange={(v) => u({ ...p, ctaHref: v })} />
                 <ImageField label="Product image" value={p.imageSrc ?? ''} onChange={(v) => u({ ...p, imageSrc: v })} />
               </div>
@@ -5833,10 +5836,10 @@ function renderBlockFields(
       type Card = { image?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill text" value={f.pillText as string ?? ''} onChange={(v) => set('pillText', v)} />
-          <TextInput label="Heading (white)" value={f.headingWhite as string ?? ''} onChange={(v) => set('headingWhite', v)} />
-          <TextInput label="Heading (teal)" value={f.headingTeal as string ?? ''} onChange={(v) => set('headingTeal', v)} />
-          <TextInput label="Sub text" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
+          <RichFieldGroup label="Sub text" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<Card>
             label="Cards"
@@ -5859,9 +5862,9 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <ImageField label="Logo" value={f.logoSrc as string ?? ''} onChange={(v) => set('logoSrc', v)} />
-          <TextInput label="Eyebrow text" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading English" value={f.headingEn as string ?? ''} onChange={(v) => set('headingEn', v)} />
-          <TextInput label="Heading Arabic" value={f.headingAr as string ?? ''} onChange={(v) => set('headingAr', v)} />
+          <RichFieldGroup label="Eyebrow text" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading English" f={f} set={set} base="headingEn" segments={[{ key: 'headingEn' }]} />
+          <RichFieldGroup label="Heading Arabic" f={f} set={set} base="headingAr" segments={[{ key: 'headingAr' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs text-slate-500">Person photos (4 — 2 left, 2 right)</p>
           {[0, 1, 2, 3].map(i => (
@@ -5870,10 +5873,10 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Map image (optional)" value={f.mapSrc as string ?? ''} onChange={(v) => set('mapSrc', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Stat value" value={f.statValue as string ?? ''} onChange={(v) => set('statValue', v)} />
-          <TextInput label="Stat label" value={f.statLabel as string ?? ''} onChange={(v) => set('statLabel', v)} />
-          <Textarea label="Stat description" value={f.statDesc as string ?? ''} onChange={(v) => set('statDesc', v)} />
-          <TextInput label="Stat highlight (teal)" value={f.statHighlight as string ?? ''} onChange={(v) => set('statHighlight', v)} />
+          <RichFieldGroup label="Stat value" f={f} set={set} base="statValue" segments={[{ key: 'statValue' }]} />
+          <RichFieldGroup label="Stat label" f={f} set={set} base="statLabel" segments={[{ key: 'statLabel' }]} />
+          <RichFieldGroup label="Stat description" f={f} set={set} base="statDesc" segments={[{ key: 'statDesc' }]} />
+          <RichFieldGroup label="Stat highlight (teal)" f={f} set={set} base="statHighlight" segments={[{ key: 'statHighlight' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<RoleItem>
             label="Team roles"
@@ -5883,20 +5886,20 @@ function renderBlockFields(
             itemPreview={(r) => r.title || '(empty)'}
             renderItem={(r, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={r.title ?? ''} onChange={(v) => u({ ...r, title: v })} />
-                <TextInput label="Subtitle" value={r.subtitle ?? ''} onChange={(v) => u({ ...r, subtitle: v })} />
+                <RichTextInput label="Title" {...richItemProps(r, 'title', u)} />
+                <RichTextInput label="Subtitle" {...richItemProps(r, 'subtitle', u)} />
               </div>
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="Language card title" value={f.langTitle as string ?? ''} onChange={(v) => set('langTitle', v)} />
-          <Textarea label="Language card body" value={f.langBody as string ?? ''} onChange={(v) => set('langBody', v)} />
+          <RichFieldGroup label="Language card title" f={f} set={set} base="langTitle" segments={[{ key: 'langTitle' }]} />
+          <RichFieldGroup label="Language card body" f={f} set={set} base="langBody" segments={[{ key: 'langBody' }]} />
           <ImageField label="Language card image" value={f.langImageSrc as string ?? ''} onChange={(v) => set('langImageSrc', v)} />
-          <TextInput label="ZATCA card title" value={f.zatcaTitle as string ?? ''} onChange={(v) => set('zatcaTitle', v)} />
-          <Textarea label="ZATCA card body" value={f.zatcaBody as string ?? ''} onChange={(v) => set('zatcaBody', v)} />
+          <RichFieldGroup label="ZATCA card title" f={f} set={set} base="zatcaTitle" segments={[{ key: 'zatcaTitle' }]} />
+          <RichFieldGroup label="ZATCA card body" f={f} set={set} base="zatcaBody" segments={[{ key: 'zatcaBody' }]} />
           <ImageField label="ZATCA card image" value={f.zatcaImageSrc as string ?? ''} onChange={(v) => set('zatcaImageSrc', v)} />
-          <TextInput label="Channel card title" value={f.channelTitle as string ?? ''} onChange={(v) => set('channelTitle', v)} />
-          <Textarea label="Channel card body" value={f.channelBody as string ?? ''} onChange={(v) => set('channelBody', v)} />
+          <RichFieldGroup label="Channel card title" f={f} set={set} base="channelTitle" segments={[{ key: 'channelTitle' }]} />
+          <RichFieldGroup label="Channel card body" f={f} set={set} base="channelBody" segments={[{ key: 'channelBody' }]} />
           <ImageField label="Channel card image" value={f.channelImageSrc as string ?? ''} onChange={(v) => set('channelImageSrc', v)} />
           <ImageField label="Roles section image (replaces map + roles)" value={f.rolesImageSrc as string ?? ''} onChange={(v) => set('rolesImageSrc', v)} />
           <ImageField label="Bottom right image" value={f.bottomImageSrc as string ?? ''} onChange={(v) => set('bottomImageSrc', v)} />
@@ -5907,8 +5910,8 @@ function renderBlockFields(
     case 'slick-conclave-guests': {
       return (
         <div className="space-y-4">
-          <TextInput label="Heading part 1" value={f.heading1 as string ?? ''} onChange={(v) => set('heading1', v)} />
-          <TextInput label="Heading part 2 (teal)" value={f.heading2 as string ?? ''} onChange={(v) => set('heading2', v)} />
+          <RichFieldGroup label="Heading part 1" f={f} set={set} base="heading1" segments={[{ key: 'heading1' }]} />
+          <RichFieldGroup label="Heading part 2 (teal)" f={f} set={set} base="heading2" segments={[{ key: 'heading2' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<string>
             label="Photos"
@@ -5927,13 +5930,13 @@ function renderBlockFields(
     case 'slick-conclave-register':
       return (
         <div className="space-y-4">
-          <TextInput label="Heading line 1" value={f.heading1 as string ?? ''} onChange={(v) => set('heading1', v)} />
-          <TextInput label="Heading line 2 (teal)" value={f.heading2 as string ?? ''} onChange={(v) => set('heading2', v)} />
-          <TextInput label="Date" value={f.date as string ?? ''} onChange={(v) => set('date', v)} />
-          <TextInput label="Venue" value={f.venue as string ?? ''} onChange={(v) => set('venue', v)} />
-          <TextInput label="Form heading line 1 (teal)" value={f.formHeading1 as string ?? ''} onChange={(v) => set('formHeading1', v)} />
-          <TextInput label="Form heading line 2 (white)" value={f.formHeading2 as string ?? ''} onChange={(v) => set('formHeading2', v)} />
-          <TextInput label="Submit button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Heading line 1" f={f} set={set} base="heading1" segments={[{ key: 'heading1' }]} />
+          <RichFieldGroup label="Heading line 2 (teal)" f={f} set={set} base="heading2" segments={[{ key: 'heading2' }]} />
+          <RichFieldGroup label="Date" f={f} set={set} base="date" segments={[{ key: 'date' }]} />
+          <RichFieldGroup label="Venue" f={f} set={set} base="venue" segments={[{ key: 'venue' }]} />
+          <RichFieldGroup label="Form heading line 1 (teal)" f={f} set={set} base="formHeading1" segments={[{ key: 'formHeading1' }]} />
+          <RichFieldGroup label="Form heading line 2 (white)" f={f} set={set} base="formHeading2" segments={[{ key: 'formHeading2' }]} />
+          <RichFieldGroup label="Submit button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Form endpoint URL" value={f.formEndpoint as string ?? ''} onChange={(v) => set('formEndpoint', v)} />
         </div>
       );
@@ -5941,16 +5944,16 @@ function renderBlockFields(
     case 'slick-ac-hero':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill (bold prefix)" value={f.pillPre as string ?? ''} onChange={(v) => set('pillPre', v)} />
-          <TextInput label="Pill (rest)" value={f.pillPost as string ?? ''} onChange={(v) => set('pillPost', v)} />
-          <TextInput label="Heading line 1" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading line 2 (teal gradient)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subtitle (start)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Subtitle (bold/white middle)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Subtitle (tail)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
-          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill (bold prefix)" f={f} set={set} base="pillPre" segments={[{ key: 'pillPre' }]} />
+          <RichFieldGroup label="Pill (rest)" f={f} set={set} base="pillPost" segments={[{ key: 'pillPost' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Subtitle (start)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Hero screenshot URL" value={f.heroImageUrl as string ?? ''} onChange={(v) => set('heroImageUrl', v)} />
           <TextInput label="Hero image alt" value={f.heroImageAlt as string ?? ''} onChange={(v) => set('heroImageAlt', v)} />
@@ -5965,9 +5968,9 @@ function renderBlockFields(
       type HiwStep = { title: string; desc: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <ImageField label="Center circle photo URL" value={f.centerImageUrl as string ?? ''} onChange={(v) => set('centerImageUrl', v)} />
           <Select<ObjectFitValue>
             label="Object-fit (frame size is fixed — tied to the spinning ring graphic)"
@@ -5983,8 +5986,8 @@ function renderBlockFields(
             itemPreview={(s) => s.title}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Title (e.g. SETUP)" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
-                <Textarea label="Description" value={s.desc ?? ''} onChange={(v) => u({ ...s, desc: v })} />
+                <RichTextInput label="Title (e.g. SETUP)" {...richItemProps(s, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(s, 'desc', u)} />
               </div>
             )}
           />
@@ -5996,13 +5999,13 @@ function renderBlockFields(
       type ProbCard = { icon: string; title: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge (red)" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading red word 1" value={f.headingRed1 as string ?? ''} onChange={(v) => set('headingRed1', v)} />
-          <TextInput label="Heading (mid)" value={f.headingMid as string ?? ''} onChange={(v) => set('headingMid', v)} />
-          <TextInput label="Heading red word 2" value={f.headingRed2 as string ?? ''} onChange={(v) => set('headingRed2', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Badge (red)" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading (pre)" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading red word 1" f={f} set={set} base="headingRed1" segments={[{ key: 'headingRed1' }]} />
+          <RichFieldGroup label="Heading (mid)" f={f} set={set} base="headingMid" segments={[{ key: 'headingMid' }]} />
+          <RichFieldGroup label="Heading red word 2" f={f} set={set} base="headingRed2" segments={[{ key: 'headingRed2' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<ProbCard>
             label="Problem cards (5)"
             items={(f.cards as ProbCard[]) ?? []}
@@ -6012,13 +6015,13 @@ function renderBlockFields(
             renderItem={(c, u) => (
               <div className="space-y-2">
                 <TextInput label="Icon (head / msg / eye / target / chart)" value={c.icon ?? ''} onChange={(v) => u({ ...c, icon: v })} />
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
               </div>
             )}
           />
-          <TextInput label="Stat number (e.g. 3–8% Sales Lost)" value={f.statNum as string ?? ''} onChange={(v) => set('statNum', v)} />
-          <Textarea label="Stat caption (start)" value={f.statPre as string ?? ''} onChange={(v) => set('statPre', v)} />
-          <TextInput label="Stat caption (bold end)" value={f.statBold as string ?? ''} onChange={(v) => set('statBold', v)} />
+          <RichFieldGroup label="Stat number (e.g. 3–8% Sales Lost)" f={f} set={set} base="statNum" segments={[{ key: 'statNum' }]} />
+          <RichFieldGroup label="Stat Pre" f={f} set={set} base="statPre" segments={[{ key: 'statPre' }]} />
+          <RichFieldGroup label="Stat Bold" f={f} set={set} base="statBold" segments={[{ key: 'statBold' }]} />
         </div>
       );
     }
@@ -6027,10 +6030,10 @@ function renderBlockFields(
       type CapCard = { icon: string; title: string; desc: string; highlight?: boolean };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<CapCard>
             label="Capability cards (6)"
             items={(f.cards as CapCard[]) ?? []}
@@ -6040,8 +6043,8 @@ function renderBlockFields(
             renderItem={(c, u) => (
               <div className="space-y-2">
                 <TextInput label="Icon (refresh / head / target / msg / chart / spark)" value={c.icon ?? ''} onChange={(v) => u({ ...c, icon: v })} />
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Description" value={c.desc ?? ''} onChange={(v) => u({ ...c, desc: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(c, 'desc', u)} />
                 <Toggle label="Highlight card (teal gradient)" value={c.highlight ?? false} onChange={(v) => u({ ...c, highlight: v })} />
               </div>
             )}
@@ -6054,9 +6057,9 @@ function renderBlockFields(
       type Stat = { num: string; unit: string; label: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
           <Repeater<Stat>
             label="Stats (4 columns)"
             items={(f.stats as Stat[]) ?? []}
@@ -6065,9 +6068,9 @@ function renderBlockFields(
             itemPreview={(s) => `${s.num}${s.unit}`}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
-                <TextInput label="Unit (%, min, /7…)" value={s.unit ?? ''} onChange={(v) => u({ ...s, unit: v })} />
-                <Textarea label="Label (use line break for 2 lines)" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'num', u)} />
+                <RichTextInput label="Unit (%, min, /7…)" {...richItemProps(s, 'unit', u)} />
+                <RichTextInput label="Label (use line break for 2 lines)" {...richItemProps(s, 'label', u)} />
               </div>
             )}
           />
@@ -6079,9 +6082,9 @@ function renderBlockFields(
       type ExecCard = { icon: string; title: string; desc: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<ExecCard>
             label="Cards (5)"
             items={(f.cards as ExecCard[]) ?? []}
@@ -6091,8 +6094,8 @@ function renderBlockFields(
             renderItem={(c, u) => (
               <div className="space-y-2">
                 <TextInput label="Icon (apps / box / phone / clock / user)" value={c.icon ?? ''} onChange={(v) => u({ ...c, icon: v })} />
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Description" value={c.desc ?? ''} onChange={(v) => u({ ...c, desc: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(c, 'desc', u)} />
               </div>
             )}
           />
@@ -6104,9 +6107,9 @@ function renderBlockFields(
       type PitchTab = { icon: string; title: string; desc: string; imageUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<PitchTab>
             label="Tabs (4) — phone mockup"
             items={(f.tabs as PitchTab[]) ?? []}
@@ -6116,8 +6119,8 @@ function renderBlockFields(
             renderItem={(t, u) => (
               <div className="space-y-2">
                 <TextInput label="Icon (eye / head / mic / msg)" value={t.icon ?? ''} onChange={(v) => u({ ...t, icon: v })} />
-                <TextInput label="Title" value={t.title ?? ''} onChange={(v) => u({ ...t, title: v })} />
-                <Textarea label="Description" value={t.desc ?? ''} onChange={(v) => u({ ...t, desc: v })} />
+                <RichTextInput label="Title" {...richItemProps(t, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(t, 'desc', u)} />
                 <ImageField label="Phone screen image URL" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
               </div>
             )}
@@ -6134,9 +6137,9 @@ function renderBlockFields(
       type ScTab = { icon: string; title: string; desc: string; imageUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<ScTab>
             label="Tabs (3) — phone mockup"
             items={(f.tabs as ScTab[]) ?? []}
@@ -6146,8 +6149,8 @@ function renderBlockFields(
             renderItem={(t, u) => (
               <div className="space-y-2">
                 <TextInput label="Icon (bolt / chart / mic)" value={t.icon ?? ''} onChange={(v) => u({ ...t, icon: v })} />
-                <TextInput label="Title" value={t.title ?? ''} onChange={(v) => u({ ...t, title: v })} />
-                <Textarea label="Description" value={t.desc ?? ''} onChange={(v) => u({ ...t, desc: v })} />
+                <RichTextInput label="Title" {...richItemProps(t, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(t, 'desc', u)} />
                 <ImageField label="Phone screen image URL" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
               </div>
             )}
@@ -6164,10 +6167,10 @@ function renderBlockFields(
       type LaunchStep = { icon: string; title: string; desc: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
           <Repeater<LaunchStep>
             label="Steps (3)"
             items={(f.steps as LaunchStep[]) ?? []}
@@ -6177,8 +6180,8 @@ function renderBlockFields(
             renderItem={(s, u) => (
               <div className="space-y-2">
                 <TextInput label="Icon (users / database / rocket)" value={s.icon ?? ''} onChange={(v) => u({ ...s, icon: v })} />
-                <TextInput label="Title" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
-                <Textarea label="Description" value={s.desc ?? ''} onChange={(v) => u({ ...s, desc: v })} />
+                <RichTextInput label="Title" {...richItemProps(s, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(s, 'desc', u)} />
               </div>
             )}
           />
@@ -6189,11 +6192,11 @@ function renderBlockFields(
     case 'slick-ac-objections':
       return (
         <div className="space-y-4">
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <TextInput label="Teal lead line" value={f.tealLine as string ?? ''} onChange={(v) => set('tealLine', v)} />
-          <Textarea label="Body paragraph" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Teal lead line" f={f} set={set} base="tealLine" segments={[{ key: 'tealLine' }]} />
+          <RichFieldGroup label="Body paragraph" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
           <TextInput label="YouTube video link" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <ImageField label="Thumbnail / image (shown before play, or standalone if no video)" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
@@ -6208,10 +6211,10 @@ function renderBlockFields(
       type BeTab = { title: string; desc: string; imageUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading gradient (teal)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<BeTab>
             label="Tabs (3) — wide image"
             items={(f.tabs as BeTab[]) ?? []}
@@ -6220,8 +6223,8 @@ function renderBlockFields(
             itemPreview={(t) => t.title}
             renderItem={(t, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={t.title ?? ''} onChange={(v) => u({ ...t, title: v })} />
-                <Textarea label="Description" value={t.desc ?? ''} onChange={(v) => u({ ...t, desc: v })} />
+                <RichTextInput label="Title" {...richItemProps(t, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(t, 'desc', u)} />
                 <ImageField label="View image URL" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
               </div>
             )}
@@ -6238,7 +6241,7 @@ function renderBlockFields(
       type Logo = { imageUrl?: string; alt?: string; width?: number; height?: number; fit?: ObjectFitValue };
       return (
         <div className="space-y-4">
-          <TextInput label="Label" value={f.label as string ?? ''} onChange={(v) => set('label', v)} />
+          <RichFieldGroup label="Label" f={f} set={set} base="label" segments={[{ key: 'label' }]} />
           <NumberInput label="Scroll speed (seconds)" value={(f.speedSeconds as number) ?? 30} onChange={(v) => set('speedSeconds', v)} />
           <Repeater<Logo>
             label="Logos"
@@ -6271,14 +6274,14 @@ function renderBlockFields(
       type CheckItem = { text: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge (with shield)" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading line 1 (pre)" value={f.headingLine1Pre as string ?? ''} onChange={(v) => set('headingLine1Pre', v)} />
-          <TextInput label="Heading line 1 (teal)" value={f.headingLine1Grad as string ?? ''} onChange={(v) => set('headingLine1Grad', v)} />
-          <TextInput label="Heading line 2 (pre)" value={f.headingLine2Pre as string ?? ''} onChange={(v) => set('headingLine2Pre', v)} />
-          <TextInput label="Heading line 2 (teal)" value={f.headingLine2Grad as string ?? ''} onChange={(v) => set('headingLine2Grad', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Badge (with shield)" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Line1 Pre" f={f} set={set} base="headingLine1Pre" segments={[{ key: 'headingLine1Pre' }]} />
+          <RichFieldGroup label="Heading Line1 Grad" f={f} set={set} base="headingLine1Grad" segments={[{ key: 'headingLine1Grad' }]} />
+          <RichFieldGroup label="Heading Line2 Pre" f={f} set={set} base="headingLine2Pre" segments={[{ key: 'headingLine2Pre' }]} />
+          <RichFieldGroup label="Heading Line2 Grad" f={f} set={set} base="headingLine2Grad" segments={[{ key: 'headingLine2Grad' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <TextInput label="Email placeholder" value={f.emailPlaceholder as string ?? ''} onChange={(v) => set('emailPlaceholder', v)} />
-          <TextInput label="CTA button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <Repeater<CheckItem>
             label="Check bullets (3)"
             items={(f.checks as CheckItem[]) ?? []}
@@ -6286,7 +6289,7 @@ function renderBlockFields(
             newItem={() => ({ text: 'Benefit text' })}
             itemPreview={(c) => c.text}
             renderItem={(c, u) => (
-              <TextInput label="Text" value={c.text ?? ''} onChange={(v) => u({ ...c, text: v })} />
+              <RichTextInput label="Text" {...richItemProps(c, 'text', u)} />
             )}
           />
         </div>
@@ -6298,16 +6301,16 @@ function renderBlockFields(
       type Chip = { val: string; lbl: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle (start)" value={f.subPre as string ?? ''} onChange={(v) => set('subPre', v)} />
-          <TextInput label="Subtitle (bold/white middle)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Subtitle (tail)" value={f.subPost as string ?? ''} onChange={(v) => set('subPost', v)} />
-          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Sub Pre" f={f} set={set} base="subPre" segments={[{ key: 'subPre' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Subtitle (tail)" f={f} set={set} base="subPost" segments={[{ key: 'subPost' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Hero screenshot URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
           <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
@@ -6324,7 +6327,7 @@ function renderBlockFields(
             renderItem={(c, u) => (
               <div className="space-y-2">
                 <TextInput label="Value (or [Vx] placeholder)" value={c.val ?? ''} onChange={(v) => u({ ...c, val: v })} />
-                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+                <RichTextInput label="Label" {...richItemProps(c, 'lbl', u)} />
               </div>
             )}
           />
@@ -6336,9 +6339,9 @@ function renderBlockFields(
       type Logo = { url?: string; label?: string; width?: number; height?: number; fit?: ObjectFitValue };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<Logo>
             label="Logos"
             items={(f.logos as Logo[]) ?? []}
@@ -6348,7 +6351,7 @@ function renderBlockFields(
             renderItem={(l, u) => (
               <div className="space-y-2">
                 <ImageField label="Logo image URL" value={l.url ?? ''} onChange={(v) => u({ ...l, url: v })} />
-                <TextInput label="Label / alt" value={l.label ?? ''} onChange={(v) => u({ ...l, label: v })} />
+                <RichTextInput label="Label / alt" {...richItemProps(l, 'label', u)} />
                 <div className="grid grid-cols-2 gap-2">
                   <NumberInput label="Max width (px)" value={l.width ?? 118} onChange={(v) => u({ ...l, width: v })} />
                   <NumberInput label="Max height (px)" value={l.height ?? 44} onChange={(v) => u({ ...l, height: v })} />
@@ -6370,11 +6373,11 @@ function renderBlockFields(
       type StatCite = { label: string; big: string; claim: string; srcName: string; srcUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge (red)" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (red)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Badge (red)" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<StatCite>
             label="Cited stats (3)"
             items={(f.stats as StatCite[]) ?? []}
@@ -6383,10 +6386,10 @@ function renderBlockFields(
             itemPreview={(s) => s.big}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Label (uppercase)" value={s.label ?? ''} onChange={(v) => u({ ...s, label: v })} />
-                <TextInput label="Big number" value={s.big ?? ''} onChange={(v) => u({ ...s, big: v })} />
-                <Textarea label="Claim" value={s.claim ?? ''} onChange={(v) => u({ ...s, claim: v })} />
-                <TextInput label="Source name" value={s.srcName ?? ''} onChange={(v) => u({ ...s, srcName: v })} />
+                <RichTextInput label="Label (uppercase)" {...richItemProps(s, 'label', u)} />
+                <RichTextInput label="Big number" {...richItemProps(s, 'big', u)} />
+                <RichTextInput label="Claim" {...richItemProps(s, 'claim', u)} />
+                <RichTextInput label="Source name" {...richItemProps(s, 'srcName', u)} />
                 <TextInput label="Source URL" value={s.srcUrl ?? ''} onChange={(v) => u({ ...s, srcUrl: v })} />
               </div>
             )}
@@ -6398,9 +6401,9 @@ function renderBlockFields(
     case 'slick-da-darkpanel':
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Body" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Body" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
           <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
@@ -6415,11 +6418,11 @@ function renderBlockFields(
       type Step = { num: string; title: string; benefit: string; items: FlowItem };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<Step>
             label="Steps (4)"
             items={(f.steps as Step[]) ?? []}
@@ -6428,9 +6431,9 @@ function renderBlockFields(
             itemPreview={(s) => s.title}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
-                <TextInput label="Title" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
-                <TextInput label="Benefit pill" value={s.benefit ?? ''} onChange={(v) => u({ ...s, benefit: v })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'num', u)} />
+                <RichTextInput label="Title" {...richItemProps(s, 'title', u)} />
+                <RichTextInput label="Benefit pill" {...richItemProps(s, 'benefit', u)} />
                 <TextInput label="Line 1 bold" value={s.items?.li1Bold ?? ''} onChange={(v) => u({ ...s, items: { ...s.items, li1Bold: v } })} />
                 <TextInput label="Line 1 rest" value={s.items?.li1 ?? ''} onChange={(v) => u({ ...s, items: { ...s.items, li1: v } })} />
                 <TextInput label="Line 2 bold" value={s.items?.li2Bold ?? ''} onChange={(v) => u({ ...s, items: { ...s.items, li2Bold: v } })} />
@@ -6446,9 +6449,9 @@ function renderBlockFields(
       type CapCard = { imageUrl?: string; imageAlt?: string; imageFit?: ObjectFitValue; title: string; benefit: string; descPre?: string; descBold: string; descTail: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<CapCard>
             label="Capability cards (8)"
             items={(f.cards as CapCard[]) ?? []}
@@ -6465,11 +6468,11 @@ function renderBlockFields(
                   onChange={(v) => u({ ...c, imageFit: v })}
                   options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
                 />
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <TextInput label="Benefit pill" value={c.benefit ?? ''} onChange={(v) => u({ ...c, benefit: v })} />
-                <TextInput label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
-                <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
-                <TextInput label="Desc (after bold)" value={c.descTail ?? ''} onChange={(v) => u({ ...c, descTail: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Benefit pill" {...richItemProps(c, 'benefit', u)} />
+                <RichTextInput label="Desc (before bold)" {...richItemProps(c, 'descPre', u)} />
+                <RichTextInput label="Desc (bold)" {...richItemProps(c, 'descBold', u)} />
+                <RichTextInput label="Desc (after bold)" {...richItemProps(c, 'descTail', u)} />
               </div>
             )}
           />
@@ -6480,15 +6483,15 @@ function renderBlockFields(
     case 'slick-da-split': {
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Body (start)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
-          <TextInput label="Body bold 1" value={f.bodyBold1 as string ?? ''} onChange={(v) => set('bodyBold1', v)} />
-          <Textarea label="Body (middle)" value={f.bodyMid as string ?? ''} onChange={(v) => set('bodyMid', v)} />
-          <TextInput label="Body bold 2" value={f.bodyBold2 as string ?? ''} onChange={(v) => set('bodyBold2', v)} />
-          <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Body Pre" f={f} set={set} base="bodyPre" segments={[{ key: 'bodyPre' }]} />
+          <RichFieldGroup label="Body Bold1" f={f} set={set} base="bodyBold1" segments={[{ key: 'bodyBold1' }]} />
+          <RichFieldGroup label="Body Mid" f={f} set={set} base="bodyMid" segments={[{ key: 'bodyMid' }]} />
+          <RichFieldGroup label="Body Bold2" f={f} set={set} base="bodyBold2" segments={[{ key: 'bodyBold2' }]} />
+          <RichFieldGroup label="Body Tail" f={f} set={set} base="bodyTail" segments={[{ key: 'bodyTail' }]} />
           <Repeater<string>
             label="Feature chips"
             items={(f.chips as string[]) ?? []}
@@ -6514,9 +6517,9 @@ function renderBlockFields(
       type ICard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; imageUrl?: string; imageFit?: ObjectFitValue; stats: IStat[] };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<ICard>
             label="Impact cards (3)"
             items={(f.cards as ICard[]) ?? []}
@@ -6525,10 +6528,10 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
-                <TextInput label="Body (bold)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
-                <TextInput label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body (before bold)" {...richItemProps(c, 'bodyPre', u)} />
+                <RichTextInput label="Body (bold)" {...richItemProps(c, 'bodyBold', u)} />
+                <RichTextInput label="Body (after bold)" {...richItemProps(c, 'bodyTail', u)} />
                 <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <Select<ObjectFitValue>
                   label="Object-fit (viz frame size is fixed by the grid)"
@@ -6545,8 +6548,8 @@ function renderBlockFields(
                   renderItem={(s, su) => (
                     <div className="space-y-2">
                       <TextInput label="Value (or [VERIFY: x])" value={s.v ?? ''} onChange={(v) => su({ ...s, v })} />
-                      <TextInput label="Key" value={s.k ?? ''} onChange={(v) => su({ ...s, k: v })} />
-                      <TextInput label="Sub-note" value={s.sub ?? ''} onChange={(v) => su({ ...s, sub: v })} />
+                      <RichTextInput label="Key" {...richItemProps(s, 'k', su)} />
+                      <RichTextInput label="Sub-note" {...richItemProps(s, 'sub', su)} />
                     </div>
                   )}
                 />
@@ -6561,10 +6564,10 @@ function renderBlockFields(
       type PCard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; v: string; k: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
           <Repeater<PCard>
             label="Proof cards (3)"
             items={(f.cards as PCard[]) ?? []}
@@ -6573,12 +6576,12 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
-                <TextInput label="Body (bold, optional)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
-                <TextInput label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body (before bold)" {...richItemProps(c, 'bodyPre', u)} />
+                <RichTextInput label="Body (bold, optional)" {...richItemProps(c, 'bodyBold', u)} />
+                <RichTextInput label="Body (after bold)" {...richItemProps(c, 'bodyTail', u)} />
                 <TextInput label="Value (or [VERIFY: x])" value={c.v ?? ''} onChange={(v) => u({ ...c, v })} />
-                <TextInput label="Key" value={c.k ?? ''} onChange={(v) => u({ ...c, k: v })} />
+                <RichTextInput label="Key" {...richItemProps(c, 'k', u)} />
               </div>
             )}
           />
@@ -6589,10 +6592,10 @@ function renderBlockFields(
     case 'slick-da-cta':
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -6602,14 +6605,14 @@ function renderBlockFields(
       type Chip = { valPre: string; valAccent: string; valPost: string; lbl: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
           <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
@@ -6625,10 +6628,10 @@ function renderBlockFields(
             itemPreview={(c) => c.lbl}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Value (before accent)" value={c.valPre ?? ''} onChange={(v) => u({ ...c, valPre: v })} />
-                <TextInput label="Accent (teal, e.g. + or arrow)" value={c.valAccent ?? ''} onChange={(v) => u({ ...c, valAccent: v })} />
-                <TextInput label="Value (after accent)" value={c.valPost ?? ''} onChange={(v) => u({ ...c, valPost: v })} />
-                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+                <RichTextInput label="Value (before accent)" {...richItemProps(c, 'valPre', u)} />
+                <RichTextInput label="Accent (teal, e.g. + or arrow)" {...richItemProps(c, 'valAccent', u)} />
+                <RichTextInput label="Value (after accent)" {...richItemProps(c, 'valPost', u)} />
+                <RichTextInput label="Label" {...richItemProps(c, 'lbl', u)} />
               </div>
             )}
           />
@@ -6640,10 +6643,10 @@ function renderBlockFields(
       type Stat = { n: string; l: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
           <Repeater<Stat>
             label="Stats (4)"
             items={(f.stats as Stat[]) ?? []}
@@ -6652,8 +6655,8 @@ function renderBlockFields(
             itemPreview={(s) => s.n}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.n ?? ''} onChange={(v) => u({ ...s, n: v })} />
-                <TextInput label="Label" value={s.l ?? ''} onChange={(v) => u({ ...s, l: v })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'n', u)} />
+                <RichTextInput label="Label" {...richItemProps(s, 'l', u)} />
               </div>
             )}
           />
@@ -6665,11 +6668,11 @@ function renderBlockFields(
       type StatCite = { big: string; claim: string; srcName: string; srcUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill (coral)" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (coral)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill (coral)" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<StatCite>
             label="Cited stats (3)"
             items={(f.stats as StatCite[]) ?? []}
@@ -6678,9 +6681,9 @@ function renderBlockFields(
             itemPreview={(s) => s.big}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Big number (coral)" value={s.big ?? ''} onChange={(v) => u({ ...s, big: v })} />
-                <Textarea label="Claim" value={s.claim ?? ''} onChange={(v) => u({ ...s, claim: v })} />
-                <TextInput label="Source name" value={s.srcName ?? ''} onChange={(v) => u({ ...s, srcName: v })} />
+                <RichTextInput label="Big number (coral)" {...richItemProps(s, 'big', u)} />
+                <RichTextInput label="Claim" {...richItemProps(s, 'claim', u)} />
+                <RichTextInput label="Source name" {...richItemProps(s, 'srcName', u)} />
                 <TextInput label="Source URL" value={s.srcUrl ?? ''} onChange={(v) => u({ ...s, srcUrl: v })} />
               </div>
             )}
@@ -6692,13 +6695,13 @@ function renderBlockFields(
     case 'slick-pe-darkpanel':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Body (start)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
-          <TextInput label="Body bold 1" value={f.bodyBold1 as string ?? ''} onChange={(v) => set('bodyBold1', v)} />
-          <Textarea label="Body (middle)" value={f.bodyMid as string ?? ''} onChange={(v) => set('bodyMid', v)} />
-          <TextInput label="Body bold 2" value={f.bodyBold2 as string ?? ''} onChange={(v) => set('bodyBold2', v)} />
-          <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Body Pre" f={f} set={set} base="bodyPre" segments={[{ key: 'bodyPre' }]} />
+          <RichFieldGroup label="Body Bold1" f={f} set={set} base="bodyBold1" segments={[{ key: 'bodyBold1' }]} />
+          <RichFieldGroup label="Body Mid" f={f} set={set} base="bodyMid" segments={[{ key: 'bodyMid' }]} />
+          <RichFieldGroup label="Body Bold2" f={f} set={set} base="bodyBold2" segments={[{ key: 'bodyBold2' }]} />
+          <RichFieldGroup label="Body Tail" f={f} set={set} base="bodyTail" segments={[{ key: 'bodyTail' }]} />
           <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <NumberInput label="Max width (px, 0 = unset)" value={(f.imageMaxWidth as number) ?? 0} onChange={(v) => set('imageMaxWidth', v)} />
@@ -6720,11 +6723,11 @@ function renderBlockFields(
       type Stage = { num: string; title: string; desc: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<Stage>
             label="Steps (4)"
             items={(f.stages as Stage[]) ?? []}
@@ -6733,9 +6736,9 @@ function renderBlockFields(
             itemPreview={(s) => s.title}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
-                <TextInput label="Title" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
-                <Textarea label="Description" value={s.desc ?? ''} onChange={(v) => u({ ...s, desc: v })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'num', u)} />
+                <RichTextInput label="Title" {...richItemProps(s, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(s, 'desc', u)} />
               </div>
             )}
           />
@@ -6747,8 +6750,8 @@ function renderBlockFields(
       type FCard = { imageUrl?: string; imageAlt?: string; imageAspectRatio?: string; imageFit?: ObjectFitValue; title: string; descPre?: string; descBold: string; descTail: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <Repeater<FCard>
             label="Capability cards (6)"
             items={(f.cards as FCard[]) ?? []}
@@ -6770,10 +6773,10 @@ function renderBlockFields(
                   onChange={(v) => u({ ...c, imageFit: v })}
                   options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
                 />
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <TextInput label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
-                <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
-                <TextInput label="Desc (after bold)" value={c.descTail ?? ''} onChange={(v) => u({ ...c, descTail: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Desc (before bold)" {...richItemProps(c, 'descPre', u)} />
+                <RichTextInput label="Desc (bold)" {...richItemProps(c, 'descBold', u)} />
+                <RichTextInput label="Desc (after bold)" {...richItemProps(c, 'descTail', u)} />
               </div>
             )}
           />
@@ -6784,13 +6787,13 @@ function renderBlockFields(
     case 'slick-pe-split': {
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Body (before bold)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
-          <TextInput label="Body (bold)" value={f.bodyBold as string ?? ''} onChange={(v) => set('bodyBold', v)} />
-          <Textarea label="Body (after bold)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Body Pre" f={f} set={set} base="bodyPre" segments={[{ key: 'bodyPre' }]} />
+          <RichFieldGroup label="Body Bold" f={f} set={set} base="bodyBold" segments={[{ key: 'bodyBold' }]} />
+          <RichFieldGroup label="Body Tail" f={f} set={set} base="bodyTail" segments={[{ key: 'bodyTail' }]} />
           <Repeater<string>
             label="Lifecycle chips"
             items={(f.chips as string[]) ?? []}
@@ -6823,9 +6826,9 @@ function renderBlockFields(
       type ICard = { title: string; body: string; imageUrl?: string; imageAlt?: string; imageFit?: ObjectFitValue };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<ICard>
             label="Impact cards (3)"
             items={(f.cards as ICard[]) ?? []}
@@ -6834,8 +6837,8 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body" {...richItemProps(c, 'body', u)} />
                 <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <Select<ObjectFitValue>
@@ -6856,11 +6859,11 @@ function renderBlockFields(
       type ProofCard = { title: string; body: string; value: string; note: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (tail)" value={f.headingTail as string ?? ''} onChange={(v) => set('headingTail', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Tail" f={f} set={set} base="headingTail" segments={[{ key: 'headingTail' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<ProofCard>
             label="Proof cards"
             items={(f.cards as ProofCard[]) ?? []}
@@ -6869,10 +6872,10 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
-                <TextInput label="Value (flagged)" value={c.value ?? ''} onChange={(v) => u({ ...c, value: v })} />
-                <Textarea label="Note" value={c.note ?? ''} onChange={(v) => u({ ...c, note: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body" {...richItemProps(c, 'body', u)} />
+                <RichTextInput label="Value (flagged)" {...richItemProps(c, 'value', u)} />
+                <RichTextInput label="Note" {...richItemProps(c, 'note', u)} />
               </div>
             )}
           />
@@ -6885,14 +6888,14 @@ function renderBlockFields(
       type Chip = { valPre: string; valAccent: string; valPost: string; lbl: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
           <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
@@ -6900,7 +6903,7 @@ function renderBlockFields(
             widthKey="mockImageMaxWidth" heightKey="mockImageMaxHeight" aspectRatioKey="mockImageAspectRatio" fitKey="mockImageFit"
             f={f} set={set} defaults={{ width: 1040, height: 380, fit: 'contain' }}
           />
-          <TextInput label="Stat note" value={f.statNote as string ?? ''} onChange={(v) => set('statNote', v)} />
+          <RichFieldGroup label="Stat note" f={f} set={set} base="statNote" segments={[{ key: 'statNote' }]} />
           <Repeater<Chip>
             label="Floating chips (4)"
             items={(f.chips as Chip[]) ?? []}
@@ -6909,10 +6912,10 @@ function renderBlockFields(
             itemPreview={(c) => c.lbl}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Value (before accent)" value={c.valPre ?? ''} onChange={(v) => u({ ...c, valPre: v })} />
-                <TextInput label="Accent (teal, e.g. +)" value={c.valAccent ?? ''} onChange={(v) => u({ ...c, valAccent: v })} />
-                <TextInput label="Value (after accent)" value={c.valPost ?? ''} onChange={(v) => u({ ...c, valPost: v })} />
-                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+                <RichTextInput label="Value (before accent)" {...richItemProps(c, 'valPre', u)} />
+                <RichTextInput label="Accent (teal, e.g. +)" {...richItemProps(c, 'valAccent', u)} />
+                <RichTextInput label="Value (after accent)" {...richItemProps(c, 'valPost', u)} />
+                <RichTextInput label="Label" {...richItemProps(c, 'lbl', u)} />
               </div>
             )}
           />
@@ -6924,9 +6927,9 @@ function renderBlockFields(
       type Logo = { url?: string; label: string; width?: number; height?: number; fit?: ObjectFitValue };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<Logo>
             label="Logo slots"
             items={(f.logos as Logo[]) ?? []}
@@ -6936,7 +6939,7 @@ function renderBlockFields(
             renderItem={(l, u) => (
               <div className="space-y-2">
                 <ImageField label="Logo URL" value={l.url ?? ''} onChange={(v) => u({ ...l, url: v })} />
-                <TextInput label="Label / slot text" value={l.label ?? ''} onChange={(v) => u({ ...l, label: v })} />
+                <RichTextInput label="Label / slot text" {...richItemProps(l, 'label', u)} />
                 <div className="grid grid-cols-2 gap-2">
                   <NumberInput label="Width (px, 0 = auto)" value={l.width ?? 0} onChange={(v) => u({ ...l, width: v })} />
                   <NumberInput label="Height (px)" value={l.height ?? 44} onChange={(v) => u({ ...l, height: v })} />
@@ -6958,11 +6961,11 @@ function renderBlockFields(
       type StatCite = { big: string; claim: string; srcName: string; srcUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (red)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<StatCite>
             label="Cited stats (3)"
             items={(f.stats as StatCite[]) ?? []}
@@ -6971,9 +6974,9 @@ function renderBlockFields(
             itemPreview={(s) => s.big}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Big number (red)" value={s.big ?? ''} onChange={(v) => u({ ...s, big: v })} />
-                <Textarea label="Claim" value={s.claim ?? ''} onChange={(v) => u({ ...s, claim: v })} />
-                <TextInput label="Source name" value={s.srcName ?? ''} onChange={(v) => u({ ...s, srcName: v })} />
+                <RichTextInput label="Big number (red)" {...richItemProps(s, 'big', u)} />
+                <RichTextInput label="Claim" {...richItemProps(s, 'claim', u)} />
+                <RichTextInput label="Source name" {...richItemProps(s, 'srcName', u)} />
                 <TextInput label="Source URL" value={s.srcUrl ?? ''} onChange={(v) => u({ ...s, srcUrl: v })} />
               </div>
             )}
@@ -6986,13 +6989,13 @@ function renderBlockFields(
       type CmpItem = { title: string; body: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Bad column label" value={f.badLabel as string ?? ''} onChange={(v) => set('badLabel', v)} />
-          <TextInput label="Good column label" value={f.goodLabel as string ?? ''} onChange={(v) => set('goodLabel', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Bad column label" f={f} set={set} base="badLabel" segments={[{ key: 'badLabel' }]} />
+          <RichFieldGroup label="Good column label" f={f} set={set} base="goodLabel" segments={[{ key: 'goodLabel' }]} />
           <Repeater<CmpItem>
             label="Generic SFA items (bad)"
             items={(f.badItems as CmpItem[]) ?? []}
@@ -7001,8 +7004,8 @@ function renderBlockFields(
             itemPreview={(it) => it.title}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
-                <Textarea label="Body" value={it.body ?? ''} onChange={(v) => u({ ...it, body: v })} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Body" {...richItemProps(it, 'body', u)} />
               </div>
             )}
           />
@@ -7014,8 +7017,8 @@ function renderBlockFields(
             itemPreview={(it) => it.title}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
-                <Textarea label="Body" value={it.body ?? ''} onChange={(v) => u({ ...it, body: v })} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Body" {...richItemProps(it, 'body', u)} />
               </div>
             )}
           />
@@ -7026,11 +7029,11 @@ function renderBlockFields(
     case 'slick-rs-darkpanel':
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Body" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Body" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
           <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
@@ -7044,11 +7047,11 @@ function renderBlockFields(
       type ProbCard = { num: string; title: string; bodyPre: string; bodyBold: string; bodyTail: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<ProbCard>
             label="Problem cards (6)"
             items={(f.cards as ProbCard[]) ?? []}
@@ -7057,11 +7060,11 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={c.num ?? ''} onChange={(v) => u({ ...c, num: v })} />
-                <TextInput label="Title (problem)" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
-                <TextInput label="Body (bold teal)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
-                <Textarea label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
+                <RichTextInput label="Number" {...richItemProps(c, 'num', u)} />
+                <RichTextInput label="Title (problem)" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body (before bold)" {...richItemProps(c, 'bodyPre', u)} />
+                <RichTextInput label="Body (bold teal)" {...richItemProps(c, 'bodyBold', u)} />
+                <RichTextInput label="Body (after bold)" {...richItemProps(c, 'bodyTail', u)} />
               </div>
             )}
           />
@@ -7073,11 +7076,11 @@ function renderBlockFields(
       type Cap = { icon: string; title: string; benefit: string; descPre: string; descBold: string; descTail: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<Cap>
             label="Capability cards (8)"
             items={(f.cards as Cap[]) ?? []}
@@ -7087,11 +7090,11 @@ function renderBlockFields(
             renderItem={(c, u) => (
               <div className="space-y-2">
                 <TextInput label="Icon (emoji)" value={c.icon ?? ''} onChange={(v) => u({ ...c, icon: v })} />
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <TextInput label="Benefit pill" value={c.benefit ?? ''} onChange={(v) => u({ ...c, benefit: v })} />
-                <TextInput label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
-                <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
-                <TextInput label="Desc (after bold)" value={c.descTail ?? ''} onChange={(v) => u({ ...c, descTail: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Benefit pill" {...richItemProps(c, 'benefit', u)} />
+                <RichTextInput label="Desc (before bold)" {...richItemProps(c, 'descPre', u)} />
+                <RichTextInput label="Desc (bold)" {...richItemProps(c, 'descBold', u)} />
+                <RichTextInput label="Desc (after bold)" {...richItemProps(c, 'descTail', u)} />
               </div>
             )}
           />
@@ -7102,15 +7105,15 @@ function renderBlockFields(
     case 'slick-rs-split': {
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Body (start)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
-          <TextInput label="Body bold 1" value={f.bodyBold1 as string ?? ''} onChange={(v) => set('bodyBold1', v)} />
-          <Textarea label="Body (middle)" value={f.bodyMid as string ?? ''} onChange={(v) => set('bodyMid', v)} />
-          <TextInput label="Body bold 2" value={f.bodyBold2 as string ?? ''} onChange={(v) => set('bodyBold2', v)} />
-          <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Body Pre" f={f} set={set} base="bodyPre" segments={[{ key: 'bodyPre' }]} />
+          <RichFieldGroup label="Body Bold1" f={f} set={set} base="bodyBold1" segments={[{ key: 'bodyBold1' }]} />
+          <RichFieldGroup label="Body Mid" f={f} set={set} base="bodyMid" segments={[{ key: 'bodyMid' }]} />
+          <RichFieldGroup label="Body Bold2" f={f} set={set} base="bodyBold2" segments={[{ key: 'bodyBold2' }]} />
+          <RichFieldGroup label="Body Tail" f={f} set={set} base="bodyTail" segments={[{ key: 'bodyTail' }]} />
           <Repeater<string>
             label="Feature chips"
             items={(f.chips as string[]) ?? []}
@@ -7136,11 +7139,11 @@ function renderBlockFields(
       type ICard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; imageUrl?: string; imageAlt?: string; imageFit?: ObjectFitValue; stats: IStat[] };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<ICard>
             label="Impact cards (3)"
             items={(f.cards as ICard[]) ?? []}
@@ -7149,10 +7152,10 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
-                <TextInput label="Body (bold)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
-                <Textarea label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body (before bold)" {...richItemProps(c, 'bodyPre', u)} />
+                <RichTextInput label="Body (bold)" {...richItemProps(c, 'bodyBold', u)} />
+                <RichTextInput label="Body (after bold)" {...richItemProps(c, 'bodyTail', u)} />
                 <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <Select<ObjectFitValue>
@@ -7169,9 +7172,9 @@ function renderBlockFields(
                   itemPreview={(s) => s.k}
                   renderItem={(s, su) => (
                     <div className="space-y-2">
-                      <TextInput label="Value" value={s.v ?? ''} onChange={(nv) => su({ ...s, v: nv })} />
-                      <TextInput label="Metric" value={s.k ?? ''} onChange={(nv) => su({ ...s, k: nv })} />
-                      <TextInput label="Sub" value={s.sub ?? ''} onChange={(nv) => su({ ...s, sub: nv })} />
+                      <RichTextInput label="Value" {...richItemProps(s, 'v', su)} />
+                      <RichTextInput label="Metric" {...richItemProps(s, 'k', su)} />
+                      <RichTextInput label="Sub" {...richItemProps(s, 'sub', su)} />
                     </div>
                   )}
                 />
@@ -7187,15 +7190,15 @@ function renderBlockFields(
       type Chip = { valPre: string; valAccent: string; lbl: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading line 1" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading line 2 (teal accent)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle (start)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Subtitle bold" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <Textarea label="Subtitle (tail)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
-          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle (start)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
           <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
@@ -7211,9 +7214,9 @@ function renderBlockFields(
             itemPreview={(c) => c.lbl}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Value" value={c.valPre ?? ''} onChange={(v) => u({ ...c, valPre: v })} />
-                <TextInput label="Accent (teal suffix, e.g. + % s)" value={c.valAccent ?? ''} onChange={(v) => u({ ...c, valAccent: v })} />
-                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+                <RichTextInput label="Value" {...richItemProps(c, 'valPre', u)} />
+                <RichTextInput label="Accent (teal suffix, e.g. + % s)" {...richItemProps(c, 'valAccent', u)} />
+                <RichTextInput label="Label" {...richItemProps(c, 'lbl', u)} />
               </div>
             )}
           />
@@ -7225,12 +7228,12 @@ function renderBlockFields(
       type Stat = { n: string; l: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle (start)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Subtitle bold" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <Textarea label="Subtitle (tail)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle (start)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
           <Repeater<Stat>
             label="Stats (4)"
             items={(f.stats as Stat[]) ?? []}
@@ -7239,8 +7242,8 @@ function renderBlockFields(
             itemPreview={(s) => s.n}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.n ?? ''} onChange={(v) => u({ ...s, n: v })} />
-                <TextInput label="Label" value={s.l ?? ''} onChange={(v) => u({ ...s, l: v })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'n', u)} />
+                <RichTextInput label="Label" {...richItemProps(s, 'l', u)} />
               </div>
             )}
           />
@@ -7263,7 +7266,7 @@ function renderBlockFields(
             onChange={(v) => set('logoFit', v)}
             options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
           />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -7273,11 +7276,11 @@ function renderBlockFields(
       type StatCite = { big: string; claim: string; srcName: string; srcUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill (coral)" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subtitle (start)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Subtitle bold" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <Textarea label="Subtitle (tail)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <RichFieldGroup label="Pill (coral)" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtitle (start)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
           <Repeater<StatCite>
             label="Cited stats (3)"
             items={(f.stats as StatCite[]) ?? []}
@@ -7286,9 +7289,9 @@ function renderBlockFields(
             itemPreview={(s) => s.big}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Big number (coral)" value={s.big ?? ''} onChange={(v) => u({ ...s, big: v })} />
-                <Textarea label="Claim" value={s.claim ?? ''} onChange={(v) => u({ ...s, claim: v })} />
-                <TextInput label="Source name" value={s.srcName ?? ''} onChange={(v) => u({ ...s, srcName: v })} />
+                <RichTextInput label="Big number (coral)" {...richItemProps(s, 'big', u)} />
+                <RichTextInput label="Claim" {...richItemProps(s, 'claim', u)} />
+                <RichTextInput label="Source name" {...richItemProps(s, 'srcName', u)} />
                 <TextInput label="Source URL" value={s.srcUrl ?? ''} onChange={(v) => u({ ...s, srcUrl: v })} />
               </div>
             )}
@@ -7300,13 +7303,13 @@ function renderBlockFields(
     case 'slick-sv-darkpanel':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Body (start)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
-          <TextInput label="Body bold 1" value={f.bodyBold1 as string ?? ''} onChange={(v) => set('bodyBold1', v)} />
-          <Textarea label="Body (middle)" value={f.bodyMid as string ?? ''} onChange={(v) => set('bodyMid', v)} />
-          <TextInput label="Body bold 2" value={f.bodyBold2 as string ?? ''} onChange={(v) => set('bodyBold2', v)} />
-          <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Body Pre" f={f} set={set} base="bodyPre" segments={[{ key: 'bodyPre' }]} />
+          <RichFieldGroup label="Body Bold1" f={f} set={set} base="bodyBold1" segments={[{ key: 'bodyBold1' }]} />
+          <RichFieldGroup label="Body Mid" f={f} set={set} base="bodyMid" segments={[{ key: 'bodyMid' }]} />
+          <RichFieldGroup label="Body Bold2" f={f} set={set} base="bodyBold2" segments={[{ key: 'bodyBold2' }]} />
+          <RichFieldGroup label="Body Tail" f={f} set={set} base="bodyTail" segments={[{ key: 'bodyTail' }]} />
         </div>
       );
 
@@ -7314,10 +7317,10 @@ function renderBlockFields(
       type Stage = { num: string; title: string; descPre: string; descBold: string; descTail: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<Stage>
             label="Steps (4)"
             items={(f.stages as Stage[]) ?? []}
@@ -7326,11 +7329,11 @@ function renderBlockFields(
             itemPreview={(s) => s.title}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
-                <TextInput label="Title" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
-                <Textarea label="Desc (before bold)" value={s.descPre ?? ''} onChange={(v) => u({ ...s, descPre: v })} />
-                <TextInput label="Desc (bold)" value={s.descBold ?? ''} onChange={(v) => u({ ...s, descBold: v })} />
-                <Textarea label="Desc (after bold)" value={s.descTail ?? ''} onChange={(v) => u({ ...s, descTail: v })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'num', u)} />
+                <RichTextInput label="Title" {...richItemProps(s, 'title', u)} />
+                <RichTextInput label="Desc (before bold)" {...richItemProps(s, 'descPre', u)} />
+                <RichTextInput label="Desc (bold)" {...richItemProps(s, 'descBold', u)} />
+                <RichTextInput label="Desc (after bold)" {...richItemProps(s, 'descTail', u)} />
               </div>
             )}
           />
@@ -7342,8 +7345,8 @@ function renderBlockFields(
       type Stat = { n: string; l: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <Repeater<Stat>
             label="Accuracy stats (4)"
             items={(f.stats as Stat[]) ?? []}
@@ -7352,8 +7355,8 @@ function renderBlockFields(
             itemPreview={(s) => s.n}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.n ?? ''} onChange={(v) => u({ ...s, n: v })} />
-                <TextInput label="Label" value={s.l ?? ''} onChange={(v) => u({ ...s, l: v })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'n', u)} />
+                <RichTextInput label="Label" {...richItemProps(s, 'l', u)} />
               </div>
             )}
           />
@@ -7365,9 +7368,9 @@ function renderBlockFields(
       type FCard = { imageUrl?: string; imageAlt?: string; imageFit?: ObjectFitValue; title: string; descPre: string; descBold: string; descTail: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subheading" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<FCard>
             label="Check cards (6)"
             items={(f.cards as FCard[]) ?? []}
@@ -7384,10 +7387,10 @@ function renderBlockFields(
                   onChange={(v) => u({ ...c, imageFit: v })}
                   options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
                 />
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
-                <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
-                <Textarea label="Desc (after bold)" value={c.descTail ?? ''} onChange={(v) => u({ ...c, descTail: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Desc (before bold)" {...richItemProps(c, 'descPre', u)} />
+                <RichTextInput label="Desc (bold)" {...richItemProps(c, 'descBold', u)} />
+                <RichTextInput label="Desc (after bold)" {...richItemProps(c, 'descTail', u)} />
               </div>
             )}
           />
@@ -7400,14 +7403,14 @@ function renderBlockFields(
         <div className="space-y-4">
           <Toggle label="Reverse layout (image left)" value={Boolean(f.reverse)} onChange={(v) => set('reverse', v)} />
           <Toggle label="Mint band background" value={Boolean(f.bandMint)} onChange={(v) => set('bandMint', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Body (start)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
-          <TextInput label="Body bold 1" value={f.bodyBold1 as string ?? ''} onChange={(v) => set('bodyBold1', v)} />
-          <Textarea label="Body (middle)" value={f.bodyMid as string ?? ''} onChange={(v) => set('bodyMid', v)} />
-          <TextInput label="Body bold 2" value={f.bodyBold2 as string ?? ''} onChange={(v) => set('bodyBold2', v)} />
-          <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Body Pre" f={f} set={set} base="bodyPre" segments={[{ key: 'bodyPre' }]} />
+          <RichFieldGroup label="Body Bold1" f={f} set={set} base="bodyBold1" segments={[{ key: 'bodyBold1' }]} />
+          <RichFieldGroup label="Body Mid" f={f} set={set} base="bodyMid" segments={[{ key: 'bodyMid' }]} />
+          <RichFieldGroup label="Body Bold2" f={f} set={set} base="bodyBold2" segments={[{ key: 'bodyBold2' }]} />
+          <RichFieldGroup label="Body Tail" f={f} set={set} base="bodyTail" segments={[{ key: 'bodyTail' }]} />
           <Repeater<string>
             label="Chips"
             items={(f.chips as string[]) ?? []}
@@ -7444,8 +7447,8 @@ function renderBlockFields(
       type HtCard = { videoUrl?: string; thumbnail?: string; alt?: string };
       return (
         <div className="space-y-4">
-          <Textarea label="Heading (** = teal accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <TextInput label="Subheading" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Heading (** = teal accent)" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<HtCard>
             label="Shorts cards"
             items={(f.cards as HtCard[]) ?? []}
@@ -7468,8 +7471,8 @@ function renderBlockFields(
       type PCard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; statValue: string; statKey: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <Repeater<PCard>
             label="Proof cards (3)"
             items={(f.cards as PCard[]) ?? []}
@@ -7478,11 +7481,11 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
-                <TextInput label="Body (bold)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
-                <Textarea label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
-                <TextInput label="Stat value (or [VERIFY: x])" value={c.statValue ?? ''} onChange={(v) => u({ ...c, statValue: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body (before bold)" {...richItemProps(c, 'bodyPre', u)} />
+                <RichTextInput label="Body (bold)" {...richItemProps(c, 'bodyBold', u)} />
+                <RichTextInput label="Body (after bold)" {...richItemProps(c, 'bodyTail', u)} />
+                <RichTextInput label="Stat value (or [VERIFY: x])" {...richItemProps(c, 'statValue', u)} />
                 <TextInput label="Stat key" value={c.statKey ?? ''} onChange={(v) => u({ ...c, statKey: v })} />
               </div>
             )}
@@ -7496,14 +7499,14 @@ function renderBlockFields(
       type Chip = { valPre: string; valAccent: string; lbl: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal, new line)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle (before bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Subtitle (bold end)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Sub" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Phone mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
           <TextInput label="Mockup alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
@@ -7519,9 +7522,9 @@ function renderBlockFields(
             itemPreview={(c) => c.lbl}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Value" value={c.valPre ?? ''} onChange={(v) => u({ ...c, valPre: v })} />
-                <TextInput label="Accent (teal)" value={c.valAccent ?? ''} onChange={(v) => u({ ...c, valAccent: v })} />
-                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+                <RichTextInput label="Value" {...richItemProps(c, 'valPre', u)} />
+                <RichTextInput label="Accent (teal)" {...richItemProps(c, 'valAccent', u)} />
+                <RichTextInput label="Label" {...richItemProps(c, 'lbl', u)} />
               </div>
             )}
           />
@@ -7534,11 +7537,11 @@ function renderBlockFields(
       type Logo = { url?: string; label: string; width?: number; height?: number; fit?: ObjectFitValue };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <TextInput label="Note" value={f.note as string ?? ''} onChange={(v) => set('note', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Note" f={f} set={set} base="note" segments={[{ key: 'note' }]} />
           <Repeater<Stat>
             label="Stats (4)"
             items={(f.stats as Stat[]) ?? []}
@@ -7547,8 +7550,8 @@ function renderBlockFields(
             itemPreview={(s) => s.num}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
-                <TextInput label="Label" value={s.lab ?? ''} onChange={(v) => u({ ...s, lab: v })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'num', u)} />
+                <RichTextInput label="Label" {...richItemProps(s, 'lab', u)} />
               </div>
             )}
           />
@@ -7561,7 +7564,7 @@ function renderBlockFields(
             renderItem={(l, u) => (
               <div className="space-y-2">
                 <ImageField label="Logo URL" value={l.url ?? ''} onChange={(v) => u({ ...l, url: v })} />
-                <TextInput label="Label / slot text" value={l.label ?? ''} onChange={(v) => u({ ...l, label: v })} />
+                <RichTextInput label="Label / slot text" {...richItemProps(l, 'label', u)} />
                 <div className="grid grid-cols-2 gap-2">
                   <NumberInput label="Max height (px)" value={l.height ?? 52} onChange={(v) => u({ ...l, height: v })} />
                   <NumberInput label="Max width (px)" value={l.width ?? 140} onChange={(v) => u({ ...l, width: v })} />
@@ -7583,13 +7586,13 @@ function renderBlockFields(
       type Card = { big: string; claim: string; srcName: string; srcUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (red)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Kicker (before bold)" value={f.kickerPre as string ?? ''} onChange={(v) => set('kickerPre', v)} />
-          <TextInput label="Kicker (bold)" value={f.kickerBold as string ?? ''} onChange={(v) => set('kickerBold', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Kicker Pre" f={f} set={set} base="kickerPre" segments={[{ key: 'kickerPre' }]} />
+          <RichFieldGroup label="Kicker Bold" f={f} set={set} base="kickerBold" segments={[{ key: 'kickerBold' }]} />
           <Repeater<Card>
             label="Cited stats (3)"
             items={(f.cards as Card[]) ?? []}
@@ -7598,9 +7601,9 @@ function renderBlockFields(
             itemPreview={(c) => c.big}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Big number (red)" value={c.big ?? ''} onChange={(v) => u({ ...c, big: v })} />
-                <Textarea label="Claim" value={c.claim ?? ''} onChange={(v) => u({ ...c, claim: v })} />
-                <TextInput label="Source name" value={c.srcName ?? ''} onChange={(v) => u({ ...c, srcName: v })} />
+                <RichTextInput label="Big number (red)" {...richItemProps(c, 'big', u)} />
+                <RichTextInput label="Claim" {...richItemProps(c, 'claim', u)} />
+                <RichTextInput label="Source name" {...richItemProps(c, 'srcName', u)} />
                 <TextInput label="Source URL" value={c.srcUrl ?? ''} onChange={(v) => u({ ...c, srcUrl: v })} />
               </div>
             )}
@@ -7613,20 +7616,20 @@ function renderBlockFields(
       type Driver = { stat: string; name: string; verify?: string; desc: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (red)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Sub (before bold)" value={f.subPre as string ?? ''} onChange={(v) => set('subPre', v)} />
-          <TextInput label="Sub (bold)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Sub (after bold)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
-          <TextInput label="Sub verify tag" value={f.subVerify as string ?? ''} onChange={(v) => set('subVerify', v)} />
-          <TextInput label="Keep %" value={f.keepPct as string ?? ''} onChange={(v) => set('keepPct', v)} />
-          <TextInput label="Keep label" value={f.keepLabel as string ?? ''} onChange={(v) => set('keepLabel', v)} />
-          <TextInput label="Lost %" value={f.lostPct as string ?? ''} onChange={(v) => set('lostPct', v)} />
-          <TextInput label="Lost label" value={f.lostLabel as string ?? ''} onChange={(v) => set('lostLabel', v)} />
-          <TextInput label="Drivers title" value={f.driversTitle as string ?? ''} onChange={(v) => set('driversTitle', v)} />
-          <Textarea label="Note" value={f.note as string ?? ''} onChange={(v) => set('note', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Sub Pre" f={f} set={set} base="subPre" segments={[{ key: 'subPre' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
+          <RichFieldGroup label="Sub verify tag" f={f} set={set} base="subVerify" segments={[{ key: 'subVerify' }]} />
+          <RichFieldGroup label="Keep %" f={f} set={set} base="keepPct" segments={[{ key: 'keepPct' }]} />
+          <RichFieldGroup label="Keep label" f={f} set={set} base="keepLabel" segments={[{ key: 'keepLabel' }]} />
+          <RichFieldGroup label="Lost %" f={f} set={set} base="lostPct" segments={[{ key: 'lostPct' }]} />
+          <RichFieldGroup label="Lost label" f={f} set={set} base="lostLabel" segments={[{ key: 'lostLabel' }]} />
+          <RichFieldGroup label="Drivers title" f={f} set={set} base="driversTitle" segments={[{ key: 'driversTitle' }]} />
+          <RichFieldGroup label="Note" f={f} set={set} base="note" segments={[{ key: 'note' }]} />
           <Repeater<Driver>
             label="Drivers (4)"
             items={(f.drivers as Driver[]) ?? []}
@@ -7635,10 +7638,10 @@ function renderBlockFields(
             itemPreview={(d) => d.name}
             renderItem={(d, u) => (
               <div className="space-y-2">
-                <TextInput label="Stat" value={d.stat ?? ''} onChange={(v) => u({ ...d, stat: v })} />
-                <TextInput label="Name" value={d.name ?? ''} onChange={(v) => u({ ...d, name: v })} />
-                <TextInput label="Verify tag (optional)" value={d.verify ?? ''} onChange={(v) => u({ ...d, verify: v })} />
-                <Textarea label="Description" value={d.desc ?? ''} onChange={(v) => u({ ...d, desc: v })} />
+                <RichTextInput label="Stat" {...richItemProps(d, 'stat', u)} />
+                <RichTextInput label="Name" {...richItemProps(d, 'name', u)} />
+                <RichTextInput label="Verify tag (optional)" {...richItemProps(d, 'verify', u)} />
+                <RichTextInput label="Description" {...richItemProps(d, 'desc', u)} />
               </div>
             )}
           />
@@ -7650,16 +7653,16 @@ function renderBlockFields(
       type Item = { num: string; title: string; linePre: string; lineBold: string; lineTail: string; impN?: string; impK?: string; impNone?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Sub (before bold)" value={f.subPre as string ?? ''} onChange={(v) => set('subPre', v)} />
-          <TextInput label="Sub (bold)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Sub (after bold)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
-          <TextInput label="Proof (before bold)" value={f.proofPre as string ?? ''} onChange={(v) => set('proofPre', v)} />
-          <TextInput label="Proof (bold)" value={f.proofBold as string ?? ''} onChange={(v) => set('proofBold', v)} />
-          <TextInput label="Proof (after bold)" value={f.proofTail as string ?? ''} onChange={(v) => set('proofTail', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Sub Pre" f={f} set={set} base="subPre" segments={[{ key: 'subPre' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
+          <RichFieldGroup label="Proof Pre" f={f} set={set} base="proofPre" segments={[{ key: 'proofPre' }]} />
+          <RichFieldGroup label="Proof Bold" f={f} set={set} base="proofBold" segments={[{ key: 'proofBold' }]} />
+          <RichFieldGroup label="Proof Tail" f={f} set={set} base="proofTail" segments={[{ key: 'proofTail' }]} />
           <Repeater<Item>
             label="Timeline items (5)"
             items={(f.items as Item[]) ?? []}
@@ -7668,14 +7671,14 @@ function renderBlockFields(
             itemPreview={(it) => it.title}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={it.num ?? ''} onChange={(v) => u({ ...it, num: v })} />
-                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
-                <Textarea label="Line (before bold)" value={it.linePre ?? ''} onChange={(v) => u({ ...it, linePre: v })} />
-                <TextInput label="Line (bold)" value={it.lineBold ?? ''} onChange={(v) => u({ ...it, lineBold: v })} />
-                <TextInput label="Line (after bold)" value={it.lineTail ?? ''} onChange={(v) => u({ ...it, lineTail: v })} />
-                <TextInput label="Impact number (blank if none)" value={it.impN ?? ''} onChange={(v) => u({ ...it, impN: v })} />
-                <TextInput label="Impact key" value={it.impK ?? ''} onChange={(v) => u({ ...it, impK: v })} />
-                <TextInput label="Impact 'none' note (if no number)" value={it.impNone ?? ''} onChange={(v) => u({ ...it, impNone: v })} />
+                <RichTextInput label="Number" {...richItemProps(it, 'num', u)} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Line (before bold)" {...richItemProps(it, 'linePre', u)} />
+                <RichTextInput label="Line (bold)" {...richItemProps(it, 'lineBold', u)} />
+                <RichTextInput label="Line (after bold)" {...richItemProps(it, 'lineTail', u)} />
+                <RichTextInput label="Impact number (blank if none)" {...richItemProps(it, 'impN', u)} />
+                <RichTextInput label="Impact key" {...richItemProps(it, 'impK', u)} />
+                <RichTextInput label="Impact 'none' note (if no number)" {...richItemProps(it, 'impNone', u)} />
               </div>
             )}
           />
@@ -7687,15 +7690,15 @@ function renderBlockFields(
       type Card = { icon: string; title: string; descPre: string; descBold: string; descTail: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Sub (before bold 1)" value={f.subPre as string ?? ''} onChange={(v) => set('subPre', v)} />
-          <TextInput label="Sub bold 1" value={f.subBold1 as string ?? ''} onChange={(v) => set('subBold1', v)} />
-          <TextInput label="Sub (middle)" value={f.subMid as string ?? ''} onChange={(v) => set('subMid', v)} />
-          <TextInput label="Sub bold 2" value={f.subBold2 as string ?? ''} onChange={(v) => set('subBold2', v)} />
-          <TextInput label="Sub (tail)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Sub Pre" f={f} set={set} base="subPre" segments={[{ key: 'subPre' }]} />
+          <RichFieldGroup label="Sub Bold1" f={f} set={set} base="subBold1" segments={[{ key: 'subBold1' }]} />
+          <RichFieldGroup label="Sub Mid" f={f} set={set} base="subMid" segments={[{ key: 'subMid' }]} />
+          <RichFieldGroup label="Sub Bold2" f={f} set={set} base="subBold2" segments={[{ key: 'subBold2' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
           <Repeater<Card>
             label="Feature cards (4)"
             items={(f.cards as Card[]) ?? []}
@@ -7705,10 +7708,10 @@ function renderBlockFields(
             renderItem={(c, u) => (
               <div className="space-y-2">
                 <TextInput label="Icon (target | tasks | star | bars)" value={c.icon ?? ''} onChange={(v) => u({ ...c, icon: v })} />
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <TextInput label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
-                <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
-                <TextInput label="Desc (after bold)" value={c.descTail ?? ''} onChange={(v) => u({ ...c, descTail: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Desc (before bold)" {...richItemProps(c, 'descPre', u)} />
+                <RichTextInput label="Desc (bold)" {...richItemProps(c, 'descBold', u)} />
+                <RichTextInput label="Desc (after bold)" {...richItemProps(c, 'descTail', u)} />
               </div>
             )}
           />
@@ -7719,13 +7722,13 @@ function renderBlockFields(
     case 'slick-su-guarantee':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Sub line 1" value={f.subLine1 as string ?? ''} onChange={(v) => set('subLine1', v)} />
-          <Textarea label="Sub line 2" value={f.subLine2 as string ?? ''} onChange={(v) => set('subLine2', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Sub line 1" f={f} set={set} base="subLine1" segments={[{ key: 'subLine1' }]} />
+          <RichFieldGroup label="Sub line 2" f={f} set={set} base="subLine2" segments={[{ key: 'subLine2' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
@@ -7735,15 +7738,15 @@ function renderBlockFields(
       type Chip = { valPre: string; valAccent: string; lbl: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle (start)" value={f.subPre as string ?? ''} onChange={(v) => set('subPre', v)} />
-          <TextInput label="Subtitle bold" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <Textarea label="Subtitle (tail)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
-          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Sub Pre" f={f} set={set} base="subPre" segments={[{ key: 'subPre' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
           <TextInput label="Hero image alt / placeholder" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
@@ -7755,9 +7758,9 @@ function renderBlockFields(
             itemPreview={(c) => c.lbl}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Value" value={c.valPre ?? ''} onChange={(v) => u({ ...c, valPre: v })} />
-                <TextInput label="Accent (teal suffix)" value={c.valAccent ?? ''} onChange={(v) => u({ ...c, valAccent: v })} />
-                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+                <RichTextInput label="Value" {...richItemProps(c, 'valPre', u)} />
+                <RichTextInput label="Accent (teal suffix)" {...richItemProps(c, 'valAccent', u)} />
+                <RichTextInput label="Label" {...richItemProps(c, 'lbl', u)} />
               </div>
             )}
           />
@@ -7770,9 +7773,9 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <Toggle label="Mint band background" value={Boolean(f.bandMint)} onChange={(v) => set('bandMint', v)} />
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subheading / body" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subheading / body" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<Stat>
             label="Stats (4)"
             items={(f.stats as Stat[]) ?? []}
@@ -7781,8 +7784,8 @@ function renderBlockFields(
             itemPreview={(s) => s.n}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.n ?? ''} onChange={(v) => u({ ...s, n: v })} />
-                <TextInput label="Label" value={s.l ?? ''} onChange={(v) => u({ ...s, l: v })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'n', u)} />
+                <RichTextInput label="Label" {...richItemProps(s, 'l', u)} />
               </div>
             )}
           />
@@ -7794,8 +7797,8 @@ function renderBlockFields(
       type StatCite = { big: string; claim: string; src: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <Repeater<StatCite>
             label="Cited stats (3)"
             items={(f.stats as StatCite[]) ?? []}
@@ -7804,8 +7807,8 @@ function renderBlockFields(
             itemPreview={(s) => s.big}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Big number (coral)" value={s.big ?? ''} onChange={(v) => u({ ...s, big: v })} />
-                <Textarea label="Claim" value={s.claim ?? ''} onChange={(v) => u({ ...s, claim: v })} />
+                <RichTextInput label="Big number (coral)" {...richItemProps(s, 'big', u)} />
+                <RichTextInput label="Claim" {...richItemProps(s, 'claim', u)} />
                 <TextInput label="Source" value={s.src ?? ''} onChange={(v) => u({ ...s, src: v })} />
               </div>
             )}
@@ -7819,13 +7822,13 @@ function renderBlockFields(
         <div className="space-y-4">
           <Toggle label="Reverse layout (image left)" value={Boolean(f.reverse)} onChange={(v) => set('reverse', v)} />
           <Toggle label="Mint band background" value={Boolean(f.bandMint)} onChange={(v) => set('bandMint', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (tail)" value={f.headingTail as string ?? ''} onChange={(v) => set('headingTail', v)} />
-          <Textarea label="Body (before bold)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
-          <TextInput label="Body (bold)" value={f.bodyBold as string ?? ''} onChange={(v) => set('bodyBold', v)} />
-          <Textarea label="Body (after bold)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Tail" f={f} set={set} base="headingTail" segments={[{ key: 'headingTail' }]} />
+          <RichFieldGroup label="Body Pre" f={f} set={set} base="bodyPre" segments={[{ key: 'bodyPre' }]} />
+          <RichFieldGroup label="Body Bold" f={f} set={set} base="bodyBold" segments={[{ key: 'bodyBold' }]} />
+          <RichFieldGroup label="Body Tail" f={f} set={set} base="bodyTail" segments={[{ key: 'bodyTail' }]} />
           <Repeater<string>
             label="Chips"
             items={(f.chips as string[]) ?? []}
@@ -7846,9 +7849,9 @@ function renderBlockFields(
       type ICard = { title: string; body: string; imageUrl?: string; imageAlt?: string; statV: string; statK: string; statSub: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Sub text" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Sub text" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<ICard>
             label="Impact cards (3)"
             items={(f.cards as ICard[]) ?? []}
@@ -7857,13 +7860,13 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body" {...richItemProps(c, 'body', u)} />
                 <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <TextInput label="Image alt / placeholder" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
-                <TextInput label="Stat value" value={c.statV ?? ''} onChange={(v) => u({ ...c, statV: v })} />
-                <TextInput label="Stat key" value={c.statK ?? ''} onChange={(v) => u({ ...c, statK: v })} />
-                <TextInput label="Stat sub" value={c.statSub ?? ''} onChange={(v) => u({ ...c, statSub: v })} />
+                <RichTextInput label="Stat value" {...richItemProps(c, 'statV', u)} />
+                <RichTextInput label="Stat key" {...richItemProps(c, 'statK', u)} />
+                <RichTextInput label="Stat sub" {...richItemProps(c, 'statSub', u)} />
               </div>
             )}
           />
@@ -7875,10 +7878,10 @@ function renderBlockFields(
       type Tab = { label: string; h3Pre: string; h3Accent: string; body: string; big: string; bigLabel: string; imageUrl?: string; imageAlt?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal, new line)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<Tab>
             label="Tabs (4)"
             items={(f.tabs as Tab[]) ?? []}
@@ -7887,12 +7890,12 @@ function renderBlockFields(
             itemPreview={(t) => t.label}
             renderItem={(t, u) => (
               <div className="space-y-2">
-                <TextInput label="Tab label" value={t.label ?? ''} onChange={(v) => u({ ...t, label: v })} />
-                <TextInput label="Panel heading (pre)" value={t.h3Pre ?? ''} onChange={(v) => u({ ...t, h3Pre: v })} />
-                <TextInput label="Panel heading accent" value={t.h3Accent ?? ''} onChange={(v) => u({ ...t, h3Accent: v })} />
-                <Textarea label="Panel body" value={t.body ?? ''} onChange={(v) => u({ ...t, body: v })} />
-                <TextInput label="Big number" value={t.big ?? ''} onChange={(v) => u({ ...t, big: v })} />
-                <TextInput label="Big number label" value={t.bigLabel ?? ''} onChange={(v) => u({ ...t, bigLabel: v })} />
+                <RichTextInput label="Tab label" {...richItemProps(t, 'label', u)} />
+                <RichTextInput label="Panel heading (pre)" {...richItemProps(t, 'h3Pre', u)} />
+                <RichTextInput label="Panel heading accent" {...richItemProps(t, 'h3Accent', u)} />
+                <RichTextInput label="Panel body" {...richItemProps(t, 'body', u)} />
+                <RichTextInput label="Big number" {...richItemProps(t, 'big', u)} />
+                <RichTextInput label="Big number label" {...richItemProps(t, 'bigLabel', u)} />
                 <ImageField label="Panel image URL" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
                 <TextInput label="Image alt / placeholder" value={t.imageAlt ?? ''} onChange={(v) => u({ ...t, imageAlt: v })} />
               </div>
@@ -7905,12 +7908,12 @@ function renderBlockFields(
     case 'slick-mt-darkpanel':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Body (before bold)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
-          <Textarea label="Body (bold)" value={f.bodyBold as string ?? ''} onChange={(v) => set('bodyBold', v)} />
-          <Textarea label="Body (after bold)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Body Pre" f={f} set={set} base="bodyPre" segments={[{ key: 'bodyPre' }]} />
+          <RichFieldGroup label="Body Bold" f={f} set={set} base="bodyBold" segments={[{ key: 'bodyBold' }]} />
+          <RichFieldGroup label="Body Tail" f={f} set={set} base="bodyTail" segments={[{ key: 'bodyTail' }]} />
           <Repeater<string>
             label="Chips"
             items={(f.chips as string[]) ?? []}
@@ -7928,8 +7931,8 @@ function renderBlockFields(
       type FCard = { imageUrl?: string; imageAlt?: string; title: string; descPre: string; descBold: string; descTail: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <Repeater<FCard>
             label="Feature cards (3)"
             items={(f.cards as FCard[]) ?? []}
@@ -7940,10 +7943,10 @@ function renderBlockFields(
               <div className="space-y-2">
                 <ImageField label="Thumbnail image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <TextInput label="Image alt / placeholder" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Desc (before bold)" value={c.descPre ?? ''} onChange={(v) => u({ ...c, descPre: v })} />
-                <TextInput label="Desc (bold)" value={c.descBold ?? ''} onChange={(v) => u({ ...c, descBold: v })} />
-                <Textarea label="Desc (after bold)" value={c.descTail ?? ''} onChange={(v) => u({ ...c, descTail: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Desc (before bold)" {...richItemProps(c, 'descPre', u)} />
+                <RichTextInput label="Desc (bold)" {...richItemProps(c, 'descBold', u)} />
+                <RichTextInput label="Desc (after bold)" {...richItemProps(c, 'descTail', u)} />
               </div>
             )}
           />
@@ -7955,8 +7958,8 @@ function renderBlockFields(
       type PCard = { title: string; bodyPre: string; bodyBold: string; bodyTail: string; pairV: string; pairK: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <Repeater<PCard>
             label="Proof cards (3)"
             items={(f.cards as PCard[]) ?? []}
@@ -7965,12 +7968,12 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
-                <TextInput label="Body (bold)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
-                <Textarea label="Body (after bold)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
-                <TextInput label="Stat value" value={c.pairV ?? ''} onChange={(v) => u({ ...c, pairV: v })} />
-                <TextInput label="Stat key" value={c.pairK ?? ''} onChange={(v) => u({ ...c, pairK: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body (before bold)" {...richItemProps(c, 'bodyPre', u)} />
+                <RichTextInput label="Body (bold)" {...richItemProps(c, 'bodyBold', u)} />
+                <RichTextInput label="Body (after bold)" {...richItemProps(c, 'bodyTail', u)} />
+                <RichTextInput label="Stat value" {...richItemProps(c, 'pairV', u)} />
+                <RichTextInput label="Stat key" {...richItemProps(c, 'pairK', u)} />
               </div>
             )}
           />
@@ -7981,8 +7984,8 @@ function renderBlockFields(
     case 'slick-mt-trust': {
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <Repeater<string>
             label="Logo image URLs"
             items={(f.logoUrls as string[]) ?? []}
@@ -8001,11 +8004,11 @@ function renderBlockFields(
       type UPCard = { big?: string; claim?: string; srcLabel?: string; srcUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (coral)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (tail)" value={f.headingTail as string ?? ''} onChange={(v) => set('headingTail', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Tail" f={f} set={set} base="headingTail" segments={[{ key: 'headingTail' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<UPCard>
             label="Stat cards"
@@ -8015,16 +8018,16 @@ function renderBlockFields(
             itemPreview={(c) => `${c.big ?? ''} — ${c.claim ?? '(empty)'}`}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Big figure" value={c.big ?? ''} onChange={(v) => u({ ...c, big: v })} />
-                <Textarea label="Claim" value={c.claim ?? ''} onChange={(v) => u({ ...c, claim: v })} />
-                <TextInput label="Source label" value={c.srcLabel ?? ''} onChange={(v) => u({ ...c, srcLabel: v })} />
+                <RichTextInput label="Big figure" {...richItemProps(c, 'big', u)} />
+                <RichTextInput label="Claim" {...richItemProps(c, 'claim', u)} />
+                <RichTextInput label="Source label" {...richItemProps(c, 'srcLabel', u)} />
                 <TextInput label="Source URL" value={c.srcUrl ?? ''} onChange={(v) => u({ ...c, srcUrl: v })} />
               </div>
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <Textarea label="Kicker (before bold)" value={f.kickerPre as string ?? ''} onChange={(v) => set('kickerPre', v)} />
-          <TextInput label="Kicker (bold end)" value={f.kickerBold as string ?? ''} onChange={(v) => set('kickerBold', v)} />
+          <RichFieldGroup label="Kicker Pre" f={f} set={set} base="kickerPre" segments={[{ key: 'kickerPre' }]} />
+          <RichFieldGroup label="Kicker Bold" f={f} set={set} base="kickerBold" segments={[{ key: 'kickerBold' }]} />
         </div>
       );
     }
@@ -8034,14 +8037,14 @@ function renderBlockFields(
       type UTItem = { num?: string; title?: string; benefit?: string; bullets?: UTBullet[] };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (tail)" value={f.headingTail as string ?? ''} onChange={(v) => set('headingTail', v)} />
-          <TextInput label="Subtitle (pre)" value={f.subPre as string ?? ''} onChange={(v) => set('subPre', v)} />
-          <TextInput label="Subtitle (bold)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <Textarea label="Subtitle (tail — [VERIFY: x] allowed)" value={f.subTail as string ?? ''} onChange={(v) => set('subTail', v)} />
-          <Textarea label="Proof line ([VERIFY: x] allowed)" value={f.proof as string ?? ''} onChange={(v) => set('proof', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Tail" f={f} set={set} base="headingTail" segments={[{ key: 'headingTail' }]} />
+          <RichFieldGroup label="Sub Pre" f={f} set={set} base="subPre" segments={[{ key: 'subPre' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
+          <RichFieldGroup label="Proof line ([VERIFY: x] allowed)" f={f} set={set} base="proof" segments={[{ key: 'proof' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<UTItem>
             label="Stages"
@@ -8051,9 +8054,9 @@ function renderBlockFields(
             itemPreview={(it) => `${it.num ?? ''}. ${it.title ?? '(stage)'}`}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={it.num ?? ''} onChange={(v) => u({ ...it, num: v })} />
-                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
-                <TextInput label="Benefit pill" value={it.benefit ?? ''} onChange={(v) => u({ ...it, benefit: v })} />
+                <RichTextInput label="Number" {...richItemProps(it, 'num', u)} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                <RichTextInput label="Benefit pill" {...richItemProps(it, 'benefit', u)} />
                 <Repeater<UTBullet>
                   label="Bullets"
                   items={it.bullets ?? []}
@@ -8062,8 +8065,8 @@ function renderBlockFields(
                   itemPreview={(b) => `${b.lead ?? ''}${b.rest ?? ''}`.trim() || '(bullet)'}
                   renderItem={(b, ub) => (
                     <div className="space-y-2">
-                      <TextInput label="Lead (bold)" value={b.lead ?? ''} onChange={(v) => ub({ ...b, lead: v })} />
-                      <Textarea label="Rest" value={b.rest ?? ''} onChange={(v) => ub({ ...b, rest: v })} />
+                      <RichTextInput label="Lead (bold)" {...richItemProps(b, 'lead', ub)} />
+                      <RichTextInput label="Rest" {...richItemProps(b, 'rest', ub)} />
                     </div>
                   )}
                 />
@@ -8078,10 +8081,10 @@ function renderBlockFields(
       type UICard = { title?: string; benefit?: string; bodyPre?: string; bodyBold?: string; bodyTail?: string; imageUrl?: string; imageAlt?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (tail)" value={f.headingTail as string ?? ''} onChange={(v) => set('headingTail', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Tail" f={f} set={set} base="headingTail" segments={[{ key: 'headingTail' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<UICard>
             label="Module cards"
@@ -8091,20 +8094,20 @@ function renderBlockFields(
             itemPreview={(c) => c.title || '(card)'}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <TextInput label="Benefit pill" value={c.benefit ?? ''} onChange={(v) => u({ ...c, benefit: v })} />
-                <Textarea label="Body (before bold)" value={c.bodyPre ?? ''} onChange={(v) => u({ ...c, bodyPre: v })} />
-                <TextInput label="Body (bold)" value={c.bodyBold ?? ''} onChange={(v) => u({ ...c, bodyBold: v })} />
-                <Textarea label="Body (tail — [VERIFY: x] allowed)" value={c.bodyTail ?? ''} onChange={(v) => u({ ...c, bodyTail: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Benefit pill" {...richItemProps(c, 'benefit', u)} />
+                <RichTextInput label="Body (before bold)" {...richItemProps(c, 'bodyPre', u)} />
+                <RichTextInput label="Body (bold)" {...richItemProps(c, 'bodyBold', u)} />
+                <RichTextInput label="Body (tail — [VERIFY: x] allowed)" {...richItemProps(c, 'bodyTail', u)} />
                 <ImageField label="Card image" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <TextInput label="Image alt / placeholder caption" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
               </div>
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <Textarea label="Footer note (before bold)" value={f.notePre as string ?? ''} onChange={(v) => set('notePre', v)} />
-          <TextInput label="Footer note (bold)" value={f.noteBold as string ?? ''} onChange={(v) => set('noteBold', v)} />
-          <Textarea label="Footer note (tail)" value={f.noteTail as string ?? ''} onChange={(v) => set('noteTail', v)} />
+          <RichFieldGroup label="Note Pre" f={f} set={set} base="notePre" segments={[{ key: 'notePre' }]} />
+          <RichFieldGroup label="Note Bold" f={f} set={set} base="noteBold" segments={[{ key: 'noteBold' }]} />
+          <RichFieldGroup label="Note Tail" f={f} set={set} base="noteTail" segments={[{ key: 'noteTail' }]} />
         </div>
       );
     }
@@ -8114,14 +8117,14 @@ function renderBlockFields(
       type Chip = { valPre: string; valAccent: string; lbl: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subtitle (before bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Subtitle (bold end)" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="Primary CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Sub" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Primary CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <TextInput label="Ghost CTA label" value={f.ctaGhostLabel as string ?? ''} onChange={(v) => set('ctaGhostLabel', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Phone mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
           <TextInput label="Mockup alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
@@ -8137,9 +8140,9 @@ function renderBlockFields(
             itemPreview={(c) => c.lbl}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Value" value={c.valPre ?? ''} onChange={(v) => u({ ...c, valPre: v })} />
-                <TextInput label="Accent (teal)" value={c.valAccent ?? ''} onChange={(v) => u({ ...c, valAccent: v })} />
-                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+                <RichTextInput label="Value" {...richItemProps(c, 'valPre', u)} />
+                <RichTextInput label="Accent (teal)" {...richItemProps(c, 'valAccent', u)} />
+                <RichTextInput label="Label" {...richItemProps(c, 'lbl', u)} />
               </div>
             )}
           />
@@ -8151,8 +8154,8 @@ function renderBlockFields(
       type Stat = { n: string; l: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <Repeater<Stat>
             label="Stats (4)"
             items={(f.stats as Stat[]) ?? []}
@@ -8161,8 +8164,8 @@ function renderBlockFields(
             itemPreview={(s) => s.n}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.n ?? ''} onChange={(v) => u({ ...s, n: v })} />
-                <TextInput label="Label" value={s.l ?? ''} onChange={(v) => u({ ...s, l: v })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'n', u)} />
+                <RichTextInput label="Label" {...richItemProps(s, 'l', u)} />
               </div>
             )}
           />
@@ -8174,11 +8177,11 @@ function renderBlockFields(
       type Cite = { big: string; claim: string; srcName: string; srcUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill (red)" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (red)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill (red)" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<Cite>
             label="Cited stats (3)"
             items={(f.stats as Cite[]) ?? []}
@@ -8187,9 +8190,9 @@ function renderBlockFields(
             itemPreview={(s) => s.big}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Big number (red)" value={s.big ?? ''} onChange={(v) => u({ ...s, big: v })} />
-                <Textarea label="Claim" value={s.claim ?? ''} onChange={(v) => u({ ...s, claim: v })} />
-                <TextInput label="Source name" value={s.srcName ?? ''} onChange={(v) => u({ ...s, srcName: v })} />
+                <RichTextInput label="Big number (red)" {...richItemProps(s, 'big', u)} />
+                <RichTextInput label="Claim" {...richItemProps(s, 'claim', u)} />
+                <RichTextInput label="Source name" {...richItemProps(s, 'srcName', u)} />
                 <TextInput label="Source URL" value={s.srcUrl ?? ''} onChange={(v) => u({ ...s, srcUrl: v })} />
               </div>
             )}
@@ -8203,11 +8206,11 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <Toggle label="Image on right" value={f.imageRight !== false} onChange={(v) => set('imageRight', v)} />
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
@@ -8222,9 +8225,9 @@ function renderBlockFields(
             itemPreview={(s) => s.title}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
-                <TextInput label="Title" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
-                <Textarea label="Description" value={s.desc ?? ''} onChange={(v) => u({ ...s, desc: v })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'num', u)} />
+                <RichTextInput label="Title" {...richItemProps(s, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(s, 'desc', u)} />
               </div>
             )}
           />
@@ -8236,9 +8239,9 @@ function renderBlockFields(
       type FCard = { imageUrl?: string; imageAlt?: string; imageFit?: ObjectFitValue; title: string; desc: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subheading" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<FCard>
             label="Feature cards (3)"
             items={(f.cards as FCard[]) ?? []}
@@ -8255,8 +8258,8 @@ function renderBlockFields(
                   onChange={(v) => u({ ...c, imageFit: v })}
                   options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
                 />
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Description" value={c.desc ?? ''} onChange={(v) => u({ ...c, desc: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(c, 'desc', u)} />
               </div>
             )}
           />
@@ -8267,12 +8270,12 @@ function renderBlockFields(
     case 'slick-sn-spotlight': {
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <TextInput label="Body (bold lead)" value={f.bodyBold as string ?? ''} onChange={(v) => set('bodyBold', v)} />
-          <Textarea label="Body (rest)" value={f.bodyRest as string ?? ''} onChange={(v) => set('bodyRest', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Body Bold" f={f} set={set} base="bodyBold" segments={[{ key: 'bodyBold' }]} />
+          <RichFieldGroup label="Body Rest" f={f} set={set} base="bodyRest" segments={[{ key: 'bodyRest' }]} />
           <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
@@ -8296,13 +8299,13 @@ function renderBlockFields(
     case 'slick-sn-darkcard':
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Body (before bold 1)" value={f.bodyPre as string ?? ''} onChange={(v) => set('bodyPre', v)} />
-          <TextInput label="Body bold 1" value={f.bodyBold1 as string ?? ''} onChange={(v) => set('bodyBold1', v)} />
-          <Textarea label="Body (middle)" value={f.bodyMid as string ?? ''} onChange={(v) => set('bodyMid', v)} />
-          <TextInput label="Body bold 2" value={f.bodyBold2 as string ?? ''} onChange={(v) => set('bodyBold2', v)} />
-          <TextInput label="Body (tail)" value={f.bodyTail as string ?? ''} onChange={(v) => set('bodyTail', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Body Pre" f={f} set={set} base="bodyPre" segments={[{ key: 'bodyPre' }]} />
+          <RichFieldGroup label="Body Bold1" f={f} set={set} base="bodyBold1" segments={[{ key: 'bodyBold1' }]} />
+          <RichFieldGroup label="Body Mid" f={f} set={set} base="bodyMid" segments={[{ key: 'bodyMid' }]} />
+          <RichFieldGroup label="Body Bold2" f={f} set={set} base="bodyBold2" segments={[{ key: 'bodyBold2' }]} />
+          <RichFieldGroup label="Body Tail" f={f} set={set} base="bodyTail" segments={[{ key: 'bodyTail' }]} />
           <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
@@ -8316,11 +8319,11 @@ function renderBlockFields(
       type Pt = { ic: string; title: string; desc: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
@@ -8335,9 +8338,9 @@ function renderBlockFields(
             itemPreview={(p) => p.title}
             renderItem={(p, u) => (
               <div className="space-y-2">
-                <TextInput label="Icon/number" value={p.ic ?? ''} onChange={(v) => u({ ...p, ic: v })} />
-                <TextInput label="Title" value={p.title ?? ''} onChange={(v) => u({ ...p, title: v })} />
-                <Textarea label="Description" value={p.desc ?? ''} onChange={(v) => u({ ...p, desc: v })} />
+                <RichTextInput label="Icon/number" {...richItemProps(p, 'ic', u)} />
+                <RichTextInput label="Title" {...richItemProps(p, 'title', u)} />
+                <RichTextInput label="Description" {...richItemProps(p, 'desc', u)} />
               </div>
             )}
           />
@@ -8349,8 +8352,8 @@ function renderBlockFields(
       type PCard = { title: string; body: string; statValue: string; statKey: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <Repeater<PCard>
             label="Proof cards (3)"
             items={(f.cards as PCard[]) ?? []}
@@ -8359,9 +8362,9 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
-                <TextInput label="Stat value (e.g. [V1] or +18%)" value={c.statValue ?? ''} onChange={(v) => u({ ...c, statValue: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body" {...richItemProps(c, 'body', u)} />
+                <RichTextInput label="Stat value (e.g. [V1] or +18%)" {...richItemProps(c, 'statValue', u)} />
                 <TextInput label="Stat key" value={c.statKey ?? ''} onChange={(v) => u({ ...c, statKey: v })} />
               </div>
             )}
@@ -8373,10 +8376,10 @@ function renderBlockFields(
     case 'slick-sc-upi-hero':
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <Textarea label="Heading (use ** for teal accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Sub text" value={f.subText as string ?? ''} onChange={(v) => set('subText', v)} />
-          <TextInput label="CTA label" value={f.ctaPrimaryLabel as string ?? ''} onChange={(v) => set('ctaPrimaryLabel', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading (use ** for teal accent)" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Sub text" f={f} set={set} base="subText" segments={[{ key: 'subText' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaPrimaryLabel" segments={[{ key: 'ctaPrimaryLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaPrimaryUrl as string ?? ''} onChange={(v) => set('ctaPrimaryUrl', v)} />
           <ImageField label="Image" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
           <ImageSizeControls
@@ -8390,9 +8393,9 @@ function renderBlockFields(
       type Stat = { big: string; claim: string; sourceLabel?: string; sourceUrl?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <Textarea label="Heading (use ** for teal accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Body" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading (use ** for teal accent)" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Body" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
           <Repeater<Stat>
             label="Stats (3)"
             items={(f.stats as Stat[]) ?? []}
@@ -8401,9 +8404,9 @@ function renderBlockFields(
             itemPreview={(s) => s.big}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Big number/text" value={s.big ?? ''} onChange={(v) => u({ ...s, big: v })} />
-                <Textarea label="Claim" value={s.claim ?? ''} onChange={(v) => u({ ...s, claim: v })} />
-                <TextInput label="Source label" value={s.sourceLabel ?? ''} onChange={(v) => u({ ...s, sourceLabel: v })} />
+                <RichTextInput label="Big number/text" {...richItemProps(s, 'big', u)} />
+                <RichTextInput label="Claim" {...richItemProps(s, 'claim', u)} />
+                <RichTextInput label="Source label" {...richItemProps(s, 'sourceLabel', u)} />
                 <TextInput label="Source URL" value={s.sourceUrl ?? ''} onChange={(v) => u({ ...s, sourceUrl: v })} />
               </div>
             )}
@@ -8417,8 +8420,8 @@ function renderBlockFields(
       type PCard = { title: string; body: string; metrics?: PMetric[] };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <Textarea label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <Repeater<PCard>
             label="Proof cards"
             items={(f.cards as PCard[]) ?? []}
@@ -8427,8 +8430,8 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body (use ** for bold)" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body (use ** for bold)" {...richItemProps(c, 'body', u)} />
                 <Repeater<PMetric>
                   label="Metrics (1–2)"
                   items={c.metrics ?? []}
@@ -8437,8 +8440,8 @@ function renderBlockFields(
                   itemPreview={(m) => m.label}
                   renderItem={(m, um) => (
                     <div className="space-y-2">
-                      <TextInput label="Value (use [VERIFY: Vx] for a flag)" value={m.value ?? ''} onChange={(v) => um({ ...m, value: v })} />
-                      <TextInput label="Label" value={m.label ?? ''} onChange={(v) => um({ ...m, label: v })} />
+                      <RichTextInput label="Value (use [VERIFY: Vx] for a flag)" {...richItemProps(m, 'value', um)} />
+                      <RichTextInput label="Label" {...richItemProps(m, 'label', um)} />
                     </div>
                   )}
                 />
@@ -8453,10 +8456,10 @@ function renderBlockFields(
       type Driver = { name: string; desc: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <Textarea label="Heading (** = coral span)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subheading (** for bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Drivers title" value={f.driversTitle as string ?? ''} onChange={(v) => set('driversTitle', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading (** = coral span)" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subheading (** for bold)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Drivers title" f={f} set={set} base="driversTitle" segments={[{ key: 'driversTitle' }]} />
           <Repeater<Driver>
             label="Barriers (auto-numbered)"
             items={(f.drivers as Driver[]) ?? []}
@@ -8465,8 +8468,8 @@ function renderBlockFields(
             itemPreview={(d) => d.name}
             renderItem={(d, u) => (
               <div className="space-y-2">
-                <TextInput label="Name" value={d.name ?? ''} onChange={(v) => u({ ...d, name: v })} />
-                <Textarea label="Description" value={d.desc ?? ''} onChange={(v) => u({ ...d, desc: v })} />
+                <RichTextInput label="Name" {...richItemProps(d, 'name', u)} />
+                <RichTextInput label="Description" {...richItemProps(d, 'desc', u)} />
               </div>
             )}
           />
@@ -8477,8 +8480,8 @@ function renderBlockFields(
     case 'slick-rd-showcase': {
       return (
         <div className="space-y-4">
-          <Textarea label="Heading (** = teal span)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subheading" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Heading (** = teal span)" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <ImageField label="Center image" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
           <TextInput label="Image alt / placeholder" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <Repeater<string>
@@ -8497,9 +8500,9 @@ function renderBlockFields(
       type ECard = { iconKey: string; title: string; body: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <Textarea label="Heading (** = teal span)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subheading (** for bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading (** = teal span)" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subheading (** for bold)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<ECard>
             label="Feature cards"
             items={(f.cards as ECard[]) ?? []}
@@ -8509,8 +8512,8 @@ function renderBlockFields(
             renderItem={(c, u) => (
               <div className="space-y-2">
                 <TextInput label="Icon key (trend, alert, listcheck, refresh, van, clipboard, ledger, phone)" value={c.iconKey ?? ''} onChange={(v) => u({ ...c, iconKey: v })} />
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body (** bold, [VERIFY: ..] flag)" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body (** bold, [VERIFY: ..] flag)" {...richItemProps(c, 'body', u)} />
               </div>
             )}
           />
@@ -8530,9 +8533,9 @@ function renderBlockFields(
       type SItem = { iconKey: string; title: string; bullets: string[]; impact: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <Textarea label="Heading (** = teal accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subheading (** for bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading (** = teal accent)" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subheading (** for bold)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<SItem>
             label="Cards"
             items={(f.items as SItem[]) ?? []}
@@ -8542,7 +8545,7 @@ function renderBlockFields(
             renderItem={(it, u) => (
               <div className="space-y-2">
                 <TextInput label="Icon key (chart, binoculars, cart)" value={it.iconKey ?? ''} onChange={(v) => u({ ...it, iconKey: v })} />
-                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
                 <Repeater<string>
                   label="Bullets (use ** for bold)"
                   items={it.bullets ?? []}
@@ -8551,7 +8554,7 @@ function renderBlockFields(
                   itemPreview={(b) => b || '(empty)'}
                   renderItem={(b, ub) => <TextInput label="Bullet" value={b ?? ''} onChange={(v) => ub(v)} />}
                 />
-                <TextInput label="Impact line" value={it.impact ?? ''} onChange={(v) => u({ ...it, impact: v })} />
+                <RichTextInput label="Impact line" {...richItemProps(it, 'impact', u)} />
               </div>
             )}
           />
@@ -8563,12 +8566,12 @@ function renderBlockFields(
       type Chip = { val: string; unit: string; lbl: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (gradient)" value={f.headingGrad as string ?? ''} onChange={(v) => set('headingGrad', v)} />
-          <Textarea label="Subheading" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <TextInput label="Subheading bold tail" value={f.subBold as string ?? ''} onChange={(v) => set('subBold', v)} />
-          <TextInput label="CTA label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Sub" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <ImageField label="Phone image" value={f.image as string ?? ''} onChange={(v) => set('image', v)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
@@ -8584,9 +8587,9 @@ function renderBlockFields(
             itemPreview={(c) => c.lbl}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Value" value={c.val ?? ''} onChange={(v) => u({ ...c, val: v })} />
-                <TextInput label="Unit (teal)" value={c.unit ?? ''} onChange={(v) => u({ ...c, unit: v })} />
-                <TextInput label="Label" value={c.lbl ?? ''} onChange={(v) => u({ ...c, lbl: v })} />
+                <RichTextInput label="Value" {...richItemProps(c, 'val', u)} />
+                <RichTextInput label="Unit (teal)" {...richItemProps(c, 'unit', u)} />
+                <RichTextInput label="Label" {...richItemProps(c, 'lbl', u)} />
               </div>
             )}
           />
@@ -8598,11 +8601,11 @@ function renderBlockFields(
       type SCard = { big: string; claim: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (coral)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subheading" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
-          <Textarea label="Kicker (use ** for bold)" value={f.kicker as string ?? ''} onChange={(v) => set('kicker', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <RichFieldGroup label="Kicker (use ** for bold)" f={f} set={set} base="kicker" segments={[{ key: 'kicker' }]} />
           <Repeater<SCard>
             label="Stat cards"
             items={(f.cards as SCard[]) ?? []}
@@ -8611,8 +8614,8 @@ function renderBlockFields(
             itemPreview={(c) => c.big}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Big figure" value={c.big ?? ''} onChange={(v) => u({ ...c, big: v })} />
-                <Textarea label="Claim (use ** for bold)" value={c.claim ?? ''} onChange={(v) => u({ ...c, claim: v })} />
+                <RichTextInput label="Big figure" {...richItemProps(c, 'big', u)} />
+                <RichTextInput label="Claim (use ** for bold)" {...richItemProps(c, 'claim', u)} />
               </div>
             )}
           />
@@ -8624,10 +8627,10 @@ function renderBlockFields(
       type SItem = { title: string; bullets: string[]; note: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subheading (use ** for bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subheading (use ** for bold)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<SItem>
             label="Signal layers"
             items={(f.items as SItem[]) ?? []}
@@ -8636,7 +8639,7 @@ function renderBlockFields(
             itemPreview={(i) => i.title}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
+                <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
                 <Repeater<string>
                   label="Bullets (use ** for bold)"
                   items={it.bullets ?? []}
@@ -8645,7 +8648,7 @@ function renderBlockFields(
                   itemPreview={(b) => b || '(empty)'}
                   renderItem={(b, ub) => <TextInput label="Bullet" value={b ?? ''} onChange={(v) => ub(v)} />}
                 />
-                <TextInput label="Note (right side)" value={it.note ?? ''} onChange={(v) => u({ ...it, note: v })} />
+                <RichTextInput label="Note (right side)" {...richItemProps(it, 'note', u)} />
               </div>
             )}
           />
@@ -8657,10 +8660,10 @@ function renderBlockFields(
       type Step = { tabLabel: string; eyebrow: string; title: string; lead: string; note: string; imageUrl?: string; imageAlt?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subheading (use ** for bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subheading (use ** for bold)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<Step>
             label="Steps / tabs"
             items={(f.steps as Step[]) ?? []}
@@ -8669,11 +8672,11 @@ function renderBlockFields(
             itemPreview={(s) => s.tabLabel}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Tab label" value={s.tabLabel ?? ''} onChange={(v) => u({ ...s, tabLabel: v })} />
-                <TextInput label="Eyebrow" value={s.eyebrow ?? ''} onChange={(v) => u({ ...s, eyebrow: v })} />
-                <TextInput label="Title" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
-                <Textarea label="Lead (use ** for bold)" value={s.lead ?? ''} onChange={(v) => u({ ...s, lead: v })} />
-                <TextInput label="Note" value={s.note ?? ''} onChange={(v) => u({ ...s, note: v })} />
+                <RichTextInput label="Tab label" {...richItemProps(s, 'tabLabel', u)} />
+                <RichTextInput label="Eyebrow" {...richItemProps(s, 'eyebrow', u)} />
+                <RichTextInput label="Title" {...richItemProps(s, 'title', u)} />
+                <RichTextInput label="Lead (use ** for bold)" {...richItemProps(s, 'lead', u)} />
+                <RichTextInput label="Note" {...richItemProps(s, 'note', u)} />
                 <ImageField label="Panel image" value={s.imageUrl ?? ''} onChange={(v) => u({ ...s, imageUrl: v })} />
                 <TextInput label="Image alt / slot text" value={s.imageAlt ?? ''} onChange={(v) => u({ ...s, imageAlt: v })} />
               </div>
@@ -8691,10 +8694,10 @@ function renderBlockFields(
       type ECard = { iconKey: string; title: string; body: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <Textarea label="Subheading (use ** for bold)" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Subheading (use ** for bold)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<ECard>
             label="Cards"
             items={(f.cards as ECard[]) ?? []}
@@ -8704,8 +8707,8 @@ function renderBlockFields(
             renderItem={(c, u) => (
               <div className="space-y-2">
                 <TextInput label="Icon key (scale / users / offline / security)" value={c.iconKey ?? ''} onChange={(v) => u({ ...c, iconKey: v })} />
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body (** for bold, [VERIFY: ..] for a flag)" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body (** for bold, [VERIFY: ..] for a flag)" {...richItemProps(c, 'body', u)} />
               </div>
             )}
           />
@@ -8719,8 +8722,8 @@ function renderBlockFields(
       type SiCapCard = { title: string; body: string; imageUrl?: string; imageAlt?: string; imageSlot?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <Textarea label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <Repeater<SiCapCard>
             label="Capability cards"
             items={(f.cards as SiCapCard[]) ?? []}
@@ -8729,8 +8732,8 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body (use ** for bold)" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body (use ** for bold)" {...richItemProps(c, 'body', u)} />
                 <ImageField label="Image URL (4:3)" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <Textarea label="Image slot placeholder (shown when no image)" value={c.imageSlot ?? ''} onChange={(v) => u({ ...c, imageSlot: v })} />
@@ -8744,10 +8747,10 @@ function renderBlockFields(
     case 'slick-si-darkpanel':
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <Textarea label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Paragraph 1 (HTML allowed — links/bold)" value={f.para1 as string ?? ''} onChange={(v) => set('para1', v)} />
-          <Textarea label="Paragraph 2 (HTML allowed)" value={f.para2 as string ?? ''} onChange={(v) => set('para2', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Paragraph 1 (HTML allowed — links/bold)" f={f} set={set} base="para1" segments={[{ key: 'para1' }]} />
+          <RichFieldGroup label="Paragraph 2 (HTML allowed)" f={f} set={set} base="para2" segments={[{ key: 'para2' }]} />
         </div>
       );
 
@@ -8755,10 +8758,10 @@ function renderBlockFields(
     case 'slick-ate-darkpanel':
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <Textarea label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Paragraph 1 (HTML allowed — links/bold)" value={f.para1 as string ?? ''} onChange={(v) => set('para1', v)} />
-          <Textarea label="Paragraph 2 (HTML allowed)" value={f.para2 as string ?? ''} onChange={(v) => set('para2', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Paragraph 1 (HTML allowed — links/bold)" f={f} set={set} base="para1" segments={[{ key: 'para1' }]} />
+          <RichFieldGroup label="Paragraph 2 (HTML allowed)" f={f} set={set} base="para2" segments={[{ key: 'para2' }]} />
         </div>
       );
 
@@ -8769,8 +8772,8 @@ function renderBlockFields(
       type PCard = { title: string; body: string; metrics?: PMetric[] };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <Textarea label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <Repeater<PCard>
             label="Proof cards"
             items={(f.cards as PCard[]) ?? []}
@@ -8779,8 +8782,8 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body (use ** for bold, [VERIFY: Vx] for a flag)" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body (use ** for bold, [VERIFY: Vx] for a flag)" {...richItemProps(c, 'body', u)} />
                 <Repeater<PMetric>
                   label="Metrics (1–2)"
                   items={c.metrics ?? []}
@@ -8789,8 +8792,8 @@ function renderBlockFields(
                   itemPreview={(m) => m.label}
                   renderItem={(m, um) => (
                     <div className="space-y-2">
-                      <TextInput label="Value (use [VERIFY: Vx] for a flag)" value={m.value ?? ''} onChange={(v) => um({ ...m, value: v })} />
-                      <TextInput label="Label" value={m.label ?? ''} onChange={(v) => um({ ...m, label: v })} />
+                      <RichTextInput label="Value (use [VERIFY: Vx] for a flag)" {...richItemProps(m, 'value', um)} />
+                      <RichTextInput label="Label" {...richItemProps(m, 'label', um)} />
                     </div>
                   )}
                 />
@@ -8804,12 +8807,12 @@ function renderBlockFields(
     case 'slick-si-split':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <TextInput label="Heading (pre)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
-          <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
-          <TextInput label="Heading (post)" value={f.headingPost as string ?? ''} onChange={(v) => set('headingPost', v)} />
-          <Textarea label="Paragraph 1 (use ** for bold)" value={f.para1 as string ?? ''} onChange={(v) => set('para1', v)} />
-          <Textarea label="Paragraph 2 (use ** for bold)" value={f.para2 as string ?? ''} onChange={(v) => set('para2', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Paragraph 1 (use ** for bold)" f={f} set={set} base="para1" segments={[{ key: 'para1' }]} />
+          <RichFieldGroup label="Paragraph 2 (use ** for bold)" f={f} set={set} base="para2" segments={[{ key: 'para2' }]} />
           <Repeater<string>
             label="Chips"
             items={(f.chips as string[]) ?? []}
@@ -8828,9 +8831,9 @@ function renderBlockFields(
     case 'slick-aa-split':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <Textarea label="Heading (use ** for teal accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Body (use ** for bold)" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading (use ** for teal accent)" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Body (use ** for bold)" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
           <Repeater<string>
             label="Chips"
             items={(f.chips as string[]) ?? []}
@@ -8853,9 +8856,9 @@ function renderBlockFields(
       type SiCard = { title: string; body: string; imageUrl?: string; imageAlt?: string; imageSlot?: string; statValue: string; statLabel: string; statBasis?: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
-          <Textarea label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Subtitle" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
+          <RichFieldGroup label="Pill" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <Repeater<SiCard>
             label="Impact cards"
             items={(f.cards as SiCard[]) ?? []}
@@ -8864,14 +8867,14 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body (use ** for bold)" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body (use ** for bold)" {...richItemProps(c, 'body', u)} />
                 <ImageField label="Image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <Textarea label="Image slot placeholder (shown when no image)" value={c.imageSlot ?? ''} onChange={(v) => u({ ...c, imageSlot: v })} />
-                <TextInput label="Stat value" value={c.statValue ?? ''} onChange={(v) => u({ ...c, statValue: v })} />
-                <TextInput label="Stat label" value={c.statLabel ?? ''} onChange={(v) => u({ ...c, statLabel: v })} />
-                <TextInput label="Basis (use [VERIFY: Vx] for a flag)" value={c.statBasis ?? ''} onChange={(v) => u({ ...c, statBasis: v })} />
+                <RichTextInput label="Stat value" {...richItemProps(c, 'statValue', u)} />
+                <RichTextInput label="Stat label" {...richItemProps(c, 'statLabel', u)} />
+                <RichTextInput label="Basis (use [VERIFY: Vx] for a flag)" {...richItemProps(c, 'statBasis', u)} />
               </div>
             )}
           />
@@ -8882,11 +8885,11 @@ function renderBlockFields(
     case 'slick-sc-upi-dark':
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <Textarea label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Paragraph 1 (HTML allowed — links go here)" value={f.para1 as string ?? ''} onChange={(v) => set('para1', v)} />
-          <Textarea label="Paragraph 2" value={f.para2 as string ?? ''} onChange={(v) => set('para2', v)} />
-          <Textarea label="Paragraph 3" value={f.para3 as string ?? ''} onChange={(v) => set('para3', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Paragraph 1 (HTML allowed — links go here)" f={f} set={set} base="para1" segments={[{ key: 'para1' }]} />
+          <RichFieldGroup label="Paragraph 2" f={f} set={set} base="para2" segments={[{ key: 'para2' }]} />
+          <RichFieldGroup label="Paragraph 3" f={f} set={set} base="para3" segments={[{ key: 'para3' }]} />
         </div>
       );
 
@@ -8894,9 +8897,9 @@ function renderBlockFields(
       type Stage = { num: string; title: string; body: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <Textarea label="Heading (use ** for teal accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Sub text" value={f.subText as string ?? ''} onChange={(v) => set('subText', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading (use ** for teal accent)" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Sub text" f={f} set={set} base="subText" segments={[{ key: 'subText' }]} />
           <Repeater<Stage>
             label="Stages (4)"
             items={(f.stages as Stage[]) ?? []}
@@ -8905,9 +8908,9 @@ function renderBlockFields(
             itemPreview={(s) => s.title}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <TextInput label="Number" value={s.num ?? ''} onChange={(v) => u({ ...s, num: v })} />
-                <TextInput label="Title" value={s.title ?? ''} onChange={(v) => u({ ...s, title: v })} />
-                <Textarea label="Body" value={s.body ?? ''} onChange={(v) => u({ ...s, body: v })} />
+                <RichTextInput label="Number" {...richItemProps(s, 'num', u)} />
+                <RichTextInput label="Title" {...richItemProps(s, 'title', u)} />
+                <RichTextInput label="Body" {...richItemProps(s, 'body', u)} />
               </div>
             )}
           />
@@ -8919,9 +8922,9 @@ function renderBlockFields(
       type SuiteCard = { title: string; body: string };
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <Textarea label="Heading (use ** for teal accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Sub text" value={f.subText as string ?? ''} onChange={(v) => set('subText', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading (use ** for teal accent)" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Sub text" f={f} set={set} base="subText" segments={[{ key: 'subText' }]} />
           <Repeater<SuiteCard>
             label="Cards (3)"
             items={(f.cards as SuiteCard[]) ?? []}
@@ -8930,8 +8933,8 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title ?? ''} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body" value={c.body ?? ''} onChange={(v) => u({ ...c, body: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body" {...richItemProps(c, 'body', u)} />
               </div>
             )}
           />
@@ -8942,9 +8945,9 @@ function renderBlockFields(
     case 'slick-sc-upi-split':
       return (
         <div className="space-y-4">
-          <TextInput label="Eyebrow" value={f.eyebrow as string ?? ''} onChange={(v) => set('eyebrow', v)} />
-          <Textarea label="Heading (use ** for teal accent)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Body (HTML allowed for <strong>)" value={f.body as string ?? ''} onChange={(v) => set('body', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading (use ** for teal accent)" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Body (HTML allowed for <strong>)" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
           <Repeater<string>
             label="Chips"
             items={(f.chips as string[]) ?? []}
@@ -8968,9 +8971,9 @@ function renderBlockFields(
       const relCards = (f.cards as RelCard[]) ?? [];
       return (
         <div className="space-y-4">
-          <TextInput label="Badge" value={f.badge as string ?? ''} onChange={(v) => set('badge', v)} />
-          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <Textarea label="Sub-text" value={f.subText as string ?? ''} onChange={(v) => set('subText', v)} />
+          <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Sub-text" f={f} set={set} base="subText" segments={[{ key: 'subText' }]} />
           <Repeater<RelCard>
             label="Cards"
             items={relCards}
@@ -8979,8 +8982,8 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={c.title} onChange={(v) => u({ ...c, title: v })} />
-                <Textarea label="Body (HTML allowed for <strong>)" value={c.body} onChange={(v) => u({ ...c, body: v })} />
+                <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
+                <RichTextInput label="Body (HTML allowed for <strong>)" {...richItemProps(c, 'body', u)} />
                 <TextInput label="Link URL" value={c.href} onChange={(v) => u({ ...c, href: v })} />
               </div>
             )}
