@@ -3253,8 +3253,10 @@ function renderBlockFields(
     case 'slick-dms-guarantee':
       return (
         <div className="space-y-4">
-          <TextInput label="Heading prefix" value={f.titlePre as string ?? ''} onChange={(v) => set('titlePre', v)} />
+          <TextInput label="Pill / eyebrow label" value={f.eyebrowLabel as string ?? ''} onChange={(v) => set('eyebrowLabel', v)} />
+          <TextInput label="Heading prefix (white, optional)" value={f.titlePre as string ?? ''} onChange={(v) => set('titlePre', v)} />
           <TextInput label="Heading accent (teal)" value={f.titleAccent as string ?? ''} onChange={(v) => set('titleAccent', v)} />
+          <TextInput label="Heading suffix (white)" value={f.titlePost as string ?? ''} onChange={(v) => set('titlePost', v)} />
           <Textarea label="Body copy" value={f.sub as string ?? ''} onChange={(v) => set('sub', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Stamp percentage text" value={f.stampPercent as string ?? ''} onChange={(v) => set('stampPercent', v)} />
