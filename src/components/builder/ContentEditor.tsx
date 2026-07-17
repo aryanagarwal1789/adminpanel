@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import {
-  ButtonEditor, ColorPicker, ImageField, LinkItemEditor, NumberInput, Repeater, Select, TextInput, Textarea, Toggle, VideoField,
+  BlogPicker, ButtonEditor, ColorPicker, ImageField, LinkItemEditor, NumberInput, Repeater, Select, TextInput, Textarea, Toggle, VideoField,
 } from "./fields";
 import type { ButtonField, LinkField } from "./defaults";
 import type { Block } from "./types";
@@ -2519,8 +2519,13 @@ function renderBlockFields(
           <TextInput label="Heading prefix" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
           <TextInput label="Heading accent (teal)" value={f.headingAccent as string ?? ''} onChange={(v) => set('headingAccent', v)} />
           <TextInput label="Heading suffix" value={f.headingSuffix as string ?? ''} onChange={(v) => set('headingSuffix', v)} />
+          <BlogPicker
+            label="Posts to show"
+            value={(f.selectedBlogSlugs as string[]) ?? []}
+            onChange={(v) => set('selectedBlogSlugs', v)}
+          />
           <p style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
-            Posts are pulled from the <strong>Featured Blogs</strong> CMS section (same source as the Blogs section). Manage them there.
+            Pick specific posts to feature (drag to reorder), or leave empty to auto-show the 6 newest published posts.
           </p>
         </div>
       );
