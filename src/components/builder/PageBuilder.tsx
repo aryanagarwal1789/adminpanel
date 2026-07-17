@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import {
   Undo2, Redo2, Plus, Eye, EyeOff, Trash2, GripVertical, Copy, Clipboard,
   X, Palette, Play, FileText, ChevronLeft, PenLine, Paintbrush, Settings, Layers, Globe, Search,
-  LogOut,
+  LogOut, History, RotateCcw,
 } from "lucide-react";
 import { defaultBlock } from "./blocks";
 import { AddSectionDrawer } from "./AddSectionDrawer";
@@ -140,6 +140,33 @@ const seedLanding = (): Block[] =>
 interface BuilderState {
   pages: Page[];
   pageBlocks: Record<string, Block[]>;
+}
+
+// One row in the version-history panel (metadata only; blocks fetched on demand).
+interface PageVersionSummary {
+  _id: string;
+  savedBy?: string;
+  note?: string;
+  createdAt: string;
+  blockCount: number;
+}
+
+// Map a stored theme blob (which may use old field names) onto the editor Theme.
+// Mirrors the normalization the bootstrap loader does, reused for version restore.
+function normalizeTheme(raw: Record<string, unknown>): Theme {
+  const normalized: Partial<Theme> = {
+    accent: (raw.accent ?? raw.accentColor) as string | undefined,
+    pageBg: (raw.pageBg ?? raw.backgroundColor) as string | undefined,
+    bodyFont: (raw.bodyFont ?? raw.fontFamily) as string | undefined,
+    headingFont: (raw.headingFont ?? raw.fontFamily) as string | undefined,
+    baseFontSize: raw.baseFontSize as number | undefined,
+    radius: raw.radius as number | undefined,
+    buttonStyle: raw.buttonStyle as Theme["buttonStyle"] | undefined,
+  };
+  return {
+    ...DEFAULT_THEME,
+    ...Object.fromEntries(Object.entries(normalized).filter(([, v]) => v != null)),
+  } as Theme;
 }
 
 const INITIAL_STATE: BuilderState = {
@@ -314,6 +341,80 @@ export function PageBuilder() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, pageBlocks]);
 
+  // ── Version history ──
+  const [versionsOpen, setVersionsOpen] = useState(false);
+  const [versions, setVersions] = useState<PageVersionSummary[]>([]);
+  const [versionsLoading, setVersionsLoading] = useState(false);
+  const [restoringId, setRestoringId] = useState<string | null>(null);
+
+  const openVersions = useCallback(async (pageKey: string) => {
+    setVersionsOpen(true);
+    setVersionsLoading(true);
+    try {
+      const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}/versions?minimalResponse=true`);
+      if (!res.ok) throw new Error(`${res.status}`);
+      const { versions: list } = await res.json();
+      setVersions((list ?? []) as PageVersionSummary[]);
+    } catch {
+      setVersions([]);
+      toast.error("Couldn't load version history — is the backend running?");
+    } finally {
+      setVersionsLoading(false);
+    }
+  }, []);
+
+  // Load a snapshot into the editor without publishing it — the editor can then
+  // Publish to keep it or Undo to discard.
+  const previewVersion = useCallback(async (pageKey: string, versionId: string) => {
+    try {
+      const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}/versions/${versionId}`);
+      if (!res.ok) throw new Error(`${res.status}`);
+      const { version } = await res.json();
+      if (!version) return;
+      commit({ ...state, pageBlocks: { ...pageBlocks, [pageKey]: (version.blocks ?? []) as Block[] } });
+      if (version.theme && Object.keys(version.theme).length) setTheme(normalizeTheme(version.theme));
+      setVersionsOpen(false);
+      toast.message("Loaded this version into the editor. Publish to keep it, or Undo to discard.");
+    } catch {
+      toast.error("Couldn't load that version.");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, pageBlocks, commit]);
+
+  // Restore a snapshot: persist it live (backend snapshots the current state first)
+  // then reflect the restored page in the editor.
+  const restoreVersion = useCallback(async (pageKey: string, versionId: string) => {
+    const { id, name } = getEditor();
+    setRestoringId(versionId);
+    try {
+      const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}/restore/${versionId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ editorId: id, editorName: name }),
+      });
+      if (res.status === 423) {
+        const d = await res.json().catch(() => ({}));
+        setLockedBy(d.lockedBy || "another editor");
+        heldByMe.current = false;
+        toast.error(`Locked by ${d.lockedBy || "another editor"} — can't restore.`);
+        return;
+      }
+      if (!res.ok) throw new Error(`${res.status}`);
+      const { page } = await res.json();
+      commit({ ...state, pageBlocks: { ...pageBlocks, [pageKey]: (page?.blocks ?? []) as Block[] } });
+      if (page?.theme && Object.keys(page.theme).length) setTheme(normalizeTheme(page.theme));
+      if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [pageKey]: page.updatedAt as string }));
+      setSaveConflict(null);
+      setVersionsOpen(false);
+      toast.success("Page restored to the selected version.");
+    } catch (err) {
+      toast.error(`Restore failed — is the backend running? (${err})`);
+    } finally {
+      setRestoringId(null);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, pageBlocks, commit]);
+
   const releaseLock = useCallback((pageKey: string) => {
     const { id } = getEditor();
     try {
@@ -345,9 +446,17 @@ export function PageBuilder() {
     };
   }, [activePage, acquireLock, releaseLock]);
 
-  // Best-effort release when the tab closes.
+  // Best-effort release when the tab closes, plus a browser confirm prompt so the
+  // editor doesn't lose in-progress work to an accidental close/refresh. Setting
+  // returnValue triggers the native "Leave site? / Reload site?" dialog; the exact
+  // wording is controlled by the browser and can't be customised.
   useEffect(() => {
-    const onUnload = () => { if (heldByMe.current) releaseLock(activePageRef.current); };
+    const onUnload = (e: BeforeUnloadEvent) => {
+      if (heldByMe.current) releaseLock(activePageRef.current);
+      e.preventDefault();
+      e.returnValue = "";
+      return "";
+    };
     window.addEventListener("beforeunload", onUnload);
     return () => window.removeEventListener("beforeunload", onUnload);
   }, [releaseLock]);
@@ -852,6 +961,7 @@ export function PageBuilder() {
           </a>
           <button onClick={undo} disabled={!canUndo} className="p-2 rounded hover:bg-slate-800 pb-transition disabled:opacity-30 disabled:hover:bg-transparent" title="Undo"><Undo2 size={16} /></button>
           <button onClick={redo} disabled={!canRedo} className="p-2 rounded hover:bg-slate-800 pb-transition disabled:opacity-30 disabled:hover:bg-transparent" title="Redo"><Redo2 size={16} /></button>
+          <button onClick={() => openVersions(activePage)} className="p-2 rounded hover:bg-slate-800 pb-transition" title="Version history"><History size={16} /></button>
           <button onClick={() => setThemeOpen(true)} className="p-2 rounded hover:bg-slate-800 pb-transition" title="Theme"><Palette size={16} /></button>
           <button onClick={() => setPreviewOpen(true)} className="px-3 py-1.5 text-sm rounded-md border border-slate-600 hover:bg-slate-800 pb-transition inline-flex items-center gap-1.5">
             <Play size={13} /> Preview
@@ -1485,6 +1595,73 @@ export function PageBuilder() {
       </div>
 
       {previewOpen && <PreviewModal blocks={blocks} theme={theme} pageKey={activePage} onClose={() => setPreviewOpen(false)} />}
+
+      {/* Version history drawer */}
+      {versionsOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setVersionsOpen(false)} />
+          <div className="relative flex h-full w-full max-w-md flex-col bg-slate-900 text-slate-100 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <History size={16} />
+                <span className="text-sm font-semibold">Version history</span>
+                <span className="text-xs text-slate-400">{currentPage.title}</span>
+              </div>
+              <button onClick={() => setVersionsOpen(false)} className="p-1.5 rounded hover:bg-slate-800 pb-transition" title="Close">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+              {versionsLoading ? (
+                <div className="p-6 text-center text-sm text-slate-400">Loading…</div>
+              ) : versions.length === 0 ? (
+                <div className="p-6 text-center text-sm text-slate-400">
+                  No versions yet. A snapshot is saved every time you publish this page.
+                </div>
+              ) : (
+                <ul className="divide-y divide-slate-800">
+                  {versions.map((v) => (
+                    <li key={v._id} className="flex items-start justify-between gap-3 px-4 py-3">
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-slate-100">
+                          {new Date(v.createdAt).toLocaleString()}
+                        </div>
+                        <div className="mt-0.5 text-xs text-slate-400">
+                          {v.savedBy || "Unknown"} · {v.blockCount} block{v.blockCount === 1 ? "" : "s"}
+                          {v.note === "pre-restore" ? " · before restore" : ""}
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <button
+                          onClick={() => previewVersion(activePage, v._id)}
+                          className="rounded-md border border-slate-600 px-2 py-1 text-xs hover:bg-slate-800 pb-transition inline-flex items-center gap-1"
+                          title="Load into the editor without publishing"
+                        >
+                          <Eye size={12} /> Preview
+                        </button>
+                        <button
+                          onClick={() => restoreVersion(activePage, v._id)}
+                          disabled={restoringId === v._id || !!lockedBy}
+                          title={lockedBy ? `Locked by ${lockedBy}` : "Restore and publish this version"}
+                          className="rounded-md px-2 py-1 text-xs font-medium text-white pb-transition hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1"
+                          style={{ background: "#22c55e" }}
+                        >
+                          <RotateCcw size={12} /> {restoringId === v._id ? "Restoring…" : "Restore"}
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="border-t border-slate-700 px-4 py-2 text-[11px] text-slate-500">
+              Keeps the last 50 published versions. Restoring saves the current state first, so it can be undone.
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

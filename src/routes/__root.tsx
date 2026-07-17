@@ -165,7 +165,17 @@ function AuthGate({ children }: { children: React.ReactNode }) {
       (async () => {
         try {
           const ssoToken = await fetchSsoToken(queryString);
-          if (ssoToken) await exchangeSso(ssoToken);
+          if (ssoToken) {
+            const auth = await exchangeSso(ssoToken);
+            // Seed the builder edit-lock identity from the SSO account so the
+            // "X is editing this page" banner shows a real name.
+            if (auth.email) {
+              localStorage.setItem(
+                "pb_editor_name",
+                auth.email.split("@")[0] || auth.email,
+              );
+            }
+          }
         } catch (err) {
           console.error("SSO login failed", err);
         } finally {
