@@ -20,10 +20,7 @@ import {
   BLOCK_LABELS, DEFAULT_THEME,
   type Block, type BlockStyle, type BlockType, type LayoutVariant, type Page, type Theme,
 } from "./types";
-import { getMyDraft, saveMyDraft, deleteMyDraft, rebaseSaveDraft } from "@/lib/builder-drafts";
-import { PresenceBanner } from "@/components/builder/PresenceBanner";
-import { mergePage } from "@/components/builder/merge";
-import { MergeReviewModal } from "@/components/builder/MergeReviewModal";
+import { getMyDraft, saveMyDraft } from "@/lib/builder-drafts";
 
 // Recursively find a widget by id in a widget array (handles row nesting)
 function findWidgetInArray(widgets: Widget[], id: string): Widget | null {
@@ -247,32 +244,6 @@ export function PageBuilder() {
   const activePageRef = useRef(activePage);
   useEffect(() => { activePageRef.current = activePage; }, [activePage]);
 
-  // Published-content snapshot captured at load time, per pageKey — used as the
-  // draft `base` (for merge later) and as the "revert to published" target now.
-  const [pageBaseSnapshot, setPageBaseSnapshot] = useState<Record<string, { blocks: Block[]; theme: Theme }>>({});
-
-  // ── Per-user drafts (autosave + restore) ──
-  const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [draftSavedAt, setDraftSavedAt] = useState<number | null>(null);
-  const [restoredDraftAt, setRestoredDraftAt] = useState<string | null>(null);
-  const draftBaseSent = useRef<Set<string>>(new Set()); // pageKeys whose draft `base` was already sent
-  const draftRestoredPages = useRef<Set<string>>(new Set()); // pages whose restore attempt has completed
-  const lastSavedContent = useRef<Record<string, string>>({}); // pageKey -> JSON of last-saved {blocks,theme}
-  const stateRef = useRef(state);
-  stateRef.current = state;
-
-  // ── Presence + merge-on-publish/rebase ──
-  // pageHead: the latest known head of the published page, refreshed by PresenceBanner's poll.
-  const [pageHead, setPageHead] = useState<{ updatedAt: string | null; lastUpdatedBy?: string }>({ updatedAt: null });
-  const [merge, setMerge] = useState<null | {
-    mode: 'publish' | 'rebase';
-    base: { blocks: Block[]; theme: Theme };
-    theirs: { blocks: Block[]; theme: Theme; updatedAt: string | null };
-    mine: { blocks: Block[]; theme: Theme };
-    disabled: Set<string>;
-  }>(null);
-  const [republished, setRepublished] = useState<{ updatedAt: string; by?: string } | null>(null);
-
   const acquireLock = useCallback(async (pageKey: string, force = false): Promise<boolean> => {
     const { id, name } = getEditor();
     try {
@@ -294,21 +265,6 @@ export function PageBuilder() {
     return true;
   }, []);
 
-  const fetchPublished = useCallback(async (pageKey: string) => {
-    const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}`);
-    const { page } = (await res.json()) as { page?: { blocks?: Block[]; theme?: Theme; updatedAt?: string } };
-    return { blocks: (page?.blocks ?? []) as Block[], theme: (page?.theme ?? {}) as Theme, updatedAt: page?.updatedAt ?? null };
-  }, []);
-  // Resolve the merge base for the active page: the draft's stored base if a draft exists, else the load-time snapshot.
-  const resolveBase = useCallback(async (pageKey: string): Promise<{ blocks: Block[]; theme: Theme }> => {
-    try {
-      const d = await getMyDraft(pageKey);
-      if (d) return { blocks: (d.baseBlocks ?? []) as Block[], theme: (d.baseTheme ?? {}) as Theme };
-    } catch { /* ignore */ }
-    const snap = pageBaseSnapshot[pageKey];
-    return { blocks: snap?.blocks ?? [], theme: snap?.theme ?? {} };
-  }, [pageBaseSnapshot]);
-
   const publishPage = useCallback(async (pageKey: string, blocksToSave: Block[], themeToSave: Theme, hostnames: string[]) => {
     try {
       const { id, name } = getEditor();
@@ -321,64 +277,36 @@ export function PageBuilder() {
         }),
       });
       if (res.status === 423) {
-        // Concurrent editing is allowed — take over the lock and retry once.
-        await acquireLock(pageKey, true);
-        const retry = await fetch(`${BACKEND}/site/builder/pages/${pageKey}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ blocks: blocksToSave, theme: themeToSave, hostnames, editorId: id, editorName: name, lastKnownUpdatedAt: pageUpdatedAt[pageKey] }),
-        });
-        if (retry.status === 409) {
-          const theirs = await fetchPublished(pageKey);
-          const base = await resolveBase(pageKey);
-          setMerge({ mode: 'publish', base, theirs, mine: { blocks: blocksToSave, theme: themeToSave }, disabled: new Set() });
-          return;
-        }
-        if (!retry.ok) { toast.error("Publish failed after takeover."); return; }
-        const { page } = await retry.json().catch(() => ({ page: undefined }));
-        if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [pageKey]: page.updatedAt as string }));
-        setSaveConflict(null);
-        try { await deleteMyDraft(pageKey); } catch { /* ignore */ }
-        draftBaseSent.current.delete(pageKey);
-        setRestoredDraftAt(null);
-        setPageBaseSnapshot((m) => ({ ...m, [pageKey]: { blocks: blocksToSave, theme: themeToSave } }));
-        lastSavedContent.current[pageKey] = JSON.stringify({ blocks: blocksToSave, theme: themeToSave });
-        toast.success("Page published successfully");
+        const d = await res.json().catch(() => ({}));
+        setLockedBy(d.lockedBy || "another editor");
+        heldByMe.current = false;
+        toast.error(`Locked by ${d.lockedBy || "another editor"} — can't publish.`);
         return;
       }
       if (res.status === 409) {
-        const theirs = await fetchPublished(pageKey);
-        const base = await resolveBase(pageKey);
-        setMerge({ mode: 'publish', base, theirs, mine: { blocks: blocksToSave, theme: themeToSave }, disabled: new Set() });
+        const d = await res.json().catch(() => ({}));
+        setSaveConflict({ pageKey, updatedAt: d.updatedAt, updatedBy: d.updatedBy });
         return;
       }
       if (!res.ok) throw new Error(`${res.status}`);
       const { page } = await res.json().catch(() => ({ page: undefined }));
       if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [pageKey]: page.updatedAt as string }));
       setSaveConflict(null);
-      try { await deleteMyDraft(pageKey); } catch { /* ignore */ }
-      draftBaseSent.current.delete(pageKey);
-      setRestoredDraftAt(null);
-      setPageBaseSnapshot((m) => ({ ...m, [pageKey]: { blocks: blocksToSave, theme: themeToSave } }));
-      lastSavedContent.current[pageKey] = JSON.stringify({ blocks: blocksToSave, theme: themeToSave });
       toast.success("Page published successfully");
     } catch (err) {
       toast.error(`Publish failed — is the backend running? (${err})`);
     }
-  }, [pageUpdatedAt, acquireLock, fetchPublished, resolveBase]);
+  }, [pageUpdatedAt]);
 
   const reloadActivePage = useCallback(async (pageKey: string) => {
     try {
       const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}`);
       const { page } = await res.json();
-      const freshBlocks = (page?.blocks ?? []) as Block[];
-      const freshTheme = (page?.theme ?? {}) as Theme;
       commit({
         ...state,
-        pageBlocks: { ...pageBlocks, [pageKey]: freshBlocks },
+        pageBlocks: { ...pageBlocks, [pageKey]: (page?.blocks ?? []) as Block[] },
       });
       if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [pageKey]: page.updatedAt as string }));
-      setPageBaseSnapshot((m) => ({ ...m, [pageKey]: { blocks: freshBlocks, theme: freshTheme } }));
       setSaveConflict(null);
       toast.success("Reloaded the latest version of this page.");
     } catch (err) {
@@ -506,34 +434,6 @@ export function PageBuilder() {
   const blocks = pageBlocks[activePage] ?? [];
   const currentPage = pages.find((p) => p.id === activePage) ?? pages[0];
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId) || null;
-
-  const saveDraftNow = useCallback(async (): Promise<boolean> => {
-    if (activePage === '__blog__') return false;
-    if (!pageBaseSnapshot[activePage]) return false; // no published base captured → don't create a phantom draft
-    const key = activePage;
-    setDraftStatus('saving');
-    try {
-      const sendBase = !draftBaseSent.current.has(key);
-      const base = sendBase && pageBaseSnapshot[key]
-        ? { blocks: pageBaseSnapshot[key].blocks, theme: pageBaseSnapshot[key].theme, pageUpdatedAt: pageUpdatedAt[key] ?? null }
-        : undefined;
-      await saveMyDraft(key, blocks, theme, base);
-      if (base) draftBaseSent.current.add(key);           // only mark once base was truly sent
-      lastSavedContent.current[key] = JSON.stringify({ blocks, theme });
-      setDraftStatus('saved'); setDraftSavedAt(Date.now());
-      return true;
-    } catch { setDraftStatus('error'); return false; }
-  }, [activePage, blocks, theme, pageBaseSnapshot, pageUpdatedAt]);
-
-  // Debounced autosave on edit.
-  useEffect(() => {
-    if (loading || activePage === '__blog__') return;
-    if (!pageBaseSnapshot[activePage]) return;                 // wait for published base
-    if (!draftRestoredPages.current.has(activePage)) return;   // wait until restore attempt finished (avoid clobbering a real draft)
-    if (lastSavedContent.current[activePage] === JSON.stringify({ blocks, theme })) return; // dirty-check: skip no-op saves
-    const t = setTimeout(() => { void saveDraftNow(); }, 2000);
-    return () => clearTimeout(t);
-  }, [blocks, theme, activePage, loading, pageBaseSnapshot, saveDraftNow]);
 
   const sendToIframe = useCallback((msg: Record<string, unknown>) => {
     if (previewReady.current) {
@@ -715,7 +615,6 @@ export function PageBuilder() {
           pages: builtPages,
           pageBlocks: { [firstKey]: page.blocks ?? [] },
         });
-        setPageBaseSnapshot((m) => ({ ...m, [firstKey]: { blocks: (page.blocks ?? []) as Block[], theme: (page.theme ?? {}) as Theme } }));
         if (page.updatedAt) setPageUpdatedAt((m) => ({ ...m, [firstKey]: page.updatedAt as string }));
         if (page.theme && Object.keys(page.theme).length) {
           // Normalize theme — backend may have old field names from a previous editor
@@ -753,7 +652,6 @@ export function PageBuilder() {
           ...state,
           pageBlocks: { ...pageBlocks, [activePage]: (page?.blocks ?? []) as Block[] },
         });
-        setPageBaseSnapshot((m) => ({ ...m, [activePage]: { blocks: (page?.blocks ?? []) as Block[], theme: (page?.theme ?? {}) as Theme } }));
         if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [activePage]: page.updatedAt as string }));
         if (page?.theme && Object.keys(page.theme).length) {
           const raw = page.theme as unknown as Record<string, unknown>;
@@ -771,46 +669,6 @@ export function PageBuilder() {
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePage, loading]);
-
-  // Restore MY draft for the active page (once, after the published page is loaded).
-  useEffect(() => {
-    if (loading || activePage === '__blog__') return;
-    if (pageBlocks[activePage] === undefined) return;
-    if (!pageBaseSnapshot[activePage]) return;
-    if (draftRestoredPages.current.has(activePage)) return; // once per page
-    let cancelled = false;
-    (async () => {
-      try {
-        const draft = await getMyDraft(activePage);
-        if (cancelled) return;
-        if (draft) {
-          draftBaseSent.current.add(activePage);
-          const cur = stateRef.current;
-          commit({ ...cur, pageBlocks: { ...cur.pageBlocks, [activePage]: (draft.blocks ?? []) as Block[] } });
-          if (draft.theme && Object.keys(draft.theme).length) setTheme({ ...DEFAULT_THEME, ...(draft.theme as Theme) });
-          setRestoredDraftAt(draft.updatedAt);
-          lastSavedContent.current[activePage] = JSON.stringify({ blocks: draft.blocks ?? [], theme: draft.theme ?? {} });
-        } else {
-          const base = pageBaseSnapshot[activePage];
-          lastSavedContent.current[activePage] = JSON.stringify({ blocks: base?.blocks ?? [], theme: base?.theme ?? {} });
-        }
-      } catch { /* ignore */ }
-      finally { if (!cancelled) draftRestoredPages.current.add(activePage); }
-    })();
-    return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePage, loading, pageBaseSnapshot, pageBlocks]);
-
-  // Proactive republish detection: the presence poll's page head is newer than the
-  // base we branched from — someone published while we were editing.
-  useEffect(() => {
-    const base = pageUpdatedAt[activePage];
-    if (pageHead.updatedAt && base && new Date(pageHead.updatedAt).getTime() > new Date(base).getTime()) {
-      setRepublished({ updatedAt: pageHead.updatedAt, by: pageHead.lastUpdatedBy });
-    } else {
-      setRepublished(null);
-    }
-  }, [pageHead, pageUpdatedAt, activePage]);
 
   // Click outside right panel to deselect
   useEffect(() => {
@@ -999,24 +857,34 @@ export function PageBuilder() {
           <button onClick={() => setPreviewOpen(true)} className="px-3 py-1.5 text-sm rounded-md border border-slate-600 hover:bg-slate-800 pb-transition inline-flex items-center gap-1.5">
             <Play size={13} /> Preview
           </button>
-          <span className="text-xs px-2 pb-muted" title="Draft autosave">
-            {draftStatus === 'saving' ? 'Saving…'
-              : draftStatus === 'error' ? 'Unsaved'
-              : draftSavedAt ? `Saved ${Math.max(0, Math.round((Date.now() - draftSavedAt) / 60000))}m ago`
-              : 'Draft'}
-          </span>
           <button
             onClick={async () => {
-              if (activePage === '__blog__') return;
-              if (!draftRestoredPages.current.has(activePage)) { toast('Still loading this page…'); return; }
-              const ok = await saveDraftNow();
-              if (ok) toast.success('Draft saved'); else toast.error('Could not save draft');
+              try { await saveMyDraft(activePage, blocks, theme); toast.success("Draft saved"); }
+              catch { toast.error("Could not save draft"); }
             }}
             className="px-3 py-1.5 text-sm rounded-md border border-slate-600 hover:bg-slate-800 pb-transition"
+            title="Save the current page as your personal draft"
           >
             Save draft
           </button>
           <button
+            onClick={async () => {
+              try {
+                const draft = await getMyDraft(activePage);
+                if (!draft) { toast("No saved draft for this page"); return; }
+                commit({ ...state, pageBlocks: { ...pageBlocks, [activePage]: (draft.blocks ?? []) as Block[] } });
+                if (draft.theme && Object.keys(draft.theme).length) setTheme({ ...DEFAULT_THEME, ...(draft.theme as Theme) });
+                toast.success("Applied your last draft");
+              } catch { toast.error("Could not load draft"); }
+            }}
+            className="px-3 py-1.5 text-sm rounded-md border border-slate-600 hover:bg-slate-800 pb-transition"
+            title="Load your last saved draft for this page"
+          >
+            Apply last draft
+          </button>
+          <button
+            disabled={!!lockedBy || (!!saveConflict && saveConflict.pageKey === activePage)}
+            title={lockedBy ? `Locked by ${lockedBy}` : saveConflict?.pageKey === activePage ? "Reload the latest version before publishing" : undefined}
             onClick={() => publishPage(activePage, blocks, theme, currentPage.hostnames ?? [])}
             className="px-3 py-1.5 text-sm rounded-md font-medium text-white pb-transition hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: "#22c55e" }}
@@ -1036,46 +904,31 @@ export function PageBuilder() {
         </div>
       </header>
 
-      {/* Presence — who else has a draft for this page */}
-      {activePage !== '__blog__' && <PresenceBanner pageKey={activePage} onHead={setPageHead} />}
-
-      {/* Someone published a newer version while we were editing — offer to pull latest + rebase our draft */}
-      {republished && activePage !== '__blog__' && (
-        <div className="flex items-center justify-center gap-3 px-4 py-2 text-sm text-red-100 bg-red-900 border-b border-red-700">
-          <span>{republished.by ? `${republished.by} just published` : 'This page was just published'} — your draft is based on an older version.</span>
+      {/* Save conflict — someone else saved this page after we last loaded/saved it */}
+      {saveConflict && saveConflict.pageKey === activePage && (
+        <div className="flex items-center justify-center gap-3 px-4 py-2 text-sm font-medium text-red-900 bg-red-100 border-b border-red-300">
+          <span>⚠️ This page was updated{saveConflict.updatedBy ? ` by ${saveConflict.updatedBy}` : ""} since you loaded it. Reload to see the latest version before you can publish.</span>
           <button
-            onClick={async () => {
-              const theirs = await fetchPublished(activePage);
-              const base = await resolveBase(activePage);
-              setMerge({ mode: 'rebase', base, theirs, mine: { blocks, theme }, disabled: new Set() });
-            }}
-            className="px-2.5 py-1 rounded-md text-xs font-semibold text-white bg-red-600 hover:bg-red-500 pb-transition"
+            onClick={() => reloadActivePage(activePage)}
+            className="px-2.5 py-1 rounded-md text-xs font-semibold text-white bg-slate-700 hover:bg-slate-800 pb-transition"
           >
-            Pull latest &amp; apply my draft
+            Reload latest
           </button>
         </div>
       )}
 
-      {/* Restored-draft bar — this browser's unpublished draft was loaded over the published content */}
-      {restoredDraftAt && (
-        <div className="flex items-center justify-center gap-3 px-4 py-2 text-sm text-slate-200 bg-slate-800 border-b border-slate-700">
-          <span>Restored your draft (saved {new Date(restoredDraftAt).toLocaleString()}).</span>
+      {/* Edit-lock banner — page is being edited by someone else (view-only) */}
+      {lockedBy && (
+        <div className="flex items-center justify-center gap-3 px-4 py-2 text-sm font-medium text-amber-900 bg-amber-100 border-b border-amber-300">
+          <span>🔒 {lockedBy} is editing this page — you’re in view-only mode. Publishing is disabled to avoid overwriting their work.</span>
           <button
             onClick={async () => {
-              try { await deleteMyDraft(activePage); } catch { /* ignore */ }
-              const base = pageBaseSnapshot[activePage];
-              if (base) {
-                commit({ ...state, pageBlocks: { ...pageBlocks, [activePage]: base.blocks } });
-                setTheme({ ...DEFAULT_THEME, ...(base.theme as Theme) });
-                lastSavedContent.current[activePage] = JSON.stringify({ blocks: base.blocks, theme: base.theme });
-              }
-              draftBaseSent.current.delete(activePage);
-              draftRestoredPages.current.add(activePage);
-              setRestoredDraftAt(null);
+              const ok = await acquireLock(activePage, true);
+              if (ok) toast.success("You’ve taken over editing this page.");
             }}
-            className="px-2.5 py-1 rounded-md text-xs font-semibold text-white bg-slate-600 hover:bg-slate-500 pb-transition"
+            className="px-2.5 py-1 rounded-md text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 pb-transition"
           >
-            Use published instead
+            Take over
           </button>
         </div>
       )}
@@ -1658,66 +1511,6 @@ export function PageBuilder() {
       </div>
 
       {previewOpen && <PreviewModal blocks={blocks} theme={theme} pageKey={activePage} onClose={() => setPreviewOpen(false)} />}
-
-      {merge && (() => {
-        const r = mergePage(merge.base.blocks, merge.theirs.blocks, merge.mine.blocks, merge.base.theme, merge.theirs.theme, merge.mine.theme, { disabledChangeIds: merge.disabled });
-        const who = merge.theirs.updatedAt && pageHead.lastUpdatedBy ? ` (published by ${pageHead.lastUpdatedBy})` : '';
-        return (
-          <MergeReviewModal
-            open
-            result={r}
-            disabledIds={merge.disabled}
-            confirmLabel={merge.mode === 'publish' ? 'Publish' : 'Save as draft'}
-            note={merge.mode === 'publish'
-              ? `We applied your draft changes on top of the latest version${who}.`
-              : `We applied your draft changes on top of the latest${who}. Saving keeps you in draft mode.`}
-            onToggle={(id) => setMerge((m) => {
-              if (!m) return m;
-              const next = new Set(m.disabled);
-              if (next.has(id)) next.delete(id); else next.add(id);
-              return { ...m, disabled: next };
-            })}
-            onCancel={() => setMerge(null)}
-            onConfirm={async () => {
-              const merged = mergePage(merge.base.blocks, merge.theirs.blocks, merge.mine.blocks, merge.base.theme, merge.theirs.theme, merge.mine.theme, { disabledChangeIds: merge.disabled });
-              const key = activePage;
-              if (merge.mode === 'publish') {
-                try {
-                  const { id, name } = getEditor();
-                  const res = await fetch(`${BACKEND}/site/builder/pages/${key}`, {
-                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ blocks: merged.mergedBlocks, theme: merged.mergedTheme, hostnames: currentPage.hostnames ?? [], editorId: id, editorName: name, lastKnownUpdatedAt: merge.theirs.updatedAt }),
-                  });
-                  if (!res.ok) { toast.error('Publish failed — reload and retry.'); setMerge(null); return; }
-                  const { page } = await res.json().catch(() => ({ page: undefined }));
-                  commit({ ...stateRef.current, pageBlocks: { ...stateRef.current.pageBlocks, [key]: merged.mergedBlocks } });
-                  setTheme({ ...DEFAULT_THEME, ...(merged.mergedTheme as Theme) });
-                  if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [key]: page.updatedAt as string }));
-                  setPageBaseSnapshot((m) => ({ ...m, [key]: { blocks: merged.mergedBlocks, theme: merged.mergedTheme } }));
-                  lastSavedContent.current[key] = JSON.stringify({ blocks: merged.mergedBlocks, theme: merged.mergedTheme });
-                  try { await deleteMyDraft(key); } catch { /* ignore */ }
-                  draftBaseSent.current.delete(key);
-                  setRestoredDraftAt(null);
-                  toast.success('Published merged version');
-                } catch { toast.error('Publish failed.'); }
-              } else {
-                try {
-                  await rebaseSaveDraft(key, merged.mergedBlocks, merged.mergedTheme);
-                  commit({ ...stateRef.current, pageBlocks: { ...stateRef.current.pageBlocks, [key]: merged.mergedBlocks } });
-                  setTheme({ ...DEFAULT_THEME, ...(merged.mergedTheme as Theme) });
-                  // Re-baseline: our draft now branches from theirs.
-                  setPageBaseSnapshot((m) => ({ ...m, [key]: { blocks: merge.theirs.blocks, theme: merge.theirs.theme } }));
-                  if (merge.theirs.updatedAt) setPageUpdatedAt((m) => ({ ...m, [key]: merge.theirs.updatedAt as string }));
-                  lastSavedContent.current[key] = JSON.stringify({ blocks: merged.mergedBlocks, theme: merged.mergedTheme });
-                  setRepublished(null);
-                  toast.success('Rebased your draft onto the latest');
-                } catch { toast.error('Rebase failed.'); }
-              }
-              setMerge(null);
-            }}
-          />
-        );
-      })()}
     </div>
   );
 }

@@ -10,9 +10,7 @@
     "preview": "vite preview",
     "start": "node render-server.mjs",
     "lint": "eslint .",
-    "format": "prettier --write .",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",
