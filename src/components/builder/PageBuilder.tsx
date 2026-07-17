@@ -20,6 +20,7 @@ import {
   BLOCK_LABELS, DEFAULT_THEME,
   type Block, type BlockStyle, type BlockType, type LayoutVariant, type Page, type Theme,
 } from "./types";
+import { getMyDraft, saveMyDraft } from "@/lib/builder-drafts";
 
 // Recursively find a widget by id in a widget array (handles row nesting)
 function findWidgetInArray(widgets: Widget[], id: string): Widget | null {
@@ -855,6 +856,31 @@ export function PageBuilder() {
           <button onClick={() => setThemeOpen(true)} className="p-2 rounded hover:bg-slate-800 pb-transition" title="Theme"><Palette size={16} /></button>
           <button onClick={() => setPreviewOpen(true)} className="px-3 py-1.5 text-sm rounded-md border border-slate-600 hover:bg-slate-800 pb-transition inline-flex items-center gap-1.5">
             <Play size={13} /> Preview
+          </button>
+          <button
+            onClick={async () => {
+              try { await saveMyDraft(activePage, blocks, theme); toast.success("Draft saved"); }
+              catch { toast.error("Could not save draft"); }
+            }}
+            className="px-3 py-1.5 text-sm rounded-md border border-slate-600 hover:bg-slate-800 pb-transition"
+            title="Save the current page as your personal draft"
+          >
+            Save draft
+          </button>
+          <button
+            onClick={async () => {
+              try {
+                const draft = await getMyDraft(activePage);
+                if (!draft) { toast("No saved draft for this page"); return; }
+                commit({ ...state, pageBlocks: { ...pageBlocks, [activePage]: (draft.blocks ?? []) as Block[] } });
+                if (draft.theme && Object.keys(draft.theme).length) setTheme({ ...DEFAULT_THEME, ...(draft.theme as Theme) });
+                toast.success("Applied your last draft");
+              } catch { toast.error("Could not load draft"); }
+            }}
+            className="px-3 py-1.5 text-sm rounded-md border border-slate-600 hover:bg-slate-800 pb-transition"
+            title="Load your last saved draft for this page"
+          >
+            Apply last draft
           </button>
           <button
             disabled={!!lockedBy || (!!saveConflict && saveConflict.pageKey === activePage)}
