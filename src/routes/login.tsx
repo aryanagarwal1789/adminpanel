@@ -37,7 +37,7 @@ function LoginPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const nextErrors: typeof errors = {};
@@ -54,7 +54,7 @@ function LoginPage() {
     setSubmitting(true);
     setErrors({});
 
-    const ok = loginWithCredentials(username.trim(), password);
+    const ok = await loginWithCredentials(username.trim(), password);
     if (!ok) {
       setErrors({ form: "Invalid username or password" });
       setSubmitting(false);

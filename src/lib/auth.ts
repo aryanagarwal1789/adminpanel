@@ -171,42 +171,90 @@ export async function exchangeSso(ssoToken: string): Promise<AuthState> {
   return auth;
 }
 
-// --- Temporary hardcoded credential login -------------------------------
-// Used while the Google SSO origin allowlist on dev-auth.salescode.ai is being
-// sorted out. Replace with the SSO flow (initiateGoogleSSO/exchangeSso) once the
-// admin panel's origin is whitelisted.
-// Credentials come from build-time env. NOTE: Vite inlines VITE_* into the client
-// bundle, so this is not truly secret — but it keeps the value out of source/git
-// and lets you rotate it by changing the Render env var (+ redeploy), no code edit.
-// Set VITE_BUILDER_USERNAME and VITE_BUILDER_PASSWORD in the environment.
-const HARDCODED_USERNAME = import.meta.env.VITE_BUILDER_USERNAME ?? "admin";
-const HARDCODED_PASSWORD = import.meta.env.VITE_BUILDER_PASSWORD ?? "Sc$Builder-7f3K@2026";
+// --- Username / password login for selected users (frontend-only) --------
+// Google SSO is currently blocked (origin not yet allowlisted on
+// dev-auth.salescode.ai) and there's no backend deploy access, so credentials
+// are verified in the browser. To avoid shipping plaintext passwords, each
+// allowed user is stored as a PBKDF2-SHA256 hash + random salt. ONLY the users
+// listed in LOCAL_USERS can sign in.
+//
+// Add a user:  node scripts/gen-login-user.mjs <username> <password> [name]
+//              then paste the printed object into LOCAL_USERS below.
+//
+// SECURITY NOTE: client-side auth only gates the UI — it can be bypassed via
+// localStorage and does not protect the builder API. Replace with the backend
+// /auth/login + API @Authenticate flow once backend deploys are possible.
+
+interface LocalUser { username: string; name?: string; role?: string; salt: string; hash: string }
+
+// The selected users allowed to log in. Add/remove entries to grant/revoke access.
+// Regenerate a salt/hash with: node scripts/gen-login-user.mjs <username> <password> [name]
+const LOCAL_USERS: LocalUser[] = [
+  { username: "aryan",     name: "Aryan",     role: "admin", salt: "a5e9771553082db47ed690dd1bc34c40", hash: "4d30ed6fdd4a8da0730ffc5713924d814699ff6df15d79b0023560b18b9623c7" },
+  { username: "hritik",    name: "Hritik",    role: "admin", salt: "ec47dbd6f3ab765429c7296808bf3e43", hash: "01436a28c5c36abb606f6253cecb4622b7fdcc2d1dd019a09a4a980f0e882a16" },
+  { username: "shubhangi", name: "Shubhangi", role: "admin", salt: "139571fb636a0aeb060a55de35772084", hash: "36fef859421d42cb549707fcc8d0bdbf3396533d05a2653ab3fda3863e93862e" },
+  { username: "pramit",    name: "Pramit",    role: "admin", salt: "c08cab2b7b64579d18c7220bc8c2430c", hash: "8a9578a63f652efdcae7cea11422813ff08c8de7b1d2f2284c534c236bd9a580" },
+  { username: "vinayak",   name: "Vinayak",   role: "admin", salt: "dc558574c1faa51dbeaf6ad2df68c266", hash: "1d6be27b6aa47cd7cc6297ede0db4bb2fd6722ebff7094c01e581f17c38cd8b3" },
+];
+
+const PBKDF2_ITERATIONS = 150000;
+
+function hexToBytes(hex: string): Uint8Array {
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
+  return out;
+}
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+async function pbkdf2Hex(password: string, saltHex: string): Promise<string> {
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(password) as BufferSource, "PBKDF2", false, ["deriveBits"],
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt: hexToBytes(saltHex) as BufferSource, iterations: PBKDF2_ITERATIONS, hash: "SHA-256" },
+    keyMaterial, 256,
+  );
+  return bytesToHex(new Uint8Array(bits));
+}
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
 
 /**
- * Validates credentials against the hardcoded pair and, on success, stores an
- * auth session (same shape/localStorage key the route guard already reads).
- * Returns true on success, false on invalid credentials.
+ * Verifies credentials against the PBKDF2-hashed LOCAL_USERS allowlist (in the
+ * browser) and stores a session on success. Returns true on success, false on
+ * unknown user or wrong password.
  */
-export function loginWithCredentials(username: string, password: string): boolean {
-  if (username !== HARDCODED_USERNAME || password !== HARDCODED_PASSWORD) {
+export async function loginWithCredentials(username: string, password: string): Promise<boolean> {
+  try {
+    const user = LOCAL_USERS.find((u) => u.username.toLowerCase() === username.trim().toLowerCase());
+    // Derive even for an unknown user so timing doesn't reveal whether it exists.
+    const computed = await pbkdf2Hex(password, user?.salt ?? "00000000000000000000000000000000");
+    if (!user || !safeEqual(computed, user.hash)) return false;
+
+    const now = new Date();
+    const expires = new Date(now.getTime() + 12 * 60 * 60 * 1000);
+    const auth: AuthState = {
+      isAuthenticated: true,
+      token: "local-session",
+      userId: user.username,
+      email: `${user.username}@salescode.ai`,
+      role: user.role ?? "admin",
+      timestamp: now.toISOString(),
+      expires: expires.toISOString(),
+      expiresIn: "12h",
+      tokenType: "bearer",
+    };
+    localStorage.setItem(AUTH_COOKIE_KEY, JSON.stringify(auth));
+    return true;
+  } catch (e) {
+    console.error("Login failed", e);
     return false;
   }
-
-  const now = new Date();
-  const expires = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-  const auth: AuthState = {
-    isAuthenticated: true,
-    token: "local-dev",
-    userId: username,
-    email: `${username}@salescode.ai`,
-    role: "admin",
-    timestamp: now.toISOString(),
-    expires: expires.toISOString(),
-    expiresIn: "1d",
-    tokenType: "bearer",
-  };
-  localStorage.setItem(AUTH_COOKIE_KEY, JSON.stringify(auth));
-  return true;
 }
 // -------------------------------------------------------------------------
 
