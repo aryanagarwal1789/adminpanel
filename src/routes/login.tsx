@@ -10,11 +10,10 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; username?: string; password?: string; form?: string }>({});
+  const [errors, setErrors] = useState<{ username?: string; password?: string; form?: string }>({});
   const [submitting, setSubmitting] = useState(false);
   const [ssoLoading, setSsoLoading] = useState(false);
 
@@ -41,7 +40,6 @@ function LoginPage() {
     e.preventDefault();
 
     const nextErrors: typeof errors = {};
-    if (!name.trim()) nextErrors.name = "Name is required";
     if (!username.trim()) nextErrors.username = "Username is required";
     if (!password) nextErrors.password = "Password is required";
     else if (password.length < 6) nextErrors.password = "Password must be at least 6 characters";
@@ -61,9 +59,8 @@ function LoginPage() {
       return;
     }
 
-    // Store the editor's display name — used to show "X is editing this page"
-    // in the builder's page edit-lock.
-    localStorage.setItem("pb_editor_name", name.trim());
+    // pb_editor_name is set inside loginWithCredentials from the authenticated
+    // account (not a typed field), so "last updated by" attribution is trustworthy.
 
     // Full navigation so the root auth guard re-runs and picks up the session.
     const redirect = popRedirectPath();
@@ -114,21 +111,6 @@ function LoginPage() {
           </div>
 
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-            <div className="space-y-1.5">
-              <label htmlFor="name" className={labelClass}>Your name</label>
-              <input
-                id="name"
-                type="text"
-                autoComplete="name"
-                placeholder="e.g. Aryan"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={submitting}
-                className={inputClass}
-              />
-              {errors.name && <p className="text-xs text-red-400">{errors.name}</p>}
-            </div>
-
             <div className="space-y-1.5">
               <label htmlFor="username" className={labelClass}>Username</label>
               <input

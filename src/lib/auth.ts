@@ -168,6 +168,13 @@ export async function exchangeSso(ssoToken: string): Promise<AuthState> {
   };
 
   localStorage.setItem(AUTH_COOKIE_KEY, JSON.stringify(auth));
+  // Editor name for "last updated by" / edit-lock comes from the authenticated
+  // SSO identity (derived from the email), so attribution can't be spoofed.
+  const displayName = email
+    ? email.split("@")[0].split(/[._-]/).filter(Boolean)
+        .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+    : "";
+  localStorage.setItem("pb_editor_name", displayName || userId || email);
   return auth;
 }
 
@@ -250,6 +257,9 @@ export async function loginWithCredentials(username: string, password: string): 
       tokenType: "bearer",
     };
     localStorage.setItem(AUTH_COOKIE_KEY, JSON.stringify(auth));
+    // Editor name for "last updated by" / edit-lock comes from the authenticated
+    // account — NOT a free-text field — so attribution can't be spoofed.
+    localStorage.setItem("pb_editor_name", user.name ?? user.username);
     return true;
   } catch (e) {
     console.error("Login failed", e);
