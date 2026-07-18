@@ -6,21 +6,26 @@ import type { Block, Theme } from "./types";
 const RENDERER = import.meta.env.VITE_RENDERER_URL ?? "https://demo-experience.salescode.ai";
 
 interface PreviewModalProps {
-  blocks: Block[];
-  theme: Theme;
+  desktopBlocks: Block[];
+  mobileBlocks: Block[] | null;
+  desktopTheme: Theme;
+  mobileTheme: Theme | null;
+  initialViewport: "desktop" | "mobile";
   pageKey: string;
   onClose: () => void;
 }
 
-export function PreviewModal({ blocks, theme, pageKey, onClose }: PreviewModalProps) {
+export function PreviewModal({ desktopBlocks, mobileBlocks, desktopTheme, mobileTheme, initialViewport, pageKey, onClose }: PreviewModalProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const readyRef = useRef(false);
-  const [viewport, setViewport] = useState<"desktop" | "mobile">("desktop");
+  const [viewport, setViewport] = useState<"desktop" | "mobile">(initialViewport);
+
+  // Mobile falls back to desktop content when no mobile variant exists — matches the production renderer
+  const blocks = viewport === "mobile" ? (mobileBlocks ?? desktopBlocks) : desktopBlocks;
+  const theme = viewport === "mobile" ? (mobileTheme ?? desktopTheme) : desktopTheme;
 
   // Listen for PREVIEW_READY from the iframe, then push current blocks
   useEffect(() => {
-    readyRef.current = false;
-
     const handler = (e: MessageEvent) => {
       if (e.data?.type === "PREVIEW_READY") {
         iframeRef.current?.contentWindow?.postMessage({ type: "PREVIEW_ACK" }, "*");
@@ -31,6 +36,14 @@ export function PreviewModal({ blocks, theme, pageKey, onClose }: PreviewModalPr
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
+  }, [blocks, theme]);
+
+  // Viewport toggled after the iframe is ready — re-send the now-active variant
+  useEffect(() => {
+    if (readyRef.current) {
+      iframeRef.current?.contentWindow?.postMessage({ type: "BUILDER_BLOCKS_REORDER", blocks }, "*");
+      iframeRef.current?.contentWindow?.postMessage({ type: "BUILDER_THEME_UPDATE", theme }, "*");
+    }
   }, [blocks, theme]);
 
   // Close on Escape
