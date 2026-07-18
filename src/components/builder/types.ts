@@ -298,7 +298,8 @@ export type TemplateBlockType =
   | 'slick-sn-spotlight'
   | 'slick-sn-darkcard'
   | 'slick-sn-recovery'
-  | 'slick-sn-proof';
+  | 'slick-sn-proof'
+  | "html-embed";
 
 export type LayoutVariant = "1" | "2" | "3" | "1-2" | "2-1" | "4";
 
@@ -384,6 +385,7 @@ export const DEFAULT_THEME: Theme = {
 };
 
 export const BLOCK_LABELS: Record<BlockType, string> = {
+  "html-embed": "Custom HTML / Embed",
   "nav-simple": "Nav Simple",
   "nav-centered": "Nav Centered",
   "footer-simple": "Footer Simple",

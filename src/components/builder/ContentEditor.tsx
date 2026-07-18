@@ -87,6 +87,21 @@ function renderBlockFields(
   focusedItem?: { itemKey: string; itemIndex: number } | null,
 ): React.ReactElement | null {
   switch (block.type) {
+    case "html-embed":
+      return (
+        <div className="space-y-3">
+          <p className="text-xs text-slate-500">
+            Paste any HTML below. It is inserted directly into the page and rendered as-is.
+            Embed scripts (forms, calendars, videos, analytics) run on the live site.
+          </p>
+          <Textarea
+            label="HTML"
+            value={(f.html as string) ?? ""}
+            onChange={(v) => set("html", v)}
+            rows={16}
+          />
+        </div>
+      );
     case "nav-simple":
       return (
         <div className="space-y-4">
