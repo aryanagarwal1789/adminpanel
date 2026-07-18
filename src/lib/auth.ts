@@ -20,7 +20,10 @@ const TOKEN_URL = `${GOOGLE_SSO_URL}/token`;
 const MARKETPLACE_URL =
   import.meta.env.VITE_MARKETPLACE_URL ?? "https://salescode-marketplace.salescode.ai";
 
-const AUTH_COOKIE_KEY = "auth_cookie";
+// Bump this suffix on any deploy where you want to force everyone to log in
+// again (invalidates all existing localStorage sessions). Raised after the
+// 2026-07-18 unauthorized-access incident + credential rotation.
+const AUTH_COOKIE_KEY = "auth_cookie_v2";
 const SSO_TOKEN_KEY = "sso_token";
 const REDIRECT_KEY = "redirect_after_login";
 
@@ -172,8 +175,12 @@ export async function exchangeSso(ssoToken: string): Promise<AuthState> {
 // Used while the Google SSO origin allowlist on dev-auth.salescode.ai is being
 // sorted out. Replace with the SSO flow (initiateGoogleSSO/exchangeSso) once the
 // admin panel's origin is whitelisted.
-const HARDCODED_USERNAME = "admin";
-const HARDCODED_PASSWORD = "PageCraft@2026";
+// Credentials come from build-time env. NOTE: Vite inlines VITE_* into the client
+// bundle, so this is not truly secret — but it keeps the value out of source/git
+// and lets you rotate it by changing the Render env var (+ redeploy), no code edit.
+// Set VITE_BUILDER_USERNAME and VITE_BUILDER_PASSWORD in the environment.
+const HARDCODED_USERNAME = import.meta.env.VITE_BUILDER_USERNAME ?? "admin";
+const HARDCODED_PASSWORD = import.meta.env.VITE_BUILDER_PASSWORD ?? "Sc$Builder-7f3K@2026";
 
 /**
  * Validates credentials against the hardcoded pair and, on success, stores an
