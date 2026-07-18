@@ -1368,33 +1368,10 @@ export function PageBuilder() {
                         >
                           {p.name}
                         </button>
-                        {p.id !== "__blog__" && (
-                          <button
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              if (!confirm(`Delete page "${p.name}"? This cannot be undone.`)) return;
-                              try {
-                                await fetch(`${BACKEND}/site/builder/pages/${p.id}`, { method: "DELETE" });
-                              } catch { /* ignore */ }
-                              const remaining = pages.filter((pg) => pg.id !== p.id);
-                              const nextActive = activePage === p.id
-                                ? (remaining.find((pg) => pg.id !== "__blog__")?.id ?? "landing")
-                                : activePage;
-                              commit({
-                                pages: remaining,
-                                pageBlocks: Object.fromEntries(
-                                  Object.entries(pageBlocks).filter(([k]) => k !== p.id)
-                                ),
-                              });
-                              setActivePage(nextActive);
-                              setSelectedBlockId(null);
-                            }}
-                            className="opacity-0 group-hover:opacity-100 p-2 text-slate-500 hover:text-red-400 pb-transition shrink-0"
-                            title={`Delete ${p.name}`}
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        )}
+                        {/* Page deletion removed from the UI — the builder API has no
+                            auth, and a public DELETE endpoint was used to wipe all pages
+                            (incident 2026-07-18). Pages are now deleted manually from the
+                            DB only; the backend no longer exposes a delete route. */}
                       </div>
 
                       {/* Hostnames row — always visible for every page */}
