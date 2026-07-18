@@ -4,7 +4,7 @@ export type ButtonField = { label: string; url: string; variant: "primary" | "se
 export type LinkField = { label: string; url: string };
 
 export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string, unknown>> = {
-  "html-embed": { html: "" },
+  "html-embed": { mode: "iframe", html: "", height: 0 },
   "nav-simple": {
     logoImage: "",
     logoText: "Acme",

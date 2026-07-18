@@ -87,12 +87,23 @@ function renderBlockFields(
   focusedItem?: { itemKey: string; itemIndex: number } | null,
 ): React.ReactElement | null {
   switch (block.type) {
-    case "html-embed":
+    case "html-embed": {
+      const embedMode = (f.mode as string) === "inline" ? "inline" : "iframe";
       return (
         <div className="space-y-3">
+          <Select
+            label="Render mode"
+            value={embedMode}
+            onChange={(v) => set("mode", v)}
+            options={[
+              { value: "iframe", label: "Isolated (iframe) — full HTML documents, scripts, embeds" },
+              { value: "inline", label: "Inline (direct DOM) — fragments that inherit the page look" },
+            ]}
+          />
           <p className="text-xs text-slate-500">
-            Paste any HTML below. It is inserted directly into the page and rendered as-is.
-            Embed scripts (forms, calendars, videos, analytics) run on the live site.
+            {embedMode === "iframe"
+              ? "Paste any HTML, including a full <!DOCTYPE html> document. It renders in an isolated frame, so its styles/scripts can't affect the rest of the page. Height auto-fits; set a value below to fix it."
+              : "Paste an HTML fragment. It is injected directly into the page and inherits the site's fonts/width. Avoid unscoped selectors like body{} — they leak to the whole page. Scripts run."}
           </p>
           <Textarea
             label="HTML"
@@ -100,8 +111,16 @@ function renderBlockFields(
             onChange={(v) => set("html", v)}
             rows={16}
           />
+          {embedMode === "iframe" && (
+            <NumberInput
+              label="Height (px) — 0 = auto-fit"
+              value={(f.height as number) ?? 0}
+              onChange={(v) => set("height", v)}
+            />
+          )}
         </div>
       );
+    }
     case "nav-simple":
       return (
         <div className="space-y-4">
