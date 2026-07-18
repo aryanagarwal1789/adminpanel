@@ -152,6 +152,13 @@ interface PageVersionSummary {
   blockCount: number;
 }
 
+// Stable serialization of a page's editable state (blocks + theme), used to tell
+// whether the live editor differs from the last saved/loaded state (the tab-close
+// prompt fires only when they differ).
+function serializeSaved(blocks: Block[], theme: Theme): string {
+  return JSON.stringify({ blocks, theme });
+}
+
 // Map a stored theme blob (which may use old field names) onto the editor Theme.
 // Mirrors the normalization the bootstrap loader does, reused for version restore.
 function normalizeTheme(raw: Record<string, unknown>): Theme {
@@ -271,6 +278,13 @@ export function PageBuilder() {
   const activePageRef = useRef(activePage);
   useEffect(() => { activePageRef.current = activePage; }, [activePage]);
 
+  // Unsaved-changes tracking for the tab-close prompt. `savedBaselineRef` holds a
+  // serialized snapshot of each page's last SAVED/LOADED state; blocksRef/themeRef
+  // mirror the live state so the beforeunload handler can compare synchronously.
+  const savedBaselineRef = useRef<Record<string, string>>({});
+  const blocksRef = useRef<Block[]>([]);
+  const themeRef = useRef<Theme>(theme);
+
   const acquireLock = useCallback(async (pageKey: string, force = false): Promise<boolean> => {
     const { id, name } = getEditor();
     try {
@@ -319,6 +333,8 @@ export function PageBuilder() {
       const { page } = await res.json().catch(() => ({ page: undefined }));
       if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [pageKey]: page.updatedAt as string }));
       setSaveConflict(null);
+      // Page is now saved — this state is the new "clean" baseline.
+      savedBaselineRef.current[pageKey] = serializeSaved(blocksToSave, themeToSave);
       toast.success("Page published successfully");
     } catch (err) {
       toast.error(`Publish failed — is the backend running? (${err})`);
@@ -335,6 +351,8 @@ export function PageBuilder() {
       });
       if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [pageKey]: page.updatedAt as string }));
       setSaveConflict(null);
+      // Freshly loaded from server — this is the clean baseline (theme unchanged).
+      savedBaselineRef.current[pageKey] = serializeSaved((page?.blocks ?? []) as Block[], themeRef.current);
       toast.success("Reloaded the latest version of this page.");
     } catch (err) {
       toast.error(`Reload failed — is the backend running? (${err})`);
@@ -402,10 +420,15 @@ export function PageBuilder() {
       }
       if (!res.ok) throw new Error(`${res.status}`);
       const { page } = await res.json();
-      commit({ ...state, pageBlocks: { ...pageBlocks, [pageKey]: (page?.blocks ?? []) as Block[] } });
-      if (page?.theme && Object.keys(page.theme).length) setTheme(normalizeTheme(page.theme));
+      const restoredBlocks = (page?.blocks ?? []) as Block[];
+      const restoredTheme =
+        page?.theme && Object.keys(page.theme).length ? normalizeTheme(page.theme) : themeRef.current;
+      commit({ ...state, pageBlocks: { ...pageBlocks, [pageKey]: restoredBlocks } });
+      if (page?.theme && Object.keys(page.theme).length) setTheme(restoredTheme);
       if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [pageKey]: page.updatedAt as string }));
       setSaveConflict(null);
+      // Restore persists to the server — the restored state is the clean baseline.
+      savedBaselineRef.current[pageKey] = serializeSaved(restoredBlocks, restoredTheme);
       setVersionsOpen(false);
       toast.success("Page restored to the selected version.");
     } catch (err) {
@@ -447,16 +470,22 @@ export function PageBuilder() {
     };
   }, [activePage, acquireLock, releaseLock]);
 
-  // Best-effort release when the tab closes, plus a browser confirm prompt so the
-  // editor doesn't lose in-progress work to an accidental close/refresh. Setting
-  // returnValue triggers the native "Leave site? / Reload site?" dialog; the exact
-  // wording is controlled by the browser and can't be customised.
+  // Best-effort release when the tab closes, plus a browser confirm prompt — but
+  // ONLY when the current page has unsaved changes (the live state differs from
+  // the last saved/loaded baseline). Setting returnValue triggers the native
+  // "Leave site? / Reload site?" dialog; the wording is browser-controlled.
   useEffect(() => {
     const onUnload = (e: BeforeUnloadEvent) => {
       if (heldByMe.current) releaseLock(activePageRef.current);
-      e.preventDefault();
-      e.returnValue = "";
-      return "";
+      const pageKey = activePageRef.current;
+      const baseline = savedBaselineRef.current[pageKey];
+      const current = serializeSaved(blocksRef.current, themeRef.current);
+      // No baseline yet = page not loaded; only warn when there's a real diff.
+      if (baseline !== undefined && current !== baseline) {
+        e.preventDefault();
+        e.returnValue = "";
+        return "";
+      }
     };
     window.addEventListener("beforeunload", onUnload);
     return () => window.removeEventListener("beforeunload", onUnload);
@@ -543,6 +572,10 @@ export function PageBuilder() {
   const blocks = pageBlocks[activePage] ?? [];
   const currentPage = pages.find((p) => p.id === activePage) ?? pages[0];
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId) || null;
+
+  // Keep the live-state refs in sync for the beforeunload dirty check.
+  useEffect(() => { blocksRef.current = blocks; }, [blocks]);
+  useEffect(() => { themeRef.current = theme; }, [theme]);
 
   const sendToIframe = useCallback((msg: Record<string, unknown>) => {
     if (previewReady.current) {
@@ -725,20 +758,14 @@ export function PageBuilder() {
           pageBlocks: { [firstKey]: page.blocks ?? [] },
         });
         if (page.updatedAt) setPageUpdatedAt((m) => ({ ...m, [firstKey]: page.updatedAt as string }));
-        if (page.theme && Object.keys(page.theme).length) {
-          // Normalize theme — backend may have old field names from a previous editor
-          const raw = page.theme as unknown as Record<string, unknown>;
-          const normalized: Partial<Theme> = {
-            accent:       (raw.accent      ?? raw.accentColor) as string | undefined,
-            pageBg:       (raw.pageBg      ?? raw.backgroundColor) as string | undefined,
-            bodyFont:     (raw.bodyFont    ?? raw.fontFamily) as string | undefined,
-            headingFont:  (raw.headingFont ?? raw.fontFamily) as string | undefined,
-            baseFontSize: (raw.baseFontSize) as number | undefined,
-            radius:       (raw.radius) as number | undefined,
-            buttonStyle:  (raw.buttonStyle) as Theme['buttonStyle'] | undefined,
-          };
-          setTheme({ ...DEFAULT_THEME, ...Object.fromEntries(Object.entries(normalized).filter(([, v]) => v != null)) });
-        }
+        // Normalize theme — backend may have old field names from a previous editor.
+        const hasTheme = page.theme && Object.keys(page.theme).length;
+        const bootTheme = hasTheme
+          ? normalizeTheme(page.theme as unknown as Record<string, unknown>)
+          : themeRef.current;
+        if (hasTheme) setTheme(bootTheme);
+        // Record the clean baseline for the tab-close prompt.
+        savedBaselineRef.current[firstKey] = serializeSaved(page.blocks ?? [], bootTheme);
         setActivePage(firstKey);
       } catch {
         // backend not running — keep mock data
@@ -757,24 +784,23 @@ export function PageBuilder() {
     fetch(`${BACKEND}/site/builder/pages/${activePage}`)
       .then((r) => r.json())
       .then(({ page }) => {
+        const loadedBlocks = (page?.blocks ?? []) as Block[];
         commit({
           ...state,
-          pageBlocks: { ...pageBlocks, [activePage]: (page?.blocks ?? []) as Block[] },
+          pageBlocks: { ...pageBlocks, [activePage]: loadedBlocks },
         });
         if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [activePage]: page.updatedAt as string }));
-        if (page?.theme && Object.keys(page.theme).length) {
-          const raw = page.theme as unknown as Record<string, unknown>;
-          setTheme({ ...DEFAULT_THEME, ...(raw.accent      ? { accent: raw.accent }           : raw.accentColor    ? { accent: raw.accentColor }      : {}),
-                                       ...(raw.bodyFont    ? { bodyFont: raw.bodyFont }        : raw.fontFamily     ? { bodyFont: raw.fontFamily }      : {}),
-                                       ...(raw.headingFont ? { headingFont: raw.headingFont }  : raw.fontFamily     ? { headingFont: raw.fontFamily }   : {}),
-                                       ...(raw.pageBg      ? { pageBg: raw.pageBg }            : {}),
-                                       ...(raw.baseFontSize ? { baseFontSize: raw.baseFontSize } : {}),
-                                       ...(raw.radius      ? { radius: raw.radius }            : {}),
-                                       ...(raw.buttonStyle ? { buttonStyle: raw.buttonStyle }  : {}) } as Theme);
-        }
+        const hasTheme = page?.theme && Object.keys(page.theme).length;
+        const loadedTheme = hasTheme
+          ? normalizeTheme(page.theme as unknown as Record<string, unknown>)
+          : themeRef.current;
+        if (hasTheme) setTheme(loadedTheme);
+        // Record the clean baseline for the tab-close prompt.
+        savedBaselineRef.current[activePage] = serializeSaved(loadedBlocks, loadedTheme);
       })
       .catch(() => {
         commit({ ...state, pageBlocks: { ...pageBlocks, [activePage]: [] } });
+        savedBaselineRef.current[activePage] = serializeSaved([], themeRef.current);
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePage, loading]);
