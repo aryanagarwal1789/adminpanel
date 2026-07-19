@@ -19,6 +19,7 @@ export interface RichMark {
     color?: string;
     fontFamily?: string;
     fontSize?: string; // e.g. "20px"
+    fontWeight?: string; // e.g. "600"
   };
 }
 
@@ -127,6 +128,7 @@ function markStyle(marks?: RichMark[]): React.CSSProperties {
       if (m.attrs.color) s.color = m.attrs.color;
       if (m.attrs.fontFamily) s.fontFamily = m.attrs.fontFamily;
       if (m.attrs.fontSize) s.fontSize = m.attrs.fontSize;
+      if (m.attrs.fontWeight) s.fontWeight = m.attrs.fontWeight;
     }
   }
   if (decorations.length) s.textDecoration = decorations.join(" ");

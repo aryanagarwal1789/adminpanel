@@ -7,7 +7,7 @@ import {
   ListOrdered, CreditCard, MessageSquareQuote, Users, TrendingUp,
   ArrowRightCircle, Zap, ShoppingCart, Puzzle, BookOpen, PanelBottom,
   List, Tag, MessageSquare, BarChart3, GitBranch, Download, Layers, Mic,
-  Languages,
+  Languages, Code,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { TemplateBlockType, LayoutVariant } from "./types";
@@ -16,6 +16,9 @@ interface TemplateItem { type: TemplateBlockType; label: string; Icon: LucideIco
 interface Group { name: string; items: TemplateItem[] }
 
 const GROUPS: Group[] = [
+  { name: "Advanced", items: [
+    { type: "html-embed", label: "Custom HTML / Embed", Icon: Code },
+  ]},
   { name: "Salescode Branded", items: [
     { type: "hero-salescode", label: "Hero — Salescode", Icon: Sparkles },
     { type: "impact-salescode", label: "Impact Stats", Icon: TrendingUp },

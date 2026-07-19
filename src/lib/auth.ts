@@ -20,7 +20,10 @@ const TOKEN_URL = `${GOOGLE_SSO_URL}/token`;
 const MARKETPLACE_URL =
   import.meta.env.VITE_MARKETPLACE_URL ?? "https://salescode-marketplace.salescode.ai";
 
-const AUTH_COOKIE_KEY = "auth_cookie";
+// Bump this suffix on any deploy where you want to force everyone to log in
+// again (invalidates all existing localStorage sessions). Raised after the
+// 2026-07-18 unauthorized-access incident + credential rotation.
+const AUTH_COOKIE_KEY = "auth_cookie_v2";
 const SSO_TOKEN_KEY = "sso_token";
 const REDIRECT_KEY = "redirect_after_login";
 
@@ -165,43 +168,20 @@ export async function exchangeSso(ssoToken: string): Promise<AuthState> {
   };
 
   localStorage.setItem(AUTH_COOKIE_KEY, JSON.stringify(auth));
+  // Editor name for "last updated by" / edit-lock comes from the authenticated
+  // SSO identity (derived from the email), so attribution can't be spoofed.
+  const displayName = email
+    ? email.split("@")[0].split(/[._-]/).filter(Boolean)
+        .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
+    : "";
+  localStorage.setItem("pb_editor_name", displayName || userId || email);
   return auth;
 }
 
-// --- Temporary hardcoded credential login -------------------------------
-// Used while the Google SSO origin allowlist on dev-auth.salescode.ai is being
-// sorted out. Replace with the SSO flow (initiateGoogleSSO/exchangeSso) once the
-// admin panel's origin is whitelisted.
-const HARDCODED_USERNAME = "admin";
-const HARDCODED_PASSWORD = "PageCraft@2026";
-
-/**
- * Validates credentials against the hardcoded pair and, on success, stores an
- * auth session (same shape/localStorage key the route guard already reads).
- * Returns true on success, false on invalid credentials.
- */
-export function loginWithCredentials(username: string, password: string): boolean {
-  if (username !== HARDCODED_USERNAME || password !== HARDCODED_PASSWORD) {
-    return false;
-  }
-
-  const now = new Date();
-  const expires = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-  const auth: AuthState = {
-    isAuthenticated: true,
-    token: "local-dev",
-    userId: username,
-    email: `${username}@salescode.ai`,
-    role: "admin",
-    timestamp: now.toISOString(),
-    expires: expires.toISOString(),
-    expiresIn: "1d",
-    tokenType: "bearer",
-  };
-  localStorage.setItem(AUTH_COOKIE_KEY, JSON.stringify(auth));
-  return true;
-}
-// -------------------------------------------------------------------------
+// Username/password login was removed — Google SSO (exchangeSso) is the only
+// sign-in path. It produces a real backend-signed JWT that the builder API's
+// @Authenticate('token') guard validates; the old client-side credential login
+// minted a fake "local-session" token that could not pass that guard.
 
 export function getAuth(): AuthState | null {
   if (!isBrowser()) return null;

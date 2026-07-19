@@ -10,8 +10,33 @@
  */
 import React, { useEffect, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
+import { Extension } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { TextStyle, Color, FontFamily, FontSize } from "@tiptap/extension-text-style";
+
+// Adds a `fontWeight` attribute to the textStyle mark (TipTap only ships bold=700;
+// this lets presets set an explicit weight like 600). Renders inline + round-trips.
+const FontWeight = Extension.create({
+  name: "fontWeight",
+  addGlobalAttributes() {
+    return [{
+      types: ["textStyle"],
+      attributes: {
+        fontWeight: {
+          default: null,
+          parseHTML: (el: HTMLElement) => el.style.fontWeight || null,
+          renderHTML: (attrs: { fontWeight?: string | null }) =>
+            attrs.fontWeight ? { style: `font-weight:${attrs.fontWeight}` } : {},
+        },
+      },
+    }];
+  },
+});
+
+// One-click heading preset — matches the reference CSS:
+//   font-size: clamp(22px, 4vw, 40px); font-weight: 600;
+// (responsive 22px→40px, NOT a fixed 22px which would render small on desktop.)
+const HEADING_PRESET = { fontSize: "clamp(22px, 4vw, 40px)", fontWeight: "600" };
 import {
   Bold as BoldIcon,
   Italic as ItalicIcon,
@@ -79,7 +104,7 @@ function RichEditor({ value, onChange }: { value: RichValue; onChange: (v: RichD
   const editor = useEditor({
     immediatelyRender: false,
     autofocus: "end",
-    extensions: [StarterKit, TextStyle, Color, FontFamily, FontSize],
+    extensions: [StarterKit, TextStyle, Color, FontFamily, FontSize, FontWeight],
     content: toRichDoc(value),
     onUpdate: ({ editor }) => onChange(editor.getJSON() as RichDoc),
     editorProps: {
@@ -102,6 +127,8 @@ function RichEditor({ value, onChange }: { value: RichValue; onChange: (v: RichD
   const currentColor = (editor?.getAttributes("textStyle").color as string) || "#000000";
   const currentFont = (editor?.getAttributes("textStyle").fontFamily as string) || "";
   const currentSize = (editor?.getAttributes("textStyle").fontSize as string) || "";
+  const currentWeight = (editor?.getAttributes("textStyle").fontWeight as string) || "";
+  const isHeadingPreset = currentSize === HEADING_PRESET.fontSize && currentWeight === HEADING_PRESET.fontWeight;
 
   return (
     <div className="rounded-md border border-blue-400 overflow-hidden" style={{ background: "#f8fafc" }}>
@@ -176,6 +203,19 @@ function RichEditor({ value, onChange }: { value: RichValue; onChange: (v: RichD
             <option key={s.label} value={s.value}>{s.label}</option>
           ))}
         </select>
+
+        {/* Heading preset — 22px / weight 600 (toggle) */}
+        <ToolbarButton
+          title="Heading style (22px / 600)"
+          active={isHeadingPreset}
+          onClick={() =>
+            editor?.chain().focus().setMark("textStyle", isHeadingPreset
+              ? { fontSize: null, fontWeight: null }
+              : { fontSize: HEADING_PRESET.fontSize, fontWeight: HEADING_PRESET.fontWeight }).run()
+          }
+        >
+          <span style={{ fontWeight: 700, fontSize: 12 }}>H1</span>
+        </ToolbarButton>
 
         <ToolbarButton title="Clear formatting" onClick={() => editor?.chain().focus().unsetAllMarks().run()}>
           <RemoveFormatting size={14} />

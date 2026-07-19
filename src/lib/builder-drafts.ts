@@ -1,8 +1,19 @@
 import type { Block, Theme } from '@/components/builder/types';
-import { getAuth } from '@/lib/auth';
+import { getAuth, getAppToken } from '@/lib/auth';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 const BASE = `${BACKEND}/site/builder/pages`;
+
+// Builder write routes are protected by @Authenticate('token') on the backend —
+// attach the app JWT from login. Reads stay public so no header is needed there.
+export function authJsonHeaders(): HeadersInit {
+  const token = getAppToken();
+  return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+}
+export function authHeaders(): HeadersInit {
+  const token = getAppToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export interface EditorIdentity { ownerId: string; ownerEmail: string; ownerName: string; }
 export interface DraftDto {
@@ -58,7 +69,7 @@ export async function saveMyDraft(
   const id = getEditorIdentity();
   const res = await fetch(`${BASE}/${pageKey}/draft`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authJsonHeaders(),
     body: JSON.stringify({ ...id, blocks, theme, base }),
   });
   if (!res.ok) throw new Error(`saveMyDraft failed: ${res.status}`);
@@ -68,7 +79,7 @@ export async function saveMyDraft(
 
 export async function deleteMyDraft(pageKey: string): Promise<void> {
   const { ownerId } = getEditorIdentity();
-  const res = await fetch(`${BASE}/${pageKey}/draft?ownerId=${encodeURIComponent(ownerId)}`, { method: 'DELETE' });
+  const res = await fetch(`${BASE}/${pageKey}/draft?ownerId=${encodeURIComponent(ownerId)}`, { method: 'DELETE', headers: authHeaders() });
   if (!res.ok) throw new Error(`deleteMyDraft failed: ${res.status}`);
 }
 
@@ -92,7 +103,7 @@ export async function publishPage(
   const id = getEditorIdentity();
   const res = await fetch(`${BASE}/${pageKey}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authJsonHeaders(),
     body: JSON.stringify({
       blocks, theme,
       editorId: id.ownerId, editorName: id.ownerName,
@@ -114,7 +125,7 @@ export async function rebaseSaveDraft(pageKey: string, blocks: Block[], theme: T
   const id = getEditorIdentity();
   const res = await fetch(`${BASE}/${pageKey}/rebase-save`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authJsonHeaders(),
     body: JSON.stringify({ ...id, blocks, theme }),
   });
   if (!res.ok) throw new Error(`rebaseSaveDraft failed: ${res.status}`);

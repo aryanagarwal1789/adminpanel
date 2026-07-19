@@ -3,9 +3,11 @@ import { toast } from "sonner";
 import {
   Undo2, Redo2, Plus, Eye, EyeOff, Trash2, GripVertical, Copy, Clipboard,
   X, Palette, Play, FileText, ChevronLeft, PenLine, Paintbrush, Settings, Layers, Globe, Search,
-  LogOut, History, RotateCcw,
+  LogOut, History, RotateCcw, Monitor, Smartphone,
 } from "lucide-react";
 import { defaultBlock } from "./blocks";
+import { isRichDoc, type RichDoc } from "./rich-text";
+import { syncRichContent, pickTextPatch } from "./rich-sync";
 import { AddSectionDrawer } from "./AddSectionDrawer";
 import { ContentEditor } from "./ContentEditor";
 import { StyleEditor } from "./StyleEditor";
@@ -20,7 +22,7 @@ import {
   BLOCK_LABELS, DEFAULT_THEME,
   type Block, type BlockStyle, type BlockType, type LayoutVariant, type Page, type Theme,
 } from "./types";
-import { getMyDraft, saveMyDraft } from "@/lib/builder-drafts";
+import { getMyDraft, saveMyDraft, authJsonHeaders } from "@/lib/builder-drafts";
 import { getAuth } from "@/lib/auth";
 
 // Recursively find a widget by id in a widget array (handles row nesting)
@@ -139,9 +141,26 @@ const seedLanding = (): Block[] =>
   (["nav-simple", "hero-centered", "features-3col", "cta-banner", "footer-simple"] as BlockType[])
     .map((t, i) => defaultBlock(t, i));
 
+type Device = "desktop" | "mobile";
+
+// Per-page block variants — mobile: null = never materialized (desktop serves everyone)
+interface PageVariants {
+  desktop: Block[];
+  mobile: Block[] | null;
+}
+
+// Per-page theme variants — mirrors PageVariants; mobile: null = never materialized
+interface ThemeVariants {
+  desktop: Theme;
+  mobile: Theme | null;
+}
+
+// Fallback for pages whose themes haven't been loaded yet — never mutated (copy-on-write)
+const DEFAULT_THEME_VARIANTS: ThemeVariants = { desktop: DEFAULT_THEME, mobile: null };
+
 interface BuilderState {
   pages: Page[];
-  pageBlocks: Record<string, Block[]>;
+  pageBlocks: Record<string, PageVariants>;
 }
 
 // One row in the version-history panel (metadata only; blocks fetched on demand).
@@ -156,31 +175,21 @@ interface PageVersionSummary {
 // Stable serialization of a page's editable state (blocks + theme), used to tell
 // whether the live editor differs from the last saved/loaded state (the tab-close
 // prompt fires only when they differ).
-function serializeSaved(blocks: Block[], theme: Theme): string {
-  return JSON.stringify({ blocks, theme });
-}
-
-// Map a stored theme blob (which may use old field names) onto the editor Theme.
-// Mirrors the normalization the bootstrap loader does, reused for version restore.
-function normalizeTheme(raw: Record<string, unknown>): Theme {
-  const normalized: Partial<Theme> = {
-    accent: (raw.accent ?? raw.accentColor) as string | undefined,
-    pageBg: (raw.pageBg ?? raw.backgroundColor) as string | undefined,
-    bodyFont: (raw.bodyFont ?? raw.fontFamily) as string | undefined,
-    headingFont: (raw.headingFont ?? raw.fontFamily) as string | undefined,
-    baseFontSize: raw.baseFontSize as number | undefined,
-    radius: raw.radius as number | undefined,
-    buttonStyle: raw.buttonStyle as Theme["buttonStyle"] | undefined,
-  };
-  return {
-    ...DEFAULT_THEME,
-    ...Object.fromEntries(Object.entries(normalized).filter(([, v]) => v != null)),
-  } as Theme;
+// Full-page snapshot (both variants + both themes) used to tell whether the live
+// editor differs from the last saved/loaded state. Serializing the WHOLE page (not
+// just the active device) keeps the tab-close prompt correct across device switches.
+function serializeSaved(entry: PageVariants, themes: ThemeVariants): string {
+  return JSON.stringify({ d: entry.desktop, m: entry.mobile, td: themes.desktop, tm: themes.mobile });
 }
 
 const INITIAL_STATE: BuilderState = {
   pages: INITIAL_PAGES,
-  pageBlocks: { landing: seedLanding(), about: [], pricing: [], contact: [] },
+  pageBlocks: {
+    landing: { desktop: seedLanding(), mobile: null },
+    about:   { desktop: [], mobile: null },
+    pricing: { desktop: [], mobile: null },
+    contact: { desktop: [], mobile: null },
+  },
 };
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
@@ -207,6 +216,39 @@ function ssoEmail(): string | null {
 
 function isValidOtpEmail(email: string): boolean {
   return new RegExp(`^[^@\\s]+@${OTP_EMAIL_DOMAIN.replace(".", "\\.")}$`).test(email.trim().toLowerCase());
+}
+
+// Normalize a theme payload — backend may have old field names from a previous editor
+function normalizeTheme(rawTheme: unknown): Theme {
+  const raw = rawTheme as Record<string, unknown>;
+  const normalized: Partial<Theme> = {
+    accent:       (raw.accent      ?? raw.accentColor) as string | undefined,
+    pageBg:       (raw.pageBg      ?? raw.backgroundColor) as string | undefined,
+    bodyFont:     (raw.bodyFont    ?? raw.fontFamily) as string | undefined,
+    headingFont:  (raw.headingFont ?? raw.fontFamily) as string | undefined,
+    baseFontSize: (raw.baseFontSize) as number | undefined,
+    radius:       (raw.radius) as number | undefined,
+    buttonStyle:  (raw.buttonStyle) as Theme['buttonStyle'] | undefined,
+  };
+  return { ...DEFAULT_THEME, ...Object.fromEntries(Object.entries(normalized).filter(([, v]) => v != null)) };
+}
+
+interface PagePayload {
+  blocks?: Block[];
+  mobileBlocks?: Block[];
+  theme?: Theme;
+  mobileTheme?: Theme;
+  updatedAt?: string;
+}
+
+// Split a backend page payload into desktop/mobile variants (null = not materialized)
+function parsePagePayload(page: PagePayload | undefined) {
+  return {
+    desktop: (page?.blocks ?? []) as Block[],
+    mobile: (page?.mobileBlocks ?? null) as Block[] | null,
+    theme: page?.theme && Object.keys(page.theme).length ? normalizeTheme(page.theme) : null,
+    mobileTheme: page?.mobileTheme && Object.keys(page.mobileTheme).length ? normalizeTheme(page.mobileTheme) : null,
+  };
 }
 
 export function PageBuilder() {
@@ -246,7 +288,13 @@ export function PageBuilder() {
   const [clipboardBlock, setClipboardBlock] = useState<Block | null>(() => {
     try { const s = localStorage.getItem('pb_clipboard'); return s ? JSON.parse(s) : null; } catch { return null; }
   });
-  const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
+  // Per-page, per-device themes — deliberately NOT part of undo history (same as the
+  // old themeByDevice). Keyed by pageKey so loading/publishing one page can never
+  // pick up another page's theme (previously theme state was global, so a cached
+  // page silently reused whatever theme was last fetched).
+  const [themesByPage, setThemesByPage] = useState<Record<string, ThemeVariants>>({});
+  // Which variant is being edited — deliberately NOT part of undo history (like activePage)
+  const [device, setDevice] = useState<Device>("desktop");
   const [themeOpen, setThemeOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [leftPanel, setLeftPanel] = useState<null | "pages" | "sections">(null);
@@ -295,18 +343,17 @@ export function PageBuilder() {
   useEffect(() => { activePageRef.current = activePage; }, [activePage]);
 
   // Unsaved-changes tracking for the tab-close prompt. `savedBaselineRef` holds a
-  // serialized snapshot of each page's last SAVED/LOADED state; blocksRef/themeRef
-  // mirror the live state so the beforeunload handler can compare synchronously.
+  // serialized snapshot of each page's last SAVED/LOADED state; `liveSnapshotRef`
+  // mirrors the live page state so the beforeunload handler can compare synchronously.
   const savedBaselineRef = useRef<Record<string, string>>({});
-  const blocksRef = useRef<Block[]>([]);
-  const themeRef = useRef<Theme>(theme);
+  const liveSnapshotRef = useRef<string>("");
 
   const acquireLock = useCallback(async (pageKey: string, force = false): Promise<boolean> => {
     const { id, name } = getEditor();
     try {
       const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}/lock`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ editorId: id, editorName: name, force }),
       });
       if (res.status === 409) {
@@ -326,12 +373,14 @@ export function PageBuilder() {
   // Publishing requires a 6-digit OTP emailed to the editor. SSO users get it
   // sent straight to their address; everyone else enters an @salescode.ai email
   // (re-validated server-side). The page is staged server-side on request and
-  // only written once the OTP is verified.
+  // only written once the OTP is verified. The staged `body` mirrors the direct
+  // publish payload (desktop + optional mobile variants) so the server applies
+  // exactly what the editor sees.
   const [publishOtp, setPublishOtp] = useState<{
     pageKey: string;
-    blocks: Block[];
-    theme: Theme;
-    hostnames: string[];
+    body: Record<string, unknown>;
+    entry: PageVariants;
+    themes: ThemeVariants;
     step: "email" | "otp";
     email: string;
     emailFromSso: boolean;
@@ -344,39 +393,27 @@ export function PageBuilder() {
 
   // Post-publish bookkeeping shared by the OTP verify success path.
   const applyPublishSuccess = useCallback(
-    (pageKey: string, blocksToSave: Block[], themeToSave: Theme, page: any) => {
+    (pageKey: string, entry: PageVariants, themes: ThemeVariants, page: any) => {
       if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [pageKey]: page.updatedAt as string }));
       setSaveConflict(null);
       // Page is now saved — this state is the new "clean" baseline.
-      savedBaselineRef.current[pageKey] = serializeSaved(blocksToSave, themeToSave);
+      savedBaselineRef.current[pageKey] = serializeSaved(entry, themes);
       toast.success("Page published successfully");
     },
     [],
   );
 
   // Step 1 — stage the publish and email an OTP. Shared by the SSO fast-path,
-  // the email-entry submit, and the "Resend" action.
+  // the email-entry submit, and the "Resend" action. `staged.body` is the full
+  // publish payload (desktop + optional mobile variants) built in publishPage.
   const requestPublishOtp = useCallback(
-    async (
-      staged: { pageKey: string; blocks: Block[]; theme: Theme; hostnames: string[] },
-      email: string,
-    ) => {
+    async (staged: { pageKey: string; body: Record<string, unknown> }, email: string) => {
       setPublishOtp((s) => (s ? { ...s, submitting: true, error: undefined } : s));
       try {
-        const { id, name } = getEditor();
         const res = await fetch(`${BACKEND}/site/builder/otp/request`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            pageKey: staged.pageKey,
-            email,
-            blocks: staged.blocks,
-            theme: staged.theme,
-            hostnames: staged.hostnames,
-            editorId: id,
-            editorName: name,
-            lastKnownUpdatedAt: pageUpdatedAt[staged.pageKey],
-          }),
+          headers: authJsonHeaders(),
+          body: JSON.stringify({ ...staged.body, pageKey: staged.pageKey, email }),
         });
         const d = await res.json().catch(() => ({} as any));
         if (res.status === 423) {
@@ -404,22 +441,36 @@ export function PageBuilder() {
         setPublishOtp((s) => (s ? { ...s, submitting: false, error: "Couldn't send OTP — is the backend running?" } : s));
       }
     },
-    [pageUpdatedAt],
+    [],
   );
 
-  // Entry point wired to the Publish button.
+  // Entry point wired to the Publish button. Builds the publish payload from the
+  // current desktop/mobile variants, then opens the OTP flow instead of writing.
   const publishPage = useCallback(
-    (pageKey: string, blocksToSave: Block[], themeToSave: Theme, hostnames: string[]) => {
-      const staged = { pageKey, blocks: blocksToSave, theme: themeToSave, hostnames };
+    (pageKey: string) => {
+      const { id, name } = getEditor();
+      const entry = pageBlocks[pageKey] ?? { desktop: [], mobile: null };
+      const themes = themesByPage[pageKey] ?? DEFAULT_THEME_VARIANTS;
+      const hostnames = pages.find((p) => p.id === pageKey)?.hostnames ?? [];
+      const body: Record<string, unknown> = {
+        blocks: entry.desktop, theme: themes.desktop, hostnames, editorId: id, editorName: name,
+        lastKnownUpdatedAt: pageUpdatedAt[pageKey],
+      };
+      // Mobile variant is included only once materialized locally — omission preserves server state
+      if (entry.mobile !== null) {
+        body.mobileBlocks = entry.mobile;
+        if (themes.mobile !== null) body.mobileTheme = themes.mobile;
+      }
+      const staged = { pageKey, body, entry, themes };
       const sso = ssoEmail();
       if (sso) {
         setPublishOtp({ ...staged, step: "otp", email: sso, emailFromSso: true, submitting: true });
-        void requestPublishOtp(staged, sso);
+        void requestPublishOtp({ pageKey, body }, sso);
       } else {
         setPublishOtp({ ...staged, step: "email", email: getAuth()?.email ?? "", emailFromSso: false, submitting: false });
       }
     },
-    [requestPublishOtp],
+    [requestPublishOtp, pageBlocks, themesByPage, pages, pageUpdatedAt],
   );
 
   // Step 2 — verify the OTP; the server applies the staged publish on success.
@@ -433,12 +484,12 @@ export function PageBuilder() {
         try {
           const res = await fetch(`${BACKEND}/site/builder/otp/verify`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: authJsonHeaders(),
             body: JSON.stringify({ sessionId: cur.sessionId, otp: code }),
           });
           const d = await res.json().catch(() => ({} as any));
           if (res.ok && d.ok) {
-            applyPublishSuccess(cur.pageKey, cur.blocks, cur.theme, d.page);
+            applyPublishSuccess(cur.pageKey, cur.entry, cur.themes, d.page);
             setPublishOtp(null);
             setOtpInput("");
             return;
@@ -484,7 +535,7 @@ export function PageBuilder() {
       if (!cur) return cur;
       const email = cur.email.trim().toLowerCase();
       if (!isValidOtpEmail(email)) return { ...cur, error: `Enter a valid @${OTP_EMAIL_DOMAIN} email` };
-      void requestPublishOtp({ pageKey: cur.pageKey, blocks: cur.blocks, theme: cur.theme, hostnames: cur.hostnames }, email);
+      void requestPublishOtp({ pageKey: cur.pageKey, body: cur.body }, email);
       return { ...cur, email, submitting: true, error: undefined };
     });
   }, [requestPublishOtp]);
@@ -493,14 +544,26 @@ export function PageBuilder() {
     try {
       const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}`);
       const { page } = await res.json();
+      const parsed = parsePagePayload(page);
+      // Replaces BOTH variants with server state — a local unseeded mobile copy is
+      // discarded, which is the correct "discard local changes" semantics here.
       commit({
         ...state,
-        pageBlocks: { ...pageBlocks, [pageKey]: (page?.blocks ?? []) as Block[] },
+        pageBlocks: { ...pageBlocks, [pageKey]: { desktop: parsed.desktop, mobile: parsed.mobile } },
       });
+      // Same semantics for themes: server state replaces local (no theme on the
+      // server means the default, not whatever was edited locally).
+      setThemesByPage((cur) => ({
+        ...cur,
+        [pageKey]: { desktop: parsed.theme ?? DEFAULT_THEME, mobile: parsed.mobileTheme },
+      }));
       if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [pageKey]: page.updatedAt as string }));
       setSaveConflict(null);
-      // Freshly loaded from server — this is the clean baseline (theme unchanged).
-      savedBaselineRef.current[pageKey] = serializeSaved((page?.blocks ?? []) as Block[], themeRef.current);
+      // Freshly loaded from server — this is the clean baseline (full page state).
+      savedBaselineRef.current[pageKey] = serializeSaved(
+        { desktop: parsed.desktop, mobile: parsed.mobile },
+        { desktop: parsed.theme ?? DEFAULT_THEME, mobile: parsed.mobileTheme },
+      );
       toast.success("Reloaded the latest version of this page.");
     } catch (err) {
       toast.error(`Reload failed — is the backend running? (${err})`);
@@ -538,8 +601,11 @@ export function PageBuilder() {
       if (!res.ok) throw new Error(`${res.status}`);
       const { version } = await res.json();
       if (!version) return;
-      commit({ ...state, pageBlocks: { ...pageBlocks, [pageKey]: (version.blocks ?? []) as Block[] } });
-      if (version.theme && Object.keys(version.theme).length) setTheme(normalizeTheme(version.theme));
+      // Versions store the desktop blocks/theme — load into the desktop variant, keep any local mobile variant.
+      commit({ ...state, pageBlocks: { ...pageBlocks, [pageKey]: { desktop: (version.blocks ?? []) as Block[], mobile: pageBlocks[pageKey]?.mobile ?? null } } });
+      if (version.theme && Object.keys(version.theme).length) {
+        setThemesByPage((cur) => ({ ...cur, [pageKey]: { desktop: normalizeTheme(version.theme), mobile: cur[pageKey]?.mobile ?? null } }));
+      }
       setVersionsOpen(false);
       toast.message("Loaded this version into the editor. Publish to keep it, or Undo to discard.");
     } catch {
@@ -556,7 +622,7 @@ export function PageBuilder() {
     try {
       const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}/restore/${versionId}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ editorId: id, editorName: name }),
       });
       if (res.status === 423) {
@@ -570,13 +636,18 @@ export function PageBuilder() {
       const { page } = await res.json();
       const restoredBlocks = (page?.blocks ?? []) as Block[];
       const restoredTheme =
-        page?.theme && Object.keys(page.theme).length ? normalizeTheme(page.theme) : themeRef.current;
-      commit({ ...state, pageBlocks: { ...pageBlocks, [pageKey]: restoredBlocks } });
-      if (page?.theme && Object.keys(page.theme).length) setTheme(restoredTheme);
+        page?.theme && Object.keys(page.theme).length ? normalizeTheme(page.theme) : (themesByPage[pageKey]?.desktop ?? DEFAULT_THEME);
+      const keptMobile = pageBlocks[pageKey]?.mobile ?? null;
+      const keptMobileTheme = themesByPage[pageKey]?.mobile ?? null;
+      commit({ ...state, pageBlocks: { ...pageBlocks, [pageKey]: { desktop: restoredBlocks, mobile: keptMobile } } });
+      setThemesByPage((cur) => ({ ...cur, [pageKey]: { desktop: restoredTheme, mobile: cur[pageKey]?.mobile ?? null } }));
       if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [pageKey]: page.updatedAt as string }));
       setSaveConflict(null);
       // Restore persists to the server — the restored state is the clean baseline.
-      savedBaselineRef.current[pageKey] = serializeSaved(restoredBlocks, restoredTheme);
+      savedBaselineRef.current[pageKey] = serializeSaved(
+        { desktop: restoredBlocks, mobile: keptMobile },
+        { desktop: restoredTheme, mobile: keptMobileTheme },
+      );
       setVersionsOpen(false);
       toast.success("Page restored to the selected version.");
     } catch (err) {
@@ -592,7 +663,7 @@ export function PageBuilder() {
     try {
       fetch(`${BACKEND}/site/builder/pages/${pageKey}/unlock`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ editorId: id }),
         keepalive: true,
       }).catch(() => {});
@@ -627,7 +698,7 @@ export function PageBuilder() {
       if (heldByMe.current) releaseLock(activePageRef.current);
       const pageKey = activePageRef.current;
       const baseline = savedBaselineRef.current[pageKey];
-      const current = serializeSaved(blocksRef.current, themeRef.current);
+      const current = liveSnapshotRef.current;
       // No baseline yet = page not loaded; only warn when there's a real diff.
       if (baseline !== undefined && current !== baseline) {
         e.preventDefault();
@@ -717,13 +788,23 @@ export function PageBuilder() {
     };
   }, []); // uses refs — no deps needed
 
-  const blocks = pageBlocks[activePage] ?? [];
+  // Derived read chokepoint — panels/mutators/postMessage below keep using the
+  // names `blocks`/`theme`; an unmaterialized mobile variant falls back to desktop.
+  const entry = pageBlocks[activePage];
+  const blocks = (device === "mobile" ? (entry?.mobile ?? entry?.desktop) : entry?.desktop) ?? [];
+  const pageThemes = themesByPage[activePage] ?? DEFAULT_THEME_VARIANTS;
+  const theme = device === "mobile" ? (pageThemes.mobile ?? pageThemes.desktop) : pageThemes.desktop;
   const currentPage = pages.find((p) => p.id === activePage) ?? pages[0];
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId) || null;
+  // Mobile editing canvas — same condition as the header device toggle
+  const mobileCanvas = device === "mobile" && activePage !== "__blog__";
 
   // Keep the live-state refs in sync for the beforeunload dirty check.
-  useEffect(() => { blocksRef.current = blocks; }, [blocks]);
-  useEffect(() => { themeRef.current = theme; }, [theme]);
+  useEffect(() => {
+    const entry = pageBlocks[activePage] ?? { desktop: [], mobile: null };
+    const themes = themesByPage[activePage] ?? DEFAULT_THEME_VARIANTS;
+    liveSnapshotRef.current = serializeSaved(entry, themes);
+  }, [pageBlocks, themesByPage, activePage]);
 
   const sendToIframe = useCallback((msg: Record<string, unknown>) => {
     if (previewReady.current) {
@@ -731,10 +812,19 @@ export function PageBuilder() {
     }
   }, []);
 
-  const setBlocks = useCallback((next: Block[], opts?: { blockId?: string; patchKind?: "fields" | "style" | "columns" }) => {
+  const setBlocks = useCallback((next: Block[], opts?: { blockId?: string; patchKind?: "fields" | "style" | "columns"; otherBlocks?: Block[] }) => {
+    const cur = pageBlocks[activePage] ?? { desktop: [], mobile: null };
+    // Copy-on-write: an edit in mobile mode materializes the mobile variant
+    const nextEntry: PageVariants = device === "mobile" ? { ...cur, mobile: next } : { ...cur, desktop: next };
+    // Text-content sync: mirror the SAME words into the other device's variant
+    // (opts.otherBlocks is prebuilt by updateBlockFields, styling/breaks kept).
+    if (opts?.otherBlocks) {
+      if (device === "mobile") nextEntry.desktop = opts.otherBlocks;
+      else nextEntry.mobile = opts.otherBlocks;
+    }
     const nextState: BuilderState = {
       ...state,
-      pageBlocks: { ...pageBlocks, [activePage]: next },
+      pageBlocks: { ...pageBlocks, [activePage]: nextEntry },
     };
     commit(nextState);
     if (opts?.blockId) {
@@ -750,7 +840,7 @@ export function PageBuilder() {
       // Block added / removed / reordered / hidden — sync full list
       sendToIframe({ type: "BUILDER_BLOCKS_REORDER", blocks: next });
     }
-  }, [state, pageBlocks, activePage, commit, sendToIframe]);
+  }, [state, pageBlocks, activePage, device, commit, sendToIframe]);
 
   const setPages = useCallback((next: Page[]) => {
     commit({ ...state, pages: next });
@@ -810,10 +900,37 @@ export function PageBuilder() {
 
   const updateBlockFields = (id: string, patch: Record<string, unknown>) => {
     const isColumns = "columns" in patch;
-    setBlocks(
-      blocks.map((b) => (b.id === id ? { ...b, fields: { ...b.fields, ...patch } } : b)),
-      { blockId: id, patchKind: isColumns ? "columns" : "fields" },
-    );
+    const nextActive = blocks.map((b) => (b.id === id ? { ...b, fields: { ...b.fields, ...patch } } : b));
+
+    // Mirror TEXT content (words only) into the matching block in the OTHER device
+    // variant, preserving that variant's own inline styling + line breaks. Skipped
+    // when the other variant isn't materialized (unmaterialized mobile already
+    // inherits desktop at render).
+    // Fail-safe: a sync error must NEVER block the primary edit — on any failure
+    // we just skip mirroring for this change.
+    let otherBlocks: Block[] | undefined;
+    try {
+      const cur = pageBlocks[activePage];
+      const otherVar = device === "mobile" ? cur?.desktop : cur?.mobile;
+      if (otherVar && otherVar.length) {
+        const textPatch = pickTextPatch(patch);
+        if (Object.keys(textPatch).length) {
+          otherBlocks = otherVar.map((b) => {
+            if (b.id !== id) return b;
+            const f = { ...(b.fields as Record<string, unknown>) };
+            for (const [k, v] of Object.entries(textPatch)) {
+              f[k] = isRichDoc(v) ? syncRichContent(f[k] as RichDoc | undefined, v) : v;
+            }
+            return { ...b, fields: f };
+          });
+        }
+      }
+    } catch (e) {
+      console.error("[text-sync] skipped for this edit", e);
+      otherBlocks = undefined;
+    }
+
+    setBlocks(nextActive, { blockId: id, patchKind: isColumns ? "columns" : "fields", otherBlocks });
   };
 
   const updateBlockStyle = (id: string, patch: Partial<BlockStyle>) => {
@@ -844,16 +961,48 @@ export function PageBuilder() {
       return;
     }
     const newPage: Page = { id, name, slug: `/${id}`, title: name, hostnames: [] };
-    commit({ pages: [...pages, newPage], pageBlocks: { ...pageBlocks, [id]: [] } });
+    commit({ pages: [...pages, newPage], pageBlocks: { ...pageBlocks, [id]: { desktop: [], mobile: null } } });
     setActivePage(id);
     setSelectedBlockId(null);
   };
 
   const onThemeChange = (t: Theme) => {
-    setTheme(t);
-    const msg = { type: "BUILDER_THEME_UPDATE", theme: t };
-    console.log("postMessage", msg);
-    sendToIframe(msg);
+    // The [theme] effect below pushes BUILDER_THEME_UPDATE to the iframe — no direct send here
+    setThemesByPage((cur) => {
+      const pageEntry = cur[activePage] ?? DEFAULT_THEME_VARIANTS;
+      return {
+        ...cur,
+        [activePage]: device === "mobile" ? { ...pageEntry, mobile: t } : { ...pageEntry, desktop: t },
+      };
+    });
+  };
+
+  // First open of mobile mode for a page: seed it as a deep copy of desktop,
+  // KEEPING block ids (variants never coexist in one array; stable ids keep
+  // translations intact). Committed as a normal history entry — undoing past it
+  // reverts mobile to null and the canvas falls back to desktop.
+  const seedMobileIfNeeded = useCallback((pageKey: string) => {
+    const pageEntry = pageBlocks[pageKey];
+    if (!pageEntry || pageEntry.mobile !== null) return;
+    const seeded: Block[] = JSON.parse(JSON.stringify(pageEntry.desktop));
+    commit({ ...state, pageBlocks: { ...pageBlocks, [pageKey]: { ...pageEntry, mobile: seeded } } });
+    setThemesByPage((cur) => {
+      const themes = cur[pageKey] ?? DEFAULT_THEME_VARIANTS;
+      return themes.mobile !== null ? cur : { ...cur, [pageKey]: { ...themes, mobile: { ...themes.desktop } } };
+    });
+    toast.success("Mobile layout created from your desktop layout");
+  }, [state, pageBlocks, commit]);
+
+  const switchDevice = (next: Device) => {
+    if (next === device) return;
+    // Seeded ids are identical across variants — clear selection/drag state
+    setSelectedBlockId(null);
+    setSelectedWidgetId(null);
+    setFocusedNestedItem(null);
+    setAddAtIndex(null);
+    setDragId(null);
+    if (next === "mobile") seedMobileIfNeeded(activePage);
+    setDevice(next);
   };
 
   const canUndo = hist.idx > 0;
@@ -899,21 +1048,23 @@ export function PageBuilder() {
         const firstKey = builtPages[0].id;
         const pageRes = await fetch(`${BACKEND}/site/builder/pages/${firstKey}`);
         if (!pageRes.ok) throw new Error(`Failed to load page: ${pageRes.status}`);
-        const { page } = await pageRes.json() as { page: { blocks: Block[]; theme?: Theme; updatedAt?: string } };
+        const { page } = await pageRes.json() as { page: PagePayload };
 
+        const parsed = parsePagePayload(page);
         commit({
           pages: builtPages,
-          pageBlocks: { [firstKey]: page.blocks ?? [] },
+          pageBlocks: { [firstKey]: { desktop: parsed.desktop, mobile: parsed.mobile } },
         });
         if (page.updatedAt) setPageUpdatedAt((m) => ({ ...m, [firstKey]: page.updatedAt as string }));
-        // Normalize theme — backend may have old field names from a previous editor.
-        const hasTheme = page.theme && Object.keys(page.theme).length;
-        const bootTheme = hasTheme
-          ? normalizeTheme(page.theme as unknown as Record<string, unknown>)
-          : themeRef.current;
-        if (hasTheme) setTheme(bootTheme);
-        // Record the clean baseline for the tab-close prompt.
-        savedBaselineRef.current[firstKey] = serializeSaved(page.blocks ?? [], bootTheme);
+        setThemesByPage((cur) => ({
+          ...cur,
+          [firstKey]: { desktop: parsed.theme ?? DEFAULT_THEME, mobile: parsed.mobileTheme },
+        }));
+        // Record the clean baseline for the tab-close prompt (full page state).
+        savedBaselineRef.current[firstKey] = serializeSaved(
+          { desktop: parsed.desktop, mobile: parsed.mobile },
+          { desktop: parsed.theme ?? DEFAULT_THEME, mobile: parsed.mobileTheme },
+        );
         setActivePage(firstKey);
       } catch {
         // backend not running — keep mock data
@@ -932,26 +1083,39 @@ export function PageBuilder() {
     fetch(`${BACKEND}/site/builder/pages/${activePage}`)
       .then((r) => r.json())
       .then(({ page }) => {
-        const loadedBlocks = (page?.blocks ?? []) as Block[];
+        const parsed = parsePagePayload(page);
         commit({
           ...state,
-          pageBlocks: { ...pageBlocks, [activePage]: loadedBlocks },
+          pageBlocks: { ...pageBlocks, [activePage]: { desktop: parsed.desktop, mobile: parsed.mobile } },
         });
         if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [activePage]: page.updatedAt as string }));
-        const hasTheme = page?.theme && Object.keys(page.theme).length;
-        const loadedTheme = hasTheme
-          ? normalizeTheme(page.theme as unknown as Record<string, unknown>)
-          : themeRef.current;
-        if (hasTheme) setTheme(loadedTheme);
-        // Record the clean baseline for the tab-close prompt.
-        savedBaselineRef.current[activePage] = serializeSaved(loadedBlocks, loadedTheme);
+        // Written to THIS page's entry only — other pages' themes stay untouched
+        setThemesByPage((cur) => ({
+          ...cur,
+          [activePage]: { desktop: parsed.theme ?? DEFAULT_THEME, mobile: parsed.mobileTheme },
+        }));
+        // Record the clean baseline for the tab-close prompt (full page state).
+        savedBaselineRef.current[activePage] = serializeSaved(
+          { desktop: parsed.desktop, mobile: parsed.mobile },
+          { desktop: parsed.theme ?? DEFAULT_THEME, mobile: parsed.mobileTheme },
+        );
       })
       .catch(() => {
-        commit({ ...state, pageBlocks: { ...pageBlocks, [activePage]: [] } });
-        savedBaselineRef.current[activePage] = serializeSaved([], themeRef.current);
+        commit({ ...state, pageBlocks: { ...pageBlocks, [activePage]: { desktop: [], mobile: null } } });
+        savedBaselineRef.current[activePage] = serializeSaved({ desktop: [], mobile: null }, DEFAULT_THEME_VARIANTS);
       });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePage, loading]);
+
+  // Seed the mobile variant when switching pages while already in mobile mode.
+  // Keyed on activePage + entry arrival only — NOT on pageBlocks — so undoing
+  // past the seed doesn't immediately re-seed (that would fight undo).
+  const entryLoaded = pageBlocks[activePage] !== undefined;
+  useEffect(() => {
+    if (device !== "mobile" || activePage === "__blog__" || !entryLoaded) return;
+    seedMobileIfNeeded(activePage);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activePage, entryLoaded]);
 
   // Click outside right panel to deselect
   useEffect(() => {
@@ -1063,7 +1227,7 @@ export function PageBuilder() {
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, [pages, blocks, setBlocks]);
+  }, [pages, blocks, theme, setBlocks]);
 
   // Iframe reloads when activePage changes — reset ready flag
   useEffect(() => {
@@ -1076,6 +1240,13 @@ export function PageBuilder() {
       iframeRef.current?.contentWindow?.postMessage({ type: "BUILDER_BLOCKS_REORDER", blocks }, "*");
     }
   }, [blocks]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Push theme to iframe whenever it changes (covers device switch — the iframe src doesn't change)
+  useEffect(() => {
+    if (previewReady.current) {
+      iframeRef.current?.contentWindow?.postMessage({ type: "BUILDER_THEME_UPDATE", theme }, "*");
+    }
+  }, [theme]);
 
   // Inject Google Fonts for theme fonts
   const fontHref = useMemo(() => {
@@ -1128,9 +1299,32 @@ export function PageBuilder() {
               {currentPage.title}
             </button>
           )}
+          {device === "mobile" && activePage !== "__blog__" && (
+            <span className="ml-1.5 align-middle text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400">
+              Mobile
+            </span>
+          )}
           <div className="text-xs pb-muted">{currentPage.slug}</div>
         </div>
         <div className="flex items-center gap-2 w-auto justify-end">
+          {activePage !== "__blog__" && (
+            <div className="flex items-center gap-1 mr-1">
+              <button
+                onClick={() => switchDevice("desktop")}
+                className={`p-2 rounded pb-transition ${device === "desktop" ? "text-white bg-slate-700" : "text-slate-400 hover:text-white"}`}
+                title="Desktop"
+              >
+                <Monitor size={15} />
+              </button>
+              <button
+                onClick={() => switchDevice("mobile")}
+                className={`p-2 rounded pb-transition ${device === "mobile" ? "text-white bg-slate-700" : "text-slate-400 hover:text-white"}`}
+                title="Mobile"
+              >
+                <Smartphone size={15} />
+              </button>
+            </div>
+          )}
           <a href="/admin" className="px-3 py-1.5 text-sm rounded-md border border-slate-600 hover:bg-slate-800 pb-transition inline-flex items-center gap-1.5" title="CMS Admin" style={{ textDecoration: 'none', color: 'inherit' }}>
             <Settings size={13} /> CMS
           </a>
@@ -1156,8 +1350,10 @@ export function PageBuilder() {
               try {
                 const draft = await getMyDraft(activePage);
                 if (!draft) { toast("No saved draft for this page"); return; }
-                commit({ ...state, pageBlocks: { ...pageBlocks, [activePage]: (draft.blocks ?? []) as Block[] } });
-                if (draft.theme && Object.keys(draft.theme).length) setTheme({ ...DEFAULT_THEME, ...(draft.theme as Theme) });
+                commit({ ...state, pageBlocks: { ...pageBlocks, [activePage]: { ...(pageBlocks[activePage] ?? { desktop: [], mobile: null }), [device]: (draft.blocks ?? []) as Block[] } } });
+                if (draft.theme && Object.keys(draft.theme).length) {
+                  setThemesByPage((cur) => ({ ...cur, [activePage]: { ...(cur[activePage] ?? DEFAULT_THEME_VARIANTS), [device]: { ...DEFAULT_THEME, ...(draft.theme as Theme) } } }));
+                }
                 toast.success("Applied your last draft");
               } catch { toast.error("Could not load draft"); }
             }}
@@ -1169,7 +1365,7 @@ export function PageBuilder() {
           <button
             disabled={!!lockedBy || (!!saveConflict && saveConflict.pageKey === activePage)}
             title={lockedBy ? `Locked by ${lockedBy}` : saveConflict?.pageKey === activePage ? "Reload the latest version before publishing" : undefined}
-            onClick={() => publishPage(activePage, blocks, theme, currentPage.hostnames ?? [])}
+            onClick={() => publishPage(activePage)}
             className="px-3 py-1.5 text-sm rounded-md font-medium text-white pb-transition hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: "#22c55e" }}
           >
@@ -1350,33 +1546,10 @@ export function PageBuilder() {
                         >
                           {p.name}
                         </button>
-                        {p.id !== "__blog__" && (
-                          <button
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              if (!confirm(`Delete page "${p.name}"? This cannot be undone.`)) return;
-                              try {
-                                await fetch(`${BACKEND}/site/builder/pages/${p.id}`, { method: "DELETE" });
-                              } catch { /* ignore */ }
-                              const remaining = pages.filter((pg) => pg.id !== p.id);
-                              const nextActive = activePage === p.id
-                                ? (remaining.find((pg) => pg.id !== "__blog__")?.id ?? "landing")
-                                : activePage;
-                              commit({
-                                pages: remaining,
-                                pageBlocks: Object.fromEntries(
-                                  Object.entries(pageBlocks).filter(([k]) => k !== p.id)
-                                ),
-                              });
-                              setActivePage(nextActive);
-                              setSelectedBlockId(null);
-                            }}
-                            className="opacity-0 group-hover:opacity-100 p-2 text-slate-500 hover:text-red-400 pb-transition shrink-0"
-                            title={`Delete ${p.name}`}
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        )}
+                        {/* Page deletion removed from the UI — the builder API has no
+                            auth, and a public DELETE endpoint was used to wipe all pages
+                            (incident 2026-07-18). Pages are now deleted manually from the
+                            DB only; the backend no longer exposes a delete route. */}
                       </div>
 
                       {/* Hostnames row — always visible for every page */}
@@ -1485,23 +1658,29 @@ export function PageBuilder() {
           </aside>
         )}
 
-        {/* Preview iframe */}
-        <iframe
-          ref={iframeRef}
-          src={(() => {
-            const base = import.meta.env.VITE_RENDERER_URL ?? "https://demo-experience.salescode.ai";
-            if (isBlogMode) {
-              return blogPosts && selectedBlogPost && !blogNewMode
-                ? `${base}/blog/${selectedBlogPost.slug}?preview=1`
-                : `${base}/blog?preview=1`;
-            }
-            return activePage === 'landing'
-              ? `${base}/landing?preview=1`
-              : `${base}/${activePage}?preview=1`;
-          })()}
-          className="flex-1 border-0 min-h-0"
-          title="Page preview"
-        />
+        {/* Preview iframe — mobile mode renders a 390×844 frame centered on a dark backdrop */}
+        <div
+          className={`flex-1 min-h-0 min-w-0 flex ${mobileCanvas ? "items-start justify-center overflow-auto" : ""}`}
+          style={mobileCanvas ? { background: "#1e293b", padding: "24px 0" } : undefined}
+        >
+          <iframe
+            ref={iframeRef}
+            src={(() => {
+              const base = import.meta.env.VITE_RENDERER_URL ?? "https://demo-experience.salescode.ai";
+              if (isBlogMode) {
+                return blogPosts && selectedBlogPost && !blogNewMode
+                  ? `${base}/blog/${selectedBlogPost.slug}?preview=1`
+                  : `${base}/blog?preview=1`;
+              }
+              return activePage === 'landing'
+                ? `${base}/landing?preview=1`
+                : `${base}/${activePage}?preview=1`;
+            })()}
+            className={mobileCanvas ? "border-0 shrink-0" : "flex-1 border-0 min-h-0"}
+            style={mobileCanvas ? { border: "1px solid #334155", borderRadius: 12, width: 390, height: 844, background: "#ffffff" } : undefined}
+            title="Page preview"
+          />
+        </div>
 
         {/* Right panel slot — AddSection drawer takes priority, then content editor */}
         {addAtIndex !== null ? (
@@ -1794,7 +1973,17 @@ export function PageBuilder() {
         <ThemePanel open={themeOpen} onClose={() => setThemeOpen(false)} theme={theme} onChange={onThemeChange} />
       </div>
 
-      {previewOpen && <PreviewModal blocks={blocks} theme={theme} pageKey={activePage} onClose={() => setPreviewOpen(false)} />}
+      {previewOpen && (
+        <PreviewModal
+          desktopBlocks={entry?.desktop ?? []}
+          mobileBlocks={entry?.mobile ?? null}
+          desktopTheme={pageThemes.desktop}
+          mobileTheme={pageThemes.mobile}
+          initialViewport={device}
+          pageKey={activePage}
+          onClose={() => setPreviewOpen(false)}
+        />
+      )}
 
       {/* Version history drawer */}
       {versionsOpen && (
@@ -1934,10 +2123,7 @@ export function PageBuilder() {
                 </button>
                 <button
                   onClick={() =>
-                    requestPublishOtp(
-                      { pageKey: publishOtp.pageKey, blocks: publishOtp.blocks, theme: publishOtp.theme, hostnames: publishOtp.hostnames },
-                      publishOtp.email,
-                    )
+                    requestPublishOtp({ pageKey: publishOtp.pageKey, body: publishOtp.body }, publishOtp.email)
                   }
                   disabled={publishOtp.submitting}
                   className="w-full rounded-md border border-slate-600 px-3 py-1.5 text-xs hover:bg-slate-800 pb-transition disabled:opacity-40"
