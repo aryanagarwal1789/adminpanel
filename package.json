@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "start": "node render-server.mjs",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "deploy:prep": "vite build && cp vercel.json dist/client/vercel.json && vercel link --cwd dist/client -p salescode-adminpanel --yes",
+    "deploy": "npm run deploy:prep && vercel deploy --prod --cwd dist/client --yes",
+    "deploy:cms": "npm run deploy:prep && vercel alias set \"$(vercel deploy --prod --cwd dist/client --yes | grep -oE 'https://[a-zA-Z0-9.-]+\\.vercel\\.app' | head -1)\" cms.salescode.ai"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",

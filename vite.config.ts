@@ -11,6 +11,19 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 export default defineConfig({
   // Disable Cloudflare Workers adapter — deployed as a static site on Render
   cloudflare: false,
+  // SPA mode: prerender a single static index.html shell (dist/client/index.html)
+  // so the app can be hosted as pure static files (S3/CloudFront or Vercel static).
+  // The app is hash-routed, so this one shell serves every route on the client.
+  tanstackStart: {
+    spa: {
+      enabled: true,
+      // Emit the shell as dist/client/index.html (default is /_shell → _shell.html)
+      // so static hosts serve it for "/" and every hash route.
+      prerender: {
+        outputPath: "/index",
+      },
+    },
+  },
   vite: {
     server: {
       proxy: {
