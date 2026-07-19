@@ -65,7 +65,11 @@ function getDeviceName(): string {
 export async function initiateGoogleSSO(): Promise<string> {
   const params = {
     tenant: TENANT,
-    targetUrl: window.location.origin + "/login",
+    // Hash-routed SPA on S3+CloudFront: return to "/" (the only guaranteed static
+    // object) — NOT "/login", which is not a real S3 key and would 404 without a
+    // CloudFront error-rewrite. AuthGate reads window.location.search for the SSO
+    // callback regardless of which route we land on.
+    targetUrl: window.location.origin + "/",
     app: APP,
   };
 

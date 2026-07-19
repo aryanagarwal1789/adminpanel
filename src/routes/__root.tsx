@@ -154,14 +154,19 @@ function AuthGate({ children }: { children: React.ReactNode }) {
       }
     };
 
+    // Only the SSO callback (query string, not yet authenticated) needs async work.
+    const queryString = window.location.search;
+    const isSsoCallback = !!queryString && !isAuthenticated();
+
     // Remember where the user was headed so we can restore it post-login.
-    if (pathname !== "/login" && !isAuthenticated()) {
+    // Skip during the SSO callback: the OAuth service now returns to "/" (a hash-routed
+    // SPA on S3+CloudFront can't 404-rewrite "/login" without CloudFront config), so
+    // writing pathname here would clobber the redirect saved before the Google round-trip.
+    if (pathname !== "/login" && !isSsoCallback && !isAuthenticated()) {
       setRedirectPath(pathname);
     }
 
-    // Only the SSO callback (query string, not yet authenticated) needs async work.
-    const queryString = window.location.search;
-    if (queryString && !isAuthenticated()) {
+    if (isSsoCallback) {
       (async () => {
         try {
           const ssoToken = await fetchSsoToken(queryString);

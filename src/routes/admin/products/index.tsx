@@ -206,7 +206,7 @@ function ProductsPage() {
       setShowAddModal(false);
       setNewProduct({ ...BLANK_NEW });
       showToast({ type: 'success', message: 'Product created' });
-      window.location.href = `/admin/products/${payload.productId}`;
+      window.location.href = `/#/admin/products/${payload.productId}`;
     } catch {
       showToast({ type: 'error', message: 'Failed to create product' });
     } finally {

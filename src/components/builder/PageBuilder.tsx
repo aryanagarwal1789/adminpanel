@@ -1325,7 +1325,7 @@ export function PageBuilder() {
               </button>
             </div>
           )}
-          <a href="/admin" className="px-3 py-1.5 text-sm rounded-md border border-slate-600 hover:bg-slate-800 pb-transition inline-flex items-center gap-1.5" title="CMS Admin" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <a href="/#/admin" className="px-3 py-1.5 text-sm rounded-md border border-slate-600 hover:bg-slate-800 pb-transition inline-flex items-center gap-1.5" title="CMS Admin" style={{ textDecoration: 'none', color: 'inherit' }}>
             <Settings size={13} /> CMS
           </a>
           <button onClick={undo} disabled={!canUndo} className="p-2 rounded hover:bg-slate-800 pb-transition disabled:opacity-30 disabled:hover:bg-transparent" title="Undo"><Undo2 size={16} /></button>
@@ -1374,7 +1374,7 @@ export function PageBuilder() {
           <button
             onClick={() => {
               localStorage.clear();
-              window.location.href = "/login";
+              window.location.href = "/#/login";
             }}
             title="Log out"
             className="p-2 rounded hover:bg-slate-800 pb-transition"

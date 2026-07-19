@@ -201,7 +201,7 @@ function ProductDetailPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
           <div style={{ marginBottom: 4 }}>
-            <a href="/admin/products" style={{ color: '#94a3b8', fontSize: 13, textDecoration: 'none' }}>← All Products</a>
+            <a href="/#/admin/products" style={{ color: '#94a3b8', fontSize: 13, textDecoration: 'none' }}>← All Products</a>
           </div>
           <h1 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 700, margin: 0 }}>{details.name || product.productId}</h1>
           <p style={{ color: '#94a3b8', fontSize: 13, margin: '4px 0 0' }}>Edit product details and sidebar menu items</p>
