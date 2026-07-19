@@ -68,6 +68,52 @@ function ImageSizeControls({
   );
 }
 
+// Standalone Object-fit control for a single image whose box size is fixed by the
+// component/grid (only the fit is safe to expose). `def` = the image's current fit.
+function FitSelect({
+  label, fitKey, f, set, def,
+}: {
+  label: string; fitKey: string; f: FieldsOf; set: (k: string, v: unknown) => void; def: ObjectFitValue;
+}) {
+  return (
+    <Select<ObjectFitValue>
+      label={label}
+      value={(f[fitKey] as ObjectFitValue) ?? def}
+      onChange={(v) => set(fitKey, v)}
+      options={OBJECT_FIT_OPTIONS as unknown as { value: ObjectFitValue; label: string }[]}
+    />
+  );
+}
+
+// Width (px max-width OR %) + aspect-ratio + object-fit group for a standalone
+// image whose width is set inline (safe to override). `widthUnit` only changes the
+// input label; the component interprets the number. Defaults preserve current render;
+// object-fit only takes effect once an aspect ratio is set.
+function ImageWHFit({
+  label, widthKey, widthUnit, widthDef, aspectRatioKey, fitKey, fitDef, f, set,
+}: {
+  label: string; widthKey: string; widthUnit: 'px' | '%'; widthDef: number;
+  aspectRatioKey: string; fitKey: string; fitDef: ObjectFitValue;
+  f: FieldsOf; set: (k: string, v: unknown) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-slate-500 font-medium">{label}</p>
+      <NumberInput
+        label={widthUnit === '%' ? 'Width (%)' : 'Max width (px)'}
+        value={(f[widthKey] as number) ?? widthDef}
+        onChange={(v) => set(widthKey, v)}
+      />
+      <TextInput
+        label="Aspect ratio (e.g. 16/9) — enables object-fit"
+        value={(f[aspectRatioKey] as string) ?? ''}
+        onChange={(v) => set(aspectRatioKey, v)}
+      />
+      <FitSelect label="Object-fit (applies when aspect ratio set)" fitKey={fitKey} f={f} set={set} def={fitDef} />
+    </div>
+  );
+}
+
 interface Props {
   block: Block;
   update: (patch: FieldsOf) => void;
@@ -2046,8 +2092,14 @@ function renderBlockFields(
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Center image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
+          <NumberInput label="Center image width (px)" value={(f.imgCenterWidth as number) ?? 254} onChange={(v) => set('imgCenterWidth', v)} />
+          <FitSelect label="Center image fit" fitKey="imgCenterFit" f={f} set={set} def="contain" />
           <ImageField label="Bottom-left card" value={f.imgBottomLeft as string ?? ''} onChange={(v) => set('imgBottomLeft', v)} />
+          <NumberInput label="Bottom-left card width (px)" value={(f.imgBottomLeftWidth as number) ?? 273} onChange={(v) => set('imgBottomLeftWidth', v)} />
+          <FitSelect label="Bottom-left card fit" fitKey="imgBottomLeftFit" f={f} set={set} def="cover" />
           <ImageField label="Bottom-right card" value={f.imgBottomRight as string ?? ''} onChange={(v) => set('imgBottomRight', v)} />
+          <NumberInput label="Bottom-right card width (px)" value={(f.imgBottomRightWidth as number) ?? 253} onChange={(v) => set('imgBottomRightWidth', v)} />
+          <FitSelect label="Bottom-right card fit" fitKey="imgBottomRightFit" f={f} set={set} def="cover" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Floating chips</p>
           <RichFieldGroup label="Chip 1 — value" f={f} set={set} base="chip1Val" segments={[{ key: 'chip1Val' }]} />
@@ -2072,6 +2124,7 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <ImageField label="Logo URL" value={f.logo as string ?? ''} onChange={(v) => set('logo', v)} />
+          <FitSelect label="Logo fit" fitKey="logoFit" f={f} set={set} def="fill" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <div style={{ fontSize: 11, color: '#94a3b8' }}>Heading</div>
           <RichFieldGroup label="Heading Prefix" f={f} set={set} base="headingPrefix" segments={[{ key: 'headingPrefix' }]} />
@@ -2091,6 +2144,7 @@ function renderBlockFields(
           <RichFieldGroup label="Stat 3" f={f} set={set} base="stat3Text" segments={[{ key: 'stat3Text' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Phone mockup image URL" value={f.mockupImage as string ?? ''} onChange={(v) => set('mockupImage', v)} />
+          <ImageWHFit label="Phone mockup size" widthKey="mockupImageMaxWidth" widthUnit="px" widthDef={520} aspectRatioKey="mockupImageAspectRatio" fitKey="mockupImageFit" fitDef="cover" f={f} set={set} />
         </div>
       );
 
@@ -2105,6 +2159,7 @@ function renderBlockFields(
           <TextInput label="CTA href" value={f.ctaHref as string ?? ''} onChange={(v) => set('ctaHref', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Video thumbnail URL" value={f.videoThumb as string ?? ''} onChange={(v) => set('videoThumb', v)} />
+          <FitSelect label="Video thumbnail fit" fitKey="videoThumbFit" f={f} set={set} def="cover" />
           <RichFieldGroup label="Video caption" f={f} set={set} base="videoLabel" segments={[{ key: 'videoLabel' }]} />
           <TextInput label="Video embed URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
         </div>
@@ -2152,6 +2207,7 @@ function renderBlockFields(
               </>
             )}
           />
+          <FitSelect label="Card image fit (all cards)" fitKey="cardsFit" f={f} set={set} def="cover" />
         </div>
       );
 
@@ -2171,6 +2227,7 @@ function renderBlockFields(
             itemPreview={(s) => s || '(empty)'}
             renderItem={(s, u) => <ImageField label="Slide image" value={s} onChange={u} />}
           />
+          <FitSelect label="Slide image fit (all slides)" fitKey="slidesFit" f={f} set={set} def="cover" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<{ label: string }>
             label="Feature chips"
@@ -2213,6 +2270,7 @@ function renderBlockFields(
             itemPreview={(s) => s || '(empty)'}
             renderItem={(s, u) => <ImageField label="Slide image URL" value={s} onChange={u} />}
           />
+          <FitSelect label="Slide image fit (all slides)" fitKey="slidesFit" f={f} set={set} def="cover" />
         </div>
       );
 
@@ -2229,8 +2287,10 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="iOS store URL" value={f.iosStoreUrl as string ?? ''} onChange={(v) => set('iosStoreUrl', v)} />
           <ImageField label="iOS QR image (optional)" value={f.iosQrUrl as string ?? ''} onChange={(v) => set('iosQrUrl', v)} />
+          <FitSelect label="QR image fit (both QRs)" fitKey="qrFit" f={f} set={set} def="contain" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Phone mockup image (right side)" value={f.phoneImage as string ?? ''} onChange={(v) => set('phoneImage', v)} />
+          <ImageWHFit label="Phone mockup size" widthKey="phoneImageMaxWidth" widthUnit="px" widthDef={460} aspectRatioKey="phoneImageAspectRatio" fitKey="phoneImageFit" fitDef="contain" f={f} set={set} />
         </div>
       );
 
@@ -2256,6 +2316,7 @@ function renderBlockFields(
               </div>
             )}
           />
+          <FitSelect label="Card image fit (all cards)" fitKey="cardsFit" f={f} set={set} def="cover" />
         </div>
       );
     }
@@ -3073,6 +3134,8 @@ function renderBlockFields(
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Center image (dashboard)" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
+          <NumberInput label="Center image width (px)" value={(f.imgCenterWidth as number) ?? 660} onChange={(v) => set('imgCenterWidth', v)} />
+          <FitSelect label="Center image fit" fitKey="imgCenterFit" f={f} set={set} def="fill" />
           <ImageField label="Left card image" value={f.imgLeft as string ?? ''} onChange={(v) => set('imgLeft', v)} />
           <ImageField label="Right card image" value={f.imgRight as string ?? ''} onChange={(v) => set('imgRight', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -3125,6 +3188,7 @@ function renderBlockFields(
               </div>
             )}
           />
+          <ImageWHFit label="Tab image size (all tabs)" widthKey="tabImageWidthPercent" widthUnit="%" widthDef={100} aspectRatioKey="tabImageAspectRatio" fitKey="tabImageFit" fitDef="cover" f={f} set={set} />
         </div>
       );
     }
@@ -3158,6 +3222,7 @@ function renderBlockFields(
               </div>
             )}
           />
+          <FitSelect label="Tab image fit (all tabs)" fitKey="tabImageFit" f={f} set={set} def="fill" />
         </div>
       );
     }
@@ -3172,7 +3237,9 @@ function renderBlockFields(
           <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
           <RichFieldGroup label="Italic subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <ImageField label="Standard DMS screen image (left/before side of slider)" value={f.imgScreenOld as string ?? ''} onChange={(v) => set('imgScreenOld', v)} />
+          <FitSelect label="Standard DMS screen fit" fitKey="imgScreenOldFit" f={f} set={set} def="cover" />
           <ImageField label="NextGen DMS screen image (right/after side of slider)" value={f.imgScreenNew as string ?? ''} onChange={(v) => set('imgScreenNew', v)} />
+          <FitSelect label="NextGen DMS screen fit" fitKey="imgScreenNewFit" f={f} set={set} def="cover" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Left panel label (Standard DMS)" f={f} set={set} base="oldLabel" segments={[{ key: 'oldLabel' }]} />
           <Repeater<CmpRow>
@@ -3232,6 +3299,7 @@ function renderBlockFields(
               </div>
             )}
           />
+          <FitSelect label="Agent image fit (all agents)" fitKey="agentImageFit" f={f} set={set} def="cover" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Agent kicker label" f={f} set={set} base="kickerLabel" segments={[{ key: 'kickerLabel' }]} />
           <RichFieldGroup label="Features section label" f={f} set={set} base="featuresLabel" segments={[{ key: 'featuresLabel' }]} />
@@ -3251,6 +3319,7 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Logo (top-left badge)" value={f.logoUrl as string ?? ''} onChange={(v) => set('logoUrl', v)} />
           <TextInput label="Logo alt" value={f.logoAlt as string ?? ''} onChange={(v) => set('logoAlt', v)} />
+          <FitSelect label="Logo fit" fitKey="logoImageFit" f={f} set={set} def="cover" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Panel Title Pre" f={f} set={set} base="panelTitlePre" segments={[{ key: 'panelTitlePre' }]} />
           <RichFieldGroup label="Panel Title Bold" f={f} set={set} base="panelTitleBold" segments={[{ key: 'panelTitleBold' }]} />
@@ -3258,6 +3327,7 @@ function renderBlockFields(
           <ImageField label="Panel background image (fills whole panel; defaults to black if empty)" value={f.panelBgUrl as string ?? ''} onChange={(v) => set('panelBgUrl', v)} />
           <ImageField label="Center mic image (defaults to a mic icon if empty)" value={f.micImageUrl as string ?? ''} onChange={(v) => set('micImageUrl', v)} />
           <TextInput label="Mic image alt" value={f.micImageAlt as string ?? ''} onChange={(v) => set('micImageAlt', v)} />
+          <FitSelect label="Mic image fit" fitKey="micImageFit" f={f} set={set} def="contain" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<VoiceAgent>
             label="Agent card images (exactly 4 — top-left, top-right, bottom-left, bottom-right)"
@@ -3272,6 +3342,7 @@ function renderBlockFields(
               </div>
             )}
           />
+          <FitSelect label="Agent card image fit (all 4)" fitKey="agentImageFit" f={f} set={set} def="fill" />
         </div>
       );
     }
@@ -3354,6 +3425,7 @@ function renderBlockFields(
           <RichFieldGroup label="Stamp label text" f={f} set={set} base="stampLabel" segments={[{ key: 'stampLabel' }]} />
           <ImageField label="Stamp image (replaces the animated stamp when set)" value={f.stampImageUrl as string ?? ''} onChange={(v) => set('stampImageUrl', v)} />
           <TextInput label="Stamp image alt" value={f.stampImageAlt as string ?? ''} onChange={(v) => set('stampImageAlt', v)} />
+          <ImageWHFit label="Stamp image size" widthKey="stampImageWidthPercent" widthUnit="%" widthDef={100} aspectRatioKey="stampImageAspectRatio" fitKey="stampImageFit" fitDef="cover" f={f} set={set} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="CTA button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
@@ -3439,6 +3511,11 @@ function renderBlockFields(
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Built-in hero art</p>
+          <NumberInput label="Centre phone width (px)" value={(f.phoneWidth as number) ?? 254} onChange={(v) => set('phoneWidth', v)} />
+          <FitSelect label="Centre phone fit" fitKey="phoneFit" f={f} set={set} def="fill" />
+          <FitSelect label="Floating frames fit" fitKey="frameFit" f={f} set={set} def="fill" />
         </div>
       );
 
@@ -4769,6 +4846,8 @@ function renderBlockFields(
               </div>
             )}
           />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <FitSelect label="Badge image fit (all badges)" fitKey="badgeFit" f={f} set={set} def="contain" />
         </div>
       );
     }
@@ -4868,6 +4947,8 @@ function renderBlockFields(
               </div>
             )}
           />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <FitSelect label="Panel image fit (all tabs)" fitKey="imageFit" f={f} set={set} def="cover" />
         </div>
       );
     }
@@ -4896,6 +4977,7 @@ function renderBlockFields(
               </div>
             )}
           />
+          <FitSelect label="Card image fit (all cards)" fitKey="cardImageFit" f={f} set={set} def="cover" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Textarea label="Feature strip (one per line)" value={(f.features as string[] ?? []).join('\n')} onChange={(v) => set('features', v.split('\n').filter(Boolean))} />
         </div>
@@ -4935,6 +5017,8 @@ function renderBlockFields(
               </div>
             )}
           />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <FitSelect label="Row image fit (all rows)" fitKey="rowImageFit" f={f} set={set} def="cover" />
         </div>
       );
     }
@@ -5045,6 +5129,8 @@ function renderBlockFields(
               </div>
             )}
           />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <FitSelect label="Card image fit (all cards)" fitKey="cardImageFit" f={f} set={set} def="fill" />
         </div>
       );
     }
@@ -5082,6 +5168,8 @@ function renderBlockFields(
               </div>
             )}
           />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <FitSelect label="Tab image fit (all tabs)" fitKey="tabImageFit" f={f} set={set} def="contain" />
         </div>
       );
     }
@@ -5105,8 +5193,14 @@ function renderBlockFields(
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Centre phone" value={f.imgPhone as string ?? ''} onChange={(v) => set('imgPhone', v)} />
+          <NumberInput label="Centre phone width (px)" value={(f.imgPhoneWidth as number) ?? 254} onChange={(v) => set('imgPhoneWidth', v)} />
+          <FitSelect label="Centre phone fit" fitKey="imgPhoneFit" f={f} set={set} def="contain" />
           <ImageField label="Bottom-left card (Share of Shelf)" value={f.imgBottomLeft as string ?? ''} onChange={(v) => set('imgBottomLeft', v)} />
+          <NumberInput label="Bottom-left card width (px)" value={(f.imgBottomLeftWidth as number) ?? 273} onChange={(v) => set('imgBottomLeftWidth', v)} />
+          <FitSelect label="Bottom-left card fit" fitKey="imgBottomLeftFit" f={f} set={set} def="fill" />
           <ImageField label="Bottom-right card (Task completed)" value={f.imgBottomRight as string ?? ''} onChange={(v) => set('imgBottomRight', v)} />
+          <NumberInput label="Bottom-right card width (px)" value={(f.imgBottomRightWidth as number) ?? 253} onChange={(v) => set('imgBottomRightWidth', v)} />
+          <FitSelect label="Bottom-right card fit" fitKey="imgBottomRightFit" f={f} set={set} def="fill" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Floating chips</p>
           <RichFieldGroup label="Chip 1 — value" f={f} set={set} base="chip1Val" segments={[{ key: 'chip1Val' }]} />
@@ -7619,6 +7713,8 @@ function renderBlockFields(
               </div>
             )}
           />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <FitSelect label="Thumbnail fit (all cards)" fitKey="thumbnailFit" f={f} set={set} def="cover" />
         </div>
       );
     }
