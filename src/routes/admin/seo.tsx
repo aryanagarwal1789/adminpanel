@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { UploadInput } from './upload-input';
+import { authJsonHeaders } from '@/lib/builder-drafts';
 
 export const Route = createFileRoute('/admin/seo')({ component: SeoPage });
 
@@ -947,7 +948,7 @@ function SeoPage() {
         schemas: { ...seo.schemas, speakable: { ...seo.schemas.speakable, cssSelectors: speakableInput.split('\n').map(s => s.trim()).filter(Boolean) } },
       };
       const res = await fetch(`${BACKEND}/site/seo/${activeTab}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        method: 'PUT', headers: authJsonHeaders(),
         body: JSON.stringify({ seo: payload }),
       });
       if (!res.ok) throw new Error(`${res.status}`);

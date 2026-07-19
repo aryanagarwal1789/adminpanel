@@ -22,7 +22,7 @@ import {
   BLOCK_LABELS, DEFAULT_THEME,
   type Block, type BlockStyle, type BlockType, type LayoutVariant, type Page, type Theme,
 } from "./types";
-import { getMyDraft, saveMyDraft } from "@/lib/builder-drafts";
+import { getMyDraft, saveMyDraft, authJsonHeaders } from "@/lib/builder-drafts";
 
 // Recursively find a widget by id in a widget array (handles row nesting)
 function findWidgetInArray(widgets: Widget[], id: string): Widget | null {
@@ -337,7 +337,7 @@ export function PageBuilder() {
     try {
       const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}/lock`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ editorId: id, editorName: name, force }),
       });
       if (res.status === 409) {
@@ -370,7 +370,7 @@ export function PageBuilder() {
       }
       const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: authJsonHeaders(),
         body: JSON.stringify(body),
       });
       if (res.status === 423) {
@@ -479,7 +479,7 @@ export function PageBuilder() {
     try {
       const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}/restore/${versionId}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ editorId: id, editorName: name }),
       });
       if (res.status === 423) {
@@ -520,7 +520,7 @@ export function PageBuilder() {
     try {
       fetch(`${BACKEND}/site/builder/pages/${pageKey}/unlock`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ editorId: id }),
         keepalive: true,
       }).catch(() => {});

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { authJsonHeaders, authHeaders } from "@/lib/builder-drafts";
 import {
   AlignLeft, ChevronDown, ChevronUp, ExternalLink,
   FileText, Globe, Heading2, Heading3, ImageIcon,
@@ -545,7 +546,7 @@ export function BlogEditorPage() {
     setSaving(true);
     try {
       const url  = isNew ? `${BACKEND}/site/builder/blog/posts` : `${BACKEND}/site/builder/blog/posts/${selected!.slug}`;
-      const res = await fetch(url, { method: isNew ? "POST" : "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const res = await fetch(url, { method: isNew ? "POST" : "PUT", headers: authJsonHeaders(), body: JSON.stringify(payload) });
       if (!res.ok) { const e = await res.json().catch(() => ({})) as { error?: string }; throw new Error(e.error ?? String(res.status)); }
       const { post: saved } = await res.json() as { post: BlogPost };
       toast.success(opts?.publish ? "Published!" : opts?.unpublish ? "Reverted to draft" : "Saved");
@@ -561,7 +562,7 @@ export function BlogEditorPage() {
   const deletePost = async () => {
     if (!selected?.slug || !window.confirm("Delete this post permanently?")) return;
     try {
-      await fetch(`${BACKEND}/site/builder/blog/posts/${selected.slug}`, { method: "DELETE" });
+      await fetch(`${BACKEND}/site/builder/blog/posts/${selected.slug}`, { method: "DELETE", headers: authHeaders() });
       toast.success("Deleted");
       setPosts(ps => ps.filter(p => p.slug !== selected.slug));
       setSelected(null);

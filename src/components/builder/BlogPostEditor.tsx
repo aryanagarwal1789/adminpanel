@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { authJsonHeaders, authHeaders } from "@/lib/builder-drafts";
 import {
   FileText, Globe, X, Trash2, ExternalLink,
   AlignLeft, Heading2, Heading3, ImageIcon, Quote,
@@ -586,7 +587,7 @@ export function BlogPostEditor({ post, onClose, onSaved, onDeleted }: Props) {
         : `${BACKEND}/site/builder/blog/posts/${post!.slug}`;
       const res = await fetch(url, {
         method: isNew ? "POST" : "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: authJsonHeaders(),
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
@@ -606,7 +607,7 @@ export function BlogPostEditor({ post, onClose, onSaved, onDeleted }: Props) {
     try {
       const res = await fetch(`${BACKEND}/site/builder/blog/posts/${post!.slug}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ status: "draft" }),
       });
       if (!res.ok) throw new Error();
@@ -620,7 +621,7 @@ export function BlogPostEditor({ post, onClose, onSaved, onDeleted }: Props) {
   const handleDelete = async () => {
     if (!post?.slug || !window.confirm("Delete this post permanently?")) return;
     try {
-      const res = await fetch(`${BACKEND}/site/builder/blog/posts/${post.slug}`, { method: "DELETE" });
+      const res = await fetch(`${BACKEND}/site/builder/blog/posts/${post.slug}`, { method: "DELETE", headers: authHeaders() });
       if (!res.ok) throw new Error();
       toast.success("Post deleted");
       onDeleted(post.slug);

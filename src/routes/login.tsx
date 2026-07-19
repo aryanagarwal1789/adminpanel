@@ -1,29 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
 import productShowcase from "@/assets/product_showcase.png";
-import { initiateGoogleSSO, loginWithCredentials, popRedirectPath } from "@/lib/auth";
+import { initiateGoogleSSO } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
 function LoginPage() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ username?: string; password?: string; form?: string }>({});
-  const [submitting, setSubmitting] = useState(false);
   const [ssoLoading, setSsoLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGoogleSSO = async () => {
-    setErrors({});
+    setError(null);
     setSsoLoading(true);
     try {
       const url = await initiateGoogleSSO();
       if (!url) {
-        setErrors({ form: "Could not start Google sign-in. Please try again." });
+        setError("Could not start Google sign-in. Please try again.");
         setSsoLoading(false);
         return;
       }
@@ -31,45 +26,10 @@ function LoginPage() {
       // string that the root AuthGate exchanges for a session.
       window.location.href = url;
     } catch {
-      setErrors({ form: "Could not start Google sign-in. Please try again." });
+      setError("Could not start Google sign-in. Please try again.");
       setSsoLoading(false);
     }
   };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const nextErrors: typeof errors = {};
-    if (!username.trim()) nextErrors.username = "Username is required";
-    if (!password) nextErrors.password = "Password is required";
-    else if (password.length < 6) nextErrors.password = "Password must be at least 6 characters";
-
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors);
-      return;
-    }
-
-    setSubmitting(true);
-    setErrors({});
-
-    const ok = await loginWithCredentials(username.trim(), password);
-    if (!ok) {
-      setErrors({ form: "Invalid username or password" });
-      setSubmitting(false);
-      return;
-    }
-
-    // pb_editor_name is set inside loginWithCredentials from the authenticated
-    // account (not a typed field), so "last updated by" attribution is trustworthy.
-
-    // Full navigation so the root auth guard re-runs and picks up the session.
-    const redirect = popRedirectPath();
-    window.location.replace(redirect && redirect !== "/login" ? redirect : "/");
-  };
-
-  const inputClass =
-    "h-11 w-full rounded-lg border border-slate-200 bg-slate-100 px-3.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-400/40 disabled:opacity-60";
-  const labelClass = "text-[11px] font-semibold uppercase tracking-wider text-slate-400";
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-[#05070a] p-4 sm:p-8">
@@ -85,13 +45,13 @@ function LoginPage() {
           </div>
 
           <h1 className="mt-8 text-3xl font-bold tracking-tight text-white">Welcome Back</h1>
-          <p className="mt-2 text-sm text-slate-400">Sign in to continue to the admin panel</p>
+          <p className="mt-2 text-sm text-slate-400">Sign in with your Salescode Google account to continue</p>
 
-          {/* Google SSO */}
+          {/* Google SSO — the only sign-in method */}
           <button
             type="button"
             onClick={handleGoogleSSO}
-            disabled={ssoLoading || submitting}
+            disabled={ssoLoading}
             className="mt-7 flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800/40 text-sm font-medium text-slate-100 transition hover:bg-slate-800 disabled:opacity-60"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
@@ -103,66 +63,9 @@ function LoginPage() {
             {ssoLoading ? "Redirecting…" : "Sign in with Google"}
           </button>
 
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-slate-800" />
-            <span className="text-[11px] uppercase tracking-widest text-slate-500">or</span>
-            <div className="h-px flex-1 bg-slate-800" />
-          </div>
+          {error && <p className="mt-4 text-center text-sm text-red-400">{error}</p>}
 
-          <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-            <div className="space-y-1.5">
-              <label htmlFor="username" className={labelClass}>Username</label>
-              <input
-                id="username"
-                type="text"
-                autoComplete="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                disabled={submitting}
-                className={inputClass}
-              />
-              {errors.username && <p className="text-xs text-red-400">{errors.username}</p>}
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="password" className={labelClass}>Password</label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={submitting}
-                  className={`${inputClass} pr-10`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  disabled={submitting}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  aria-pressed={showPassword}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 transition hover:text-slate-600 disabled:opacity-50"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              {errors.password && <p className="text-xs text-red-400">{errors.password}</p>}
-            </div>
-
-            {errors.form && <p className="text-center text-sm text-red-400">{errors.form}</p>}
-
-            <button
-              type="submit"
-              disabled={submitting || ssoLoading}
-              className="h-11 w-full rounded-lg bg-teal-400 text-base font-semibold text-slate-900 transition hover:bg-teal-300 disabled:opacity-50"
-            >
-              {submitting ? "Signing in…" : "Sign in"}
-            </button>
-          </form>
-
-          <p className="mt-8 text-center text-xs text-slate-600">Authorized access only.</p>
+          <p className="mt-8 text-center text-xs text-slate-600">Authorized Salescode accounts only.</p>
         </div>
 
         {/* Right — showcase */}
