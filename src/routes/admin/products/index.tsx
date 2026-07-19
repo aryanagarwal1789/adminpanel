@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { authJsonHeaders } from '@/lib/auth';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 export const Route = createFileRoute('/admin/products/')({ component: ProductsPage });
@@ -113,7 +114,7 @@ function ProductsPage() {
     try {
       await fetch(`${BACKEND}/site/products/reorder`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ order: newOrder }),
       });
     } catch {
@@ -127,7 +128,7 @@ function ProductsPage() {
     try {
       const res = await fetch(`${BACKEND}/site/products/${p.productId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ enabled: nextEnabled }),
       });
       if (!res.ok) throw new Error(`${res.status}`);
@@ -140,7 +141,7 @@ function ProductsPage() {
   const handleDelete = async (productId: string) => {
     if (!window.confirm(`Delete product "${productId}"?`)) return;
     try {
-      const res = await fetch(`${BACKEND}/site/products/${productId}`, { method: 'DELETE' });
+      const res = await fetch(`${BACKEND}/site/products/${productId}`, { method: 'DELETE', headers: authJsonHeaders() });
       if (!res.ok) throw new Error(`${res.status}`);
       setProducts((prev) => prev.filter((p) => p.productId !== productId));
       showToast({ type: 'success', message: 'Product deleted' });
@@ -173,7 +174,7 @@ function ProductsPage() {
     try {
       const res = await fetch(`${BACKEND}/site/products/reorder`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ order: [...otherProducts.map(p => p.productId), ...catItems.map(p => p.productId)] }),
       });
       if (!res.ok) throw new Error(`${res.status}`);
@@ -197,7 +198,7 @@ function ProductsPage() {
       };
       const res = await fetch(`${BACKEND}/site/products`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authJsonHeaders(),
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error(`${res.status}`);

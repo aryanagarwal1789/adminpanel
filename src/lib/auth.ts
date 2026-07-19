@@ -209,6 +209,22 @@ export function getAppToken(): string | null {
   return getAuth()?.token ?? null;
 }
 
+/**
+ * Headers for a JSON mutation call to a protected CMS endpoint — attaches the
+ * app JWT (validated by @Authenticate('token') on the backend). Reads stay
+ * public, so use plain fetch for GETs.
+ */
+export function authJsonHeaders(): Record<string, string> {
+  const token = getAppToken();
+  return { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+}
+
+/** Auth header only (no Content-Type) — for multipart/FormData uploads. */
+export function authUploadHeaders(): Record<string, string> {
+  const token = getAppToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export function logout(): void {
   if (!isBrowser()) return;
   localStorage.removeItem(AUTH_COOKIE_KEY);

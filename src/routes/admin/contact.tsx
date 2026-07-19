@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { authJsonHeaders } from '@/lib/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAdminPreview } from './preview-context';
 
@@ -66,7 +67,7 @@ function ContactPage() {
     try {
       const res = await fetch(`${BACKEND}/site/pages/contact-us`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ page }),
       });
       if (!res.ok) throw new Error(`${res.status}`);

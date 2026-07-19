@@ -175,7 +175,7 @@ function ImgUpload({ value, onChange, label = "Upload image", small = false }:
     if (!f) return; setBusy(true);
     try {
       const fd = new FormData(); fd.append("file", f);
-      const r = await fetch(UPLOAD_URL, { method: "POST", body: fd });
+      const r = await fetch(UPLOAD_URL, { method: "POST", headers: authHeaders(), body: fd });
       if (!r.ok) throw new Error();
       const d = await r.json() as { url?: string };
       if (d.url) onChange(d.url);

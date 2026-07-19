@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { authUploadHeaders } from "@/lib/auth";
 import { ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
 import type { ButtonField, LinkField } from "./defaults";
 import { useBlogPosts } from "./useBlogPosts";
@@ -50,7 +51,7 @@ export function VideoField({ label, value, onChange }: { label: string; value: s
     try {
       const form = new FormData();
       form.append("file", file);
-      const res = await fetch(UPLOAD_URL, { method: "POST", body: form });
+      const res = await fetch(UPLOAD_URL, { method: "POST", headers: authUploadHeaders(), body: form });
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json() as { url?: string };
       if (data.url) onChange(data.url);
@@ -114,7 +115,7 @@ export function ImageField({ label, value, onChange }: { label: string; value: s
     try {
       const form = new FormData();
       form.append("file", file);
-      const res = await fetch(UPLOAD_URL, { method: "POST", body: form });
+      const res = await fetch(UPLOAD_URL, { method: "POST", headers: authUploadHeaders(), body: form });
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json() as { url?: string };
       if (data.url) onChange(data.url);
