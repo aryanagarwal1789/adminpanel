@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { authJsonHeaders } from '@/lib/auth';
 import { useEffect, useState } from 'react';
 import { UploadInput } from './upload-input';
 
@@ -129,7 +130,7 @@ function ProductDetailPage() {
     try {
       const res = await fetch(`${BACKEND}/site/products/${productId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authJsonHeaders(),
         body: JSON.stringify({
           name: details.name,
           description: details.description,
@@ -159,7 +160,7 @@ function ProductDetailPage() {
       const payload = items.map((it, i) => ({ ...it, order: i }));
       const res = await fetch(`${BACKEND}/site/products/${productId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ sidebar: payload }),
       });
       if (!res.ok) throw new Error(`${res.status}`);

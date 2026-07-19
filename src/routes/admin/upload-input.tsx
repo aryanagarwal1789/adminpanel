@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { authUploadHeaders } from '@/lib/auth';
 
 const UPLOAD_URL = `${import.meta.env.VITE_BACKEND_URL ?? 'https://salescode-marketplace.salescode.ai'}/site/upload`;
 
@@ -31,7 +32,7 @@ export function UploadInput({ value, onChange, accept = 'image/*,video/*', label
     try {
       const form = new FormData();
       form.append('file', file);
-      const res = await fetch(UPLOAD_URL, { method: 'POST', body: form });
+      const res = await fetch(UPLOAD_URL, { method: 'POST', headers: authUploadHeaders(), body: form });
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json() as { url?: string };
       if (data.url) onChange(data.url);

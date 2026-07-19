@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { authJsonHeaders } from '@/lib/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAdminPreview } from './preview-context';
 import { UploadInput } from './upload-input';
@@ -111,7 +112,7 @@ function ClientsPage() {
       const payload = { ...page, images: page.images.map((img, i) => ({ ...img, order: i })) };
       const res = await fetch(`${BACKEND}/site/pages/client`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ page: payload }),
       });
       if (!res.ok) throw new Error(`${res.status}`);

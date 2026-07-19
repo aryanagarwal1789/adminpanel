@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { authJsonHeaders } from '@/lib/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAdminPreview } from './preview-context';
 import { UploadInput } from './upload-input';
@@ -324,7 +325,7 @@ function SectionsPage() {
       }));
       const res = await fetch(`${BACKEND}/site/sections`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ sections: payload }),
       });
       if (!res.ok) throw new Error(`${res.status}`);

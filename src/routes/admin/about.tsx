@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { authJsonHeaders } from '@/lib/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAdminPreview } from './preview-context';
 import { UploadInput } from './upload-input';
@@ -71,7 +72,7 @@ function AboutPage() {
     try {
       const res = await fetch(`${BACKEND}/site/pages/about-us`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authJsonHeaders(),
         body: JSON.stringify({ page }),
       });
       if (!res.ok) throw new Error(`${res.status}`);

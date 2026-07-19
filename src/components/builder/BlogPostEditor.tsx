@@ -34,7 +34,7 @@ function ImageUploadInline({ value, onChange }: { value: string; onChange: (v: s
     setUploading(true);
     try {
       const form = new FormData(); form.append("file", file);
-      const res = await fetch(UPLOAD_URL, { method: "POST", body: form });
+      const res = await fetch(UPLOAD_URL, { method: "POST", headers: authHeaders(), body: form });
       if (!res.ok) throw new Error();
       const data = await res.json() as { url?: string };
       if (data.url) onChange(data.url);
@@ -440,7 +440,7 @@ function FeaturedImageUpload({ value, onChange }: { value: string; onChange: (v:
     setUploading(true);
     try {
       const form = new FormData(); form.append("file", file);
-      const res = await fetch(UPLOAD_URL, { method: "POST", body: form });
+      const res = await fetch(UPLOAD_URL, { method: "POST", headers: authHeaders(), body: form });
       if (!res.ok) throw new Error();
       const data = await res.json() as { url?: string };
       if (data.url) onChange(data.url);
