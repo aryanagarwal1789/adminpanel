@@ -6,6 +6,8 @@ import {
   LogOut, History, RotateCcw, Monitor, Smartphone,
 } from "lucide-react";
 import { defaultBlock } from "./blocks";
+import { isRichDoc, type RichDoc } from "./rich-text";
+import { syncRichContent, pickTextPatch } from "./rich-sync";
 import { AddSectionDrawer } from "./AddSectionDrawer";
 import { ContentEditor } from "./ContentEditor";
 import { StyleEditor } from "./StyleEditor";
@@ -667,10 +669,16 @@ export function PageBuilder() {
     }
   }, []);
 
-  const setBlocks = useCallback((next: Block[], opts?: { blockId?: string; patchKind?: "fields" | "style" | "columns" }) => {
+  const setBlocks = useCallback((next: Block[], opts?: { blockId?: string; patchKind?: "fields" | "style" | "columns"; otherBlocks?: Block[] }) => {
     const cur = pageBlocks[activePage] ?? { desktop: [], mobile: null };
     // Copy-on-write: an edit in mobile mode materializes the mobile variant
     const nextEntry: PageVariants = device === "mobile" ? { ...cur, mobile: next } : { ...cur, desktop: next };
+    // Text-content sync: mirror the SAME words into the other device's variant
+    // (opts.otherBlocks is prebuilt by updateBlockFields, styling/breaks kept).
+    if (opts?.otherBlocks) {
+      if (device === "mobile") nextEntry.desktop = opts.otherBlocks;
+      else nextEntry.mobile = opts.otherBlocks;
+    }
     const nextState: BuilderState = {
       ...state,
       pageBlocks: { ...pageBlocks, [activePage]: nextEntry },
@@ -749,10 +757,37 @@ export function PageBuilder() {
 
   const updateBlockFields = (id: string, patch: Record<string, unknown>) => {
     const isColumns = "columns" in patch;
-    setBlocks(
-      blocks.map((b) => (b.id === id ? { ...b, fields: { ...b.fields, ...patch } } : b)),
-      { blockId: id, patchKind: isColumns ? "columns" : "fields" },
-    );
+    const nextActive = blocks.map((b) => (b.id === id ? { ...b, fields: { ...b.fields, ...patch } } : b));
+
+    // Mirror TEXT content (words only) into the matching block in the OTHER device
+    // variant, preserving that variant's own inline styling + line breaks. Skipped
+    // when the other variant isn't materialized (unmaterialized mobile already
+    // inherits desktop at render).
+    // Fail-safe: a sync error must NEVER block the primary edit — on any failure
+    // we just skip mirroring for this change.
+    let otherBlocks: Block[] | undefined;
+    try {
+      const cur = pageBlocks[activePage];
+      const otherVar = device === "mobile" ? cur?.desktop : cur?.mobile;
+      if (otherVar && otherVar.length) {
+        const textPatch = pickTextPatch(patch);
+        if (Object.keys(textPatch).length) {
+          otherBlocks = otherVar.map((b) => {
+            if (b.id !== id) return b;
+            const f = { ...(b.fields as Record<string, unknown>) };
+            for (const [k, v] of Object.entries(textPatch)) {
+              f[k] = isRichDoc(v) ? syncRichContent(f[k] as RichDoc | undefined, v) : v;
+            }
+            return { ...b, fields: f };
+          });
+        }
+      }
+    } catch (e) {
+      console.error("[text-sync] skipped for this edit", e);
+      otherBlocks = undefined;
+    }
+
+    setBlocks(nextActive, { blockId: id, patchKind: isColumns ? "columns" : "fields", otherBlocks });
   };
 
   const updateBlockStyle = (id: string, patch: Partial<BlockStyle>) => {
