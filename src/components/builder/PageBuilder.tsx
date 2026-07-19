@@ -21,6 +21,7 @@ import {
   type Block, type BlockStyle, type BlockType, type LayoutVariant, type Page, type Theme,
 } from "./types";
 import { getMyDraft, saveMyDraft } from "@/lib/builder-drafts";
+import { getAuth } from "@/lib/auth";
 
 // Recursively find a widget by id in a widget array (handles row nesting)
 function findWidgetInArray(widgets: Widget[], id: string): Widget | null {
@@ -193,6 +194,21 @@ function getEditor(): { id: string; name: string } {
   return { id, name };
 }
 
+// Domain that the publish OTP may be emailed to. Enforced again server-side.
+const OTP_EMAIL_DOMAIN = "salescode.ai";
+
+// The email to send the publish OTP to WITHOUT prompting — only for a real SSO
+// session. The credential fallback (`token === "local-dev"`) is treated as
+// "not SSO", so the user is asked to enter/confirm an address.
+function ssoEmail(): string | null {
+  const a = getAuth();
+  return a?.email && a.token && a.token !== "local-dev" ? a.email : null;
+}
+
+function isValidOtpEmail(email: string): boolean {
+  return new RegExp(`^[^@\\s]+@${OTP_EMAIL_DOMAIN.replace(".", "\\.")}$`).test(email.trim().toLowerCase());
+}
+
 export function PageBuilder() {
   // Undo/redo history — stack + index kept in a SINGLE state object so they can
   // never desync. (Previously these were two separate useState values updated in
@@ -306,40 +322,172 @@ export function PageBuilder() {
     return true;
   }, []);
 
-  const publishPage = useCallback(async (pageKey: string, blocksToSave: Block[], themeToSave: Theme, hostnames: string[]) => {
-    try {
-      const { id, name } = getEditor();
-      const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          blocks: blocksToSave, theme: themeToSave, hostnames, editorId: id, editorName: name,
-          lastKnownUpdatedAt: pageUpdatedAt[pageKey],
-        }),
-      });
-      if (res.status === 423) {
-        const d = await res.json().catch(() => ({}));
-        setLockedBy(d.lockedBy || "another editor");
-        heldByMe.current = false;
-        toast.error(`Locked by ${d.lockedBy || "another editor"} — can't publish.`);
-        return;
-      }
-      if (res.status === 409) {
-        const d = await res.json().catch(() => ({}));
-        setSaveConflict({ pageKey, updatedAt: d.updatedAt, updatedBy: d.updatedBy });
-        return;
-      }
-      if (!res.ok) throw new Error(`${res.status}`);
-      const { page } = await res.json().catch(() => ({ page: undefined }));
+  // ── OTP-gated publish ──
+  // Publishing requires a 6-digit OTP emailed to the editor. SSO users get it
+  // sent straight to their address; everyone else enters an @salescode.ai email
+  // (re-validated server-side). The page is staged server-side on request and
+  // only written once the OTP is verified.
+  const [publishOtp, setPublishOtp] = useState<{
+    pageKey: string;
+    blocks: Block[];
+    theme: Theme;
+    hostnames: string[];
+    step: "email" | "otp";
+    email: string;
+    emailFromSso: boolean;
+    sessionId?: string;
+    sentTo?: string;
+    submitting: boolean;
+    error?: string;
+  } | null>(null);
+  const [otpInput, setOtpInput] = useState("");
+
+  // Post-publish bookkeeping shared by the OTP verify success path.
+  const applyPublishSuccess = useCallback(
+    (pageKey: string, blocksToSave: Block[], themeToSave: Theme, page: any) => {
       if (page?.updatedAt) setPageUpdatedAt((m) => ({ ...m, [pageKey]: page.updatedAt as string }));
       setSaveConflict(null);
       // Page is now saved — this state is the new "clean" baseline.
       savedBaselineRef.current[pageKey] = serializeSaved(blocksToSave, themeToSave);
       toast.success("Page published successfully");
-    } catch (err) {
-      toast.error(`Publish failed — is the backend running? (${err})`);
-    }
-  }, [pageUpdatedAt]);
+    },
+    [],
+  );
+
+  // Step 1 — stage the publish and email an OTP. Shared by the SSO fast-path,
+  // the email-entry submit, and the "Resend" action.
+  const requestPublishOtp = useCallback(
+    async (
+      staged: { pageKey: string; blocks: Block[]; theme: Theme; hostnames: string[] },
+      email: string,
+    ) => {
+      setPublishOtp((s) => (s ? { ...s, submitting: true, error: undefined } : s));
+      try {
+        const { id, name } = getEditor();
+        const res = await fetch(`${BACKEND}/site/builder/otp/request`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            pageKey: staged.pageKey,
+            email,
+            blocks: staged.blocks,
+            theme: staged.theme,
+            hostnames: staged.hostnames,
+            editorId: id,
+            editorName: name,
+            lastKnownUpdatedAt: pageUpdatedAt[staged.pageKey],
+          }),
+        });
+        const d = await res.json().catch(() => ({} as any));
+        if (res.status === 423) {
+          setLockedBy(d.lockedBy || "another editor");
+          heldByMe.current = false;
+          setPublishOtp(null);
+          toast.error(`Locked by ${d.lockedBy || "another editor"} — can't publish.`);
+          return;
+        }
+        if (res.status === 409) {
+          setSaveConflict({ pageKey: staged.pageKey, updatedAt: d.updatedAt, updatedBy: d.updatedBy });
+          setPublishOtp(null);
+          return;
+        }
+        if (!res.ok) {
+          setPublishOtp((s) => (s ? { ...s, submitting: false, error: d.error || `Couldn't send OTP (${res.status})` } : s));
+          return;
+        }
+        setOtpInput("");
+        setPublishOtp((s) =>
+          s ? { ...s, step: "otp", email, sessionId: d.sessionId, sentTo: d.sentTo, submitting: false, error: undefined } : s,
+        );
+        toast.success(`OTP sent to ${d.sentTo || email}`);
+      } catch {
+        setPublishOtp((s) => (s ? { ...s, submitting: false, error: "Couldn't send OTP — is the backend running?" } : s));
+      }
+    },
+    [pageUpdatedAt],
+  );
+
+  // Entry point wired to the Publish button.
+  const publishPage = useCallback(
+    (pageKey: string, blocksToSave: Block[], themeToSave: Theme, hostnames: string[]) => {
+      const staged = { pageKey, blocks: blocksToSave, theme: themeToSave, hostnames };
+      const sso = ssoEmail();
+      if (sso) {
+        setPublishOtp({ ...staged, step: "otp", email: sso, emailFromSso: true, submitting: true });
+        void requestPublishOtp(staged, sso);
+      } else {
+        setPublishOtp({ ...staged, step: "email", email: getAuth()?.email ?? "", emailFromSso: false, submitting: false });
+      }
+    },
+    [requestPublishOtp],
+  );
+
+  // Step 2 — verify the OTP; the server applies the staged publish on success.
+  const verifyPublishOtp = useCallback(async () => {
+    setPublishOtp((cur) => {
+      if (!cur?.sessionId) return cur;
+      const code = otpInput.trim();
+      if (!/^\d{6}$/.test(code)) return { ...cur, error: "Enter the 6-digit code" };
+      // Fire the request; state transitions happen in the async block below.
+      void (async () => {
+        try {
+          const res = await fetch(`${BACKEND}/site/builder/otp/verify`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId: cur.sessionId, otp: code }),
+          });
+          const d = await res.json().catch(() => ({} as any));
+          if (res.ok && d.ok) {
+            applyPublishSuccess(cur.pageKey, cur.blocks, cur.theme, d.page);
+            setPublishOtp(null);
+            setOtpInput("");
+            return;
+          }
+          if (res.status === 400 && typeof d.attemptsRemaining === "number") {
+            setPublishOtp((s) => (s ? { ...s, submitting: false, error: `Invalid OTP — ${d.attemptsRemaining} attempt(s) left` } : s));
+            return;
+          }
+          if (res.status === 410) {
+            setPublishOtp((s) => (s ? { ...s, submitting: false, sessionId: undefined, error: "OTP expired — request a new one" } : s));
+            return;
+          }
+          if (res.status === 423 && d.lockedBy) {
+            setLockedBy(d.lockedBy);
+            heldByMe.current = false;
+            setPublishOtp(null);
+            toast.error(`Locked by ${d.lockedBy} — can't publish.`);
+            return;
+          }
+          if (res.status === 423) {
+            setPublishOtp(null);
+            setOtpInput("");
+            toast.error(d.error || "Too many attempts — request a new OTP.");
+            return;
+          }
+          if (res.status === 409) {
+            setSaveConflict({ pageKey: cur.pageKey, updatedAt: d.updatedAt, updatedBy: d.updatedBy });
+            setPublishOtp(null);
+            return;
+          }
+          setPublishOtp((s) => (s ? { ...s, submitting: false, error: d.error || `Verify failed (${res.status})` } : s));
+        } catch {
+          setPublishOtp((s) => (s ? { ...s, submitting: false, error: "Verify failed — is the backend running?" } : s));
+        }
+      })();
+      return { ...cur, submitting: true, error: undefined };
+    });
+  }, [otpInput, applyPublishSuccess]);
+
+  // Email-entry submit (non-SSO path): validate the domain, then request an OTP.
+  const submitPublishEmail = useCallback(() => {
+    setPublishOtp((cur) => {
+      if (!cur) return cur;
+      const email = cur.email.trim().toLowerCase();
+      if (!isValidOtpEmail(email)) return { ...cur, error: `Enter a valid @${OTP_EMAIL_DOMAIN} email` };
+      void requestPublishOtp({ pageKey: cur.pageKey, blocks: cur.blocks, theme: cur.theme, hostnames: cur.hostnames }, email);
+      return { ...cur, email, submitting: true, error: undefined };
+    });
+  }, [requestPublishOtp]);
 
   const reloadActivePage = useCallback(async (pageKey: string) => {
     try {
@@ -1711,6 +1859,93 @@ export function PageBuilder() {
             <div className="border-t border-slate-700 px-4 py-2 text-[11px] text-slate-500">
               Keeps the last 50 published versions. Restoring saves the current state first, so it can be undone.
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Publish OTP — verify the editor before writing the page */}
+      {publishOtp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/50" onClick={() => { setPublishOtp(null); setOtpInput(""); }} />
+          <div className="relative w-full max-w-sm rounded-lg border border-slate-700 bg-slate-900 text-slate-100 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
+              <span className="text-sm font-semibold">Verify to publish</span>
+              <button
+                onClick={() => { setPublishOtp(null); setOtpInput(""); }}
+                className="p-1.5 rounded hover:bg-slate-800 pb-transition"
+                title="Cancel"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {publishOtp.step === "email" ? (
+              <div className="space-y-3 px-4 py-4">
+                <p className="text-xs text-slate-400">
+                  Enter your <span className="font-medium text-slate-200">@{OTP_EMAIL_DOMAIN}</span> email — we'll send a
+                  6-digit code to confirm this publish.
+                </p>
+                <input
+                  autoFocus
+                  type="email"
+                  value={publishOtp.email}
+                  onChange={(e) => setPublishOtp((s) => (s ? { ...s, email: e.target.value, error: undefined } : s))}
+                  onKeyDown={(e) => { if (e.key === "Enter") submitPublishEmail(); }}
+                  placeholder={`you@${OTP_EMAIL_DOMAIN}`}
+                  className="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white outline-none focus:border-slate-400"
+                />
+                {publishOtp.error && <p className="text-xs text-red-400">{publishOtp.error}</p>}
+                <button
+                  onClick={submitPublishEmail}
+                  disabled={publishOtp.submitting || !isValidOtpEmail(publishOtp.email)}
+                  className="w-full rounded-md px-3 py-2 text-sm font-medium text-white pb-transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ background: "#22c55e" }}
+                >
+                  {publishOtp.submitting ? "Sending…" : "Send code"}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3 px-4 py-4">
+                <p className="text-xs text-slate-400">
+                  {publishOtp.sentTo ? (
+                    <>Enter the 6-digit code sent to <span className="font-medium text-slate-200">{publishOtp.sentTo}</span>.</>
+                  ) : (
+                    "Sending code…"
+                  )}
+                </p>
+                <input
+                  autoFocus
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={otpInput}
+                  onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  onKeyDown={(e) => { if (e.key === "Enter") verifyPublishOtp(); }}
+                  placeholder="••••••"
+                  className="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-center text-lg tracking-[0.5em] text-white outline-none focus:border-slate-400"
+                />
+                {publishOtp.error && <p className="text-xs text-red-400">{publishOtp.error}</p>}
+                <button
+                  onClick={verifyPublishOtp}
+                  disabled={publishOtp.submitting || otpInput.length !== 6 || !publishOtp.sessionId}
+                  className="w-full rounded-md px-3 py-2 text-sm font-medium text-white pb-transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ background: "#22c55e" }}
+                >
+                  {publishOtp.submitting ? "Verifying…" : "Verify & publish"}
+                </button>
+                <button
+                  onClick={() =>
+                    requestPublishOtp(
+                      { pageKey: publishOtp.pageKey, blocks: publishOtp.blocks, theme: publishOtp.theme, hostnames: publishOtp.hostnames },
+                      publishOtp.email,
+                    )
+                  }
+                  disabled={publishOtp.submitting}
+                  className="w-full rounded-md border border-slate-600 px-3 py-1.5 text-xs hover:bg-slate-800 pb-transition disabled:opacity-40"
+                >
+                  Resend code
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

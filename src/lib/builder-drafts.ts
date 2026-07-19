@@ -1,4 +1,5 @@
 import type { Block, Theme } from '@/components/builder/types';
+import { getAuth } from '@/lib/auth';
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 const BASE = `${BACKEND}/site/builder/pages`;
@@ -24,7 +25,10 @@ export function getEditorIdentity(): EditorIdentity {
   } catch { ownerId = 'anonymous'; }
   let ownerName = 'Editor';
   try { ownerName = localStorage.getItem('pb_editor_name') || 'Editor'; } catch { /* ignore */ }
-  return { ownerId, ownerEmail: '', ownerName };
+  // Carry the logged-in user's real email (parity with the publish flow, which
+  // sends it as the OTP recipient). Empty when not authenticated.
+  const ownerEmail = getAuth()?.email ?? '';
+  return { ownerId, ownerEmail, ownerName };
 }
 
 export async function getMyDraft(pageKey: string): Promise<DraftDto | null> {
