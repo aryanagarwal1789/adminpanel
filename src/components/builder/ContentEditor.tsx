@@ -2326,7 +2326,8 @@ function renderBlockFields(
         <div className="space-y-4">
           <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
           <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
-          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Accent (fallback if no rotating words)" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <Textarea label="Rotating teal words (one per line — animates through them)" value={((f.rotatingWords as string[]) ?? []).join('\n')} onChange={(v) => set('rotatingWords', v.split('\n').map((s) => s.trim()).filter(Boolean))} />
           <RichFieldGroup label="Body text" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
           <RichFieldGroup label="Form title" f={f} set={set} base="formTitle" segments={[{ key: 'formTitle' }]} />
           <RichFieldGroup label="Form subtext" f={f} set={set} base="formSubtext" segments={[{ key: 'formSubtext' }]} />
@@ -5194,12 +5195,15 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Centre phone" value={f.imgPhone as string ?? ''} onChange={(v) => set('imgPhone', v)} />
           <NumberInput label="Centre phone width (px)" value={(f.imgPhoneWidth as number) ?? 254} onChange={(v) => set('imgPhoneWidth', v)} />
+          <TextInput label="Centre phone aspect ratio (e.g. 3/4) — enables object-fit" value={f.imgPhoneAspectRatio as string ?? ''} onChange={(v) => set('imgPhoneAspectRatio', v)} />
           <FitSelect label="Centre phone fit" fitKey="imgPhoneFit" f={f} set={set} def="contain" />
           <ImageField label="Bottom-left card (Share of Shelf)" value={f.imgBottomLeft as string ?? ''} onChange={(v) => set('imgBottomLeft', v)} />
           <NumberInput label="Bottom-left card width (px)" value={(f.imgBottomLeftWidth as number) ?? 273} onChange={(v) => set('imgBottomLeftWidth', v)} />
+          <TextInput label="Bottom-left aspect ratio (e.g. 16/9) — enables object-fit" value={f.imgBottomLeftAspectRatio as string ?? ''} onChange={(v) => set('imgBottomLeftAspectRatio', v)} />
           <FitSelect label="Bottom-left card fit" fitKey="imgBottomLeftFit" f={f} set={set} def="fill" />
           <ImageField label="Bottom-right card (Task completed)" value={f.imgBottomRight as string ?? ''} onChange={(v) => set('imgBottomRight', v)} />
           <NumberInput label="Bottom-right card width (px)" value={(f.imgBottomRightWidth as number) ?? 253} onChange={(v) => set('imgBottomRightWidth', v)} />
+          <TextInput label="Bottom-right aspect ratio (e.g. 16/9) — enables object-fit" value={f.imgBottomRightAspectRatio as string ?? ''} onChange={(v) => set('imgBottomRightAspectRatio', v)} />
           <FitSelect label="Bottom-right card fit" fitKey="imgBottomRightFit" f={f} set={set} def="fill" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Floating chips</p>
