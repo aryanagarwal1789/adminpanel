@@ -2994,8 +2994,10 @@ function renderBlockFields(
           <ImageField label="Centre image (phone group)" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Label — top left" f={f} set={set} base="labelTL" segments={[{ key: 'labelTL' }]} />
+          <RichFieldGroup label="Label — mid left" f={f} set={set} base="labelML" segments={[{ key: 'labelML' }]} />
           <RichFieldGroup label="Label — bottom left" f={f} set={set} base="labelBL" segments={[{ key: 'labelBL' }]} />
           <RichFieldGroup label="Label — top right" f={f} set={set} base="labelTR" segments={[{ key: 'labelTR' }]} />
+          <RichFieldGroup label="Label — mid right" f={f} set={set} base="labelMR" segments={[{ key: 'labelMR' }]} />
           <RichFieldGroup label="Label — bottom right" f={f} set={set} base="labelBR" segments={[{ key: 'labelBR' }]} />
         </div>
       );
@@ -3022,8 +3024,10 @@ function renderBlockFields(
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Label — top left" f={f} set={set} base="labelTL" segments={[{ key: 'labelTL' }]} />
+          <RichFieldGroup label="Label — mid left" f={f} set={set} base="labelML" segments={[{ key: 'labelML' }]} />
           <RichFieldGroup label="Label — bottom left" f={f} set={set} base="labelBL" segments={[{ key: 'labelBL' }]} />
           <RichFieldGroup label="Label — top right" f={f} set={set} base="labelTR" segments={[{ key: 'labelTR' }]} />
+          <RichFieldGroup label="Label — mid right" f={f} set={set} base="labelMR" segments={[{ key: 'labelMR' }]} />
           <RichFieldGroup label="Label — bottom right" f={f} set={set} base="labelBR" segments={[{ key: 'labelBR' }]} />
         </div>
       );
@@ -5300,9 +5304,15 @@ function renderBlockFields(
     case 'slick-scai-best-agent': {
       type ChartField = { scaiValue?: number; scaiLabel?: string; compValue?: number; compLabel1?: string; compLabel2?: string; yAxisLabel?: string };
       type BulletField = { title?: string; desc?: string };
+      type HeadingSegField = { text?: string; kind?: 'bold' | 'semi' | 'normal' };
+      type TableRowField = { cap?: string; salescode?: string; other?: string };
+      type TableField = { colCap?: string; colScai?: string; colOther?: string; rows?: TableRowField[] };
       type TabField = {
-        tabLabel?: string; headingBold?: string; headingSemi1?: string; headingNormal?: string; headingSemi2?: string;
-        body?: string; bigStat?: string; bigStatLabel?: string; bullets?: BulletField[]; chart?: ChartField;
+        tabLabel?: string;
+        headingSegments?: HeadingSegField[];
+        headingBold?: string; headingSemi1?: string; headingNormal?: string; headingSemi2?: string;
+        body?: string; bigStat?: string; bigStatLabel?: string; bullets?: BulletField[];
+        panelType?: 'chart' | 'table'; chart?: ChartField; table?: TableField;
       };
       return (
         <div className="space-y-4">
@@ -5310,27 +5320,53 @@ function renderBlockFields(
           <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <RichFieldGroup label="Subtitle Pre" f={f} set={set} base="subtitlePre" segments={[{ key: 'subtitlePre' }]} />
           <RichFieldGroup label="Subtitle Accent" f={f} set={set} base="subtitleAccent" segments={[{ key: 'subtitleAccent' }]} />
+          <RichFieldGroup label="Subtitle Post" f={f} set={set} base="subtitlePost" segments={[{ key: 'subtitlePost' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<TabField>
             label="Comparison tabs (4)"
             items={(f.tabs as TabField[]) ?? []}
             onChange={(v) => set('tabs', v)}
             newItem={() => ({
-              tabLabel: 'New Tab', headingBold: 'SCAI ', headingSemi1: 'does', headingNormal: ' something', headingSemi2: ' better.',
+              tabLabel: 'New Tab',
+              headingSegments: [
+                { text: 'SCAI ', kind: 'bold' },
+                { text: 'does something', kind: 'semi' },
+                { text: ' better.', kind: 'normal' },
+              ],
               body: 'Description of this capability.', bigStat: '0', bigStatLabel: 'Stat label',
               bullets: [{ title: 'Bullet title', desc: 'Bullet description' }, { title: 'Bullet title', desc: 'Bullet description' }],
+              panelType: 'chart',
               chart: { scaiValue: 1, scaiLabel: 'SCAI', compValue: 1, compLabel1: 'Nearest', compLabel2: 'Competitor', yAxisLabel: 'Metric' },
+              table: { colCap: 'Capabilities', colScai: 'Salescode', colOther: 'Other', rows: [{ cap: 'Capability', salescode: 'Yes', other: 'No' }] },
             })}
             itemPreview={(t) => t.tabLabel || '(untitled)'}
             renderItem={(t, u) => (
               <div className="space-y-2">
                 <RichTextInput label="Tab label" {...richItemProps(t, 'tabLabel', u)} />
                 <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-                <p className="text-xs text-slate-500 font-medium">Heading (4 parts, in order)</p>
-                <RichTextInput label="Bold word (teal, e.g. 'SCAI ')" {...richItemProps(t, 'headingBold', u)} />
-                <RichTextInput label="Semi-bold part 1 (e.g. 'responds')" {...richItemProps(t, 'headingSemi1', u)} />
-                <RichTextInput label="Normal part (e.g. ' to customers in')" {...richItemProps(t, 'headingNormal', u)} />
-                <RichTextInput label="Semi-bold part 2 (e.g. ' real time.')" {...richItemProps(t, 'headingSemi2', u)} />
+                <p className="text-xs text-slate-500 font-medium">Heading (segments, in order · bold = teal)</p>
+                <Repeater<HeadingSegField>
+                  label="Heading segments"
+                  items={t.headingSegments ?? []}
+                  onChange={(v) => u({ ...t, headingSegments: v })}
+                  newItem={() => ({ text: 'text ', kind: 'normal' })}
+                  itemPreview={(s) => `${s.kind ?? 'normal'}: ${s.text ?? ''}`}
+                  renderItem={(s, us) => (
+                    <div className="space-y-2">
+                      <TextInput label="Text" value={s.text ?? ''} onChange={(v) => us({ ...s, text: v })} />
+                      <Select<'bold' | 'semi' | 'normal'>
+                        label="Style"
+                        value={s.kind ?? 'normal'}
+                        onChange={(v) => us({ ...s, kind: v })}
+                        options={[
+                          { value: 'bold', label: 'Bold (teal)' },
+                          { value: 'semi', label: 'Semi-bold (white)' },
+                          { value: 'normal', label: 'Normal (white)' },
+                        ]}
+                      />
+                    </div>
+                  )}
+                />
                 <RichTextInput label="Body paragraph" {...richItemProps(t, 'body', u)} />
                 <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
                 <RichTextInput label="Big stat (e.g. '< 1 sec')" {...richItemProps(t, 'bigStat', u)} />
@@ -5350,15 +5386,51 @@ function renderBlockFields(
                   )}
                 />
                 <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-                <p className="text-xs text-slate-500 font-medium">Chart (bar comparison)</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <NumberInput label="SCAI value" value={t.chart?.scaiValue ?? 1} onChange={(v) => u({ ...t, chart: { ...t.chart, scaiValue: v } })} />
-                  <NumberInput label="Competitor value" value={t.chart?.compValue ?? 1} onChange={(v) => u({ ...t, chart: { ...t.chart, compValue: v } })} />
-                </div>
-                <TextInput label="SCAI bar label" value={t.chart?.scaiLabel ?? ''} onChange={(v) => u({ ...t, chart: { ...t.chart, scaiLabel: v } })} />
-                <TextInput label="Competitor bar label (line 1)" value={t.chart?.compLabel1 ?? ''} onChange={(v) => u({ ...t, chart: { ...t.chart, compLabel1: v } })} />
-                <TextInput label="Competitor bar label (line 2)" value={t.chart?.compLabel2 ?? ''} onChange={(v) => u({ ...t, chart: { ...t.chart, compLabel2: v } })} />
-                <TextInput label="Y-axis label" value={t.chart?.yAxisLabel ?? ''} onChange={(v) => u({ ...t, chart: { ...t.chart, yAxisLabel: v } })} />
+                <Select<'chart' | 'table'>
+                  label="Right panel"
+                  value={t.panelType ?? 'chart'}
+                  onChange={(v) => u({ ...t, panelType: v })}
+                  options={[
+                    { value: 'chart', label: 'Bar chart' },
+                    { value: 'table', label: 'Comparison table' },
+                  ]}
+                />
+                {(t.panelType ?? 'chart') === 'table' ? (
+                  <>
+                    <p className="text-xs text-slate-500 font-medium">Comparison table</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      <TextInput label="Col 1" value={t.table?.colCap ?? ''} onChange={(v) => u({ ...t, table: { ...t.table, colCap: v } })} />
+                      <TextInput label="Col 2 (teal)" value={t.table?.colScai ?? ''} onChange={(v) => u({ ...t, table: { ...t.table, colScai: v } })} />
+                      <TextInput label="Col 3" value={t.table?.colOther ?? ''} onChange={(v) => u({ ...t, table: { ...t.table, colOther: v } })} />
+                    </div>
+                    <Repeater<TableRowField>
+                      label="Rows"
+                      items={t.table?.rows ?? []}
+                      onChange={(v) => u({ ...t, table: { ...t.table, rows: v } })}
+                      newItem={() => ({ cap: 'Capability', salescode: 'Yes', other: 'No' })}
+                      itemPreview={(r) => r.cap || '(row)'}
+                      renderItem={(r, ur) => (
+                        <div className="space-y-2">
+                          <TextInput label="Capability (\n for line break)" value={r.cap ?? ''} onChange={(v) => ur({ ...r, cap: v })} />
+                          <TextInput label="Salescode value" value={r.salescode ?? ''} onChange={(v) => ur({ ...r, salescode: v })} />
+                          <TextInput label="Other value" value={r.other ?? ''} onChange={(v) => ur({ ...r, other: v })} />
+                        </div>
+                      )}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xs text-slate-500 font-medium">Chart (bar comparison)</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <NumberInput label="SCAI value" value={t.chart?.scaiValue ?? 1} onChange={(v) => u({ ...t, chart: { ...t.chart, scaiValue: v } })} />
+                      <NumberInput label="Competitor value" value={t.chart?.compValue ?? 1} onChange={(v) => u({ ...t, chart: { ...t.chart, compValue: v } })} />
+                    </div>
+                    <TextInput label="SCAI bar label" value={t.chart?.scaiLabel ?? ''} onChange={(v) => u({ ...t, chart: { ...t.chart, scaiLabel: v } })} />
+                    <TextInput label="Competitor bar label (line 1)" value={t.chart?.compLabel1 ?? ''} onChange={(v) => u({ ...t, chart: { ...t.chart, compLabel1: v } })} />
+                    <TextInput label="Competitor bar label (line 2)" value={t.chart?.compLabel2 ?? ''} onChange={(v) => u({ ...t, chart: { ...t.chart, compLabel2: v } })} />
+                    <TextInput label="Y-axis label" value={t.chart?.yAxisLabel ?? ''} onChange={(v) => u({ ...t, chart: { ...t.chart, yAxisLabel: v } })} />
+                  </>
+                )}
               </div>
             )}
           />
@@ -6008,7 +6080,7 @@ function renderBlockFields(
     }
 
     case 'slick-sc-saudi-products': {
-      type ProductItem = { pill?: string; headingWhite?: string; headingTeal?: string; description?: string; features?: Array<{ label: string; text: string }>; ctaLabel?: string; ctaHref?: string; imageSrc?: string; };
+      type ProductItem = { pill?: string; headingWhite?: string; headingTeal?: string; description?: string; features?: Array<{ label: string; text: string }>; ctaLabel?: string; ctaHref?: string; imageSrc?: string; videoSrc?: string; };
       type FeatureItem = { label: string; text: string };
       return (
         <div className="space-y-4">
@@ -6020,7 +6092,7 @@ function renderBlockFields(
             label="Products"
             items={(f.products as ProductItem[]) ?? []}
             onChange={(v) => set('products', v)}
-            newItem={() => ({ pill: '', headingWhite: 'AI Native', headingTeal: 'Product', description: '', features: [], ctaLabel: 'Know More', ctaHref: '#', imageSrc: '' })}
+            newItem={() => ({ pill: '', headingWhite: 'AI Native', headingTeal: 'Product', description: '', features: [], ctaLabel: 'Know More', ctaHref: '#', imageSrc: '', videoSrc: '' })}
             itemPreview={(p) => `${p.headingWhite ?? ''} ${p.headingTeal ?? ''}`.trim() || '(empty)'}
             renderItem={(p, u) => (
               <div className="space-y-3">
@@ -6043,7 +6115,8 @@ function renderBlockFields(
                 />
                 <RichTextInput label="CTA label" {...richItemProps(p, 'ctaLabel', u)} />
                 <TextInput label="CTA URL" value={p.ctaHref ?? ''} onChange={(v) => u({ ...p, ctaHref: v })} />
-                <ImageField label="Product image" value={p.imageSrc ?? ''} onChange={(v) => u({ ...p, imageSrc: v })} />
+                <ImageField label="Product image (also used as video poster)" value={p.imageSrc ?? ''} onChange={(v) => u({ ...p, imageSrc: v })} />
+                <VideoField label="Product video (autoplays; overrides image when set)" value={p.videoSrc ?? ''} onChange={(v) => u({ ...p, videoSrc: v })} />
               </div>
             )}
           />
