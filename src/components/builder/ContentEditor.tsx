@@ -5195,7 +5195,8 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Centre phone" value={f.imgPhone as string ?? ''} onChange={(v) => set('imgPhone', v)} />
           <NumberInput label="Centre phone width (px)" value={(f.imgPhoneWidth as number) ?? 254} onChange={(v) => set('imgPhoneWidth', v)} />
-          <TextInput label="Centre phone aspect ratio (e.g. 3/4) — enables object-fit" value={f.imgPhoneAspectRatio as string ?? ''} onChange={(v) => set('imgPhoneAspectRatio', v)} />
+          <NumberInput label="Centre phone height (px, 0 = auto/natural)" value={(f.imgPhoneHeight as number) ?? 0} onChange={(v) => set('imgPhoneHeight', v)} />
+          <TextInput label="Centre phone aspect ratio (e.g. 3/4) — leave blank if using height" value={f.imgPhoneAspectRatio as string ?? ''} onChange={(v) => set('imgPhoneAspectRatio', v)} />
           <FitSelect label="Centre phone fit" fitKey="imgPhoneFit" f={f} set={set} def="contain" />
           <ImageField label="Bottom-left card (Share of Shelf)" value={f.imgBottomLeft as string ?? ''} onChange={(v) => set('imgBottomLeft', v)} />
           <NumberInput label="Bottom-left card width (px)" value={(f.imgBottomLeftWidth as number) ?? 273} onChange={(v) => set('imgBottomLeftWidth', v)} />
