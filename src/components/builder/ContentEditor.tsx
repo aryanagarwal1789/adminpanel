@@ -2165,6 +2165,40 @@ function renderBlockFields(
         </div>
       );
 
+    case 'slick-dv-video-pointers': {
+      type PointerField = { title?: string; tag?: string };
+      return (
+        <div className="space-y-4">
+          <Toggle label="Reverse layout (video on left)" value={Boolean(f.reverseLayout)} onChange={(v) => set('reverseLayout', v)} />
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<PointerField>
+            label="Pointers"
+            items={(f.pointers as PointerField[]) ?? []}
+            onChange={(v) => set('pointers', v)}
+            newItem={() => ({ title: 'New pointer', tag: '' })}
+            itemPreview={(p) => p.title || '(empty)'}
+            renderItem={(p, u) => (
+              <div className="space-y-2">
+                <TextInput label="Title" value={p.title ?? ''} onChange={(v) => u({ ...p, title: v })} />
+                <TextInput label="Tag pill (optional)" value={p.tag ?? ''} onChange={(v) => u({ ...p, tag: v })} />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <TextInput label="CTA href" value={f.ctaHref as string ?? ''} onChange={(v) => set('ctaHref', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <ImageField label="Video thumbnail URL" value={f.videoThumb as string ?? ''} onChange={(v) => set('videoThumb', v)} />
+          <FitSelect label="Video thumbnail fit" fitKey="videoThumbFit" f={f} set={set} def="cover" />
+          <RichFieldGroup label="Video caption" f={f} set={set} base="videoLabel" segments={[{ key: 'videoLabel' }]} />
+          <TextInput label="Video embed URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+        </div>
+      );
+    }
+
     case 'slick-dv-vision':
       return (
         <div className="space-y-4">

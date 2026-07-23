@@ -65,6 +65,7 @@ export type TemplateBlockType =
   | 'slick-dv-register'
   | 'slick-dv-vision'
   | 'slick-dv-video-split'
+  | 'slick-dv-video-pointers'
   | 'slick-dv-agent'
   | 'slick-dv-who'
   | 'slick-dv-download'
@@ -452,6 +453,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-dv-register': 'DigiVyapar — Register Form',
   'slick-dv-vision': 'DigiVyapar — Vision & Stats',
   'slick-dv-video-split': 'DigiVyapar — Video + Copy Split',
+  'slick-dv-video-pointers': 'DigiVyapar — Video + Pointers Split',
   'slick-dv-agent': 'DigiVyapar — AI Agent Split',
   'slick-dv-who': 'DigiVyapar — Who Can Onboard',
   'slick-dv-download': 'DigiVyapar — Download App',

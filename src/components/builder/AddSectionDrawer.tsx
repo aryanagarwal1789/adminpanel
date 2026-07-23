@@ -372,6 +372,7 @@ const GROUPS: Group[] = [
     { type: "slick-dv-register", label: "DV — Register Form", Icon: FileText },
     { type: "slick-dv-vision", label: "DV — Vision & Stats", Icon: TrendingUp },
     { type: "slick-dv-video-split", label: "DV — Video + Copy", Icon: MonitorPlay },
+    { type: "slick-dv-video-pointers", label: "DV — Video + Pointers", Icon: MonitorPlay },
     { type: "slick-dv-agent", label: "DV — AI Agent Split", Icon: Sparkles },
     { type: "slick-dv-who", label: "DV — Who Can Onboard", Icon: Grid },
     { type: "slick-dv-download", label: "DV — Download App", Icon: Download },

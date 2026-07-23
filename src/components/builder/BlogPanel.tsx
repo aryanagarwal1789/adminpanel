@@ -38,6 +38,8 @@ export interface BlogPost {
   status: "draft" | "published";
   publishedAt?: string;
   createdAt?: string;
+  updatedAt?: string;
+  lastModifiedBy?: string;
 }
 
 interface Props {

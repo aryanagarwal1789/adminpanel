@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { authJsonHeaders, authHeaders } from "@/lib/builder-drafts";
+import { getAuth } from "@/lib/auth";
 import {
   AlignLeft, ChevronDown, ChevronUp, ExternalLink,
   FileText, Globe, Heading2, Heading3, ImageIcon,
@@ -11,6 +12,16 @@ import type { BlogPost, ContentBlock, ContentBlockType } from "./BlogPanel";
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 const UPLOAD_URL = `${BACKEND}/site/upload`;
 const RENDERER  = (import.meta.env.VITE_RENDERER_URL as string | undefined) ?? "https://demo-experience.salescode.ai";
+
+// ── Publish OTP (same gate as builder pages) ──
+const OTP_EMAIL_DOMAIN = "salescode.ai";
+function ssoEmail(): string | null {
+  const a = getAuth();
+  return a?.email && a.token && a.token !== "local-dev" ? a.email : null;
+}
+function isValidOtpEmail(email: string): boolean {
+  return new RegExp(`^[^@\\s]+@${OTP_EMAIL_DOMAIN.replace(".", "\\.")}$`).test(email.trim().toLowerCase());
+}
 
 // ── Inline rich-text parser (mirrors BlogPostPage rendering) ──────
 function parseParagraphPreview(text: string): React.ReactNode {
@@ -557,37 +568,138 @@ export function BlogEditorPage() {
     setBlocks(next);
   };
 
+  // Apply a saved post to local state (shared by direct saves + OTP verify).
+  const applySaved = (saved: BlogPost, msg: string) => {
+    toast.success(msg);
+    setPosts(ps => {
+      const idx = ps.findIndex(p => p.slug === saved.slug);
+      return idx >= 0 ? ps.map((p, i) => i === idx ? saved : p) : [saved, ...ps];
+    });
+    setSelected(saved);
+  };
+
   // ── Save ────────────────────────────────────────────────────────
+  // Draft saves + unpublish write directly. Publishing is OTP-gated (same as
+  // builder pages): it stages the payload and opens the verify modal.
   const save = async (opts?: { publish?: boolean; unpublish?: boolean }) => {
     if (!form.title.trim()) { toast.error("Title is required"); return; }
     if (!form.slug.trim())  { toast.error("Slug is required");  return; }
-    const payload: Partial<BlogPost> = { ...form, tags: tagInput.split(",").map(t => t.trim()).filter(Boolean) };
+    const editorName = (typeof localStorage !== "undefined" && localStorage.getItem("pb_editor_name")) || "Editor";
+    const payload: Partial<BlogPost> & { editorName: string } = { ...form, tags: tagInput.split(",").map(t => t.trim()).filter(Boolean), editorName };
     if (opts?.publish)   { payload.status = "published"; if (!payload.publishedAt) payload.publishedAt = new Date().toISOString(); }
     if (opts?.unpublish) { payload.status = "draft"; }
+
+    // A publish = the resulting status is "published". Those go through OTP.
+    const isPublishing = payload.status === "published" && !opts?.unpublish;
+    if (isPublishing) { openPublishOtp(payload); return; }
+
     setSaving(true);
     try {
       const url  = isNew ? `${BACKEND}/site/builder/blog/posts` : `${BACKEND}/site/builder/blog/posts/${selected!.slug}`;
       const res = await fetch(url, { method: isNew ? "POST" : "PUT", headers: authJsonHeaders(), body: JSON.stringify(payload) });
       if (!res.ok) { const e = await res.json().catch(() => ({})) as { error?: string }; throw new Error(e.error ?? String(res.status)); }
       const { post: saved } = await res.json() as { post: BlogPost };
-      toast.success(opts?.publish ? "Published!" : opts?.unpublish ? "Reverted to draft" : "Saved");
-      setPosts(ps => {
-        const idx = ps.findIndex(p => p.slug === saved.slug);
-        return idx >= 0 ? ps.map((p, i) => i === idx ? saved : p) : [saved, ...ps];
-      });
-      setSelected(saved);
+      applySaved(saved, opts?.unpublish ? "Reverted to draft" : "Saved");
     } catch (err) { toast.error(`Save failed: ${err}`); }
     finally { setSaving(false); }
   };
 
-  const deletePost = async () => {
-    if (!selected?.slug || !window.confirm("Delete this post permanently?")) return;
+  // ── OTP-gated publish ──
+  const [publishOtp, setPublishOtp] = useState<{
+    payload: Partial<BlogPost> & { editorName: string };
+    slug: string;
+    step: "email" | "otp";
+    email: string;
+    sessionId?: string;
+    sentTo?: string;
+    submitting: boolean;
+    error?: string;
+  } | null>(null);
+  const [otpInput, setOtpInput] = useState("");
+
+  const requestPublishOtp = async (
+    staged: { slug: string; payload: Partial<BlogPost> & { editorName: string } },
+    email: string,
+  ) => {
+    setPublishOtp(s => (s ? { ...s, submitting: true, error: undefined } : s));
     try {
-      await fetch(`${BACKEND}/site/builder/blog/posts/${selected.slug}`, { method: "DELETE", headers: authHeaders() });
-      toast.success("Deleted");
-      setPosts(ps => ps.filter(p => p.slug !== selected.slug));
-      setSelected(null);
-    } catch { toast.error("Delete failed"); }
+      const res = await fetch(`${BACKEND}/site/builder/blog/otp/request`, {
+        method: "POST",
+        headers: authJsonHeaders(),
+        body: JSON.stringify({ ...staged.payload, slug: staged.slug, isNew, email }),
+      });
+      const d = await res.json().catch(() => ({} as any));
+      if (!res.ok) {
+        setPublishOtp(s => (s ? { ...s, submitting: false, error: d.error || `Couldn't send OTP (${res.status})` } : s));
+        return;
+      }
+      setOtpInput("");
+      setPublishOtp(s => (s ? { ...s, step: "otp", email, sessionId: d.sessionId, sentTo: d.sentTo, submitting: false, error: undefined } : s));
+      toast.success(`OTP sent to ${d.sentTo || email}`);
+    } catch {
+      setPublishOtp(s => (s ? { ...s, submitting: false, error: "Couldn't send OTP — is the backend running?" } : s));
+    }
+  };
+
+  const openPublishOtp = (payload: Partial<BlogPost> & { editorName: string }) => {
+    const staged = { slug: form.slug.trim(), payload };
+    const sso = ssoEmail();
+    if (sso) {
+      setPublishOtp({ ...staged, step: "otp", email: sso, submitting: true });
+      void requestPublishOtp(staged, sso);
+    } else {
+      setPublishOtp({ ...staged, step: "email", email: getAuth()?.email ?? "", submitting: false });
+    }
+  };
+
+  const submitPublishEmail = () => {
+    setPublishOtp(cur => {
+      if (!cur) return cur;
+      const email = cur.email.trim().toLowerCase();
+      if (!isValidOtpEmail(email)) return { ...cur, error: `Enter a valid @${OTP_EMAIL_DOMAIN} email` };
+      void requestPublishOtp({ slug: cur.slug, payload: cur.payload }, email);
+      return { ...cur, email, submitting: true, error: undefined };
+    });
+  };
+
+  const verifyPublishOtp = () => {
+    setPublishOtp(cur => {
+      if (!cur?.sessionId) return cur;
+      const code = otpInput.trim();
+      if (!/^\d{6}$/.test(code)) return { ...cur, error: "Enter the 6-digit code" };
+      void (async () => {
+        try {
+          const res = await fetch(`${BACKEND}/site/builder/blog/otp/verify`, {
+            method: "POST",
+            headers: authJsonHeaders(),
+            body: JSON.stringify({ sessionId: cur.sessionId, otp: code }),
+          });
+          const d = await res.json().catch(() => ({} as any));
+          if (res.ok && d.ok) {
+            applySaved(d.post as BlogPost, "Published!");
+            setPublishOtp(null); setOtpInput("");
+            return;
+          }
+          if (res.status === 400 && typeof d.attemptsRemaining === "number") {
+            setPublishOtp(s => (s ? { ...s, submitting: false, error: `Invalid OTP — ${d.attemptsRemaining} attempt(s) left` } : s));
+            return;
+          }
+          if (res.status === 410) {
+            setPublishOtp(s => (s ? { ...s, submitting: false, sessionId: undefined, error: "OTP expired — request a new one" } : s));
+            return;
+          }
+          if (res.status === 423) {
+            setPublishOtp(null); setOtpInput("");
+            toast.error(d.error || "Too many attempts — request a new OTP.");
+            return;
+          }
+          setPublishOtp(s => (s ? { ...s, submitting: false, error: d.error || `Verify failed (${res.status})` } : s));
+        } catch {
+          setPublishOtp(s => (s ? { ...s, submitting: false, error: "Verify failed — is the backend running?" } : s));
+        }
+      })();
+      return { ...cur, submitting: true, error: undefined };
+    });
   };
 
   const newPost = () => { setSelected(null); setActiveTab("write"); };
@@ -647,6 +759,12 @@ export function BlogEditorPage() {
             </span>
           )}
           {form.readTime && <span className="text-xs text-slate-600">{form.readTime}</span>}
+          {!isNew && selected?.lastModifiedBy && (
+            <span className="text-xs text-slate-500"
+              title={selected.updatedAt ? `Updated ${new Date(selected.updatedAt).toLocaleString()}` : undefined}>
+              Edited by <span className="text-slate-300">{selected.lastModifiedBy}</span>
+            </span>
+          )}
           {!isNew && form.slug && (
             <a href={`${RENDERER}/blog/${form.slug}?preview=1`} target="_blank" rel="noreferrer"
               className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg"
@@ -862,22 +980,81 @@ export function BlogEditorPage() {
                     onChange={e => set("readTime", e.target.value)} placeholder="5 min read" />
                 </div>
 
-                {/* Danger zone */}
-                {!isNew && (
-                  <div className="pt-6 mt-6" style={{ borderTop: "1px solid #1f2937" }}>
-                    <p className="text-xs font-medium text-slate-500 mb-3">Danger zone</p>
-                    <button onClick={deletePost}
-                      className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 px-4 py-2 rounded-lg transition-colors"
-                      style={{ border: "1px solid rgba(239,68,68,0.2)" }}>
-                      <Trash2 size={14} /> Delete this post permanently
-                    </button>
-                  </div>
-                )}
               </div>
             )}
           </div>
         </main>
       </div>
+
+      {/* ── Publish OTP modal ── */}
+      {publishOtp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/50" onClick={() => { setPublishOtp(null); setOtpInput(""); }} />
+          <div className="relative w-full max-w-sm rounded-lg border border-slate-700 bg-slate-900 text-slate-100 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
+              <span className="text-sm font-semibold">Verify to publish</span>
+              <button onClick={() => { setPublishOtp(null); setOtpInput(""); }} className="p-1.5 rounded hover:bg-slate-800" title="Cancel">
+                <X size={16} />
+              </button>
+            </div>
+
+            {publishOtp.step === "email" ? (
+              <div className="space-y-3 px-4 py-4">
+                <p className="text-xs text-slate-400">
+                  Enter your <span className="font-medium text-slate-200">@{OTP_EMAIL_DOMAIN}</span> email — we'll send a 6-digit code to confirm this publish.
+                </p>
+                <input
+                  autoFocus type="email" value={publishOtp.email}
+                  onChange={(e) => setPublishOtp(s => (s ? { ...s, email: e.target.value, error: undefined } : s))}
+                  onKeyDown={(e) => { if (e.key === "Enter") submitPublishEmail(); }}
+                  placeholder={`you@${OTP_EMAIL_DOMAIN}`}
+                  className="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white outline-none focus:border-slate-400"
+                />
+                {publishOtp.error && <p className="text-xs text-red-400">{publishOtp.error}</p>}
+                <button
+                  onClick={submitPublishEmail}
+                  disabled={publishOtp.submitting || !isValidOtpEmail(publishOtp.email)}
+                  className="w-full rounded-md px-3 py-2 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ background: "#22c55e" }}
+                >
+                  {publishOtp.submitting ? "Sending…" : "Send code"}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3 px-4 py-4">
+                <p className="text-xs text-slate-400">
+                  {publishOtp.sentTo
+                    ? <>Enter the 6-digit code sent to <span className="font-medium text-slate-200">{publishOtp.sentTo}</span>.</>
+                    : "Sending code…"}
+                </p>
+                <input
+                  autoFocus inputMode="numeric" maxLength={6} value={otpInput}
+                  onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  onKeyDown={(e) => { if (e.key === "Enter") verifyPublishOtp(); }}
+                  placeholder="••••••"
+                  className="w-full rounded border border-slate-600 bg-slate-800 px-3 py-2 text-center text-lg tracking-[0.5em] text-white outline-none focus:border-slate-400"
+                />
+                {publishOtp.error && <p className="text-xs text-red-400">{publishOtp.error}</p>}
+                <button
+                  onClick={verifyPublishOtp}
+                  disabled={publishOtp.submitting || otpInput.length !== 6 || !publishOtp.sessionId}
+                  className="w-full rounded-md px-3 py-2 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ background: "#22c55e" }}
+                >
+                  {publishOtp.submitting ? "Verifying…" : "Verify & publish"}
+                </button>
+                <button
+                  onClick={() => requestPublishOtp({ slug: publishOtp.slug, payload: publishOtp.payload }, publishOtp.email)}
+                  disabled={publishOtp.submitting}
+                  className="w-full rounded-md border border-slate-600 px-3 py-1.5 text-xs hover:bg-slate-800 disabled:opacity-40"
+                >
+                  Resend code
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
