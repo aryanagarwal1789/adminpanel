@@ -444,19 +444,40 @@ function BlockCard({ block, onChange, onDelete, onUp, onDown, first, last }:
 }
 
 // ── Post list item ────────────────────────────────────────────────
-function PostItem({ post, active, onClick }: { post: BlogPost; active: boolean; onClick: () => void }) {
+function PostItem({ post, active, onClick, draggable, dragging, onDragStart, onDragOver, onDrop }: {
+  post: BlogPost; active: boolean; onClick: () => void;
+  draggable?: boolean; dragging?: boolean;
+  onDragStart?: () => void; onDragOver?: (e: React.DragEvent) => void; onDrop?: () => void;
+}) {
   return (
     <button type="button" onClick={onClick}
-      className="w-full text-left px-3 py-2.5 rounded-xl transition-all"
-      style={{ background: active ? "rgba(0,198,177,0.1)" : "transparent", border: active ? "1px solid rgba(0,198,177,0.25)" : "1px solid transparent" }}>
-      <div className="flex items-start justify-between gap-2">
-        <span className="text-sm font-medium leading-snug truncate" style={{ color: active ? "#00c6b1" : "#e2e8f0" }}>{post.title || "Untitled"}</span>
-        <span className="shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-          style={{ background: post.status === "published" ? "rgba(34,197,94,0.15)" : "rgba(100,116,139,0.2)", color: post.status === "published" ? "#4ade80" : "#94a3b8" }}>
-          {post.status === "published" ? "Live" : "Draft"}
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      className="w-full text-left px-3 py-2.5 rounded-xl transition-all flex items-start gap-2.5"
+      style={{ background: active ? "rgba(0,198,177,0.1)" : "transparent", border: active ? "1px solid rgba(0,198,177,0.25)" : "1px solid transparent", opacity: dragging ? 0.4 : 1, cursor: draggable ? "grab" : "pointer" }}>
+      {/* Thumbnail */}
+      <span
+        className="shrink-0 rounded-md overflow-hidden flex items-center justify-center"
+        style={{ width: 44, height: 44, background: "#1f2937", border: "1px solid #2d3748" }}
+      >
+        {post.featuredImage
+          ? <img src={post.featuredImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          : <FileText size={16} style={{ color: "#475569" }} />
+        }
+      </span>
+      {/* Text */}
+      <span className="flex-1 min-w-0">
+        <span className="flex items-start justify-between gap-2">
+          <span className="text-sm font-medium leading-snug truncate" style={{ color: active ? "#00c6b1" : "#e2e8f0" }}>{post.title || "Untitled"}</span>
+          <span className="shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+            style={{ background: post.status === "published" ? "rgba(34,197,94,0.15)" : "rgba(100,116,139,0.2)", color: post.status === "published" ? "#4ade80" : "#94a3b8" }}>
+            {post.status === "published" ? "Live" : "Draft"}
+          </span>
         </span>
-      </div>
-      {post.excerpt && <p className="text-xs mt-0.5 line-clamp-1" style={{ color: "#64748b" }}>{post.excerpt}</p>}
+        {post.excerpt && <span className="block text-xs mt-0.5 line-clamp-1" style={{ color: "#64748b" }}>{post.excerpt}</span>}
+      </span>
     </button>
   );
 }
@@ -571,6 +592,32 @@ export function BlogEditorPage() {
 
   const newPost = () => { setSelected(null); setActiveTab("write"); };
 
+  // ── Drag-to-reorder (disabled while searching, since the list is filtered) ──
+  const [dragSlug, setDragSlug] = useState<string | null>(null);
+
+  const persistOrder = (ordered: BlogPost[]) => {
+    fetch(`${BACKEND}/site/builder/blog/reorder`, {
+      method: "PUT",
+      headers: authJsonHeaders(),
+      body: JSON.stringify({ slugs: ordered.map(p => p.slug) }),
+    }).catch(() => toast.error("Could not save order"));
+  };
+
+  const handleDrop = (targetSlug: string) => {
+    if (!dragSlug || dragSlug === targetSlug) { setDragSlug(null); return; }
+    setPosts(ps => {
+      const from = ps.findIndex(p => p.slug === dragSlug);
+      const to = ps.findIndex(p => p.slug === targetSlug);
+      if (from < 0 || to < 0) return ps;
+      const next = [...ps];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      persistOrder(next);
+      return next;
+    });
+    setDragSlug(null);
+  };
+
   const filtered = posts.filter(p => !search || p.title.toLowerCase().includes(search.toLowerCase()) || (p.excerpt ?? "").toLowerCase().includes(search.toLowerCase()));
 
   const inp = "w-full rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500/50";
@@ -661,7 +708,17 @@ export function BlogEditorPage() {
             ) : filtered.length === 0 ? (
               <p className="text-xs text-slate-600 text-center py-8">No posts found</p>
             ) : filtered.map(p => (
-              <PostItem key={p.slug} post={p} active={selected?.slug === p.slug} onClick={() => { setSelected(p); setActiveTab("write"); }} />
+              <PostItem
+                key={p.slug}
+                post={p}
+                active={selected?.slug === p.slug}
+                onClick={() => { setSelected(p); setActiveTab("write"); }}
+                draggable={!search}
+                dragging={dragSlug === p.slug}
+                onDragStart={() => setDragSlug(p.slug)}
+                onDragOver={(e) => { if (dragSlug) e.preventDefault(); }}
+                onDrop={() => handleDrop(p.slug)}
+              />
             ))}
           </div>
 
