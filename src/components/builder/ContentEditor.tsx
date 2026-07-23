@@ -2182,8 +2182,8 @@ function renderBlockFields(
             itemPreview={(p) => p.title || '(empty)'}
             renderItem={(p, u) => (
               <div className="space-y-2">
-                <TextInput label="Title" value={p.title ?? ''} onChange={(v) => u({ ...p, title: v })} />
-                <TextInput label="Tag pill (optional)" value={p.tag ?? ''} onChange={(v) => u({ ...p, tag: v })} />
+                <RichTextInput label="Title" {...richItemProps(p, 'title', u)} />
+                <RichTextInput label="Tag pill (optional)" {...richItemProps(p, 'tag', u)} />
               </div>
             )}
           />
