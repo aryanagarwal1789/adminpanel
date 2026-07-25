@@ -4625,6 +4625,8 @@ function renderBlockFields(
     case 'slick-sc-footer-v2': {
       type FLink = { label: string; href: string; badge?: string };
       type SLink = { icon: string; label: string; href: string };
+      type DtcFeat = { text?: string; iconUrl?: string };
+      type PGroup = { label: string; items: FLink[] };
       const linkColumn = (
         title: string, key: string, tKey: string, withBadge: boolean,
       ) => (
@@ -4648,11 +4650,27 @@ function renderBlockFields(
       );
       return (
         <div className="space-y-4">
-          <RichFieldGroup label="CTA badge" f={f} set={set} base="ctaBadge" segments={[{ key: 'ctaBadge' }]} />
-          <RichFieldGroup label="CTA heading" f={f} set={set} base="ctaHeading" segments={[{ key: 'ctaHeading' }]} />
-          <RichFieldGroup label="CTA body" f={f} set={set} base="ctaBody" segments={[{ key: 'ctaBody' }]} />
-          <RichFieldGroup label="CTA button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
-          <TextInput label="CTA button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <p className="text-xs text-slate-500 font-medium">Dare to Compare card</p>
+          <ImageField label="Logo" value={f.dtcLogo as string ?? ''} onChange={(v) => set('dtcLogo', v)} />
+          <RichFieldGroup label="Heading (normal part)" f={f} set={set} base="dtcHeadingPre" segments={[{ key: 'dtcHeadingPre' }]} />
+          <RichFieldGroup label="Heading (gold accent)" f={f} set={set} base="dtcHeadingAccent" segments={[{ key: 'dtcHeadingAccent' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="dtcSubtitle" segments={[{ key: 'dtcSubtitle' }]} />
+          <Repeater<DtcFeat>
+            label="Feature cards"
+            items={(f.dtcFeatures as DtcFeat[]) ?? []}
+            onChange={(v) => set('dtcFeatures', v)}
+            newItem={() => ({ text: 'New feature (**bold** for teal)', iconUrl: '' })}
+            itemPreview={(x) => x.text || '(empty)'}
+            renderItem={(x, u) => (
+              <div className="space-y-2">
+                <TextInput label="Text (wrap **text** for teal bold)" value={x.text ?? ''} onChange={(v) => u({ ...x, text: v })} />
+                <ImageField label="Icon" value={x.iconUrl ?? ''} onChange={(v) => u({ ...x, iconUrl: v })} />
+              </div>
+            )}
+          />
+          <RichFieldGroup label="CTA button label" f={f} set={set} base="dtcCtaLabel" segments={[{ key: 'dtcCtaLabel' }]} />
+          <TextInput label="CTA button URL" value={f.dtcCtaUrl as string ?? ''} onChange={(v) => set('dtcCtaUrl', v)} />
+          <RichFieldGroup label="Footnote" f={f} set={set} base="dtcFootnote" segments={[{ key: 'dtcFootnote' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Logo URL" value={f.logoSrc as string ?? ''} onChange={(v) => set('logoSrc', v)} />
           <RichFieldGroup label="Tagline" f={f} set={set} base="tagline" segments={[{ key: 'tagline' }]} />
@@ -4662,7 +4680,32 @@ function renderBlockFields(
           <RichFieldGroup label="Email" f={f} set={set} base="email" segments={[{ key: 'email' }]} />
           <RichFieldGroup label="Email label" f={f} set={set} base="emailLabel" segments={[{ key: 'emailLabel' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          {linkColumn('Products', 'products', 'productsTitle', true)}
+          <p className="text-xs text-slate-500 font-medium">All Products mega-grid (grouped columns)</p>
+          <Repeater<PGroup>
+            label="Product groups"
+            items={(f.productGroups as PGroup[]) ?? []}
+            onChange={(v) => set('productGroups', v)}
+            newItem={() => ({ label: 'New group', items: [{ label: 'New link', href: '#' }] })}
+            itemPreview={(g) => g.label || '(group)'}
+            renderItem={(g, u) => (
+              <div className="space-y-2">
+                <TextInput label="Group title" value={g.label ?? ''} onChange={(v) => u({ ...g, label: v })} />
+                <Repeater<FLink>
+                  label="Links"
+                  items={g.items ?? []}
+                  onChange={(v) => u({ ...g, items: v })}
+                  newItem={() => ({ label: 'New link', href: '#' })}
+                  itemPreview={(l) => l.label || '(link)'}
+                  renderItem={(l, ul) => (
+                    <div className="space-y-2">
+                      <TextInput label="Label" value={l.label ?? ''} onChange={(v) => ul({ ...l, label: v })} />
+                      <TextInput label="URL" value={l.href ?? ''} onChange={(v) => ul({ ...l, href: v })} />
+                    </div>
+                  )}
+                />
+              </div>
+            )}
+          />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           {linkColumn('Resources', 'resources', 'resourcesTitle', true)}
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -5922,7 +5965,7 @@ function renderBlockFields(
       );
 
     case 'slick-sc-platform-grid': {
-      type PlatformItem = { titleBold: string; titleLight: string; icon: string; tags: string[]; href: string };
+      type PlatformItem = { titleBold: string; titleLight: string; icon: string; tags: string[]; href: string; iconImage?: string; iconBg?: string };
       const PG_ICON_OPTS = [
         'buildings','plant','binoculars','chart-line-up','warehouse','barn','shopping-cart','truck',
         'scan','camera','device-mobile-camera','headset','chalkboard-teacher','brain','rocket-launch',
@@ -5959,7 +6002,9 @@ function renderBlockFields(
                 <RichTextInput label="Title (bold)" {...richItemProps(it, 'titleBold', u)} />
                 <RichTextInput label="Title (light)" {...richItemProps(it, 'titleLight', u)} />
                 <TextInput label="Link URL" value={it.href} onChange={(v) => u({ ...it, href: v })} />
-                <div className="text-xs text-slate-400">Icon</div>
+                <ImageField label="Upload icon (overrides the built-in icon below when set)" value={it.iconImage ?? ''} onChange={(v) => u({ ...it, iconImage: v })} />
+                <ColorPicker label="Icon card background (blank = category tint)" value={it.iconBg ?? ''} onChange={(v) => u({ ...it, iconBg: v })} />
+                <div className="text-xs text-slate-400">Built-in icon</div>
                 <div className="flex gap-1.5 flex-wrap">
                   {PG_ICON_OPTS.map(ico => (
                     <button key={ico} onClick={() => u({ ...it, icon: ico })}
