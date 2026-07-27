@@ -104,6 +104,7 @@ const GROUPS: Group[] = [
   ]},
   { name: "Careers", items: [
     { type: "slick-careers-hero",  label: "Careers — Hero",  Icon: Sparkles },
+    { type: "slick-help-hero",     label: "Help Center — Hero", Icon: Sparkles },
     { type: "slick-careers-about",   label: "Careers — About",   Icon: FileText },
     { type: "slick-careers-culture", label: "Careers — Culture", Icon: Users   },
     { type: "slick-careers-expect",  label: "Careers — Expect",  Icon: Star       },

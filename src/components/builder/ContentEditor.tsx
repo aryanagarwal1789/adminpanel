@@ -1,5 +1,6 @@
 import { RichFieldGroup } from "./RichFieldGroup";
 import { RichTextInput } from "./RichTextInput";
+import { LinkField as PageLinkField } from "./LinkField";
 import { richItemProps } from "./rich-text";
 import { useState } from "react";
 import { Plus } from "lucide-react";
@@ -4088,6 +4089,22 @@ function renderBlockFields(
         </div>
       );
 
+    case 'slick-help-hero':
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading (dark part)" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading accent (teal)" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="Subheading — normal start" f={f} set={set} base="subNormal" segments={[{ key: 'subNormal' }]} />
+          <RichFieldGroup label="Subheading — bold word" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Subheading — normal end" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Search placeholder" value={f.searchPlaceholder as string ?? ''} onChange={(v) => set('searchPlaceholder', v)} />
+          <TextInput label="Search results URL (optional — Enter navigates to ?q=…)" value={f.searchUrl as string ?? ''} onChange={(v) => set('searchUrl', v)} />
+        </div>
+      );
+
     case 'slick-careers-hero':
     case 'slick-ab-hero-v2':
       return (
@@ -4584,7 +4601,7 @@ function renderBlockFields(
                     <div className="space-y-2">
                       <RichTextInput label="Name" {...richItemProps(it, 'name', ui)} />
                       <RichTextInput label="Description" {...richItemProps(it, 'desc', ui)} />
-                      <TextInput label="Link URL" value={it.href ?? ''} onChange={(v) => ui({ ...it, href: v })} />
+                      <PageLinkField label="Link URL" value={it.href ?? ''} onChange={(v) => ui({ ...it, href: v })} />
                       <TextInput label="Icon key" value={it.iconKey ?? ''} onChange={(v) => ui({ ...it, iconKey: v })} />
                       <Toggle label="Show AI badge" value={Boolean(it.ai)} onChange={(v) => ui({ ...it, ai: v })} />
                     </div>
@@ -4641,7 +4658,7 @@ function renderBlockFields(
             renderItem={(l, u) => (
               <div className="space-y-2">
                 <RichTextInput label="Label" {...richItemProps(l, 'label', u)} />
-                <TextInput label="URL" value={l.href ?? ''} onChange={(v) => u({ ...l, href: v })} />
+                <PageLinkField label="URL" value={l.href ?? ''} onChange={(v) => u({ ...l, href: v })} />
                 {withBadge && <TextInput label="Badge (new / hiring — optional)" value={l.badge ?? ''} onChange={(v) => u({ ...l, badge: v })} />}
               </div>
             )}
@@ -4699,7 +4716,7 @@ function renderBlockFields(
                   renderItem={(l, ul) => (
                     <div className="space-y-2">
                       <TextInput label="Label" value={l.label ?? ''} onChange={(v) => ul({ ...l, label: v })} />
-                      <TextInput label="URL" value={l.href ?? ''} onChange={(v) => ul({ ...l, href: v })} />
+                      <PageLinkField label="URL" value={l.href ?? ''} onChange={(v) => ul({ ...l, href: v })} />
                     </div>
                   )}
                 />
@@ -4747,7 +4764,7 @@ function renderBlockFields(
             renderItem={(l, u) => (
               <div className="space-y-2">
                 <RichTextInput label="Label" {...richItemProps(l, 'label', u)} />
-                <TextInput label="URL" value={l.href ?? ''} onChange={(v) => u({ ...l, href: v })} />
+                <PageLinkField label="URL" value={l.href ?? ''} onChange={(v) => u({ ...l, href: v })} />
               </div>
             )}
           />
@@ -5938,6 +5955,8 @@ function renderBlockFields(
           <TextInput label="Ghost CTA URL" value={f.ghostCtaUrl as string ?? ''} onChange={(v) => set('ghostCtaUrl', v)} />
           <RichFieldGroup label="Credits label" f={f} set={set} base="creditsLabel" segments={[{ key: 'creditsLabel' }]} />
           <RichFieldGroup label="Credits highlight (teal)" f={f} set={set} base="creditsHighlight" segments={[{ key: 'creditsHighlight' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Register URL (post-call CTA)" value={f.registerUrl as string ?? ''} onChange={(v) => set('registerUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Avatar image" value={f.avatarUrl as string ?? ''} onChange={(v) => set('avatarUrl', v)} />
           <RichFieldGroup label="Mic label (Tap to Talk)" f={f} set={set} base="micLabel" segments={[{ key: 'micLabel' }]} />

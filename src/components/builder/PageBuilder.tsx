@@ -6,6 +6,7 @@ import {
   LogOut, History, RotateCcw, Monitor, Smartphone,
 } from "lucide-react";
 import { defaultBlock } from "./blocks";
+import { SiteUrlManager } from "./SiteUrlManager";
 import { isRichDoc, type RichDoc } from "./rich-text";
 import { syncRichContent, pickTextPatch } from "./rich-sync";
 import { AddSectionDrawer } from "./AddSectionDrawer";
@@ -297,7 +298,7 @@ export function PageBuilder() {
   const [device, setDevice] = useState<Device>("desktop");
   const [themeOpen, setThemeOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [leftPanel, setLeftPanel] = useState<null | "pages" | "sections">(null);
+  const [leftPanel, setLeftPanel] = useState<null | "pages" | "sections" | "urls">(null);
 
   // Push a history entry when preview opens so pressing Back closes it
   useEffect(() => {
@@ -451,11 +452,15 @@ export function PageBuilder() {
       const { id, name } = getEditor();
       const entry = pageBlocks[pageKey] ?? { desktop: [], mobile: null };
       const themes = themesByPage[pageKey] ?? DEFAULT_THEME_VARIANTS;
-      const hostnames = pages.find((p) => p.id === pageKey)?.hostnames ?? [];
+      const pageMeta = pages.find((p) => p.id === pageKey);
+      const hostnames = pageMeta?.hostnames ?? [];
       const body: Record<string, unknown> = {
         blocks: entry.desktop, theme: themes.desktop, hostnames, editorId: id, editorName: name,
         lastKnownUpdatedAt: pageUpdatedAt[pageKey],
       };
+      // CMS URL (bucket + slug) — publishing a page also saves its route.
+      if (pageMeta?.bucketId !== undefined) body.bucketId = pageMeta.bucketId;
+      if (pageMeta?.urlSlug !== undefined) body.slug = pageMeta.urlSlug;
       // Mobile variant is included only once materialized locally — omission preserves server state
       if (entry.mobile !== null) {
         body.mobileBlocks = entry.mobile;
@@ -1017,7 +1022,7 @@ export function PageBuilder() {
       try {
         const res = await fetch(`${BACKEND}/site/builder/pages`);
         if (!res.ok) throw new Error();
-        const { pages: rawPages } = await res.json() as { pages: { pageKey: string; hostnames?: string[] }[] };
+        const { pages: rawPages } = await res.json() as { pages: { pageKey: string; hostnames?: string[]; bucketId?: string | null; slug?: string; path?: string }[] };
         if (!rawPages?.length) { setLoading(false); return; }
 
         // Known safe page keys — scraper bait, well-known paths, and HTML-entity duplicates are excluded
@@ -1043,6 +1048,9 @@ export function PageBuilder() {
             slug: `/${p.pageKey}`,
             title: p.pageKey.charAt(0).toUpperCase() + p.pageKey.slice(1) + " Page",
             hostnames: p.hostnames ?? [],
+            bucketId: p.bucketId ?? null,
+            urlSlug: p.slug ?? "",
+            path: p.path ?? "",
           }));
 
         const firstKey = builtPages[0].id;
@@ -1439,6 +1447,13 @@ export function PageBuilder() {
           >
             <FileText size={18} />
           </button>
+          <button
+            onClick={() => setLeftPanel((p) => (p === "urls" ? null : "urls"))}
+            className={`w-9 h-9 flex items-center justify-center rounded pb-transition ${leftPanel === "urls" ? "bg-slate-700 text-white" : "text-slate-400 hover:bg-slate-700/60 hover:text-white"}`}
+            title="Site URLs & buckets"
+          >
+            <Globe size={18} />
+          </button>
         </div>
 
         {/* Left slide panel — opens when icon clicked */}
@@ -1462,7 +1477,7 @@ export function PageBuilder() {
                 </div>
               ) : (
                 <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">
-                  {leftPanel === "pages" ? "Pages" : "Sections"}
+                  {leftPanel === "pages" ? "Pages" : leftPanel === "urls" ? "Site URLs" : "Sections"}
                 </span>
               )}
               <div className="flex items-center gap-1">
@@ -1582,12 +1597,22 @@ export function PageBuilder() {
                           </button>
                         )}
                       </div>
+
                     </div>
                   );
                   });
                 })()}
                 </div>
               </div>
+            )}
+
+            {leftPanel === "urls" && (
+              <SiteUrlManager
+                pages={pages}
+                activePageId={activePage}
+                onSelectPage={(id) => { setActivePage(id); setSelectedBlockId(null); }}
+                onPageChange={(pageKey, patch) => setPages(pages.map((pg) => (pg.id === pageKey ? { ...pg, ...patch } : pg)))}
+              />
             )}
 
             {leftPanel === "sections" && (

@@ -143,6 +143,7 @@ export type TemplateBlockType =
   | 'slick-ab-hero'
   | 'slick-ab-hero-v2'
   | 'slick-careers-hero'
+  | 'slick-help-hero'
   | 'slick-clients-hero'
   | 'slick-blogs-hero'
   | 'slick-contact-hero'
@@ -363,6 +364,12 @@ export interface Page {
   slug: string;
   title: string;
   hostnames: string[];
+  // CMS-editable public URL: bucket (nested route folder) + slug within it.
+  // Published with the page; drives routing + navbar/footer links.
+  bucketId?: string | null;
+  urlSlug?: string;
+  /** Computed canonical path (bucket chain + urlSlug), for display/preview. */
+  path?: string;
 }
 
 export interface Theme {
@@ -531,6 +538,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-ab-hero': 'About Us — Hero',
   'slick-ab-hero-v2': 'About Us — Hero V2',
   'slick-careers-hero': 'Careers — Hero',
+  'slick-help-hero': 'Help Center — Hero',
   'slick-clients-hero': 'Clients — Hero',
   'slick-blogs-hero': 'Blogs — Hero',
   'slick-contact-hero': 'Contact — Hero',
