@@ -36,6 +36,7 @@ const GROUPS: Group[] = [
     { type: "clients-page-slot", label: "Clients Page", Icon: Users },
     { type: "contact-page-slot", label: "Contact Us Page", Icon: Megaphone },
     { type: "blog-page-slot", label: "Blog Page", Icon: FileText },
+    { type: "slick-sc-faq-explorer", label: "FAQ Explorer (382 Q&A, search + filters)", Icon: HelpCircle },
   ]},
   { name: "Salescode Landing", items: [
     { type: "slick-sc-hero-v2",        label: "SC — Hero V2 (Person + Floating Cards)", Icon: Sparkles },
@@ -44,6 +45,7 @@ const GROUPS: Group[] = [
     { type: "slick-sc-platform-grid",  label: "SC — Platform Grid",  Icon: Grid      },
     { type: "slick-sc-privacy-policy", label: "SC — Privacy Policy", Icon: FileText  },
     { type: "slick-sc-brand-strip", label: "SC — Brand Strip", Icon: Grid2x2 },
+    { type: "slick-sc-founder-reels", label: "SC — Founder Reels", Icon: Grid2x2 },
     { type: "slick-sc-impact-stats", label: "SC — Impact Stats", Icon: TrendingUp },
     { type: "slick-sc-product-suite", label: "SC — Product Suite", Icon: Grid2x2 },
     { type: "slick-sc-ai-product-grid", label: "SC — AI Product Grid", Icon: MonitorPlay },

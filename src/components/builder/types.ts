@@ -95,6 +95,7 @@ export type TemplateBlockType =
   | 'slick-sc-platform-grid'
   | 'slick-sc-privacy-policy'
   | 'slick-sc-brand-strip'
+  | 'slick-sc-founder-reels'
   | 'slick-sc-impact-stats'
   | 'slick-sc-product-suite'
   | 'slick-sc-ai-product-grid'
@@ -140,6 +141,7 @@ export type TemplateBlockType =
   | 'slick-eb2b-impact'
   | 'slick-eb2b-deployments'
   | 'slick-eb2b-faq'
+  | 'slick-sc-faq-explorer'
   | 'slick-ab-hero'
   | 'slick-ab-hero-v2'
   | 'slick-careers-hero'
@@ -356,6 +358,8 @@ export interface Block {
   style: BlockStyle;
   layout?: LayoutVariant;
   columns?: unknown[];
+  // Global-component reference → a block id in the reserved "_globals" page.
+  globalId?: string;
 }
 
 export interface Page {
@@ -490,6 +494,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sc-platform-grid':   'SC — Platform Grid',
   'slick-sc-privacy-policy':  'SC — Privacy Policy',
   'slick-sc-brand-strip': 'SC — Brand Strip',
+  'slick-sc-founder-reels': 'SC — Founder Reels',
   'slick-sc-impact-stats': 'SC — Impact Stats',
   'slick-sc-product-suite': 'SC — Product Suite',
   'slick-sc-ai-product-grid': 'SC — AI Product Grid',
@@ -535,6 +540,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-eb2b-impact': 'eB2B — Proven Impact',
   'slick-eb2b-deployments': 'eB2B — Our Deployments',
   'slick-eb2b-faq': 'eB2B — FAQ',
+  'slick-sc-faq-explorer': 'FAQ Explorer (382 Q&A)',
   'slick-ab-hero': 'About Us — Hero',
   'slick-ab-hero-v2': 'About Us — Hero V2',
   'slick-careers-hero': 'Careers — Hero',

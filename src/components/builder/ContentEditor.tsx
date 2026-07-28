@@ -2589,6 +2589,33 @@ function renderBlockFields(
       );
     }
 
+    case 'slick-sc-founder-reels': {
+      type ReelItem = { posterUrl?: string; videoUrl?: string };
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Eyebrow label" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading (plain start)" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading (teal emphasis)" f={f} set={set} base="headingEm" segments={[{ key: 'headingEm' }]} />
+          <RichFieldGroup label="Heading (plain end)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
+          <RichFieldGroup label="Subheading" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<ReelItem>
+            label="Reels (YouTube Shorts)"
+            items={(f.reels as ReelItem[]) ?? []}
+            onChange={(v) => set('reels', v)}
+            newItem={() => ({ posterUrl: '', videoUrl: '' })}
+            itemPreview={(_, i) => `Reel ${i + 1}`}
+            renderItem={(r, u) => (
+              <div className="space-y-2">
+                <TextInput label="YouTube Short / video URL" value={r.videoUrl ?? ''} onChange={(v) => u({ ...r, videoUrl: v })} />
+                <ImageField label="Thumbnail (optional — falls back to the YouTube thumbnail)" value={r.posterUrl ?? ''} onChange={(v) => u({ ...r, posterUrl: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
     case 'slick-sc-brand-strip': {
       type LogoField = { imageUrl: string; alt: string };
       return (
@@ -3770,6 +3797,23 @@ function renderBlockFields(
         </div>
       );
 
+    case 'slick-sc-faq-explorer':
+      // Hero copy only — the 382 questions always render from faqExplorerData.ts
+      // on the self-serve site (never CMS data), so there is no FAQ list to edit here.
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading (dark part)" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading accent (teal)" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="Subheading — normal start" f={f} set={set} base="subNormal" segments={[{ key: 'subNormal' }]} />
+          <RichFieldGroup label="Subheading — bold word" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
+          <RichFieldGroup label="Subheading — normal end" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Search placeholder" value={f.searchPlaceholder as string ?? ''} onChange={(v) => set('searchPlaceholder', v)} />
+        </div>
+      );
+
     case 'slick-eb2b-faq':
       return (
         <div className="space-y-4">
@@ -3790,6 +3834,9 @@ function renderBlockFields(
               </div>
             )}
           />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label={'"View more" button label'} f={f} set={set} base="viewMoreLabel" segments={[{ key: 'viewMoreLabel' }]} />
+          <PageLinkField label={'"View more" button URL (opens in a new tab)'} value={f.viewMoreUrl as string ?? ''} onChange={(v) => set('viewMoreUrl', v)} />
         </div>
       );
 

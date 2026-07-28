@@ -1036,17 +1036,22 @@ export function PageBuilder() {
           /wp-/i,                        // WordPress scanner probes
           /admin-sdk/i,                  // SDK paths from bots
         ];
+        // Reserved store for global components (shared navbar/footer). It's a real
+        // page doc but never a public URL; editors open it here to edit site-wide
+        // components once. Allowed through the `/^_/` block below.
+        const GLOBALS_KEY = "_globals";
         const builtPages: Page[] = rawPages
           .filter((p) => {
             if (p.pageKey === "__blog__") return false;
+            if (p.pageKey === GLOBALS_KEY) return true; // keep the globals store visible
             if (BLOCKED_PATTERNS.some((rx) => rx.test(p.pageKey))) return false;
             return true;
           })
           .map((p) => ({
             id: p.pageKey,
-            name: p.pageKey.charAt(0).toUpperCase() + p.pageKey.slice(1),
+            name: p.pageKey === GLOBALS_KEY ? "🌐 Global Components" : p.pageKey.charAt(0).toUpperCase() + p.pageKey.slice(1),
             slug: `/${p.pageKey}`,
-            title: p.pageKey.charAt(0).toUpperCase() + p.pageKey.slice(1) + " Page",
+            title: p.pageKey === GLOBALS_KEY ? "Global Components" : p.pageKey.charAt(0).toUpperCase() + p.pageKey.slice(1) + " Page",
             hostnames: p.hostnames ?? [],
             bucketId: p.bucketId ?? null,
             urlSlug: p.slug ?? "",
