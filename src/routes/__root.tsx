@@ -28,7 +28,7 @@ function NotFoundComponent() {
   }, [navigate]);
   return null;
 }
-  
+   
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
