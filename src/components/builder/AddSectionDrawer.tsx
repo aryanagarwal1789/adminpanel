@@ -19,6 +19,9 @@ const GROUPS: Group[] = [
   { name: "Advanced", items: [
     { type: "html-embed", label: "Custom HTML / Embed", Icon: Code },
   ]},
+  { name: "Platform Branded", items: [
+    { type: "slick-sc-platform-branded", label: "Platform — Sign-in Split", Icon: Sparkles },
+  ]},
   { name: "Salescode Branded", items: [
     { type: "hero-salescode", label: "Hero — Salescode", Icon: Sparkles },
     { type: "impact-salescode", label: "Impact Stats", Icon: TrendingUp },

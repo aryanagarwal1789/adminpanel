@@ -1269,6 +1269,13 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
       { posterUrl: '', videoUrl: '' },
     ],
   },
+  'slick-sc-platform-branded': {
+    pillText: 'The Complete Sales-Tech Suite',
+    headingPre: 'Future Ready ',
+    headingAccent: 'Solutions',
+    headingLine2: 'All in one place',
+    sub: '24 AI-native solutions across your entire route-to-market. Filter by category or browse everything at once.',
+  },
   'slick-sc-think-tank': {
     eyebrowLabel:  'Latest thinking',
     headingPre:    'From the ',

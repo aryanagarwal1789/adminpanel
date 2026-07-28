@@ -2589,6 +2589,18 @@ function renderBlockFields(
       );
     }
 
+    case 'slick-sc-platform-branded':
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Pill / eyebrow" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Heading (plain start)" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading (teal accent word)" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading (second line)" f={f} set={set} base="headingLine2" segments={[{ key: 'headingLine2' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <p className="text-xs text-slate-500">The right side embeds the live sign-in / sign-up (same as the /login page) — no fields to edit.</p>
+        </div>
+      );
+
     case 'slick-sc-founder-reels': {
       type ReelItem = { posterUrl?: string; videoUrl?: string };
       return (
