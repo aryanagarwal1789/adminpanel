@@ -4625,7 +4625,7 @@ function renderBlockFields(
       );
 
     case 'slick-sc-navbar': {
-      type NavItem = { name: string; desc: string; href: string; iconKey: string; ai?: boolean };
+      type NavItem = { name: string; desc: string; href: string; iconKey: string; ai?: boolean; iconImage?: string; iconBg?: string };
       type NavCat = { key: string; label: string; sub: string; accent: string; iconKey: string; items: NavItem[]; flagship?: boolean };
       return (
         <div className="space-y-4">
@@ -4662,6 +4662,8 @@ function renderBlockFields(
                       <RichTextInput label="Description" {...richItemProps(it, 'desc', ui)} />
                       <PageLinkField label="Link URL" value={it.href ?? ''} onChange={(v) => ui({ ...it, href: v })} />
                       <TextInput label="Icon key" value={it.iconKey ?? ''} onChange={(v) => ui({ ...it, iconKey: v })} />
+                      <ImageField label="Upload icon (overrides the icon key)" value={it.iconImage ?? ''} onChange={(v) => ui({ ...it, iconImage: v })} />
+                      <ColorPicker label="Icon background (blank = default tint)" value={it.iconBg ?? ''} onChange={(v) => ui({ ...it, iconBg: v })} />
                       <Toggle label="Show AI badge" value={Boolean(it.ai)} onChange={(v) => ui({ ...it, ai: v })} />
                     </div>
                   )}
