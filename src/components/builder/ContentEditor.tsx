@@ -6219,8 +6219,8 @@ function renderBlockFields(
     case 'slick-sc-saudi-platform': {
       return (
         <div className="space-y-4">
-          <TextInput label="YouTube URL (overrides image)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
-          <ImageField label="Section image (full-width)" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
+          <TextInput label="Video link (mp4/webm plays inline, or a YouTube URL) — overrides image" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <ImageField label="Section image (full-width) — also the video poster" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
           <RichFieldGroup label="CTA label (HTML ok)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
@@ -6275,7 +6275,8 @@ function renderBlockFields(
                 <RichTextInput label="CTA label" {...richItemProps(p, 'ctaLabel', u)} />
                 <TextInput label="CTA URL" value={p.ctaHref ?? ''} onChange={(v) => u({ ...p, ctaHref: v })} />
                 <ImageField label="Product image (also used as video poster)" value={p.imageSrc ?? ''} onChange={(v) => u({ ...p, imageSrc: v })} />
-                <VideoField label="Product video (autoplays; overrides image when set)" value={p.videoSrc ?? ''} onChange={(v) => u({ ...p, videoSrc: v })} />
+                <VideoField label="Product video — upload (autoplays; overrides image when set)" value={p.videoSrc ?? ''} onChange={(v) => u({ ...p, videoSrc: v })} />
+                <TextInput label="…or paste a video link (mp4/webm URL)" value={p.videoSrc ?? ''} onChange={(v) => u({ ...p, videoSrc: v })} />
               </div>
             )}
           />
