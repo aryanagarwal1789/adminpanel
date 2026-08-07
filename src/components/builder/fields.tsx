@@ -3,6 +3,12 @@ import { authUploadHeaders } from "@/lib/auth";
 import { ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
 import type { ButtonField, LinkField } from "./defaults";
 import { useBlogPosts } from "./useBlogPosts";
+import {
+  DEFAULT_LOCALE,
+  OVERLAY_LOCALES,
+  isUsableVariant,
+  type ImageI18n,
+} from "@/lib/i18n-images";
 
 const fieldBase =
   "w-full text-sm rounded-md px-2.5 py-1.5 outline-none pb-transition focus:border-blue-500";
@@ -101,10 +107,46 @@ export function VideoField({ label, value, onChange }: { label: string; value: s
   );
 }
 
-export function ImageField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+export function ImageField({
+  label,
+  value,
+  onChange,
+  i18n,
+  onI18nChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  /** Per-locale overrides for this field, keyed by non-English locale code.
+   *  Omit (along with onI18nChange) to keep the control's original English-only
+   *  behavior — nothing breaks for fields that haven't adopted this yet. */
+  i18n?: ImageI18n;
+  onI18nChange?: (next: ImageI18n | undefined) => void;
+}) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [locale, setLocale] = useState<string>(DEFAULT_LOCALE);
+
+  const localeAware = onI18nChange !== undefined;
+  const isEnglish = !localeAware || locale === DEFAULT_LOCALE;
+  const override = localeAware ? i18n?.[locale] : undefined;
+  const hasOverride = isUsableVariant(override);
+  // What this control edits right now: the base value on English, else the
+  // current locale's override (or nothing, when it inherits English).
+  const editValue = isEnglish ? value : (hasOverride ? (override as string) : "");
+
+  const setOverride = (url: string) => {
+    if (!onI18nChange) return;
+    onI18nChange({ ...i18n, [locale]: url });
+  };
+  const clearOverride = () => {
+    if (!onI18nChange) return;
+    const next = { ...i18n };
+    delete next[locale];
+    // Never persist an empty override object — absent sidecar, not `{}`.
+    onI18nChange(Object.keys(next).length ? next : undefined);
+  };
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -118,7 +160,10 @@ export function ImageField({ label, value, onChange }: { label: string; value: s
       const res = await fetch(UPLOAD_URL, { method: "POST", headers: authUploadHeaders(), body: form });
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json() as { url?: string };
-      if (data.url) onChange(data.url);
+      if (data.url) {
+        if (isEnglish) onChange(data.url);
+        else setOverride(data.url);
+      }
     } catch {
       setError("Upload failed");
     } finally {
@@ -126,9 +171,34 @@ export function ImageField({ label, value, onChange }: { label: string; value: s
     }
   };
 
+  const handleRemove = () => {
+    if (isEnglish) onChange("");
+    else clearOverride();
+  };
+
   return (
     <div>
-      <Label>{label}</Label>
+      <div className="flex items-center justify-between mb-1.5">
+        <Label>{label}</Label>
+        {localeAware && (
+          <select
+            className="text-xs rounded-md px-1.5 py-0.5 outline-none pb-transition"
+            style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#0f172a", borderRadius: 6 }}
+            value={locale}
+            onChange={(e) => setLocale(e.target.value)}
+          >
+            <option value={DEFAULT_LOCALE}>English</option>
+            {OVERLAY_LOCALES.map((l) => (
+              <option key={l.code} value={l.code}>
+                {isUsableVariant(i18n?.[l.code]) ? `● ${l.label}` : l.label}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+      {!isEnglish && !hasOverride && (
+        <p className="text-xs text-slate-500 mb-1">Inherits English — no override set</p>
+      )}
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
@@ -136,30 +206,64 @@ export function ImageField({ label, value, onChange }: { label: string; value: s
         className="w-full py-2 text-xs rounded-md pb-transition font-medium disabled:opacity-50"
         style={{ background: "#1e40af", color: "#fff", border: "none", cursor: uploading ? "default" : "pointer" }}
       >
-        {uploading ? "Uploading…" : value ? "↑ Replace file" : "↑ Upload image / video"}
+        {uploading
+          ? "Uploading…"
+          : isEnglish
+            ? (value ? "↑ Replace file" : "↑ Upload image / video")
+            : (hasOverride ? "↑ Replace override" : `↑ Upload ${locale.toUpperCase()} override`)}
       </button>
       <input ref={inputRef} type="file" accept="image/*,video/*" style={{ display: "none" }} onChange={handleFile} />
       {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
-      <div className="mt-2 h-20 w-full rounded-md overflow-hidden border border-slate-700 bg-slate-800 flex items-center justify-center">
-        {value ? (
+      <div
+        className="mt-2 h-20 w-full rounded-md overflow-hidden border border-slate-700 bg-slate-800 flex items-center justify-center"
+        style={!isEnglish && !hasOverride ? { opacity: 0.5 } : undefined}
+      >
+        {editValue || (!isEnglish && value) ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={value} alt="" className="h-full w-full object-cover" />
+          <img src={editValue || value} alt="" className="h-full w-full object-cover" />
         ) : (
           <span className="text-xs text-slate-500">No file uploaded</span>
         )}
       </div>
-      {value && (
+      {(isEnglish ? !!value : hasOverride) && (
         <button
           type="button"
-          onClick={() => onChange("")}
+          onClick={handleRemove}
           className="mt-1 text-xs text-red-400 hover:text-red-300 pb-transition"
           style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
         >
-          Remove
+          {isEnglish ? "Remove" : "Use English"}
         </button>
       )}
     </div>
   );
+}
+
+/**
+ * Bind ImageField's per-locale override props to a container object: reads
+ * `container[key]` as the base value, and writes/reads the override sidecar
+ * `container[key + 'I18n']` on the SAME container. Works for both block fields
+ * (via ContentEditor's `update`) and repeater items (via `u`) — both are
+ * "merge a patch into the container" callbacks, so the sidecar always lands
+ * next to the value it overrides, and survives Repeater reordering because it
+ * rides the item rather than an index-addressed path.
+ *
+ *   <ImageField label="Logo" {...imageI18nProps(f, 'logoImage', update)} />
+ *   <ImageField label="Avatar" {...imageI18nProps(it, 'avatar', (p) => u({ ...it, ...p }))} />
+ */
+export function imageI18nProps<C>(
+  container: C,
+  key: string,
+  merge: (patch: Partial<C>) => void,
+) {
+  const rec = container as Record<string, unknown>;
+  const i18nKey = `${key}I18n`;
+  return {
+    value: (rec[key] as string) ?? "",
+    onChange: (v: string) => merge({ [key]: v } as Partial<C>),
+    i18n: rec[i18nKey] as ImageI18n | undefined,
+    onI18nChange: (next: ImageI18n | undefined) => merge({ [i18nKey]: next } as Partial<C>),
+  };
 }
 
 export function ColorPicker({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {

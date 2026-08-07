@@ -319,6 +319,8 @@ export interface BlockStyle {
   // Phase 5 additions
   bgColor?: string;
   bgImage?: string;
+  /** Per-locale overrides for bgImage, keyed by non-English locale code. */
+  bgImageI18n?: Partial<Record<string, string>>;
   bgTransparent?: boolean;
   paddingTop?: number;
   paddingRight?: number;

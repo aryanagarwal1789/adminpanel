@@ -24,7 +24,7 @@ function SubSection({ label, children, defaultOpen = false }: { label: string; c
 }
 import {
   ButtonEditor, ColorPicker, ImageField, VideoField, NumberInput, Repeater, Select,
-  Slider, TextInput, Textarea, Toggle,
+  Slider, TextInput, Textarea, Toggle, imageI18nProps,
 } from "./fields";
 import type { ButtonField } from "./defaults";
 import { RichTextInput } from "./RichTextInput";
@@ -195,7 +195,7 @@ export function WidgetEditor({
     case "image":
       return (
         <div className="space-y-3">
-          <ImageField label="Source URL" value={p.src as string} onChange={(v) => set("src", v)} />
+          <ImageField label="Source URL" {...imageI18nProps(p, "src", (patch) => update({ ...p, ...patch }))} />
           <TextInput label="Alt text" value={p.alt as string} onChange={(v) => set("alt", v)} />
           <NumberInput label="Width %" value={(p.width as number) ?? 100} onChange={(v) => set("width", v)} />
           <NumberInput label="Height (px, 0 = auto)" value={(p.height as number) ?? 0} onChange={(v) => set("height", v || undefined)} />
@@ -317,7 +317,7 @@ export function WidgetEditor({
         <div className="space-y-3">
           <Select label="Platform" value={(p.platform as "google") || "google"} onChange={(v) => set("platform", v)}
             options={[{value:'google',label:'Google Play'},{value:'apple',label:'App Store'},{value:'custom',label:'Custom'}] as {value:"google";label:string}[]} />
-          <ImageField label="Badge image (upload or URL)" value={p.badgeImage as string ?? ''} onChange={(v) => set("badgeImage", v)} />
+          <ImageField label="Badge image (upload or URL)" {...imageI18nProps(p, "badgeImage", (patch) => update({ ...p, ...patch }))} />
           <TextInput label="Store URL" value={p.storeUrl as string ?? '#'} onChange={(v) => set("storeUrl", v)} />
           <NumberInput label="Width (px)" value={(p.widthPx as number) ?? 160} onChange={(v) => set("widthPx", v)} />
           <NumberInput label="Height (px)" value={(p.height as number) ?? 44} onChange={(v) => set("height", v)} />
@@ -356,7 +356,7 @@ export function WidgetEditor({
           </SubSection>
 
           <SubSection label="🖼 Image">
-            <ImageField  label="Image"         value={(p.image as string) || ''}                    onChange={(v) => set('image', v)} />
+            <ImageField label="Image" {...imageI18nProps(p, "image", (patch) => update({ ...p, ...patch }))} />
             <Toggle      label="Hide image"    value={(imageSt.hidden as boolean) || false}         onChange={upd('imageStyle',  imageSt, 'hidden')} />
             <NumberInput label="Height (px)"   value={(imageSt.height as number) ?? 200}            onChange={upd('imageStyle',  imageSt, 'height')} />
             <Select      label="Object fit"    value={(imageSt.objectFit as 'cover') || 'cover'}    onChange={upd('imageStyle',  imageSt, 'objectFit')} options={FITS} />
@@ -507,7 +507,7 @@ export function WidgetEditor({
             itemPreview={(it) => it.alt || "Image"}
             renderItem={(it, u) => (
               <>
-                <ImageField label="URL" value={it.src} onChange={(x) => u({ ...it, src: x })} />
+                <ImageField label="URL" {...imageI18nProps(it, "src", (patch) => u({ ...it, ...patch }))} />
                 <TextInput label="Alt" value={it.alt} onChange={(x) => u({ ...it, alt: x })} />
               </>
             )}
@@ -528,7 +528,7 @@ export function WidgetEditor({
               <RichTextInput label="Quote" {...richItemProps(it, 'quote', u)} />
               <RichTextInput label="Author" {...richItemProps(it, 'author', u)} />
               <RichTextInput label="Role" {...richItemProps(it, 'role', u)} />
-              <ImageField label="Avatar URL" value={it.avatar} onChange={(x) => u({ ...it, avatar: x })} />
+              <ImageField label="Avatar URL" {...imageI18nProps(it, "avatar", (patch) => u({ ...it, ...patch }))} />
             </>
           )}
         />
@@ -552,7 +552,7 @@ export function WidgetEditor({
     case "logo":
       return (
         <div className="space-y-3">
-          <ImageField label="Image URL" value={p.src as string} onChange={(v) => set("src", v)} />
+          <ImageField label="Image URL" {...imageI18nProps(p, "src", (patch) => update({ ...p, ...patch }))} />
           <TextInput label="Alt text" value={p.alt as string} onChange={(v) => set("alt", v)} />
           <TextInput label="Link URL" value={p.link as string} onChange={(v) => set("link", v)} />
           <NumberInput label="Width (px)" value={p.width as number} onChange={(v) => set("width", v)} />
@@ -606,7 +606,7 @@ export function WidgetEditor({
     case "image-text":
       return (
         <div className="space-y-3">
-          <ImageField label="Image URL" value={p.image as string} onChange={(v) => set("image", v)} />
+          <ImageField label="Image URL" {...imageI18nProps(p, "image", (patch) => update({ ...p, ...patch }))} />
           <RichFieldGroup label="Heading" f={p} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <RichFieldGroup label="Text" f={p} set={set} base="text" segments={[{ key: 'text' }]} />
           <Select label="Layout" value={(p.layout as "left") || "left"} onChange={(v) => set("layout", v)} options={[{ value: "left", label: "Image left" }, { value: "right", label: "Image right" }] as { value: "left"; label: string }[]} />
@@ -649,7 +649,7 @@ export function WidgetEditor({
             itemPreview={(it) => it.alt || "Logo"}
             renderItem={(it, u) => (
               <>
-                <ImageField label="Image URL" value={it.src} onChange={(x) => u({ ...it, src: x })} />
+                <ImageField label="Image URL" {...imageI18nProps(it, "src", (patch) => u({ ...it, ...patch }))} />
                 <TextInput label="Alt text" value={it.alt} onChange={(x) => u({ ...it, alt: x })} />
                 <TextInput label="Link URL" value={it.url} onChange={(x) => u({ ...it, url: x })} />
               </>
@@ -670,7 +670,7 @@ export function WidgetEditor({
             itemPreview={(it) => it.alt || "Image"}
             renderItem={(it, u) => (
               <>
-                <ImageField label="URL" value={it.src} onChange={(x) => u({ ...it, src: x })} />
+                <ImageField label="URL" {...imageI18nProps(it, "src", (patch) => u({ ...it, ...patch }))} />
                 <TextInput label="Alt text" value={it.alt} onChange={(x) => u({ ...it, alt: x })} />
               </>
             )}
@@ -691,7 +691,7 @@ export function WidgetEditor({
             itemPreview={(it) => it.alt || "Image"}
             renderItem={(it, u) => (
               <>
-                <ImageField label="URL" value={it.src} onChange={(x) => u({ ...it, src: x })} />
+                <ImageField label="URL" {...imageI18nProps(it, "src", (patch) => u({ ...it, ...patch }))} />
                 <TextInput label="Alt text" value={it.alt} onChange={(x) => u({ ...it, alt: x })} />
               </>
             )}
@@ -769,7 +769,7 @@ export function WidgetEditor({
       return (
         <div className="space-y-3">
           <RichFieldGroup label="Logo text" f={p} set={set} base="logoText" segments={[{ key: 'logoText' }]} />
-          <ImageField label="Logo image URL" value={p.logoImage as string} onChange={(v) => set("logoImage", v)} />
+          <ImageField label="Logo image URL" {...imageI18nProps(p, "logoImage", (patch) => update({ ...p, ...patch }))} />
           <Repeater<{ label: string; url: string }>
             label="Nav links"
             items={(p.links as { label: string; url: string }[]) ?? []}
@@ -839,7 +839,7 @@ export function WidgetEditor({
         <div className="space-y-3">
           <RichFieldGroup label="Name" f={p} set={set} base="name" segments={[{ key: 'name' }]} />
           <RichFieldGroup label="Price" f={p} set={set} base="price" segments={[{ key: 'price' }]} />
-          <ImageField label="Image URL" value={p.image as string} onChange={(v) => set("image", v)} />
+          <ImageField label="Image URL" {...imageI18nProps(p, "image", (patch) => update({ ...p, ...patch }))} />
           <RichFieldGroup label="Description" f={p} set={set} base="description" segments={[{ key: 'description' }]} />
           <RichFieldGroup label="CTA label" f={p} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={p.ctaUrl as string} onChange={(v) => set("ctaUrl", v)} />

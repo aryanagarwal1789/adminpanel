@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import {
   BlogPicker, ButtonEditor, ColorPicker, ImageField, LinkItemEditor, NumberInput, Repeater, Select, TextInput, Textarea, Toggle, VideoField,
+  imageI18nProps,
 } from "./fields";
 import type { ButtonField, LinkField } from "./defaults";
 import type { Block } from "./types";
@@ -171,7 +172,7 @@ function renderBlockFields(
     case "nav-simple":
       return (
         <div className="space-y-4">
-          <ImageField label="Logo image URL" value={f.logoImage as string} onChange={(v) => set("logoImage", v)} />
+          <ImageField label="Logo image URL" {...imageI18nProps(f, "logoImage", update)} />
           <RichFieldGroup label="Logo text" f={f} set={set} base="logoText" segments={[{ key: 'logoText' }]} />
           <ButtonEditor label="Primary CTA" value={f.cta as ButtonField} onChange={(v) => set("cta", v)} />
           <ButtonEditor label="Secondary CTA" value={f.ctaSecondary as ButtonField} onChange={(v) => set("ctaSecondary", v)} />
@@ -188,7 +189,7 @@ function renderBlockFields(
     case "nav-centered":
       return (
         <div className="space-y-4">
-          <ImageField label="Logo image URL" value={f.logoImage as string} onChange={(v) => set("logoImage", v)} />
+          <ImageField label="Logo image URL" {...imageI18nProps(f, "logoImage", update)} />
           <RichFieldGroup label="Logo text" f={f} set={set} base="logoText" segments={[{ key: 'logoText' }]} />
           <Repeater<LinkField>
             label="Nav links" items={(f.links as LinkField[]) ?? []} onChange={(v) => set("links", v)}
@@ -200,7 +201,7 @@ function renderBlockFields(
     case "footer-simple":
       return (
         <div className="space-y-4">
-          <ImageField label="Logo image URL" value={f.logoImage as string} onChange={(v) => set("logoImage", v)} />
+          <ImageField label="Logo image URL" {...imageI18nProps(f, "logoImage", update)} />
           <RichFieldGroup label="Logo text" f={f} set={set} base="logoText" segments={[{ key: 'logoText' }]} />
           <RichFieldGroup label="Copyright text" f={f} set={set} base="copyright" segments={[{ key: 'copyright' }]} />
           <Repeater<LinkField>
@@ -213,7 +214,7 @@ function renderBlockFields(
     case "footer-columns":
       return (
         <div className="space-y-4">
-          <ImageField label="Logo image URL" value={f.logoImage as string} onChange={(v) => set("logoImage", v)} />
+          <ImageField label="Logo image URL" {...imageI18nProps(f, "logoImage", update)} />
           <RichFieldGroup label="Logo text" f={f} set={set} base="logoText" segments={[{ key: 'logoText' }]} />
           <RichFieldGroup label="Tagline" f={f} set={set} base="tagline" segments={[{ key: 'tagline' }]} />
           <RichFieldGroup label="Copyright text" f={f} set={set} base="copyright" segments={[{ key: 'copyright' }]} />
@@ -238,7 +239,7 @@ function renderBlockFields(
           <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <ButtonEditor label="Primary CTA" value={f.primaryCta as ButtonField} onChange={(v) => set("primaryCta", v)} />
           <ButtonEditor label="Secondary CTA" value={f.secondaryCta as ButtonField} onChange={(v) => set("secondaryCta", v)} />
-          <ImageField label="Background image URL" value={f.bgImage as string} onChange={(v) => set("bgImage", v)} />
+          <ImageField label="Background image URL" {...imageI18nProps(f, "bgImage", update)} />
         </div>
       );
     case "hero-split":
@@ -247,7 +248,7 @@ function renderBlockFields(
           <RichFieldGroup label="Headline" f={f} set={set} base="headline" segments={[{ key: 'headline' }]} />
           <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <ButtonEditor label="CTA" value={f.cta as ButtonField} onChange={(v) => set("cta", v)} />
-          <ImageField label="Image URL" value={f.image as string} onChange={(v) => set("image", v)} />
+          <ImageField label="Image URL" {...imageI18nProps(f, "image", update)} />
           <Toggle label="Image on right" value={f.imageRight as boolean} onChange={(v) => set("imageRight", v)} />
         </div>
       );
@@ -278,7 +279,7 @@ function renderBlockFields(
         <div className="space-y-4">
           <RichFieldGroup label="Headline" f={f} set={set} base="headline" segments={[{ key: 'headline' }]} />
           <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
-          <ImageField label="Image URL" value={f.image as string} onChange={(v) => set("image", v)} />
+          <ImageField label="Image URL" {...imageI18nProps(f, "image", update)} />
           <Toggle label="Image on right" value={f.imageRight as boolean} onChange={(v) => set("imageRight", v)} />
         </div>
       );
@@ -316,7 +317,7 @@ function renderBlockFields(
                 <RichTextInput label="Quote" {...richItemProps(it, 'quote', u)} />
                 <RichTextInput label="Author name" {...richItemProps(it, 'author', u)} />
                 <RichTextInput label="Role / company" {...richItemProps(it, 'role', u)} />
-                <ImageField label="Avatar URL" value={it.avatar} onChange={(x) => u({ ...it, avatar: x })} />
+                <ImageField label="Avatar URL" {...imageI18nProps(it, "avatar", (p) => u({ ...it, ...p }))} />
               </>
             )}
           />
@@ -334,7 +335,7 @@ function renderBlockFields(
             itemPreview={(it) => it.alt}
             renderItem={(it, u) => (
               <>
-                <ImageField label="Logo image URL" value={it.src} onChange={(x) => u({ ...it, src: x })} />
+                <ImageField label="Logo image URL" {...imageI18nProps(it, "src", (p) => u({ ...it, ...p }))} />
                 <TextInput label="Alt text" value={it.alt} onChange={(x) => u({ ...it, alt: x })} />
               </>
             )}
@@ -404,7 +405,7 @@ function renderBlockFields(
           <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <ButtonEditor label="Primary CTA" value={f.primaryCta as ButtonField} onChange={(v) => set("primaryCta", v)} />
           <ButtonEditor label="Secondary CTA" value={f.secondaryCta as ButtonField} onChange={(v) => set("secondaryCta", v)} />
-          <ImageField label="Product image URL (optional)" value={f.image as string} onChange={(v) => set("image", v)} />
+          <ImageField label="Product image URL (optional)" {...imageI18nProps(f, "image", update)} />
         </div>
       );
 
@@ -416,7 +417,7 @@ function renderBlockFields(
           <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <ButtonEditor label="Primary CTA" value={f.primaryCta as ButtonField} onChange={(v) => set("primaryCta", v)} />
           <ButtonEditor label="Secondary CTA" value={f.secondaryCta as ButtonField} onChange={(v) => set("secondaryCta", v)} />
-          <ImageField label="Screenshot / product image URL" value={f.image as string} onChange={(v) => set("image", v)} />
+          <ImageField label="Screenshot / product image URL" {...imageI18nProps(f, "image", update)} />
         </div>
       );
 
@@ -436,7 +437,7 @@ function renderBlockFields(
                 <RichTextInput label="Category tag" {...richItemProps(it, 'tag', u)} />
                 <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
                 <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
-                <ImageField label="Image URL" value={it.image} onChange={(x) => u({ ...it, image: x })} />
+                <ImageField label="Image URL" {...imageI18nProps(it, "image", (p) => u({ ...it, ...p }))} />
                 <RichTextInput label="CTA label" {...richItemProps(it, 'ctaLabel', u)} />
                 <TextInput label="CTA URL" value={it.ctaUrl} onChange={(x) => u({ ...it, ctaUrl: x })} />
               </>
@@ -532,7 +533,7 @@ function renderBlockFields(
               <>
                 <RichTextInput label="Name" {...richItemProps(it, 'name', u)} />
                 <RichTextInput label="Role" {...richItemProps(it, 'role', u)} />
-                <ImageField label="Avatar image URL" value={it.avatar} onChange={(x) => u({ ...it, avatar: x })} />
+                <ImageField label="Avatar image URL" {...imageI18nProps(it, "avatar", (p) => u({ ...it, ...p }))} />
                 <TextInput label="LinkedIn URL" value={it.linkedin} onChange={(x) => u({ ...it, linkedin: x })} />
               </>
             )}
@@ -610,7 +611,7 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <RichFieldGroup label="Title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
-          <ImageField label="Video" value={f.videoUrl as string} onChange={(v) => set("videoUrl", v)} />
+          <ImageField label="Video" {...imageI18nProps(f, "videoUrl", update)} />
           <Repeater<{ value: string; suffix: string; description: string }>
             label="Stats"
             items={(f.stats as { value: string; suffix: string; description: string }[]) ?? []}
@@ -651,7 +652,7 @@ function renderBlockFields(
             itemPreview={(it) => it.alt}
             renderItem={(it, u) => (
               <>
-                <ImageField label="Image" value={it.url} onChange={(x) => u({ ...it, url: x })} />
+                <ImageField label="Image" {...imageI18nProps(it, "url", (p) => u({ ...it, ...p }))} />
                 <TextInput label="Alt text" value={it.alt} onChange={(x) => u({ ...it, alt: x })} />
               </>
             )}
@@ -664,7 +665,7 @@ function renderBlockFields(
         <div className="space-y-4">
           <RichFieldGroup label="Title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
           <RichFieldGroup label="Subtitle (teal, below title)" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
-          <ImageField label="Video" value={f.videoUrl as string} onChange={(v) => set("videoUrl", v)} />
+          <ImageField label="Video" {...imageI18nProps(f, "videoUrl", update)} />
         </div>
       );
 
@@ -798,7 +799,7 @@ function renderBlockFields(
           <TextInput label="Primary CTA href" value={f.primaryCtaHref as string ?? ''} onChange={(v) => set('primaryCtaHref', v)} />
           <RichFieldGroup label="Secondary CTA label" f={f} set={set} base="secondaryCtaLabel" segments={[{ key: 'secondaryCtaLabel' }]} />
           <TextInput label="Secondary CTA href" value={f.secondaryCtaHref as string ?? ''} onChange={(v) => set('secondaryCtaHref', v)} />
-          <ImageField label="Mockup image URL" value={f.mockupImageUrl as string ?? ''} onChange={(v) => set('mockupImageUrl', v)} />
+          <ImageField label="Mockup image URL" {...imageI18nProps(f, "mockupImageUrl", update)} />
           <TextInput label="Mockup alt text" value={f.mockupAlt as string ?? ''} onChange={(v) => set('mockupAlt', v)} />
           <RichFieldGroup label="Trust label" f={f} set={set} base="trustLabel" segments={[{ key: 'trustLabel' }]} />
         </div>
@@ -862,8 +863,8 @@ function renderBlockFields(
           <RichFieldGroup label="Primary CTA label" f={f} set={set} base="primaryCtaLabel" segments={[{ key: 'primaryCtaLabel' }]} />
           <TextInput label="Primary CTA href" value={f.primaryCtaHref as string ?? ''} onChange={(v) => set('primaryCtaHref', v)} />
           <RichFieldGroup label="Secondary CTA label" f={f} set={set} base="secondaryCtaLabel" segments={[{ key: 'secondaryCtaLabel' }]} />
-          <ImageField label="Video poster image" value={f.videoPoster as string ?? ''} onChange={(v) => set('videoPoster', v)} />
-          <ImageField label="Video (mp4)" value={f.videoSrc as string ?? ''} onChange={(v) => set('videoSrc', v)} />
+          <ImageField label="Video poster image" {...imageI18nProps(f, "videoPoster", update)} />
+          <ImageField label="Video (mp4)" {...imageI18nProps(f, "videoSrc", update)} />
           <Repeater<{ value: string; label: string }>
             label="Metrics"
             items={(f.metrics as { value: string; label: string }[]) ?? []}
@@ -1034,7 +1035,7 @@ function renderBlockFields(
                 <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
                 <RichTextInput label="CTA label" {...richItemProps(it, 'ctaLabel', u)} />
                 <TextInput label="CTA href" value={(it as { ctaHref?: string }).ctaHref ?? ''} onChange={(x) => u({ ...it, ctaHref: x })} />
-                <ImageField label="Image URL" value={it.imageUrl} onChange={(x) => u({ ...it, imageUrl: x })} />
+                <ImageField label="Image URL" {...imageI18nProps(it, "imageUrl", (p) => u({ ...it, ...p }))} />
                 <TextInput label="Image alt text" value={(it as { imageAlt?: string }).imageAlt ?? ''} onChange={(x) => u({ ...it, imageAlt: x })} />
                 <Repeater<string>
                   label="Bullet points"
@@ -1208,7 +1209,7 @@ function renderBlockFields(
                 <RichTextInput label="Name" {...richItemProps(it, 'name', u)} />
                 <RichTextInput label="Role" {...richItemProps(it, 'role', u)} />
                 <RichTextInput label="Company" {...richItemProps(it, 'company', u)} />
-                <ImageField label="Avatar URL" value={it.avatarUrl} onChange={(x) => u({ ...it, avatarUrl: x })} />
+                <ImageField label="Avatar URL" {...imageI18nProps(it, "avatarUrl", (p) => u({ ...it, ...p }))} />
                 <NumberInput label="Rating (1–5)" value={(it as { rating?: number }).rating ?? 5} onChange={(x) => u({ ...it, rating: x })} />
               </>
             )}
@@ -1273,7 +1274,7 @@ function renderBlockFields(
           <RichFieldGroup label="Author name" f={f} set={set} base="authorName" segments={[{ key: 'authorName' }]} />
           <RichFieldGroup label="Author role" f={f} set={set} base="authorRole" segments={[{ key: 'authorRole' }]} />
           <RichFieldGroup label="Author company" f={f} set={set} base="authorCompany" segments={[{ key: 'authorCompany' }]} />
-          <ImageField label="Author avatar URL" value={f.authorAvatarUrl as string ?? ''} onChange={(v) => set('authorAvatarUrl', v)} />
+          <ImageField label="Author avatar URL" {...imageI18nProps(f, "authorAvatarUrl", update)} />
           <Repeater<{ name: string; src: string }>
             label="Company logos"
             items={(f.logos as { name: string; src: string }[]) ?? []}
@@ -1283,7 +1284,7 @@ function renderBlockFields(
             renderItem={(it, u) => (
               <>
                 <RichTextInput label="Company name" {...richItemProps(it, 'name', u)} />
-                <ImageField label="Logo URL" value={it.src} onChange={(x) => u({ ...it, src: x })} />
+                <ImageField label="Logo URL" {...imageI18nProps(it, "src", (p) => u({ ...it, ...p }))} />
               </>
             )}
           />
@@ -1563,7 +1564,7 @@ function renderBlockFields(
                 <RichTextInput label="Name" {...richItemProps(it, 'name', u)} />
                 <RichTextInput label="Role" {...richItemProps(it, 'role', u)} />
                 <RichTextInput label="Bio" {...richItemProps(it, 'bio', u)} />
-                <ImageField label="Avatar URL" value={it.avatarUrl} onChange={(x) => u({ ...it, avatarUrl: x })} />
+                <ImageField label="Avatar URL" {...imageI18nProps(it, "avatarUrl", (p) => u({ ...it, ...p }))} />
                 <TextInput label="LinkedIn URL" value={it.linkedinUrl ?? ''} onChange={(x) => u({ ...it, linkedinUrl: x })} />
                 <div>
                   <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Card accent</span>
@@ -1643,7 +1644,7 @@ function renderBlockFields(
             renderItem={(it, u) => (
               <>
                 <RichTextInput label="Name" {...richItemProps(it, 'name', u)} />
-                <ImageField label="Logo URL" value={it.src} onChange={(x) => u({ ...it, src: x })} />
+                <ImageField label="Logo URL" {...imageI18nProps(it, "src", (p) => u({ ...it, ...p }))} />
               </>
             )}
           />
@@ -1715,12 +1716,12 @@ function renderBlockFields(
             itemPreview={(it) => it.title}
             renderItem={(it, u) => (
               <>
-                <ImageField label="Cover image URL" value={it.coverUrl} onChange={(x) => u({ ...it, coverUrl: x })} />
+                <ImageField label="Cover image URL" {...imageI18nProps(it, "coverUrl", (p) => u({ ...it, ...p }))} />
                 <RichTextInput label="Tag" {...richItemProps(it, 'tag', u)} />
                 <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
                 <RichTextInput label="Excerpt" {...richItemProps(it, 'excerpt', u)} />
                 <RichTextInput label="Author name" {...richItemProps(it, 'authorName', u)} />
-                <ImageField label="Author avatar URL" value={(it as { authorAvatarUrl?: string }).authorAvatarUrl ?? ''} onChange={(x) => u({ ...it, authorAvatarUrl: x })} />
+                <ImageField label="Author avatar URL" {...imageI18nProps(it, "authorAvatarUrl", (p) => u({ ...it, ...p }))} />
                 <TextInput label="Read time (e.g. 5 min)" value={(it as { readTime?: string }).readTime ?? ''} onChange={(x) => u({ ...it, readTime: x })} />
                 <RichTextInput label="Date" {...richItemProps(it, 'date', u)} />
                 <TextInput label="Link href" value={it.href} onChange={(x) => u({ ...it, href: x })} />
@@ -1980,10 +1981,10 @@ function renderBlockFields(
             itemPreview={(it) => it.deviceLabel || 'Store'}
             renderItem={(it, u) => (
               <>
-                <ImageField label="Badge image" value={it.badgeImage} onChange={(x) => u({ ...it, badgeImage: x })} />
+                <ImageField label="Badge image" {...imageI18nProps(it, "badgeImage", (p) => u({ ...it, ...p }))} />
                 <TextInput label="Store URL" value={it.storeUrl} onChange={(x) => u({ ...it, storeUrl: x })} />
                 <RichTextInput label="Device label" {...richItemProps(it, 'deviceLabel', u)} />
-                <ImageField label="QR code image" value={it.qrImage} onChange={(x) => u({ ...it, qrImage: x })} />
+                <ImageField label="QR code image" {...imageI18nProps(it, "qrImage", (p) => u({ ...it, ...p }))} />
                 <RichTextInput label="QR label" {...richItemProps(it, 'qrLabel', u)} />
               </>
             )}
@@ -2014,7 +2015,7 @@ function renderBlockFields(
               <>
                 <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
                 <RichTextInput label="Subtitle" {...richItemProps(it, 'subtitle', u)} />
-                <ImageField label="Phone screenshot" value={it.image} onChange={(x) => u({ ...it, image: x })} />
+                <ImageField label="Phone screenshot" {...imageI18nProps(it, "image", (p) => u({ ...it, ...p }))} />
                 <ColorPicker label="Card background" value={it.cardBg || '#0A3028'} onChange={(x: string) => u({ ...it, cardBg: x })} />
               </>
             )}
@@ -2065,7 +2066,7 @@ function renderBlockFields(
           />
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA href" value={f.ctaHref as string ?? ''} onChange={(v) => set('ctaHref', v)} />
-          <ImageField label="Right-side image URL" value={f.image as string ?? ''} onChange={(v) => set('image', v)} />
+          <ImageField label="Right-side image URL" {...imageI18nProps(f, "image", update)} />
           <div>
             <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Banner background color</span>
             <input type="color" value={(f.bgColor as string) || '#00B39F'}
@@ -2092,13 +2093,13 @@ function renderBlockFields(
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Center image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
+          <ImageField label="Center image" {...imageI18nProps(f, "imgCenter", update)} />
           <NumberInput label="Center image width (px)" value={(f.imgCenterWidth as number) ?? 254} onChange={(v) => set('imgCenterWidth', v)} />
           <FitSelect label="Center image fit" fitKey="imgCenterFit" f={f} set={set} def="contain" />
-          <ImageField label="Bottom-left card" value={f.imgBottomLeft as string ?? ''} onChange={(v) => set('imgBottomLeft', v)} />
+          <ImageField label="Bottom-left card" {...imageI18nProps(f, "imgBottomLeft", update)} />
           <NumberInput label="Bottom-left card width (px)" value={(f.imgBottomLeftWidth as number) ?? 273} onChange={(v) => set('imgBottomLeftWidth', v)} />
           <FitSelect label="Bottom-left card fit" fitKey="imgBottomLeftFit" f={f} set={set} def="cover" />
-          <ImageField label="Bottom-right card" value={f.imgBottomRight as string ?? ''} onChange={(v) => set('imgBottomRight', v)} />
+          <ImageField label="Bottom-right card" {...imageI18nProps(f, "imgBottomRight", update)} />
           <NumberInput label="Bottom-right card width (px)" value={(f.imgBottomRightWidth as number) ?? 253} onChange={(v) => set('imgBottomRightWidth', v)} />
           <FitSelect label="Bottom-right card fit" fitKey="imgBottomRightFit" f={f} set={set} def="cover" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -2124,7 +2125,7 @@ function renderBlockFields(
     case 'slick-dv-hero':
       return (
         <div className="space-y-4">
-          <ImageField label="Logo URL" value={f.logo as string ?? ''} onChange={(v) => set('logo', v)} />
+          <ImageField label="Logo URL" {...imageI18nProps(f, "logo", update)} />
           <FitSelect label="Logo fit" fitKey="logoFit" f={f} set={set} def="fill" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <div style={{ fontSize: 11, color: '#94a3b8' }}>Heading</div>
@@ -2144,7 +2145,7 @@ function renderBlockFields(
           <RichFieldGroup label="Stat 2" f={f} set={set} base="stat2Text" segments={[{ key: 'stat2Text' }]} />
           <RichFieldGroup label="Stat 3" f={f} set={set} base="stat3Text" segments={[{ key: 'stat3Text' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Phone mockup image URL" value={f.mockupImage as string ?? ''} onChange={(v) => set('mockupImage', v)} />
+          <ImageField label="Phone mockup image URL" {...imageI18nProps(f, "mockupImage", update)} />
           <ImageWHFit label="Phone mockup size" widthKey="mockupImageMaxWidth" widthUnit="px" widthDef={520} aspectRatioKey="mockupImageAspectRatio" fitKey="mockupImageFit" fitDef="cover" f={f} set={set} />
         </div>
       );
@@ -2159,7 +2160,7 @@ function renderBlockFields(
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA href" value={f.ctaHref as string ?? ''} onChange={(v) => set('ctaHref', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Video thumbnail URL" value={f.videoThumb as string ?? ''} onChange={(v) => set('videoThumb', v)} />
+          <ImageField label="Video thumbnail URL" {...imageI18nProps(f, "videoThumb", update)} />
           <FitSelect label="Video thumbnail fit" fitKey="videoThumbFit" f={f} set={set} def="cover" />
           <RichFieldGroup label="Video caption" f={f} set={set} base="videoLabel" segments={[{ key: 'videoLabel' }]} />
           <TextInput label="Video embed URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
@@ -2192,7 +2193,7 @@ function renderBlockFields(
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA href" value={f.ctaHref as string ?? ''} onChange={(v) => set('ctaHref', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Video thumbnail URL" value={f.videoThumb as string ?? ''} onChange={(v) => set('videoThumb', v)} />
+          <ImageField label="Video thumbnail URL" {...imageI18nProps(f, "videoThumb", update)} />
           <FitSelect label="Video thumbnail fit" fitKey="videoThumbFit" f={f} set={set} def="cover" />
           <RichFieldGroup label="Video caption" f={f} set={set} base="videoLabel" segments={[{ key: 'videoLabel' }]} />
           <TextInput label="Video embed URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
@@ -2237,7 +2238,7 @@ function renderBlockFields(
               <>
                 <RichTextInput label="Card title" {...richItemProps(it, 'title', u)} />
                 <RichTextInput label="Card subtitle" {...richItemProps(it, 'subtitle', u)} />
-                <ImageField label="Screenshot image" value={it.image} onChange={(x) => u({ ...it, image: x })} />
+                <ImageField label="Screenshot image" {...imageI18nProps(it, "image", (p) => u({ ...it, ...p }))} />
                 <TextInput label="Alt text" value={it.alt} onChange={(x) => u({ ...it, alt: x })} />
               </>
             )}
@@ -2318,13 +2319,13 @@ function renderBlockFields(
           <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Android store URL" value={f.androidStoreUrl as string ?? ''} onChange={(v) => set('androidStoreUrl', v)} />
-          <ImageField label="Android QR image (optional)" value={f.androidQrUrl as string ?? ''} onChange={(v) => set('androidQrUrl', v)} />
+          <ImageField label="Android QR image (optional)" {...imageI18nProps(f, "androidQrUrl", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="iOS store URL" value={f.iosStoreUrl as string ?? ''} onChange={(v) => set('iosStoreUrl', v)} />
-          <ImageField label="iOS QR image (optional)" value={f.iosQrUrl as string ?? ''} onChange={(v) => set('iosQrUrl', v)} />
+          <ImageField label="iOS QR image (optional)" {...imageI18nProps(f, "iosQrUrl", update)} />
           <FitSelect label="QR image fit (both QRs)" fitKey="qrFit" f={f} set={set} def="contain" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Phone mockup image (right side)" value={f.phoneImage as string ?? ''} onChange={(v) => set('phoneImage', v)} />
+          <ImageField label="Phone mockup image (right side)" {...imageI18nProps(f, "phoneImage", update)} />
           <ImageWHFit label="Phone mockup size" widthKey="phoneImageMaxWidth" widthUnit="px" widthDef={460} aspectRatioKey="phoneImageAspectRatio" fitKey="phoneImageFit" fitDef="contain" f={f} set={set} />
         </div>
       );
@@ -2347,7 +2348,7 @@ function renderBlockFields(
               <div className="space-y-2">
                 <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
                 <RichTextInput label="Description" {...richItemProps(c, 'description', u)} />
-                <ImageField label="Card image" value={c.image ?? ''} onChange={(v) => u({ ...c, image: v })} />
+                <ImageField label="Card image" {...imageI18nProps(c, "image", (p) => u({ ...c, ...p }))} />
               </div>
             )}
           />
@@ -2502,7 +2503,7 @@ function renderBlockFields(
             itemPreview={(t) => t.alt || '(unnamed)'}
             renderItem={(t, u) => (
               <div className="space-y-2">
-                <ImageField label="Logo image" value={t.imageUrl ?? ''} onChange={(x) => u({ ...t, imageUrl: x })} />
+                <ImageField label="Logo image" {...imageI18nProps(t, "imageUrl", (p) => u({ ...t, ...p }))} />
                 <TextInput label="Alt text" value={t.alt ?? ''} onChange={(x) => u({ ...t, alt: x })} />
               </div>
             )}
@@ -2620,7 +2621,7 @@ function renderBlockFields(
             renderItem={(r, u) => (
               <div className="space-y-2">
                 <TextInput label="YouTube Short / video URL" value={r.videoUrl ?? ''} onChange={(v) => u({ ...r, videoUrl: v })} />
-                <ImageField label="Thumbnail (optional — falls back to the YouTube thumbnail)" value={r.posterUrl ?? ''} onChange={(v) => u({ ...r, posterUrl: v })} />
+                <ImageField label="Thumbnail (optional — falls back to the YouTube thumbnail)" {...imageI18nProps(r, "posterUrl", (p) => u({ ...r, ...p }))} />
               </div>
             )}
           />
@@ -2646,7 +2647,7 @@ function renderBlockFields(
             itemPreview={(l) => l.alt || '(unnamed)'}
             renderItem={(l, u) => (
               <div className="space-y-2">
-                <ImageField label="Logo URL" value={l.imageUrl} onChange={(x) => u({ ...l, imageUrl: x })} />
+                <ImageField label="Logo URL" {...imageI18nProps(l, "imageUrl", (p) => u({ ...l, ...p }))} />
                 <TextInput label="Alt text" value={l.alt} onChange={(x) => u({ ...l, alt: x })} />
               </div>
             )}
@@ -2720,7 +2721,7 @@ function renderBlockFields(
             itemPreview={(b) => b.alt || '(unnamed)'}
             renderItem={(b, u) => (
               <div className="space-y-2">
-                <ImageField label="Badge image" value={b.imageUrl ?? ''} onChange={(x) => u({ ...b, imageUrl: x })} />
+                <ImageField label="Badge image" {...imageI18nProps(b, "imageUrl", (p) => u({ ...b, ...p }))} />
                 <TextInput label="Alt text" value={b.alt ?? ''} onChange={(x) => u({ ...b, alt: x })} />
               </div>
             )}
@@ -2749,7 +2750,7 @@ function renderBlockFields(
               <div className="space-y-2">
                 <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
                 <RichTextInput label="Description" {...richItemProps(c, 'description', u)} />
-                <ImageField label="Thumbnail image" value={c.thumbnailUrl ?? ''} onChange={(x) => u({ ...c, thumbnailUrl: x })} />
+                <ImageField label="Thumbnail image" {...imageI18nProps(c, "thumbnailUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Video URL (YouTube, YouTube Shorts, or direct mp4)" value={c.videoUrl ?? ''} onChange={(x) => u({ ...c, videoUrl: x })} />
               </div>
             )}
@@ -2777,7 +2778,7 @@ function renderBlockFields(
               <div className="space-y-2">
                 <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
                 <RichTextInput label="Description" {...richItemProps(c, 'description', u)} />
-                <ImageField label="Screenshot image" value={c.imageUrl ?? ''} onChange={(x) => u({ ...c, imageUrl: x })} />
+                <ImageField label="Screenshot image" {...imageI18nProps(c, "imageUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Image alt text" value={c.imageAlt ?? ''} onChange={(x) => u({ ...c, imageAlt: x })} />
               </div>
             )}
@@ -2804,7 +2805,7 @@ function renderBlockFields(
               <div className="space-y-2 pl-1 border-l-2 border-slate-700">
                 <TextInput label="Badge" value={fp.badge ?? ''} onChange={(v) => upd({ badge: v })} />
                 <Textarea label="Title" value={fp.title ?? ''} onChange={(v) => upd({ title: v })} />
-                <ImageField label="Image" value={fp.imageUrl ?? ''} onChange={(v) => upd({ imageUrl: v })} />
+                <ImageField label="Image" {...imageI18nProps(fp, "imageUrl", upd)} />
                 <TextInput label="CTA label" value={fp.ctaLabel ?? ''} onChange={(v) => upd({ ctaLabel: v })} />
                 <TextInput label="CTA URL" value={fp.ctaUrl ?? ''} onChange={(v) => upd({ ctaUrl: v })} />
               </div>
@@ -2821,7 +2822,7 @@ function renderBlockFields(
               <div className="space-y-2">
                 <RichTextInput label="Badge" {...richItemProps(p, 'badge', u)} />
                 <RichTextInput label="Title" {...richItemProps(p, 'title', u)} />
-                <ImageField label="Image" value={p.imageUrl ?? ''} onChange={(v) => u({ ...p, imageUrl: v })} />
+                <ImageField label="Image" {...imageI18nProps(p, "imageUrl", (patch) => u({ ...p, ...patch }))} />
                 <RichTextInput label="CTA label" {...richItemProps(p, 'ctaLabel', u)} />
                 <TextInput label="CTA URL" value={p.ctaUrl ?? ''} onChange={(v) => u({ ...p, ctaUrl: v })} />
               </div>
@@ -3051,7 +3052,7 @@ function renderBlockFields(
                 <RichTextInput label="Impact value" {...richItemProps(t, 'impactValue', u)} />
                 <RichTextInput label="Impact label" {...richItemProps(t, 'impactLabel', u)} />
                 <RichTextInput label="Impact sub" {...richItemProps(t, 'impactSub', u)} />
-                <ImageField label="Tab image (right panel)" value={t.img ?? ''} onChange={(v) => u({ ...t, img: v })} />
+                <ImageField label="Tab image (right panel)" {...imageI18nProps(t, "img", (p) => u({ ...t, ...p }))} />
               </div>
             )}
           />
@@ -3065,7 +3066,7 @@ function renderBlockFields(
           <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
           <RichFieldGroup label="Sub paragraph (\\n for line break)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Centre image (phone group)" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
+          <ImageField label="Centre image (phone group)" {...imageI18nProps(f, "imgCenter", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Label — top left" f={f} set={set} base="labelTL" segments={[{ key: 'labelTL' }]} />
           <RichFieldGroup label="Label — mid left" f={f} set={set} base="labelML" segments={[{ key: 'labelML' }]} />
@@ -3091,7 +3092,7 @@ function renderBlockFields(
             itemPreview={(s) => s.imageAlt || 'Slide'}
             renderItem={(s, u) => (
               <div className="space-y-2">
-                <ImageField label="Slide image" value={s.imageUrl ?? ''} onChange={(v) => u({ ...s, imageUrl: v })} />
+                <ImageField label="Slide image" {...imageI18nProps(s, "imageUrl", (p) => u({ ...s, ...p }))} />
                 <TextInput label="Image alt" value={s.imageAlt ?? ''} onChange={(v) => u({ ...s, imageAlt: v })} />
               </div>
             )}
@@ -3138,11 +3139,11 @@ function renderBlockFields(
               <div className="space-y-2">
                 <RichTextInput label="Name" {...richItemProps(c, 'name', u)} />
                 <RichTextInput label="Role (use newline for line break)" {...richItemProps(c, 'role', u)} />
-                <ImageField label="Logo image" value={c.logoImg ?? ''} onChange={(v) => u({ ...c, logoImg: v })} />
+                <ImageField label="Logo image" {...imageI18nProps(c, "logoImg", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Logo alt text" value={c.logoAlt ?? ''} onChange={(v) => u({ ...c, logoAlt: v })} />
                 <RichTextInput label="Logo text (fallback)" {...richItemProps(c, 'logoText', u)} />
                 <ColorPicker label="Logo text color" value={c.logoColor ?? '#082B4B'} onChange={(v) => u({ ...c, logoColor: v })} />
-                <ImageField label="Video thumbnail" value={c.thumbnail ?? ''} onChange={(v) => u({ ...c, thumbnail: v })} />
+                <ImageField label="Video thumbnail" {...imageI18nProps(c, "thumbnail", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Video URL" value={c.videoUrl ?? ''} onChange={(v) => u({ ...c, videoUrl: v })} />
               </div>
             )}
@@ -3212,11 +3213,11 @@ function renderBlockFields(
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
-          <ImageField label="Center image (dashboard)" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
+          <ImageField label="Center image (dashboard)" {...imageI18nProps(f, "imgCenter", update)} />
           <NumberInput label="Center image width (px)" value={(f.imgCenterWidth as number) ?? 660} onChange={(v) => set('imgCenterWidth', v)} />
           <FitSelect label="Center image fit" fitKey="imgCenterFit" f={f} set={set} def="fill" />
-          <ImageField label="Left card image" value={f.imgLeft as string ?? ''} onChange={(v) => set('imgLeft', v)} />
-          <ImageField label="Right card image" value={f.imgRight as string ?? ''} onChange={(v) => set('imgRight', v)} />
+          <ImageField label="Left card image" {...imageI18nProps(f, "imgLeft", update)} />
+          <ImageField label="Right card image" {...imageI18nProps(f, "imgRight", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Floating chips</p>
           <RichFieldGroup label="Chip 1 — value" f={f} set={set} base="chip1Val" segments={[{ key: 'chip1Val' }]} />
@@ -3263,7 +3264,7 @@ function renderBlockFields(
                 <RichTextInput label="Stat value (e.g. 3%)" {...richItemProps(t, 'statValue', u)} />
                 <RichTextInput label="Stat label" {...richItemProps(t, 'statLabel', u)} />
                 <RichTextInput label="Stat suffix" {...richItemProps(t, 'statSuffix', u)} />
-                <ImageField label="Tab image" value={t.img ?? ''} onChange={(v) => u({ ...t, img: v })} />
+                <ImageField label="Tab image" {...imageI18nProps(t, "img", (p) => u({ ...t, ...p }))} />
               </div>
             )}
           />
@@ -3297,7 +3298,7 @@ function renderBlockFields(
                 <RichTextInput label="Stat value (e.g. 3%)" {...richItemProps(t, 'statValue', u)} />
                 <RichTextInput label="Stat label" {...richItemProps(t, 'statLabel', u)} />
                 <RichTextInput label="Stat suffix" {...richItemProps(t, 'statSuffix', u)} />
-                <ImageField label="Tab image" value={t.img ?? ''} onChange={(v) => u({ ...t, img: v })} />
+                <ImageField label="Tab image" {...imageI18nProps(t, "img", (p) => u({ ...t, ...p }))} />
               </div>
             )}
           />
@@ -3315,9 +3316,9 @@ function renderBlockFields(
           <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
           <RichFieldGroup label="Italic subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
-          <ImageField label="Standard DMS screen image (left/before side of slider)" value={f.imgScreenOld as string ?? ''} onChange={(v) => set('imgScreenOld', v)} />
+          <ImageField label="Standard DMS screen image (left/before side of slider)" {...imageI18nProps(f, "imgScreenOld", update)} />
           <FitSelect label="Standard DMS screen fit" fitKey="imgScreenOldFit" f={f} set={set} def="cover" />
-          <ImageField label="NextGen DMS screen image (right/after side of slider)" value={f.imgScreenNew as string ?? ''} onChange={(v) => set('imgScreenNew', v)} />
+          <ImageField label="NextGen DMS screen image (right/after side of slider)" {...imageI18nProps(f, "imgScreenNew", update)} />
           <FitSelect label="NextGen DMS screen fit" fitKey="imgScreenNewFit" f={f} set={set} def="cover" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Left panel label (Standard DMS)" f={f} set={set} base="oldLabel" segments={[{ key: 'oldLabel' }]} />
@@ -3371,7 +3372,7 @@ function renderBlockFields(
             renderItem={(a, u) => (
               <div className="space-y-2">
                 <RichTextInput label="Agent name" {...richItemProps(a, 'name', u)} />
-                <ImageField label="Agent image (overrides mockup)" value={a.img ?? ''} onChange={(v) => u({ ...a, img: v })} />
+                <ImageField label="Agent image (overrides mockup)" {...imageI18nProps(a, "img", (p) => u({ ...a, ...p }))} />
                 <RichTextInput label="Short description" {...richItemProps(a, 'lede', u)} />
                 <TextInput label="Benefit 1" value={(a.benefits as string[] | undefined)?.[0] ?? ''} onChange={(v) => u({ ...a, benefits: [v, ...((a.benefits as string[] | undefined ?? []).slice(1))] })} />
                 <TextInput label="Benefit 2" value={(a.benefits as string[] | undefined)?.[1] ?? ''} onChange={(v) => u({ ...a, benefits: [((a.benefits as string[] | undefined ?? [])[0]) ?? '', v] })} />
@@ -3396,15 +3397,15 @@ function renderBlockFields(
           <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Logo (top-left badge)" value={f.logoUrl as string ?? ''} onChange={(v) => set('logoUrl', v)} />
+          <ImageField label="Logo (top-left badge)" {...imageI18nProps(f, "logoUrl", update)} />
           <TextInput label="Logo alt" value={f.logoAlt as string ?? ''} onChange={(v) => set('logoAlt', v)} />
           <FitSelect label="Logo fit" fitKey="logoImageFit" f={f} set={set} def="cover" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Panel Title Pre" f={f} set={set} base="panelTitlePre" segments={[{ key: 'panelTitlePre' }]} />
           <RichFieldGroup label="Panel Title Bold" f={f} set={set} base="panelTitleBold" segments={[{ key: 'panelTitleBold' }]} />
           <RichFieldGroup label="Panel subtitle" f={f} set={set} base="panelSub" segments={[{ key: 'panelSub' }]} />
-          <ImageField label="Panel background image (fills whole panel; defaults to black if empty)" value={f.panelBgUrl as string ?? ''} onChange={(v) => set('panelBgUrl', v)} />
-          <ImageField label="Center mic image (defaults to a mic icon if empty)" value={f.micImageUrl as string ?? ''} onChange={(v) => set('micImageUrl', v)} />
+          <ImageField label="Panel background image (fills whole panel; defaults to black if empty)" {...imageI18nProps(f, "panelBgUrl", update)} />
+          <ImageField label="Center mic image (defaults to a mic icon if empty)" {...imageI18nProps(f, "micImageUrl", update)} />
           <TextInput label="Mic image alt" value={f.micImageAlt as string ?? ''} onChange={(v) => set('micImageAlt', v)} />
           <FitSelect label="Mic image fit" fitKey="micImageFit" f={f} set={set} def="contain" />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -3416,7 +3417,7 @@ function renderBlockFields(
             itemPreview={(a) => a.imageAlt || '(untitled)'}
             renderItem={(a, u) => (
               <div className="space-y-2">
-                <ImageField label="Agent card image (title + tag + photo, pre-composed)" value={a.imageUrl ?? ''} onChange={(v) => u({ ...a, imageUrl: v })} />
+                <ImageField label="Agent card image (title + tag + photo, pre-composed)" {...imageI18nProps(a, "imageUrl", (p) => u({ ...a, ...p }))} />
                 <TextInput label="Image alt" value={a.imageAlt ?? ''} onChange={(v) => u({ ...a, imageAlt: v })} />
               </div>
             )}
@@ -3502,7 +3503,7 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Stamp percentage text" f={f} set={set} base="stampPercent" segments={[{ key: 'stampPercent' }]} />
           <RichFieldGroup label="Stamp label text" f={f} set={set} base="stampLabel" segments={[{ key: 'stampLabel' }]} />
-          <ImageField label="Stamp image (replaces the animated stamp when set)" value={f.stampImageUrl as string ?? ''} onChange={(v) => set('stampImageUrl', v)} />
+          <ImageField label="Stamp image (replaces the animated stamp when set)" {...imageI18nProps(f, "stampImageUrl", update)} />
           <TextInput label="Stamp image alt" value={f.stampImageAlt as string ?? ''} onChange={(v) => set('stampImageAlt', v)} />
           <ImageWHFit label="Stamp image size" widthKey="stampImageWidthPercent" widthUnit="%" widthDef={100} aspectRatioKey="stampImageAspectRatio" fitKey="stampImageFit" fitDef="cover" f={f} set={set} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -3519,10 +3520,10 @@ function renderBlockFields(
           <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <RichFieldGroup label="Subtitle" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Main screenshot" value={f.screenshotUrl as string ?? ''} onChange={(v) => set('screenshotUrl', v)} />
+          <ImageField label="Main screenshot" {...imageI18nProps(f, "screenshotUrl", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Floating card 1" value={f.card1Img as string ?? ''} onChange={(v) => set('card1Img', v)} />
-          <ImageField label="Floating card 2" value={f.card2Img as string ?? ''} onChange={(v) => set('card2Img', v)} />
+          <ImageField label="Floating card 1" {...imageI18nProps(f, "card1Img", update)} />
+          <ImageField label="Floating card 2" {...imageI18nProps(f, "card2Img", update)} />
         </div>
       );
 
@@ -3614,13 +3615,13 @@ function renderBlockFields(
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Left card 1 (top)" value={f.imgCl1 as string ?? ''} onChange={(v) => set('imgCl1', v)} />
-          <ImageField label="Left card 2 (middle)" value={f.imgCl2 as string ?? ''} onChange={(v) => set('imgCl2', v)} />
-          <ImageField label="Left card 3 (bottom)" value={f.imgCl3 as string ?? ''} onChange={(v) => set('imgCl3', v)} />
-          <ImageField label="Centre phone" value={f.imgPhone as string ?? ''} onChange={(v) => set('imgPhone', v)} />
-          <ImageField label="Right card 1 (top)" value={f.imgCr1 as string ?? ''} onChange={(v) => set('imgCr1', v)} />
-          <ImageField label="Right card 2 (middle)" value={f.imgCr2 as string ?? ''} onChange={(v) => set('imgCr2', v)} />
-          <ImageField label="Right card 3 (bottom)" value={f.imgCr3 as string ?? ''} onChange={(v) => set('imgCr3', v)} />
+          <ImageField label="Left card 1 (top)" {...imageI18nProps(f, "imgCl1", update)} />
+          <ImageField label="Left card 2 (middle)" {...imageI18nProps(f, "imgCl2", update)} />
+          <ImageField label="Left card 3 (bottom)" {...imageI18nProps(f, "imgCl3", update)} />
+          <ImageField label="Centre phone" {...imageI18nProps(f, "imgPhone", update)} />
+          <ImageField label="Right card 1 (top)" {...imageI18nProps(f, "imgCr1", update)} />
+          <ImageField label="Right card 2 (middle)" {...imageI18nProps(f, "imgCr2", update)} />
+          <ImageField label="Right card 3 (bottom)" {...imageI18nProps(f, "imgCr3", update)} />
         </div>
       );
 
@@ -3654,7 +3655,7 @@ function renderBlockFields(
             itemPreview={(it) => it.alt || it.text || '(untitled)'}
             renderItem={(it, u) => (
               <div className="space-y-2">
-                <ImageField label="Logo image (overrides text)" value={it.img ?? ''} onChange={(v) => u({ ...it, img: v })} />
+                <ImageField label="Logo image (overrides text)" {...imageI18nProps(it, "img", (p) => u({ ...it, ...p }))} />
                 <TextInput label="Alt text" value={it.alt ?? ''} onChange={(v) => u({ ...it, alt: v })} />
                 <RichTextInput label="Text fallback" {...richItemProps(it, 'text', u)} />
                 <RichTextInput label="Sub (optional)" {...richItemProps(it, 'sub', u)} />
@@ -3678,7 +3679,7 @@ function renderBlockFields(
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Video URL (YouTube embed or direct)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
-          <ImageField label="Video thumbnail" value={f.videoThumb as string ?? ''} onChange={(v) => set('videoThumb', v)} />
+          <ImageField label="Video thumbnail" {...imageI18nProps(f, "videoThumb", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Media Title" f={f} set={set} base="mediaTitle" segments={[{ key: 'mediaTitle' }]} />
           <RichFieldGroup label="Media Title Highlight" f={f} set={set} base="mediaTitleHighlight" segments={[{ key: 'mediaTitleHighlight' }]} />
@@ -3719,7 +3720,7 @@ function renderBlockFields(
                 <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
                 <RichTextInput label="Body" {...richItemProps(it, 'body', u)} />
                 <RichTextInput label="Stat" {...richItemProps(it, 'stat', u)} />
-                <ImageField label="Card image (overrides coded mockup)" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
+                <ImageField label="Card image (overrides coded mockup)" {...imageI18nProps(it, "image", (p) => u({ ...it, ...p }))} />
               </div>
             )}
           />
@@ -3744,7 +3745,7 @@ function renderBlockFields(
             renderItem={(it, u) => (
               <div className="space-y-2">
                 <RichTextInput label="Label (shown if no image)" {...richItemProps(it, 'label', u)} />
-                <ImageField label="Logo image" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
+                <ImageField label="Logo image" {...imageI18nProps(it, "image", (p) => u({ ...it, ...p }))} />
               </div>
             )}
           />
@@ -3769,7 +3770,7 @@ function renderBlockFields(
               <div className="space-y-2">
                 <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
                 <RichTextInput label="Body" {...richItemProps(it, 'body', u)} />
-                <ImageField label="Card image" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
+                <ImageField label="Card image" {...imageI18nProps(it, "image", (p) => u({ ...it, ...p }))} />
                 <RichTextInput label="Metric 1 value" {...richItemProps(it, 'metricValue', u)} />
                 <RichTextInput label="Metric 1 label" {...richItemProps(it, 'metricLabel', u)} />
                 <RichTextInput label="Metric 1 sub" {...richItemProps(it, 'metricSub', u)} />
@@ -3805,7 +3806,7 @@ function renderBlockFields(
             )}
           />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Right side image" value={f.sectionImg as string ?? ''} onChange={(v) => set('sectionImg', v)} />
+          <ImageField label="Right side image" {...imageI18nProps(f, "sectionImg", update)} />
         </div>
       );
 
@@ -3873,14 +3874,14 @@ function renderBlockFields(
           <RichFieldGroup label="Stat 4 value" f={f} set={set} base="stat4Val" segments={[{ key: 'stat4Val' }]} />
           <RichFieldGroup label="Stat 4 label" f={f} set={set} base="stat4Label" segments={[{ key: 'stat4Label' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Logo 1" value={f.logo1 as string ?? ''} onChange={(v) => set('logo1', v)} />
-          <ImageField label="Logo 2" value={f.logo2 as string ?? ''} onChange={(v) => set('logo2', v)} />
-          <ImageField label="Logo 3" value={f.logo3 as string ?? ''} onChange={(v) => set('logo3', v)} />
-          <ImageField label="Logo 4" value={f.logo4 as string ?? ''} onChange={(v) => set('logo4', v)} />
-          <ImageField label="Logo 5" value={f.logo5 as string ?? ''} onChange={(v) => set('logo5', v)} />
-          <ImageField label="Logo 6" value={f.logo6 as string ?? ''} onChange={(v) => set('logo6', v)} />
-          <ImageField label="Logo 7" value={f.logo7 as string ?? ''} onChange={(v) => set('logo7', v)} />
-          <ImageField label="Logo 8" value={f.logo8 as string ?? ''} onChange={(v) => set('logo8', v)} />
+          <ImageField label="Logo 1" {...imageI18nProps(f, "logo1", update)} />
+          <ImageField label="Logo 2" {...imageI18nProps(f, "logo2", update)} />
+          <ImageField label="Logo 3" {...imageI18nProps(f, "logo3", update)} />
+          <ImageField label="Logo 4" {...imageI18nProps(f, "logo4", update)} />
+          <ImageField label="Logo 5" {...imageI18nProps(f, "logo5", update)} />
+          <ImageField label="Logo 6" {...imageI18nProps(f, "logo6", update)} />
+          <ImageField label="Logo 7" {...imageI18nProps(f, "logo7", update)} />
+          <ImageField label="Logo 8" {...imageI18nProps(f, "logo8", update)} />
         </div>
       );
 
@@ -3907,7 +3908,7 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <TextInput label="Video URL (mp4)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
-          <ImageField label="Thumbnail URL (optional)" value={f.thumbnailUrl as string ?? ''} onChange={(v) => set('thumbnailUrl', v)} />
+          <ImageField label="Thumbnail URL (optional)" {...imageI18nProps(f, "thumbnailUrl", update)} />
         </div>
       );
 
@@ -3926,12 +3927,12 @@ function renderBlockFields(
             itemPreview={(it) => it.name || 'Testimonial'}
             renderItem={(it, u) => (
               <>
-                <ImageField label="Thumbnail URL" value={it.thumbnail} onChange={(x) => u({ ...it, thumbnail: x })} />
+                <ImageField label="Thumbnail URL" {...imageI18nProps(it, "thumbnail", (p) => u({ ...it, ...p }))} />
                 <TextInput label="Video URL (mp4)" value={it.videoUrl} onChange={(x) => u({ ...it, videoUrl: x })} />
                 <RichTextInput label="Name" {...richItemProps(it, 'name', u)} />
                 <RichTextInput label="Role" {...richItemProps(it, 'role', u)} />
                 <RichTextInput label="Company" {...richItemProps(it, 'company', u)} />
-                <ImageField label="Company logo URL" value={it.logoUrl} onChange={(x) => u({ ...it, logoUrl: x })} />
+                <ImageField label="Company logo URL" {...imageI18nProps(it, "logoUrl", (p) => u({ ...it, ...p }))} />
                 <TextInput label="Logo alt text" value={it.logoAlt} onChange={(x) => u({ ...it, logoAlt: x })} />
               </>
             )}
@@ -3945,7 +3946,7 @@ function renderBlockFields(
             itemPreview={(it) => it.alt || 'Logo'}
             renderItem={(it, u) => (
               <>
-                <ImageField label="Logo URL" value={it.url} onChange={(x) => u({ ...it, url: x })} />
+                <ImageField label="Logo URL" {...imageI18nProps(it, "url", (p) => u({ ...it, ...p }))} />
                 <TextInput label="Alt text" value={it.alt} onChange={(x) => u({ ...it, alt: x })} />
               </>
             )}
@@ -4071,7 +4072,7 @@ function renderBlockFields(
             itemPreview={(it) => it.alt || 'Photo'}
             renderItem={(it, u) => (
               <>
-                <ImageField label="Photo URL" value={it.url} onChange={(x) => u({ ...it, url: x })} />
+                <ImageField label="Photo URL" {...imageI18nProps(it, "url", (p) => u({ ...it, ...p }))} />
                 <TextInput label="Alt text" value={it.alt} onChange={(x) => u({ ...it, alt: x })} />
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#334155' }}>
                   <input type="checkbox" checked={!!it.tall} onChange={(e) => u({ ...it, tall: e.target.checked })} />
@@ -4098,7 +4099,7 @@ function renderBlockFields(
             itemPreview={(it) => it.title || 'Award'}
             renderItem={(it, u) => (
               <>
-                <ImageField label="Award image URL" value={it.imgUrl} onChange={(x) => u({ ...it, imgUrl: x })} />
+                <ImageField label="Award image URL" {...imageI18nProps(it, "imgUrl", (p) => u({ ...it, ...p }))} />
                 <TextInput label="Alt text" value={it.imgAlt} onChange={(x) => u({ ...it, imgAlt: x })} />
                 <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
               </>
@@ -4189,14 +4190,14 @@ function renderBlockFields(
           <RichFieldGroup label="Stat 4 label" f={f} set={set} base="stat4Label" segments={[{ key: 'stat4Label' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Brands section label" f={f} set={set} base="brandsLabel" segments={[{ key: 'brandsLabel' }]} />
-          <ImageField label="Logo 1" value={f.logo1 as string ?? ''} onChange={(v) => set('logo1', v)} />
-          <ImageField label="Logo 2" value={f.logo2 as string ?? ''} onChange={(v) => set('logo2', v)} />
-          <ImageField label="Logo 3" value={f.logo3 as string ?? ''} onChange={(v) => set('logo3', v)} />
-          <ImageField label="Logo 4" value={f.logo4 as string ?? ''} onChange={(v) => set('logo4', v)} />
-          <ImageField label="Logo 5" value={f.logo5 as string ?? ''} onChange={(v) => set('logo5', v)} />
-          <ImageField label="Logo 6" value={f.logo6 as string ?? ''} onChange={(v) => set('logo6', v)} />
-          <ImageField label="Logo 7" value={f.logo7 as string ?? ''} onChange={(v) => set('logo7', v)} />
-          <ImageField label="Logo 8" value={f.logo8 as string ?? ''} onChange={(v) => set('logo8', v)} />
+          <ImageField label="Logo 1" {...imageI18nProps(f, "logo1", update)} />
+          <ImageField label="Logo 2" {...imageI18nProps(f, "logo2", update)} />
+          <ImageField label="Logo 3" {...imageI18nProps(f, "logo3", update)} />
+          <ImageField label="Logo 4" {...imageI18nProps(f, "logo4", update)} />
+          <ImageField label="Logo 5" {...imageI18nProps(f, "logo5", update)} />
+          <ImageField label="Logo 6" {...imageI18nProps(f, "logo6", update)} />
+          <ImageField label="Logo 7" {...imageI18nProps(f, "logo7", update)} />
+          <ImageField label="Logo 8" {...imageI18nProps(f, "logo8", update)} />
         </div>
       );
 
@@ -4226,7 +4227,7 @@ function renderBlockFields(
             itemPreview={(it) => it.alt || 'Logo'}
             renderItem={(it, u) => (
               <>
-                <ImageField label="Logo image URL" value={it.url} onChange={(x) => u({ ...it, url: x })} />
+                <ImageField label="Logo image URL" {...imageI18nProps(it, "url", (p) => u({ ...it, ...p }))} />
                 <TextInput label="Alt text" value={it.alt} onChange={(x) => u({ ...it, alt: x })} />
               </>
             )}
@@ -4293,7 +4294,7 @@ function renderBlockFields(
           <RichFieldGroup label="Mission Heading Teal" f={f} set={set} base="missionHeadingTeal" segments={[{ key: 'missionHeadingTeal' }]} />
           <RichFieldGroup label="Mission Heading Tail" f={f} set={set} base="missionHeadingTail" segments={[{ key: 'missionHeadingTail' }]} />
           <RichFieldGroup label="Sub text" f={f} set={set} base="missionSub" segments={[{ key: 'missionSub' }]} />
-          <ImageField label="Mission image" value={f.missionImg as string ?? ''} onChange={(v) => set('missionImg', v)} />
+          <ImageField label="Mission image" {...imageI18nProps(f, "missionImg", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Vision row</p>
           <RichFieldGroup label="Vision pill" f={f} set={set} base="visionPill" segments={[{ key: 'visionPill' }]} />
@@ -4301,7 +4302,7 @@ function renderBlockFields(
           <RichFieldGroup label="Vision Heading Teal" f={f} set={set} base="visionHeadingTeal" segments={[{ key: 'visionHeadingTeal' }]} />
           <RichFieldGroup label="Vision Heading Tail" f={f} set={set} base="visionHeadingTail" segments={[{ key: 'visionHeadingTail' }]} />
           <RichFieldGroup label="Sub text" f={f} set={set} base="visionSub" segments={[{ key: 'visionSub' }]} />
-          <ImageField label="Vision image" value={f.visionImg as string ?? ''} onChange={(v) => set('visionImg', v)} />
+          <ImageField label="Vision image" {...imageI18nProps(f, "visionImg", update)} />
         </div>
       );
 
@@ -4323,7 +4324,7 @@ function renderBlockFields(
           <RichFieldGroup label="Text 5 (bold)" f={f} set={set} base="textBold5" segments={[{ key: 'textBold5' }]} />
           <RichFieldGroup label="Text 6 (normal)" f={f} set={set} base="textSeg6" segments={[{ key: 'textSeg6' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Video poster" value={f.posterUrl as string ?? ''} onChange={(v) => set('posterUrl', v)} />
+          <ImageField label="Video poster" {...imageI18nProps(f, "posterUrl", update)} />
           <TextInput label="Video URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
@@ -4430,13 +4431,13 @@ function renderBlockFields(
           <RichFieldGroup label="Sub text" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Founder 1</p>
-          <ImageField label="Photo" value={f.f1Photo as string ?? ''} onChange={(v) => set('f1Photo', v)} />
+          <ImageField label="Photo" {...imageI18nProps(f, "f1Photo", update)} />
           <RichFieldGroup label="Name" f={f} set={set} base="f1Name" segments={[{ key: 'f1Name' }]} />
           <RichFieldGroup label="Role" f={f} set={set} base="f1Role" segments={[{ key: 'f1Role' }]} />
           <TextInput label="LinkedIn URL" value={f.f1LinkedIn as string ?? ''} onChange={(v) => set('f1LinkedIn', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Founder 2</p>
-          <ImageField label="Photo" value={f.f2Photo as string ?? ''} onChange={(v) => set('f2Photo', v)} />
+          <ImageField label="Photo" {...imageI18nProps(f, "f2Photo", update)} />
           <RichFieldGroup label="Name" f={f} set={set} base="f2Name" segments={[{ key: 'f2Name' }]} />
           <RichFieldGroup label="Role" f={f} set={set} base="f2Role" segments={[{ key: 'f2Role' }]} />
           <TextInput label="LinkedIn URL" value={f.f2LinkedIn as string ?? ''} onChange={(v) => set('f2LinkedIn', v)} />
@@ -4600,8 +4601,8 @@ function renderBlockFields(
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Center image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
-          <ImageField label="Center image — mobile (optional, shown ≤620px)" value={f.imgCenterMobile as string ?? ''} onChange={(v) => set('imgCenterMobile', v)} />
+          <ImageField label="Center image" {...imageI18nProps(f, "imgCenter", update)} />
+          <ImageField label="Center image — mobile (optional, shown ≤620px)" {...imageI18nProps(f, "imgCenterMobile", update)} />
         </div>
       );
 
@@ -4620,7 +4621,7 @@ function renderBlockFields(
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Center image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
+          <ImageField label="Center image" {...imageI18nProps(f, "imgCenter", update)} />
         </div>
       );
 
@@ -4629,7 +4630,7 @@ function renderBlockFields(
       type NavCat = { key: string; label: string; sub: string; accent: string; iconKey: string; items: NavItem[]; flagship?: boolean };
       return (
         <div className="space-y-4">
-          <ImageField label="Logo image" value={f.logoSrc as string ?? ''} onChange={(v) => set('logoSrc', v)} />
+          <ImageField label="Logo image" {...imageI18nProps(f, "logoSrc", update)} />
           <RichFieldGroup label="CTA button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -4662,7 +4663,7 @@ function renderBlockFields(
                       <RichTextInput label="Description" {...richItemProps(it, 'desc', ui)} />
                       <PageLinkField label="Link URL" value={it.href ?? ''} onChange={(v) => ui({ ...it, href: v })} />
                       <TextInput label="Icon key" value={it.iconKey ?? ''} onChange={(v) => ui({ ...it, iconKey: v })} />
-                      <ImageField label="Upload icon (overrides the icon key)" value={it.iconImage ?? ''} onChange={(v) => ui({ ...it, iconImage: v })} />
+                      <ImageField label="Upload icon (overrides the icon key)" {...imageI18nProps(it, "iconImage", (p) => ui({ ...it, ...p }))} />
                       <ColorPicker label="Icon background (blank = default tint)" value={it.iconBg ?? ''} onChange={(v) => ui({ ...it, iconBg: v })} />
                       <Toggle label="Show AI badge" value={Boolean(it.ai)} onChange={(v) => ui({ ...it, ai: v })} />
                     </div>
@@ -4729,7 +4730,7 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <p className="text-xs text-slate-500 font-medium">Dare to Compare card</p>
-          <ImageField label="Logo" value={f.dtcLogo as string ?? ''} onChange={(v) => set('dtcLogo', v)} />
+          <ImageField label="Logo" {...imageI18nProps(f, "dtcLogo", update)} />
           <RichFieldGroup label="Heading (normal part)" f={f} set={set} base="dtcHeadingPre" segments={[{ key: 'dtcHeadingPre' }]} />
           <RichFieldGroup label="Heading (gold accent)" f={f} set={set} base="dtcHeadingAccent" segments={[{ key: 'dtcHeadingAccent' }]} />
           <RichFieldGroup label="Subtitle" f={f} set={set} base="dtcSubtitle" segments={[{ key: 'dtcSubtitle' }]} />
@@ -4742,7 +4743,7 @@ function renderBlockFields(
             renderItem={(x, u) => (
               <div className="space-y-2">
                 <TextInput label="Text (wrap **text** for teal bold)" value={x.text ?? ''} onChange={(v) => u({ ...x, text: v })} />
-                <ImageField label="Icon" value={x.iconUrl ?? ''} onChange={(v) => u({ ...x, iconUrl: v })} />
+                <ImageField label="Icon" {...imageI18nProps(x, "iconUrl", (p) => u({ ...x, ...p }))} />
               </div>
             )}
           />
@@ -4976,7 +4977,7 @@ function renderBlockFields(
           <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
           <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Thumbnail image" value={f.thumbnailUrl as string ?? ''} onChange={(v) => set('thumbnailUrl', v)} />
+          <ImageField label="Thumbnail image" {...imageI18nProps(f, "thumbnailUrl", update)} />
           <TextInput label="Video URL (.mp4 / YouTube / Vimeo)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="CTA label (prefix)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
@@ -5002,7 +5003,7 @@ function renderBlockFields(
             renderItem={(b, u) => (
               <div className="space-y-2">
                 <TextInput label="Alt text / name" value={b.alt ?? ''} onChange={(v) => u({ ...b, alt: v })} />
-                <ImageField label="Badge image" value={b.image ?? ''} onChange={(v) => u({ ...b, image: v })} />
+                <ImageField label="Badge image" {...imageI18nProps(b, "image", (p) => u({ ...b, ...p }))} />
               </div>
             )}
           />
@@ -5087,7 +5088,7 @@ function renderBlockFields(
                 <RichTextInput label="Body" {...richItemProps(t, 'body', u)} />
                 <RichTextInput label="Big value (e.g. 95%+)" {...richItemProps(t, 'bigValue', u)} />
                 <RichTextInput label="Big value label" {...richItemProps(t, 'bigLabel', u)} />
-                <ImageField label="Panel image" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
+                <ImageField label="Panel image" {...imageI18nProps(t, "imageUrl", (p) => u({ ...t, ...p }))} />
                 <TextInput label="Image alt / placeholder caption" value={t.imageAlt ?? ''} onChange={(v) => u({ ...t, imageAlt: v })} />
                 <Repeater<MRow>
                   label="Rows"
@@ -5133,7 +5134,7 @@ function renderBlockFields(
                 <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
                 <RichTextInput label="Sub (e.g. 28 SKUs detected)" {...richItemProps(c, 'sub', u)} />
                 <RichTextInput label="Accuracy badge (e.g. 89%)" {...richItemProps(c, 'accuracy', u)} />
-                <ImageField label="Card image" value={c.img ?? ''} onChange={(v) => u({ ...c, img: v })} />
+                <ImageField label="Card image" {...imageI18nProps(c, "img", (p) => u({ ...c, ...p }))} />
               </div>
             )}
           />
@@ -5169,7 +5170,7 @@ function renderBlockFields(
                 <RichTextInput label="Heading suffix (dark)" {...richItemProps(r, 'headingSuffix', u)} />
                 <RichTextInput label="Body text" {...richItemProps(r, 'body', u)} />
                 <Textarea label="Tags (one per line)" value={(r.tags ?? []).join('\n')} onChange={(v) => u({ ...r, tags: v.split('\n').filter(Boolean) })} />
-                <ImageField label="Row image" value={r.img ?? ''} onChange={(v) => u({ ...r, img: v })} />
+                <ImageField label="Row image" {...imageI18nProps(r, "img", (p) => u({ ...r, ...p }))} />
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#94a3b8', cursor: 'pointer' }}>
                   <input type="checkbox" checked={r.imgRight !== false} onChange={(e) => u({ ...r, imgRight: e.target.checked })} />
                   Image on right (uncheck = image on left)
@@ -5285,7 +5286,7 @@ function renderBlockFields(
               <div className="space-y-2">
                 <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
                 <RichTextInput label="Description" {...richItemProps(c, 'description', u)} />
-                <ImageField label="Card image" value={c.img ?? ''} onChange={(v) => u({ ...c, img: v })} />
+                <ImageField label="Card image" {...imageI18nProps(c, "img", (p) => u({ ...c, ...p }))} />
               </div>
             )}
           />
@@ -5324,7 +5325,7 @@ function renderBlockFields(
                 <RichTextInput label="Why — text before bold" {...richItemProps(t, 'whyPre', u)} />
                 <RichTextInput label="Why — bold text" {...richItemProps(t, 'whyBold', u)} />
                 <RichTextInput label="Why — text after bold" {...richItemProps(t, 'whyTail', u)} />
-                <ImageField label="Tab image (right panel)" value={t.img ?? ''} onChange={(v) => u({ ...t, img: v })} />
+                <ImageField label="Tab image (right panel)" {...imageI18nProps(t, "img", (p) => u({ ...t, ...p }))} />
               </div>
             )}
           />
@@ -5352,16 +5353,16 @@ function renderBlockFields(
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Centre phone" value={f.imgPhone as string ?? ''} onChange={(v) => set('imgPhone', v)} />
+          <ImageField label="Centre phone" {...imageI18nProps(f, "imgPhone", update)} />
           <NumberInput label="Centre phone width (px)" value={(f.imgPhoneWidth as number) ?? 254} onChange={(v) => set('imgPhoneWidth', v)} />
           <NumberInput label="Centre phone height (px, 0 = auto/natural)" value={(f.imgPhoneHeight as number) ?? 0} onChange={(v) => set('imgPhoneHeight', v)} />
           <TextInput label="Centre phone aspect ratio (e.g. 3/4) — leave blank if using height" value={f.imgPhoneAspectRatio as string ?? ''} onChange={(v) => set('imgPhoneAspectRatio', v)} />
           <FitSelect label="Centre phone fit" fitKey="imgPhoneFit" f={f} set={set} def="contain" />
-          <ImageField label="Bottom-left card (Share of Shelf)" value={f.imgBottomLeft as string ?? ''} onChange={(v) => set('imgBottomLeft', v)} />
+          <ImageField label="Bottom-left card (Share of Shelf)" {...imageI18nProps(f, "imgBottomLeft", update)} />
           <NumberInput label="Bottom-left card width (px)" value={(f.imgBottomLeftWidth as number) ?? 273} onChange={(v) => set('imgBottomLeftWidth', v)} />
           <TextInput label="Bottom-left aspect ratio (e.g. 16/9) — enables object-fit" value={f.imgBottomLeftAspectRatio as string ?? ''} onChange={(v) => set('imgBottomLeftAspectRatio', v)} />
           <FitSelect label="Bottom-left card fit" fitKey="imgBottomLeftFit" f={f} set={set} def="fill" />
-          <ImageField label="Bottom-right card (Task completed)" value={f.imgBottomRight as string ?? ''} onChange={(v) => set('imgBottomRight', v)} />
+          <ImageField label="Bottom-right card (Task completed)" {...imageI18nProps(f, "imgBottomRight", update)} />
           <NumberInput label="Bottom-right card width (px)" value={(f.imgBottomRightWidth as number) ?? 253} onChange={(v) => set('imgBottomRightWidth', v)} />
           <TextInput label="Bottom-right aspect ratio (e.g. 16/9) — enables object-fit" value={f.imgBottomRightAspectRatio as string ?? ''} onChange={(v) => set('imgBottomRightAspectRatio', v)} />
           <FitSelect label="Bottom-right card fit" fitKey="imgBottomRightFit" f={f} set={set} def="fill" />
@@ -5423,7 +5424,7 @@ function renderBlockFields(
               <div className="space-y-2">
                 <RichTextInput label="Flag emoji" {...richItemProps(l, 'flag', u)} />
                 <RichTextInput label="Label" {...richItemProps(l, 'label', u)} />
-                <ImageField label="Thumbnail" value={l.thumbnailUrl} onChange={(v) => u({ ...l, thumbnailUrl: v })} />
+                <ImageField label="Thumbnail" {...imageI18nProps(l, "thumbnailUrl", (p) => u({ ...l, ...p }))} />
               </div>
             )}
           />
@@ -5447,7 +5448,7 @@ function renderBlockFields(
             itemPreview={(im) => im.alt || im.url || 'Image'}
             renderItem={(im, u) => (
               <div className="space-y-2">
-                <ImageField label="Image" value={im.url ?? ''} onChange={(v) => u({ ...im, url: v })} />
+                <ImageField label="Image" {...imageI18nProps(im, "url", (p) => u({ ...im, ...p }))} />
                 <TextInput label="Alt text" value={im.alt ?? ''} onChange={(v) => u({ ...im, alt: v })} />
               </div>
             )}
@@ -5608,7 +5609,7 @@ function renderBlockFields(
             itemPreview={(p) => p.alt || '(empty)'}
             renderItem={(p, u) => (
               <div className="space-y-2">
-                <ImageField label="Thumbnail" value={p.thumbnailUrl} onChange={(v) => u({ ...p, thumbnailUrl: v })} />
+                <ImageField label="Thumbnail" {...imageI18nProps(p, "thumbnailUrl", (patch) => u({ ...p, ...patch }))} />
                 <TextInput label="Video URL (YouTube or direct .mp4)" value={p.videoUrl ?? ''} onChange={(v) => u({ ...p, videoUrl: v })} />
                 <TextInput label="Alt text" value={p.alt} onChange={(v) => u({ ...p, alt: v })} />
               </div>
@@ -5643,7 +5644,7 @@ function renderBlockFields(
             itemPreview={(c) => c.thumbnailUrl ? 'Clip (has thumbnail)' : 'Clip (placeholder)'}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <ImageField label="Thumbnail" value={c.thumbnailUrl} onChange={(v) => u({ ...c, thumbnailUrl: v })} />
+                <ImageField label="Thumbnail" {...imageI18nProps(c, "thumbnailUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Video URL (YouTube Short / mp4 — click to play)" value={c.videoUrl ?? ''} onChange={(v) => u({ ...c, videoUrl: v })} />
               </div>
             )}
@@ -5716,7 +5717,7 @@ function renderBlockFields(
           <RichFieldGroup label="Primary CTA label" f={f} set={set} base="primaryCtaLabel" segments={[{ key: 'primaryCtaLabel' }]} />
           <TextInput label="Primary CTA URL" value={f.primaryCtaUrl as string ?? ''} onChange={(v) => set('primaryCtaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Video thumbnail" value={f.thumbnailUrl as string ?? ''} onChange={(v) => set('thumbnailUrl', v)} />
+          <ImageField label="Video thumbnail" {...imageI18nProps(f, "thumbnailUrl", update)} />
           <VideoField label="Upload video" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <TextInput label="…or paste a video URL (YouTube / .mp4)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <RichFieldGroup label="Video caption" f={f} set={set} base="videoCaption" segments={[{ key: 'videoCaption' }]} />
@@ -5745,7 +5746,7 @@ function renderBlockFields(
           <RichFieldGroup label="Center bold line" f={f} set={set} base="centerBold" segments={[{ key: 'centerBold' }]} />
           <RichFieldGroup label="Center sub line" f={f} set={set} base="centerSub" segments={[{ key: 'centerSub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Right image" value={f.rightImageUrl as string ?? ''} onChange={(v) => set('rightImageUrl', v)} />
+          <ImageField label="Right image" {...imageI18nProps(f, "rightImageUrl", update)} />
           <TextInput label="Right image alt text" value={f.rightImageAlt as string ?? ''} onChange={(v) => set('rightImageAlt', v)} />
         </div>
       );
@@ -5762,7 +5763,7 @@ function renderBlockFields(
           <RichFieldGroup label="CTA bold suffix" f={f} set={set} base="ctaBold" segments={[{ key: 'ctaBold' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Background image" value={f.bgImageUrl as string ?? ''} onChange={(v) => set('bgImageUrl', v)} />
+          <ImageField label="Background image" {...imageI18nProps(f, "bgImageUrl", update)} />
         </div>
       );
     }
@@ -5771,7 +5772,7 @@ function renderBlockFields(
       type DTCFeature = { text: string; iconUrl?: string };
       return (
         <div className="space-y-4">
-          <ImageField label="Logo image (optional — falls back to text)" value={f.logoUrl as string ?? ''} onChange={(v) => set('logoUrl', v)} />
+          <ImageField label="Logo image (optional — falls back to text)" {...imageI18nProps(f, "logoUrl", update)} />
           <TextInput label="Logo alt text" value={f.logoAlt as string ?? ''} onChange={(v) => set('logoAlt', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Heading prefix (white)" value={f.headingPre as string ?? ''} onChange={(v) => set('headingPre', v)} />
@@ -5787,7 +5788,7 @@ function renderBlockFields(
             renderItem={(ft, u) => (
               <div className="space-y-2">
                 <Textarea label="Text" value={ft.text} onChange={(v) => u({ ...ft, text: v })} />
-                <ImageField label="Icon/logo image (optional — falls back to default icon)" value={ft.iconUrl ?? ''} onChange={(v) => u({ ...ft, iconUrl: v })} />
+                <ImageField label="Icon/logo image (optional — falls back to default icon)" {...imageI18nProps(ft, "iconUrl", (p) => u({ ...ft, ...p }))} />
               </div>
             )}
           />
@@ -5877,7 +5878,7 @@ function renderBlockFields(
           <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
           <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
           <RichFieldGroup label="Sub text" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
-          <ImageField label="Diagram image" value={f.diagramImg as string ?? ''} onChange={(v) => set('diagramImg', v)} />
+          <ImageField label="Diagram image" {...imageI18nProps(f, "diagramImg", update)} />
         </div>
       );
 
@@ -5892,7 +5893,7 @@ function renderBlockFields(
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 1 — Left tall (Ultra-Configurable Agents)</p>
           <RichFieldGroup label="Title" f={f} set={set} base="c1Title" segments={[{ key: 'c1Title' }]} />
           <RichFieldGroup label="Body" f={f} set={set} base="c1Body" segments={[{ key: 'c1Body' }]} />
-          <ImageField label="Agent image" value={f.c1Image as string ?? ''} onChange={(v) => set('c1Image', v)} />
+          <ImageField label="Agent image" {...imageI18nProps(f, "c1Image", update)} />
           <RichFieldGroup label="Caption (teal line)" f={f} set={set} base="c1Caption" segments={[{ key: 'c1Caption' }]} />
           <RichFieldGroup label="Caption (bold line)" f={f} set={set} base="c1CaptionSub" segments={[{ key: 'c1CaptionSub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -5901,7 +5902,7 @@ function renderBlockFields(
           <RichFieldGroup label="C2 Body Pre" f={f} set={set} base="c2BodyPre" segments={[{ key: 'c2BodyPre' }]} />
           <RichFieldGroup label="C2 Body Bold" f={f} set={set} base="c2BodyBold" segments={[{ key: 'c2BodyBold' }]} />
           <RichFieldGroup label="Body (after bold)" f={f} set={set} base="c2BodyPost" segments={[{ key: 'c2BodyPost' }]} />
-          <ImageField label="Side image" value={f.c2Image as string ?? ''} onChange={(v) => set('c2Image', v)} />
+          <ImageField label="Side image" {...imageI18nProps(f, "c2Image", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Banner — Agentic AI CTA</p>
           <RichFieldGroup label="Banner Pre" f={f} set={set} base="bannerPre" segments={[{ key: 'bannerPre' }]} />
@@ -5914,17 +5915,17 @@ function renderBlockFields(
           <RichFieldGroup label="C3 Body Pre" f={f} set={set} base="c3BodyPre" segments={[{ key: 'c3BodyPre' }]} />
           <RichFieldGroup label="C3 Body Bold" f={f} set={set} base="c3BodyBold" segments={[{ key: 'c3BodyBold' }]} />
           <RichFieldGroup label="Body (after bold)" f={f} set={set} base="c3BodyPost" segments={[{ key: 'c3BodyPost' }]} />
-          <ImageField label="Side image" value={f.c3Image as string ?? ''} onChange={(v) => set('c3Image', v)} />
+          <ImageField label="Side image" {...imageI18nProps(f, "c3Image", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 4 — Right top (Embedded in RTM)</p>
           <RichFieldGroup label="Title" f={f} set={set} base="c4Title" segments={[{ key: 'c4Title' }]} />
           <RichFieldGroup label="Body" f={f} set={set} base="c4Body" segments={[{ key: 'c4Body' }]} />
-          <ImageField label="Image" value={f.c4Image as string ?? ''} onChange={(v) => set('c4Image', v)} />
+          <ImageField label="Image" {...imageI18nProps(f, "c4Image", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Card 5 — Right bottom (AI Agents)</p>
           <RichFieldGroup label="Title" f={f} set={set} base="c5Title" segments={[{ key: 'c5Title' }]} />
           <RichFieldGroup label="Body" f={f} set={set} base="c5Body" segments={[{ key: 'c5Body' }]} />
-          <ImageField label="Visual image" value={f.c5Image as string ?? ''} onChange={(v) => set('c5Image', v)} />
+          <ImageField label="Visual image" {...imageI18nProps(f, "c5Image", update)} />
         </div>
       );
 
@@ -5932,7 +5933,7 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <TextInput label="Video URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
-          <ImageField label="Thumbnail" value={f.posterUrl as string ?? ''} onChange={(v) => set('posterUrl', v)} />
+          <ImageField label="Thumbnail" {...imageI18nProps(f, "posterUrl", update)} />
         </div>
       );
 
@@ -5947,7 +5948,7 @@ function renderBlockFields(
             <div key={n}>
               <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
               <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 6px' }}>Agent {n}</p>
-              <ImageField label={`Agent ${n} avatar`} value={f[`a${n}Img`] as string ?? ''} onChange={(v) => set(`a${n}Img`, v)} />
+              <ImageField label={`Agent ${n} avatar`} {...imageI18nProps(f, `a${n}Img`, update)} />
               <TextInput label="Title (before teal)" value={f[`a${n}TitlePre`] as string ?? ''} onChange={(v) => set(`a${n}TitlePre`, v)} />
               <TextInput label="Title (teal word)" value={f[`a${n}TitleTeal`] as string ?? ''} onChange={(v) => set(`a${n}TitleTeal`, v)} />
               <TextInput label="Title (after teal)" value={f[`a${n}TitlePost`] as string ?? ''} onChange={(v) => set(`a${n}TitlePost`, v)} />
@@ -5965,7 +5966,7 @@ function renderBlockFields(
           <RichFieldGroup label="Heading Teal" f={f} set={set} base="headingTeal" segments={[{ key: 'headingTeal' }]} />
           <RichFieldGroup label="Sub text" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Section image" value={f.sectionImg as string ?? ''} onChange={(v) => set('sectionImg', v)} />
+          <ImageField label="Section image" {...imageI18nProps(f, "sectionImg", update)} />
         </div>
       );
 
@@ -5987,9 +5988,9 @@ function renderBlockFields(
           <RichFieldGroup label="Promo Normal" f={f} set={set} base="promoNormal" segments={[{ key: 'promoNormal' }]} />
           <RichFieldGroup label="Promo Teal" f={f} set={set} base="promoTeal" segments={[{ key: 'promoTeal' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Center agent image" value={f.imgCenter as string ?? ''} onChange={(v) => set('imgCenter', v)} />
-          <ImageField label="Left UI screenshot" value={f.imgLeft as string ?? ''} onChange={(v) => set('imgLeft', v)} />
-          <ImageField label="Right UI screenshot" value={f.imgRight as string ?? ''} onChange={(v) => set('imgRight', v)} />
+          <ImageField label="Center agent image" {...imageI18nProps(f, "imgCenter", update)} />
+          <ImageField label="Left UI screenshot" {...imageI18nProps(f, "imgLeft", update)} />
+          <ImageField label="Right UI screenshot" {...imageI18nProps(f, "imgRight", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Card 1 value (top-left)" f={f} set={set} base="c1Val" segments={[{ key: 'c1Val' }]} />
           <RichFieldGroup label="Card 1 label" f={f} set={set} base="c1Lbl" segments={[{ key: 'c1Lbl' }]} />
@@ -6019,11 +6020,11 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Register URL (post-call CTA)" value={f.registerUrl as string ?? ''} onChange={(v) => set('registerUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Avatar image" value={f.avatarUrl as string ?? ''} onChange={(v) => set('avatarUrl', v)} />
+          <ImageField label="Avatar image" {...imageI18nProps(f, "avatarUrl", update)} />
           <RichFieldGroup label="Mic label (Tap to Talk)" f={f} set={set} base="micLabel" segments={[{ key: 'micLabel' }]} />
           <RichFieldGroup label="Mic sub-label" f={f} set={set} base="micSub" segments={[{ key: 'micSub' }]} />
           <RichFieldGroup label="Language label" f={f} set={set} base="langLabel" segments={[{ key: 'langLabel' }]} />
-          <ImageField label="Language flag URL" value={f.langFlag as string ?? ''} onChange={(v) => set('langFlag', v)} />
+          <ImageField label="Language flag URL" {...imageI18nProps(f, "langFlag", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<string>
             label="Typewriter phrases"
@@ -6082,7 +6083,7 @@ function renderBlockFields(
                 <RichTextInput label="Title (bold)" {...richItemProps(it, 'titleBold', u)} />
                 <RichTextInput label="Title (light)" {...richItemProps(it, 'titleLight', u)} />
                 <TextInput label="Link URL" value={it.href} onChange={(v) => u({ ...it, href: v })} />
-                <ImageField label="Upload icon (overrides the built-in icon below when set)" value={it.iconImage ?? ''} onChange={(v) => u({ ...it, iconImage: v })} />
+                <ImageField label="Upload icon (overrides the built-in icon below when set)" {...imageI18nProps(it, "iconImage", (p) => u({ ...it, ...p }))} />
                 <ColorPicker label="Icon card background (blank = category tint)" value={it.iconBg ?? ''} onChange={(v) => u({ ...it, iconBg: v })} />
                 <div className="text-xs text-slate-400">Built-in icon</div>
                 <div className="flex gap-1.5 flex-wrap">
@@ -6116,7 +6117,7 @@ function renderBlockFields(
     case 'slick-conclave-hero': {
       return (
         <div className="space-y-4">
-          <ImageField label="Branding image (logo + heading as one image)" value={f.brandingImageSrc as string ?? ''} onChange={(v) => set('brandingImageSrc', v)} />
+          <ImageField label="Branding image (logo + heading as one image)" {...imageI18nProps(f, "brandingImageSrc", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Date" f={f} set={set} base="date" segments={[{ key: 'date' }]} />
           <RichFieldGroup label="Venue" f={f} set={set} base="venue" segments={[{ key: 'venue' }]} />
@@ -6159,7 +6160,7 @@ function renderBlockFields(
         <div className="space-y-4">
           <RichFieldGroup label="Section heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Agenda image" value={f.agendaImage as string ?? ''} onChange={(v) => set('agendaImage', v)} />
+          <ImageField label="Agenda image" {...imageI18nProps(f, "agendaImage", update)} />
         </div>
       );
 
@@ -6169,7 +6170,7 @@ function renderBlockFields(
         <div className="space-y-4">
           <RichFieldGroup label="Eyebrow line 1" f={f} set={set} base="eyebrow1" segments={[{ key: 'eyebrow1' }]} />
           <RichFieldGroup label="Eyebrow line 2 (teal)" f={f} set={set} base="eyebrow2" segments={[{ key: 'eyebrow2' }]} />
-          <ImageField label="Banner image (full-width)" value={f.bannerImage as string ?? ''} onChange={(v) => set('bannerImage', v)} />
+          <ImageField label="Banner image (full-width)" {...imageI18nProps(f, "bannerImage", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<Stat>
             label="Stats"
@@ -6206,7 +6207,7 @@ function renderBlockFields(
             itemPreview={(c) => c.captionBold || 'Card'}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <ImageField label="Image" value={c.image ?? ''} onChange={(v) => u({ ...c, image: v })} />
+                <ImageField label="Image" {...imageI18nProps(c, "image", (p) => u({ ...c, ...p }))} />
                 <RichTextInput label="Caption bold" {...richItemProps(c, 'captionBold', u)} />
                 <RichTextInput label="Caption rest" {...richItemProps(c, 'captionRest', u)} />
               </div>
@@ -6220,7 +6221,7 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <TextInput label="Video link (mp4/webm plays inline, or a YouTube URL) — overrides image" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
-          <ImageField label="Section image (full-width) — also the video poster" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
+          <ImageField label="Section image (full-width) — also the video poster" {...imageI18nProps(f, "imageSrc", update)} />
           <RichFieldGroup label="CTA label (HTML ok)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
@@ -6231,7 +6232,7 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <TextInput label="YouTube URL (overrides image)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
-          <ImageField label="Fallback image" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
+          <ImageField label="Fallback image" {...imageI18nProps(f, "imageSrc", update)} />
           <RichFieldGroup label="CTA label (HTML ok)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
@@ -6274,7 +6275,7 @@ function renderBlockFields(
                 />
                 <RichTextInput label="CTA label" {...richItemProps(p, 'ctaLabel', u)} />
                 <TextInput label="CTA URL" value={p.ctaHref ?? ''} onChange={(v) => u({ ...p, ctaHref: v })} />
-                <ImageField label="Product image (also used as video poster)" value={p.imageSrc ?? ''} onChange={(v) => u({ ...p, imageSrc: v })} />
+                <ImageField label="Product image (also used as video poster)" {...imageI18nProps(p, "imageSrc", (patch) => u({ ...p, ...patch }))} />
                 <VideoField label="Product video — upload (autoplays; overrides image when set)" value={p.videoSrc ?? ''} onChange={(v) => u({ ...p, videoSrc: v })} />
                 <TextInput label="…or paste a video link (mp4/webm URL)" value={p.videoSrc ?? ''} onChange={(v) => u({ ...p, videoSrc: v })} />
               </div>
@@ -6301,7 +6302,7 @@ function renderBlockFields(
             itemPreview={(_, i) => `Card ${i + 1}`}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <ImageField label="Image" value={c.image ?? ''} onChange={(v) => u({ ...c, image: v })} />
+                <ImageField label="Image" {...imageI18nProps(c, "image", (p) => u({ ...c, ...p }))} />
               </div>
             )}
           />
@@ -6313,7 +6314,7 @@ function renderBlockFields(
       type RoleItem = { title: string; subtitle: string };
       return (
         <div className="space-y-4">
-          <ImageField label="Logo" value={f.logoSrc as string ?? ''} onChange={(v) => set('logoSrc', v)} />
+          <ImageField label="Logo" {...imageI18nProps(f, "logoSrc", update)} />
           <RichFieldGroup label="Eyebrow text" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
           <RichFieldGroup label="Heading English" f={f} set={set} base="headingEn" segments={[{ key: 'headingEn' }]} />
           <RichFieldGroup label="Heading Arabic" f={f} set={set} base="headingAr" segments={[{ key: 'headingAr' }]} />
@@ -6323,7 +6324,7 @@ function renderBlockFields(
             <ImageField key={i} label={`Photo ${i + 1}`} value={((f.photos as string[]) ?? [])[i] ?? ''} onChange={(v) => { const arr = [...((f.photos as string[]) ?? ['','','',''])]; arr[i] = v; set('photos', arr); }} />
           ))}
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <ImageField label="Map image (optional)" value={f.mapSrc as string ?? ''} onChange={(v) => set('mapSrc', v)} />
+          <ImageField label="Map image (optional)" {...imageI18nProps(f, "mapSrc", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Stat value" f={f} set={set} base="statValue" segments={[{ key: 'statValue' }]} />
           <RichFieldGroup label="Stat label" f={f} set={set} base="statLabel" segments={[{ key: 'statLabel' }]} />
@@ -6346,15 +6347,15 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Language card title" f={f} set={set} base="langTitle" segments={[{ key: 'langTitle' }]} />
           <RichFieldGroup label="Language card body" f={f} set={set} base="langBody" segments={[{ key: 'langBody' }]} />
-          <ImageField label="Language card image" value={f.langImageSrc as string ?? ''} onChange={(v) => set('langImageSrc', v)} />
+          <ImageField label="Language card image" {...imageI18nProps(f, "langImageSrc", update)} />
           <RichFieldGroup label="ZATCA card title" f={f} set={set} base="zatcaTitle" segments={[{ key: 'zatcaTitle' }]} />
           <RichFieldGroup label="ZATCA card body" f={f} set={set} base="zatcaBody" segments={[{ key: 'zatcaBody' }]} />
-          <ImageField label="ZATCA card image" value={f.zatcaImageSrc as string ?? ''} onChange={(v) => set('zatcaImageSrc', v)} />
+          <ImageField label="ZATCA card image" {...imageI18nProps(f, "zatcaImageSrc", update)} />
           <RichFieldGroup label="Channel card title" f={f} set={set} base="channelTitle" segments={[{ key: 'channelTitle' }]} />
           <RichFieldGroup label="Channel card body" f={f} set={set} base="channelBody" segments={[{ key: 'channelBody' }]} />
-          <ImageField label="Channel card image" value={f.channelImageSrc as string ?? ''} onChange={(v) => set('channelImageSrc', v)} />
-          <ImageField label="Roles section image (replaces map + roles)" value={f.rolesImageSrc as string ?? ''} onChange={(v) => set('rolesImageSrc', v)} />
-          <ImageField label="Bottom right image" value={f.bottomImageSrc as string ?? ''} onChange={(v) => set('bottomImageSrc', v)} />
+          <ImageField label="Channel card image" {...imageI18nProps(f, "channelImageSrc", update)} />
+          <ImageField label="Roles section image (replaces map + roles)" {...imageI18nProps(f, "rolesImageSrc", update)} />
+          <ImageField label="Bottom right image" {...imageI18nProps(f, "bottomImageSrc", update)} />
         </div>
       );
     }
@@ -6407,7 +6408,7 @@ function renderBlockFields(
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
-          <ImageField label="Hero screenshot URL" value={f.heroImageUrl as string ?? ''} onChange={(v) => set('heroImageUrl', v)} />
+          <ImageField label="Hero screenshot URL" {...imageI18nProps(f, "heroImageUrl", update)} />
           <TextInput label="Hero image alt" value={f.heroImageAlt as string ?? ''} onChange={(v) => set('heroImageAlt', v)} />
           <ImageSizeControls
             widthKey="heroImageMaxWidth" heightKey="heroImageHeight" aspectRatioKey="heroImageAspectRatio" fitKey="heroImageFit"
@@ -6423,7 +6424,7 @@ function renderBlockFields(
           <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
           <RichFieldGroup label="Heading Grad" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
           <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
-          <ImageField label="Center circle photo URL" value={f.centerImageUrl as string ?? ''} onChange={(v) => set('centerImageUrl', v)} />
+          <ImageField label="Center circle photo URL" {...imageI18nProps(f, "centerImageUrl", update)} />
           <Select<ObjectFitValue>
             label="Object-fit (frame size is fixed — tied to the spinning ring graphic)"
             value={(f.centerImageFit as ObjectFitValue) ?? 'cover'}
@@ -6573,7 +6574,7 @@ function renderBlockFields(
                 <TextInput label="Icon (eye / head / mic / msg)" value={t.icon ?? ''} onChange={(v) => u({ ...t, icon: v })} />
                 <RichTextInput label="Title" {...richItemProps(t, 'title', u)} />
                 <RichTextInput label="Description" {...richItemProps(t, 'desc', u)} />
-                <ImageField label="Phone screen image URL" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
+                <ImageField label="Phone screen image URL" {...imageI18nProps(t, "imageUrl", (p) => u({ ...t, ...p }))} />
               </div>
             )}
           />
@@ -6603,7 +6604,7 @@ function renderBlockFields(
                 <TextInput label="Icon (bolt / chart / mic)" value={t.icon ?? ''} onChange={(v) => u({ ...t, icon: v })} />
                 <RichTextInput label="Title" {...richItemProps(t, 'title', u)} />
                 <RichTextInput label="Description" {...richItemProps(t, 'desc', u)} />
-                <ImageField label="Phone screen image URL" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
+                <ImageField label="Phone screen image URL" {...imageI18nProps(t, "imageUrl", (p) => u({ ...t, ...p }))} />
               </div>
             )}
           />
@@ -6650,7 +6651,7 @@ function renderBlockFields(
           <RichFieldGroup label="Teal lead line" f={f} set={set} base="tealLine" segments={[{ key: 'tealLine' }]} />
           <RichFieldGroup label="Body paragraph" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
           <TextInput label="YouTube video link" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
-          <ImageField label="Thumbnail / image (shown before play, or standalone if no video)" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Thumbnail / image (shown before play, or standalone if no video)" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
             widthKey="frameWidth" heightKey="frameHeight" aspectRatioKey="frameAspectRatio" fitKey="imageFit"
@@ -6677,7 +6678,7 @@ function renderBlockFields(
               <div className="space-y-2">
                 <RichTextInput label="Title" {...richItemProps(t, 'title', u)} />
                 <RichTextInput label="Description" {...richItemProps(t, 'desc', u)} />
-                <ImageField label="View image URL" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
+                <ImageField label="View image URL" {...imageI18nProps(t, "imageUrl", (p) => u({ ...t, ...p }))} />
               </div>
             )}
           />
@@ -6703,7 +6704,7 @@ function renderBlockFields(
             itemPreview={(l) => l.alt || l.imageUrl || '(empty)'}
             renderItem={(l, u) => (
               <div className="space-y-2">
-                <ImageField label="Logo image URL" value={l.imageUrl ?? ''} onChange={(v) => u({ ...l, imageUrl: v })} />
+                <ImageField label="Logo image URL" {...imageI18nProps(l, "imageUrl", (p) => u({ ...l, ...p }))} />
                 <TextInput label="Alt / placeholder" value={l.alt ?? ''} onChange={(v) => u({ ...l, alt: v })} />
                 <div className="grid grid-cols-2 gap-2">
                   <NumberInput label="Width (px)" value={l.width ?? 120} onChange={(v) => u({ ...l, width: v })} />
@@ -6764,7 +6765,7 @@ function renderBlockFields(
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
-          <ImageField label="Hero screenshot URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <ImageField label="Hero screenshot URL" {...imageI18nProps(f, "mockImageUrl", update)} />
           <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
           <ImageSizeControls
             widthKey="mockImageMaxWidth" aspectRatioKey="mockImageAspectRatio" fitKey="mockImageFit"
@@ -6802,7 +6803,7 @@ function renderBlockFields(
             itemPreview={(l) => l.label || l.url || '(empty)'}
             renderItem={(l, u) => (
               <div className="space-y-2">
-                <ImageField label="Logo image URL" value={l.url ?? ''} onChange={(v) => u({ ...l, url: v })} />
+                <ImageField label="Logo image URL" {...imageI18nProps(l, "url", (p) => u({ ...l, ...p }))} />
                 <RichTextInput label="Label / alt" {...richItemProps(l, 'label', u)} />
                 <div className="grid grid-cols-2 gap-2">
                   <NumberInput label="Max width (px)" value={l.width ?? 118} onChange={(v) => u({ ...l, width: v })} />
@@ -6856,7 +6857,7 @@ function renderBlockFields(
           <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
           <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <RichFieldGroup label="Body" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
-          <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Right image URL" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
             widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
@@ -6912,7 +6913,7 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <ImageField label="Thumbnail image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <ImageField label="Thumbnail image URL" {...imageI18nProps(c, "imageUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <Select<ObjectFitValue>
                   label="Object-fit (thumbnail frame size is fixed by the grid)"
@@ -6954,7 +6955,7 @@ function renderBlockFields(
               <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />
             )}
           />
-          <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Right image URL" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
             widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
@@ -6984,7 +6985,7 @@ function renderBlockFields(
                 <RichTextInput label="Body (before bold)" {...richItemProps(c, 'bodyPre', u)} />
                 <RichTextInput label="Body (bold)" {...richItemProps(c, 'bodyBold', u)} />
                 <RichTextInput label="Body (after bold)" {...richItemProps(c, 'bodyTail', u)} />
-                <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <ImageField label="Viz image URL" {...imageI18nProps(c, "imageUrl", (p) => u({ ...c, ...p }))} />
                 <Select<ObjectFitValue>
                   label="Object-fit (viz frame size is fixed by the grid)"
                   value={c.imageFit ?? 'contain'}
@@ -7066,7 +7067,7 @@ function renderBlockFields(
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
-          <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <ImageField label="Hero mockup URL" {...imageI18nProps(f, "mockImageUrl", update)} />
           <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
           <ImageSizeControls
             widthKey="mockImageMaxWidth" heightKey="mockImageMaxHeight" aspectRatioKey="mockImageAspectRatio" fitKey="mockImageFit"
@@ -7154,7 +7155,7 @@ function renderBlockFields(
           <RichFieldGroup label="Body Mid" f={f} set={set} base="bodyMid" segments={[{ key: 'bodyMid' }]} />
           <RichFieldGroup label="Body Bold2" f={f} set={set} base="bodyBold2" segments={[{ key: 'bodyBold2' }]} />
           <RichFieldGroup label="Body Tail" f={f} set={set} base="bodyTail" segments={[{ key: 'bodyTail' }]} />
-          <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Right image URL" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <NumberInput label="Max width (px, 0 = unset)" value={(f.imageMaxWidth as number) ?? 0} onChange={(v) => set('imageMaxWidth', v)} />
           <TextInput
@@ -7212,7 +7213,7 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <ImageField label="Thumbnail image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <ImageField label="Thumbnail image URL" {...imageI18nProps(c, "imageUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <TextInput
                   label="Aspect ratio (e.g. 4/3) — optional, overrides natural image height"
@@ -7256,7 +7257,7 @@ function renderBlockFields(
               <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />
             )}
           />
-          <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Right image URL" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <NumberInput label="Max width (px, 0 = unset)" value={(f.imageMaxWidth as number) ?? 0} onChange={(v) => set('imageMaxWidth', v)} />
           <TextInput
@@ -7291,7 +7292,7 @@ function renderBlockFields(
               <div className="space-y-2">
                 <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
                 <RichTextInput label="Body" {...richItemProps(c, 'body', u)} />
-                <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <ImageField label="Viz image URL" {...imageI18nProps(c, "imageUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <Select<ObjectFitValue>
                   label="Object-fit (viz frame size is fixed by the grid)"
@@ -7385,7 +7386,7 @@ function renderBlockFields(
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
-          <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <ImageField label="Hero mockup URL" {...imageI18nProps(f, "mockImageUrl", update)} />
           <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
           <ImageSizeControls
             widthKey="mockImageMaxWidth" heightKey="mockImageMaxHeight" aspectRatioKey="mockImageAspectRatio" fitKey="mockImageFit"
@@ -7426,7 +7427,7 @@ function renderBlockFields(
             itemPreview={(l) => l.label}
             renderItem={(l, u) => (
               <div className="space-y-2">
-                <ImageField label="Logo URL" value={l.url ?? ''} onChange={(v) => u({ ...l, url: v })} />
+                <ImageField label="Logo URL" {...imageI18nProps(l, "url", (p) => u({ ...l, ...p }))} />
                 <RichTextInput label="Label / slot text" {...richItemProps(l, 'label', u)} />
                 <div className="grid grid-cols-2 gap-2">
                   <NumberInput label="Width (px, 0 = auto)" value={l.width ?? 0} onChange={(v) => u({ ...l, width: v })} />
@@ -7522,7 +7523,7 @@ function renderBlockFields(
           <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
           <RichFieldGroup label="Body" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
-          <ImageField label="Right image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Right image URL" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
             widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
@@ -7612,7 +7613,7 @@ function renderBlockFields(
               <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />
             )}
           />
-          <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Image URL" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
             widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
@@ -7644,7 +7645,7 @@ function renderBlockFields(
                 <RichTextInput label="Body (before bold)" {...richItemProps(c, 'bodyPre', u)} />
                 <RichTextInput label="Body (bold)" {...richItemProps(c, 'bodyBold', u)} />
                 <RichTextInput label="Body (after bold)" {...richItemProps(c, 'bodyTail', u)} />
-                <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <ImageField label="Viz image URL" {...imageI18nProps(c, "imageUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <Select<ObjectFitValue>
                   label="Object-fit (viz frame size is fixed by the grid)"
@@ -7688,7 +7689,7 @@ function renderBlockFields(
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
-          <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <ImageField label="Hero mockup URL" {...imageI18nProps(f, "mockImageUrl", update)} />
           <TextInput label="Hero image alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
           <ImageSizeControls
             widthKey="mockImageMaxWidth" aspectRatioKey="mockImageAspectRatio" fitKey="mockImageFit"
@@ -7867,7 +7868,7 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <ImageField label="Thumbnail image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <ImageField label="Thumbnail image URL" {...imageI18nProps(c, "imageUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Image alt / placeholder text" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <Select<ObjectFitValue>
                   label="Object-fit (thumbnail frame size is fixed by the grid)"
@@ -7909,7 +7910,7 @@ function renderBlockFields(
               <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />
             )}
           />
-          <ImageField label="Art image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Art image URL" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt / placeholder text" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <NumberInput
             label="Image width (% of column — default 108 intentionally bleeds past the edge)"
@@ -7946,7 +7947,7 @@ function renderBlockFields(
             renderItem={(c, u) => (
               <div className="space-y-2">
                 <TextInput label="YouTube Shorts URL" value={c.videoUrl ?? ''} onChange={(v) => u({ ...c, videoUrl: v })} />
-                <ImageField label="Thumbnail (optional)" value={c.thumbnail ?? ''} onChange={(v) => u({ ...c, thumbnail: v })} />
+                <ImageField label="Thumbnail (optional)" {...imageI18nProps(c, "thumbnail", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Alt text" value={c.alt ?? ''} onChange={(v) => u({ ...c, alt: v })} />
               </div>
             )}
@@ -7998,7 +7999,7 @@ function renderBlockFields(
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
-          <ImageField label="Phone mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <ImageField label="Phone mockup URL" {...imageI18nProps(f, "mockImageUrl", update)} />
           <TextInput label="Mockup alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
           <ImageSizeControls
             widthKey="mockImageWidth" aspectRatioKey="mockImageAspectRatio" fitKey="mockImageFit"
@@ -8053,7 +8054,7 @@ function renderBlockFields(
             itemPreview={(l) => l.label}
             renderItem={(l, u) => (
               <div className="space-y-2">
-                <ImageField label="Logo URL" value={l.url ?? ''} onChange={(v) => u({ ...l, url: v })} />
+                <ImageField label="Logo URL" {...imageI18nProps(l, "url", (p) => u({ ...l, ...p }))} />
                 <RichTextInput label="Label / slot text" {...richItemProps(l, 'label', u)} />
                 <div className="grid grid-cols-2 gap-2">
                   <NumberInput label="Max height (px)" value={l.height ?? 52} onChange={(v) => u({ ...l, height: v })} />
@@ -8238,7 +8239,7 @@ function renderBlockFields(
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
-          <ImageField label="Hero mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <ImageField label="Hero mockup URL" {...imageI18nProps(f, "mockImageUrl", update)} />
           <TextInput label="Hero image alt / placeholder" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
           <Repeater<Chip>
             label="Floating chips (4)"
@@ -8329,7 +8330,7 @@ function renderBlockFields(
               <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />
             )}
           />
-          <ImageField label="Art image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Art image URL" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt / placeholder" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
         </div>
       );
@@ -8352,7 +8353,7 @@ function renderBlockFields(
               <div className="space-y-2">
                 <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
                 <RichTextInput label="Body" {...richItemProps(c, 'body', u)} />
-                <ImageField label="Viz image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <ImageField label="Viz image URL" {...imageI18nProps(c, "imageUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Image alt / placeholder" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <RichTextInput label="Stat value" {...richItemProps(c, 'statV', u)} />
                 <RichTextInput label="Stat key" {...richItemProps(c, 'statK', u)} />
@@ -8386,7 +8387,7 @@ function renderBlockFields(
                 <RichTextInput label="Panel body" {...richItemProps(t, 'body', u)} />
                 <RichTextInput label="Big number" {...richItemProps(t, 'big', u)} />
                 <RichTextInput label="Big number label" {...richItemProps(t, 'bigLabel', u)} />
-                <ImageField label="Panel image URL" value={t.imageUrl ?? ''} onChange={(v) => u({ ...t, imageUrl: v })} />
+                <ImageField label="Panel image URL" {...imageI18nProps(t, "imageUrl", (p) => u({ ...t, ...p }))} />
                 <TextInput label="Image alt / placeholder" value={t.imageAlt ?? ''} onChange={(v) => u({ ...t, imageAlt: v })} />
               </div>
             )}
@@ -8431,7 +8432,7 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <ImageField label="Thumbnail image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <ImageField label="Thumbnail image URL" {...imageI18nProps(c, "imageUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Image alt / placeholder" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
                 <RichTextInput label="Desc (before bold)" {...richItemProps(c, 'descPre', u)} />
@@ -8589,7 +8590,7 @@ function renderBlockFields(
                 <RichTextInput label="Body (before bold)" {...richItemProps(c, 'bodyPre', u)} />
                 <RichTextInput label="Body (bold)" {...richItemProps(c, 'bodyBold', u)} />
                 <RichTextInput label="Body (tail — [VERIFY: x] allowed)" {...richItemProps(c, 'bodyTail', u)} />
-                <ImageField label="Card image" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <ImageField label="Card image" {...imageI18nProps(c, "imageUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Image alt / placeholder caption" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
               </div>
             )}
@@ -8616,7 +8617,7 @@ function renderBlockFields(
           <TextInput label="Primary CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
-          <ImageField label="Phone mockup URL" value={f.mockImageUrl as string ?? ''} onChange={(v) => set('mockImageUrl', v)} />
+          <ImageField label="Phone mockup URL" {...imageI18nProps(f, "mockImageUrl", update)} />
           <TextInput label="Mockup alt" value={f.mockImageAlt as string ?? ''} onChange={(v) => set('mockImageAlt', v)} />
           <ImageSizeControls
             widthKey="mockImageMaxWidth" aspectRatioKey="mockImageAspectRatio" fitKey="mockImageFit"
@@ -8701,7 +8702,7 @@ function renderBlockFields(
           <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
           <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
-          <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Image URL" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
             widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
@@ -8740,7 +8741,7 @@ function renderBlockFields(
             itemPreview={(c) => c.title}
             renderItem={(c, u) => (
               <div className="space-y-2">
-                <ImageField label="Thumbnail URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <ImageField label="Thumbnail URL" {...imageI18nProps(c, "imageUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <Select<ObjectFitValue>
                   label="Object-fit (thumbnail frame size is fixed by the grid)"
@@ -8766,7 +8767,7 @@ function renderBlockFields(
           <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
           <RichFieldGroup label="Body Bold" f={f} set={set} base="bodyBold" segments={[{ key: 'bodyBold' }]} />
           <RichFieldGroup label="Body Rest" f={f} set={set} base="bodyRest" segments={[{ key: 'bodyRest' }]} />
-          <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Image URL" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
             widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
@@ -8796,7 +8797,7 @@ function renderBlockFields(
           <RichFieldGroup label="Body Mid" f={f} set={set} base="bodyMid" segments={[{ key: 'bodyMid' }]} />
           <RichFieldGroup label="Body Bold2" f={f} set={set} base="bodyBold2" segments={[{ key: 'bodyBold2' }]} />
           <RichFieldGroup label="Body Tail" f={f} set={set} base="bodyTail" segments={[{ key: 'bodyTail' }]} />
-          <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Image URL" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
             widthKey="imageMaxWidth" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
@@ -8814,7 +8815,7 @@ function renderBlockFields(
           <RichFieldGroup label="Heading Accent" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <RichFieldGroup label="Heading (post)" f={f} set={set} base="headingPost" segments={[{ key: 'headingPost' }]} />
           <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
-          <ImageField label="Image URL" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Image URL" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
             widthKey="imageMaxWidth" heightKey="imageMaxHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
@@ -8871,7 +8872,7 @@ function renderBlockFields(
           <RichFieldGroup label="Sub text" f={f} set={set} base="subText" segments={[{ key: 'subText' }]} />
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaPrimaryLabel" segments={[{ key: 'ctaPrimaryLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaPrimaryUrl as string ?? ''} onChange={(v) => set('ctaPrimaryUrl', v)} />
-          <ImageField label="Image" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
+          <ImageField label="Image" {...imageI18nProps(f, "imageSrc", update)} />
           <ImageSizeControls
             widthKey="imageMaxWidth" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
             f={f} set={set} defaults={{ width: 800, fit: 'cover' }} withHeight={false}
@@ -8985,7 +8986,7 @@ function renderBlockFields(
         <div className="space-y-4">
           <RichFieldGroup label="Heading (** = teal span)" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <RichFieldGroup label="Subheading" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
-          <ImageField label="Center image" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Center image" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt / placeholder" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <Repeater<string>
             label="Floating labels (4: TL, BL, TR, BR)"
@@ -9076,7 +9077,7 @@ function renderBlockFields(
           <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
-          <ImageField label="Phone image" value={f.image as string ?? ''} onChange={(v) => set('image', v)} />
+          <ImageField label="Phone image" {...imageI18nProps(f, "image", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
             widthKey="imageWidth" heightKey="imageHeight" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
@@ -9180,7 +9181,7 @@ function renderBlockFields(
                 <RichTextInput label="Title" {...richItemProps(s, 'title', u)} />
                 <RichTextInput label="Lead (use ** for bold)" {...richItemProps(s, 'lead', u)} />
                 <RichTextInput label="Note" {...richItemProps(s, 'note', u)} />
-                <ImageField label="Panel image" value={s.imageUrl ?? ''} onChange={(v) => u({ ...s, imageUrl: v })} />
+                <ImageField label="Panel image" {...imageI18nProps(s, "imageUrl", (p) => u({ ...s, ...p }))} />
                 <TextInput label="Image alt / slot text" value={s.imageAlt ?? ''} onChange={(v) => u({ ...s, imageAlt: v })} />
               </div>
             )}
@@ -9237,7 +9238,7 @@ function renderBlockFields(
               <div className="space-y-2">
                 <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
                 <RichTextInput label="Body (use ** for bold)" {...richItemProps(c, 'body', u)} />
-                <ImageField label="Image URL (4:3)" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <ImageField label="Image URL (4:3)" {...imageI18nProps(c, "imageUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <Textarea label="Image slot placeholder (shown when no image)" value={c.imageSlot ?? ''} onChange={(v) => u({ ...c, imageSlot: v })} />
               </div>
@@ -9324,7 +9325,7 @@ function renderBlockFields(
             itemPreview={(c) => c || '(empty)'}
             renderItem={(c, u) => <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />}
           />
-          <ImageField label="Image URL (1:1)" value={f.imageUrl as string ?? ''} onChange={(v) => set('imageUrl', v)} />
+          <ImageField label="Image URL (1:1)" {...imageI18nProps(f, "imageUrl", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <Textarea label="Image slot placeholder (shown when no image)" value={f.imageSlot as string ?? ''} onChange={(v) => set('imageSlot', v)} />
           <Toggle label="Reverse layout (image on left)" value={f.reverse as boolean} onChange={(v) => set('reverse', v)} />
@@ -9345,7 +9346,7 @@ function renderBlockFields(
             itemPreview={(c) => c || '(empty)'}
             renderItem={(c, u) => <TextInput label="Chip" value={c ?? ''} onChange={(v) => u(v)} />}
           />
-          <ImageField label="Image URL" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
+          <ImageField label="Image URL" {...imageI18nProps(f, "imageSrc", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <Toggle label="Reverse layout (image on left)" value={f.reverse !== false} onChange={(v) => set('reverse', v)} />
           <ImageSizeControls
@@ -9372,7 +9373,7 @@ function renderBlockFields(
               <div className="space-y-2">
                 <RichTextInput label="Title" {...richItemProps(c, 'title', u)} />
                 <RichTextInput label="Body (use ** for bold)" {...richItemProps(c, 'body', u)} />
-                <ImageField label="Image URL" value={c.imageUrl ?? ''} onChange={(v) => u({ ...c, imageUrl: v })} />
+                <ImageField label="Image URL" {...imageI18nProps(c, "imageUrl", (p) => u({ ...c, ...p }))} />
                 <TextInput label="Image alt" value={c.imageAlt ?? ''} onChange={(v) => u({ ...c, imageAlt: v })} />
                 <Textarea label="Image slot placeholder (shown when no image)" value={c.imageSlot ?? ''} onChange={(v) => u({ ...c, imageSlot: v })} />
                 <RichTextInput label="Stat value" {...richItemProps(c, 'statValue', u)} />
@@ -9461,7 +9462,7 @@ function renderBlockFields(
               <TextInput label="Chip text" value={chip} onChange={(v) => u(v)} />
             )}
           />
-          <ImageField label="Image" value={f.imageSrc as string ?? ''} onChange={(v) => set('imageSrc', v)} />
+          <ImageField label="Image" {...imageI18nProps(f, "imageSrc", update)} />
           <ImageSizeControls
             widthKey="imageMaxWidth" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
             f={f} set={set} defaults={{ fit: 'cover' }} withHeight={false}

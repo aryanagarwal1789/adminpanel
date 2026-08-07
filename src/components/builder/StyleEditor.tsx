@@ -1,5 +1,5 @@
 import type { BlockStyle, BorderStyle, ShadowSize } from "./types";
-import { ColorPicker, ImageField, NumberInput, Select, Toggle } from "./fields";
+import { ColorPicker, ImageField, NumberInput, Select, Toggle, imageI18nProps } from "./fields";
 
 const ALIGN_OPTS = [
   { value: "left",   label: "Left" },
@@ -105,7 +105,7 @@ export function StyleEditor({
             ) : (
               <>
                 <ColorPicker label="Color" value={style.bgColor ?? ""} onChange={(v) => update({ bgColor: v })} />
-                <ImageField label="Background image URL" value={style.bgImage ?? ""} onChange={(v) => update({ bgImage: v })} />
+                <ImageField label="Background image URL" {...imageI18nProps(style, "bgImage", update)} />
               </>
             )}
           </>

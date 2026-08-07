@@ -4,15 +4,9 @@ import { Languages, Save, Search } from "lucide-react";
 import { authJsonHeaders } from "@/lib/builder-drafts";
 import { BLOCK_LABELS, type BlockType } from "./types";
 import { walkPageStrings, type TransRow, type TranslatableBlock } from "@/lib/i18n-walk";
+import { OVERLAY_LOCALES as LOCALES } from "@/lib/i18n-images";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
-
-// Base language is English (the stored page). These are the overlay locales.
-const LOCALES: { code: string; label: string }[] = [
-  { code: "id", label: "Bahasa (id)" },
-  { code: "pt", label: "Português (pt)" },
-  { code: "es", label: "Español (es)" },
-];
 
 const blockLabel = (type: string) => BLOCK_LABELS[type as BlockType] ?? type;
 
