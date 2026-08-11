@@ -4001,9 +4001,16 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Panel 1 — Immersive Sessions</p>
           <RichFieldGroup label="Tab label" f={f} set={set} base="p1Tab" segments={[{ key: 'p1Tab' }]} />
-          <TextInput label="Image 1 URL" value={f.p1Img1 as string ?? ''} onChange={(v) => set('p1Img1', v)} />
-          <TextInput label="Image 2 URL" value={f.p1Img2 as string ?? ''} onChange={(v) => set('p1Img2', v)} />
-          <TextInput label="Image 3 URL" value={f.p1Img3 as string ?? ''} onChange={(v) => set('p1Img3', v)} />
+          <Repeater<{ src: string }>
+            label="Photos (auto-scroll)"
+            items={(f.p1Images as { src: string }[]) ?? []}
+            onChange={(v) => set('p1Images', v)}
+            newItem={() => ({ src: '' })}
+            itemPreview={(it) => (it.src ? it.src.split('/').pop() ?? 'Photo' : 'Photo')}
+            renderItem={(it, u) => (
+              <ImageField label="Photo" value={it.src} onChange={(x) => u({ ...it, src: x })} />
+            )}
+          />
           <RichFieldGroup label="Body text (**bold**=teal)" f={f} set={set} base="p1Body" segments={[{ key: 'p1Body' }]} />
           <RichFieldGroup label="Bullet 1" f={f} set={set} base="p1B1" segments={[{ key: 'p1B1' }]} />
           <RichFieldGroup label="Bullet 2" f={f} set={set} base="p1B2" segments={[{ key: 'p1B2' }]} />
@@ -4012,9 +4019,16 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Panel 2 — Leadership Workshops</p>
           <RichFieldGroup label="Tab label" f={f} set={set} base="p2Tab" segments={[{ key: 'p2Tab' }]} />
-          <TextInput label="Image 1 URL" value={f.p2Img1 as string ?? ''} onChange={(v) => set('p2Img1', v)} />
-          <TextInput label="Image 2 URL" value={f.p2Img2 as string ?? ''} onChange={(v) => set('p2Img2', v)} />
-          <TextInput label="Image 3 URL" value={f.p2Img3 as string ?? ''} onChange={(v) => set('p2Img3', v)} />
+          <Repeater<{ src: string }>
+            label="Photos (auto-scroll)"
+            items={(f.p2Images as { src: string }[]) ?? []}
+            onChange={(v) => set('p2Images', v)}
+            newItem={() => ({ src: '' })}
+            itemPreview={(it) => (it.src ? it.src.split('/').pop() ?? 'Photo' : 'Photo')}
+            renderItem={(it, u) => (
+              <ImageField label="Photo" value={it.src} onChange={(x) => u({ ...it, src: x })} />
+            )}
+          />
           <RichFieldGroup label="Body text (**bold**=teal)" f={f} set={set} base="p2Body" segments={[{ key: 'p2Body' }]} />
           <RichFieldGroup label="Bullet 1" f={f} set={set} base="p2B1" segments={[{ key: 'p2B1' }]} />
           <RichFieldGroup label="Bullet 2" f={f} set={set} base="p2B2" segments={[{ key: 'p2B2' }]} />
