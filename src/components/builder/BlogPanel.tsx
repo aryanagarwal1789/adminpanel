@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 
-export type ContentBlockType = 'paragraph' | 'heading2' | 'heading3' | 'image' | 'quote' | 'list' | 'divider' | 'faq' | 'image-grid';
+export type ContentBlockType = 'paragraph' | 'heading2' | 'heading3' | 'image' | 'quote' | 'list' | 'divider' | 'faq' | 'image-grid' | 'html';
 
 export interface ContentBlock {
   id: string;
@@ -19,6 +19,7 @@ export interface ContentBlock {
   faqItems?: { q: string; a: string }[]; // faq
   columns?: 2 | 3 | 4; // image-grid
   images?: { url: string; caption?: string; alt?: string }[]; // image-grid
+  html?: string;       // html (custom HTML / embed)
 }
 
 export interface BlogPost {

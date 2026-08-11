@@ -602,8 +602,11 @@ function renderBlockFields(
           <RichFieldGroup label="Description" f={f} set={set} base="description" segments={[{ key: 'description' }]} />
           <RichFieldGroup label="CTA text" f={f} set={set} base="ctaText" segments={[{ key: 'ctaText' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string} onChange={(v) => set("ctaUrl", v)} />
-          <TextInput label="Secondary CTA text" value={(f.ctaSecondaryText as string) ?? ""} onChange={(v) => set("ctaSecondaryText", v)} placeholder="e.g. Watch Demo (leave empty to hide)" />
+          <RichFieldGroup label="Secondary CTA text (leave empty to hide)" f={f} set={set} base="ctaSecondaryText" segments={[{ key: 'ctaSecondaryText' }]} />
           <TextInput label="Secondary CTA URL" value={(f.ctaSecondaryUrl as string) ?? ""} onChange={(v) => set("ctaSecondaryUrl", v)} placeholder="e.g. https://youtu.be/..." />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <ImageField label="Stage image (Person + Floating Cards)" value={(f.imgCenter as string) ?? ""} onChange={(v) => set("imgCenter", v)} />
+          <ImageField label="Stage image — mobile (optional, overrides the above ≤620px)" value={(f.imgCenterMobile as string) ?? ""} onChange={(v) => set("imgCenterMobile", v)} />
         </div>
       );
 
@@ -6356,6 +6359,9 @@ function renderBlockFields(
           <ImageField label="Channel card image" {...imageI18nProps(f, "channelImageSrc", update)} />
           <ImageField label="Roles section image (replaces map + roles)" {...imageI18nProps(f, "rolesImageSrc", update)} />
           <ImageField label="Bottom right image" {...imageI18nProps(f, "bottomImageSrc", update)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="CTA label (HTML ok)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
     }
