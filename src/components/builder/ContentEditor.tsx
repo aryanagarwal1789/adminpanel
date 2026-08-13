@@ -6335,6 +6335,7 @@ function renderBlockFields(
           <RichFieldGroup label="Eyebrow text" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
           <RichFieldGroup label="Heading English" f={f} set={set} base="headingEn" segments={[{ key: 'headingEn' }]} />
           <RichFieldGroup label="Heading Arabic" f={f} set={set} base="headingAr" segments={[{ key: 'headingAr' }]} />
+            <RichFieldGroup label="Subtext line" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs text-slate-500">Person photos (4 — 2 left, 2 right)</p>
           {[0, 1, 2, 3].map(i => (
