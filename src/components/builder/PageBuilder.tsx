@@ -817,7 +817,7 @@ export function PageBuilder() {
     }
   }, []);
 
-  const setBlocks = useCallback((next: Block[], opts?: { blockId?: string; patchKind?: "fields" | "style" | "columns"; otherBlocks?: Block[] }) => {
+  const setBlocks = useCallback((next: Block[], opts?: { blockId?: string; patchKind?: "fields" | "style" | "columns"; otherBlocks?: Block[]; structural?: boolean }) => {
     const cur = pageBlocks[activePage] ?? { desktop: [], mobile: null };
     // Copy-on-write: an edit in mobile mode materializes the mobile variant
     const nextEntry: PageVariants = device === "mobile" ? { ...cur, mobile: next } : { ...cur, desktop: next };
@@ -826,6 +826,25 @@ export function PageBuilder() {
     if (opts?.otherBlocks) {
       if (device === "mobile") nextEntry.desktop = opts.otherBlocks;
       else nextEntry.mobile = opts.otherBlocks;
+    }
+    // Structural sync — DESKTOP DRIVES STRUCTURE. When a section is added, removed,
+    // reordered, duplicated or pasted on DESKTOP, mirror the same section list into
+    // the (already materialized) mobile variant, matched by block id:
+    //   • a section mobile already has  → keep mobile's own block (its per-device
+    //     style / fields / images / hidden), only fix its position;
+    //   • a section mobile doesn't have → insert an independent deep-cloned copy
+    //     (same id, so the text-content sync keeps the words in step afterwards).
+    // Any section no longer on desktop is dropped from mobile. Mobile-side
+    // structural edits deliberately do NOT restructure desktop, and an
+    // unmaterialized mobile (null) is left alone (it already inherits desktop).
+    if (opts?.structural && device === "desktop" && cur.mobile !== null) {
+      const mobileById = new Map(cur.mobile.map((b) => [b.id, b]));
+      nextEntry.mobile = next.map((b, i) => {
+        const existing = mobileById.get(b.id);
+        return existing
+          ? { ...existing, order: i }
+          : { ...(JSON.parse(JSON.stringify(b)) as Block), order: i };
+      });
     }
     const nextState: BuilderState = {
       ...state,
@@ -853,7 +872,7 @@ export function PageBuilder() {
 
   const deleteBlock = (id: string, confirmFirst = false) => {
     if (confirmFirst && !window.confirm("Delete this section?")) return;
-    setBlocks(blocks.filter((b) => b.id !== id).map((b, i) => ({ ...b, order: i })));
+    setBlocks(blocks.filter((b) => b.id !== id).map((b, i) => ({ ...b, order: i })), { structural: true });
     if (selectedBlockId === id) setSelectedBlockId(null);
   };
 
@@ -873,7 +892,7 @@ export function PageBuilder() {
       id: `b_${Math.random().toString(36).slice(2, 9)}`,
       order: blocks.length,
     };
-    setBlocks([...blocks, pasted].map((b, i) => ({ ...b, order: i })));
+    setBlocks([...blocks, pasted].map((b, i) => ({ ...b, order: i })), { structural: true });
     setSelectedBlockId(pasted.id);
     toast.success('Section pasted');
   };
@@ -888,7 +907,7 @@ export function PageBuilder() {
     };
     const next = [...blocks];
     next.splice(idx + 1, 0, copy);
-    setBlocks(next.map((b, i) => ({ ...b, order: i })));
+    setBlocks(next.map((b, i) => ({ ...b, order: i })), { structural: true });
     setSelectedBlockId(copy.id);
   };
 
@@ -899,7 +918,7 @@ export function PageBuilder() {
   const addBlock = (type: BlockType, index: number, layout?: LayoutVariant) => {
     const next = [...blocks];
     next.splice(index, 0, defaultBlock(type, index, layout));
-    setBlocks(next.map((b, i) => ({ ...b, order: i })));
+    setBlocks(next.map((b, i) => ({ ...b, order: i })), { structural: true });
     setAddAtIndex(null);
   };
 
@@ -953,7 +972,7 @@ export function PageBuilder() {
     const [moved] = next.splice(from, 1);
     next.splice(to, 0, moved);
     const reordered = next.map((b, i) => ({ ...b, order: i }));
-    setBlocks(reordered);
+    setBlocks(reordered, { structural: true });
     setDragId(null);
   };
 
