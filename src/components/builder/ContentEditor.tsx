@@ -4615,8 +4615,10 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Sub (use **text** for bold)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
-          <TextInput label="CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
+          <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Center image" {...imageI18nProps(f, "imgCenter", update)} />
           <ImageField label="Center image — mobile (optional, shown ≤620px)" {...imageI18nProps(f, "imgCenterMobile", update)} />
@@ -4635,6 +4637,8 @@ function renderBlockFields(
           <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
           <RichFieldGroup label="Sub Tail" f={f} set={set} base="subTail" segments={[{ key: 'subTail' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
           <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -6248,7 +6252,7 @@ function renderBlockFields(
     case 'slick-sc-saudi-video': {
       return (
         <div className="space-y-4">
-          <TextInput label="YouTube URL (overrides image)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <TextInput label="YouTube URL / Shorts (overrides image)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} placeholder="youtube.com/watch?v=… or youtube.com/shorts/…" />
           <ImageField label="Fallback image" {...imageI18nProps(f, "imageSrc", update)} />
           <RichFieldGroup label="CTA label (HTML ok)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
@@ -8893,6 +8897,8 @@ function renderBlockFields(
           <RichFieldGroup label="Sub text" f={f} set={set} base="subText" segments={[{ key: 'subText' }]} />
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaPrimaryLabel" segments={[{ key: 'ctaPrimaryLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaPrimaryUrl as string ?? ''} onChange={(v) => set('ctaPrimaryUrl', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
+          <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Image" {...imageI18nProps(f, "imageSrc", update)} />
           <ImageSizeControls
             widthKey="imageMaxWidth" aspectRatioKey="imageAspectRatio" fitKey="imageFit"
@@ -9098,6 +9104,8 @@ function renderBlockFields(
           <RichFieldGroup label="Sub Bold" f={f} set={set} base="subBold" segments={[{ key: 'subBold' }]} />
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <RichFieldGroup label="Ghost CTA label" f={f} set={set} base="ctaGhostLabel" segments={[{ key: 'ctaGhostLabel' }]} />
+          <TextInput label="Ghost CTA URL" value={f.ctaGhostUrl as string ?? ''} onChange={(v) => set('ctaGhostUrl', v)} />
           <ImageField label="Phone image" {...imageI18nProps(f, "image", update)} />
           <TextInput label="Image alt" value={f.imageAlt as string ?? ''} onChange={(v) => set('imageAlt', v)} />
           <ImageSizeControls
