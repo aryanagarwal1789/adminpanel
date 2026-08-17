@@ -15,6 +15,15 @@ const PAGE_TABS = [
   { key: 'client',    label: 'Clients'    },
 ];
 
+// Languages the SEO can be authored in. English is the base; the other three
+// store per-page overrides (a blank field inherits the English value on render).
+const SEO_LOCALES = [
+  { code: 'en', label: 'English' },
+  { code: 'id', label: 'Indonesian' },
+  { code: 'es', label: 'Spanish' },
+  { code: 'pt', label: 'Portuguese' },
+];
+
 type PageKey = string;
 
 // ─── Types ─────────────────────────────────────────────────────────────────
@@ -844,8 +853,13 @@ function SiteView({ tabs }: { tabs: Array<{ key: string; label: string }> }) {
 // ─── Main page ────────────────────────────────────────────────────────────
 function SeoPage() {
   const [activeTab, setActiveTab]       = useState<string>('landing');
+  const [locale, setLocale]             = useState<string>('en');
+  // English base for the active page — used as placeholders when editing a
+  // non-English locale so blanks visibly inherit English.
+  const [baseSeo, setBaseSeo]           = useState<SeoData | null>(null);
   const [tabs, setTabs]                 = useState<Array<{ key: string; label: string }>>(PAGE_TABS);
   const [dropOpen, setDropOpen]         = useState(false);
+  const [pageSearch, setPageSearch]     = useState('');
   const dropRef                         = useRef<HTMLDivElement>(null);
   const [seo, setSeo]                   = useState<SeoData>(BLANK_SEO);
   const [loading, setLoading]           = useState(true);
@@ -902,12 +916,18 @@ function SeoPage() {
     setContentLoading(true);
     setPageContent(null);
 
-    const seoFetch = fetch(`${BACKEND}/site/seo/${activeTab}`)
+    const q = locale !== 'en' ? `?locale=${locale}` : '';
+    const seoFetch = fetch(`${BACKEND}/site/seo/${activeTab}${q}`)
       .then(r => r.json())
-      .then((data: { seo?: Partial<SeoData> }) => {
-        const merged = mergeSeo(data.seo ?? {});
+      .then((data: { seo?: Partial<SeoData>; override?: Partial<SeoData> }) => {
+        // English → edit the base directly. Other locales → edit the raw override
+        // (blank fields stay blank so they inherit English on render), and keep
+        // the English base for placeholder hints.
+        const source = locale !== 'en' ? (data.override ?? {}) : (data.seo ?? {});
+        const merged = mergeSeo(source);
         setSeo(merged);
-        setKeywords((data.seo?.keywords ?? []).join(', '));
+        setBaseSeo(locale !== 'en' ? mergeSeo(data.seo ?? {}) : null);
+        setKeywords((source.keywords ?? []).join(', '));
         setSpeakable((merged.schemas.speakable.cssSelectors ?? []).join('\n'));
       })
       .catch(() => showToast({ type: 'error', message: 'Failed to load SEO data' }))
@@ -919,7 +939,7 @@ function SeoPage() {
       .finally(() => setContentLoading(false));
 
     return () => { void seoFetch; void contentFetch; };
-  }, [activeTab]);
+  }, [activeTab, locale]);
 
   const update       = (patch: Partial<SeoData>) => setSeo(p => ({ ...p, ...patch }));
   const updateSchema = <K extends keyof SeoData['schemas']>(key: K, patch: Partial<SeoData['schemas'][K]>) =>
@@ -947,12 +967,14 @@ function SeoPage() {
         keywords: keywordsInput.split(',').map(k => k.trim()).filter(Boolean),
         schemas: { ...seo.schemas, speakable: { ...seo.schemas.speakable, cssSelectors: speakableInput.split('\n').map(s => s.trim()).filter(Boolean) } },
       };
-      const res = await fetch(`${BACKEND}/site/seo/${activeTab}`, {
+      const q = locale !== 'en' ? `?locale=${locale}` : '';
+      const res = await fetch(`${BACKEND}/site/seo/${activeTab}${q}`, {
         method: 'PUT', headers: authJsonHeaders(),
         body: JSON.stringify({ seo: payload }),
       });
       if (!res.ok) throw new Error(`${res.status}`);
-      showToast({ type: 'success', message: 'SEO settings saved.' });
+      const langLabel = SEO_LOCALES.find(l => l.code === locale)?.label ?? locale;
+      showToast({ type: 'success', message: `SEO settings saved${locale !== 'en' ? ` (${langLabel})` : ''}.` });
     } catch {
       showToast({ type: 'error', message: 'Save failed. Please try again.' });
     } finally { setSaving(false); }
@@ -992,31 +1014,72 @@ function SeoPage() {
         <div ref={dropRef} style={{ position: 'relative', flex: 1 }}>
           {/* Trigger button */}
           <button
-            onClick={() => setDropOpen(o => !o)}
+            onClick={() => { setPageSearch(''); setDropOpen(o => !o); }}
             style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, background: '#0f172a', border: `1px solid ${isPage && !dropOpen ? C.blue : dropOpen ? C.blue : C.border}`, color: C.text, borderRadius: 6, padding: '9px 12px', fontSize: 13, fontWeight: 600, cursor: 'pointer', textAlign: 'left', outline: 'none', boxSizing: 'border-box' }}
           >
             <span>{isPage ? (tabs.find(t => t.key === activeTab)?.label ?? activeTab) : 'Select a page…'}</span>
             <span style={{ color: C.muted, fontSize: 10, flexShrink: 0, transform: dropOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', display: 'inline-block' }}>▾</span>
           </button>
           {/* Dropdown panel */}
-          {dropOpen && (
-            <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: '#1e293b', border: `1px solid ${C.border}`, borderRadius: 8, maxHeight: 260, overflowY: 'auto', zIndex: 200, boxShadow: '0 12px 32px rgba(0,0,0,0.5)' }}>
-              {tabs.map(t => (
-                <button
-                  key={t.key}
-                  onClick={() => { setActiveTab(t.key); setDropOpen(false); }}
-                  style={{ width: '100%', padding: '8px 12px', background: t.key === activeTab ? 'rgba(59,130,246,0.15)' : 'transparent', border: 'none', borderBottom: `1px solid ${C.border}`, cursor: 'pointer', textAlign: 'left', color: t.key === activeTab ? C.blue : C.text, fontSize: 13, fontWeight: t.key === activeTab ? 600 : 400, display: 'block', boxSizing: 'border-box' }}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          )}
+          {dropOpen && (() => {
+            const q = pageSearch.trim().toLowerCase();
+            const filtered = q ? tabs.filter(t => t.label.toLowerCase().includes(q) || t.key.toLowerCase().includes(q)) : tabs;
+            return (
+              <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: '#1e293b', border: `1px solid ${C.border}`, borderRadius: 8, maxHeight: 300, overflow: 'hidden', zIndex: 200, boxShadow: '0 12px 32px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column' }}>
+                {/* Search */}
+                <div style={{ padding: 8, borderBottom: `1px solid ${C.border}`, background: '#1e293b' }}>
+                  <input
+                    autoFocus
+                    value={pageSearch}
+                    onChange={e => setPageSearch(e.target.value)}
+                    placeholder="Search pages…"
+                    style={{ ...INP, width: '100%', fontSize: 13, padding: '7px 10px', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div style={{ overflowY: 'auto' }}>
+                  {filtered.length === 0 ? (
+                    <div style={{ padding: '12px', color: C.subtle, fontSize: 12, textAlign: 'center' }}>No pages match</div>
+                  ) : filtered.map(t => (
+                    <button
+                      key={t.key}
+                      onClick={() => { setActiveTab(t.key); setDropOpen(false); }}
+                      style={{ width: '100%', padding: '8px 12px', background: t.key === activeTab ? 'rgba(59,130,246,0.15)' : 'transparent', border: 'none', borderBottom: `1px solid ${C.border}`, cursor: 'pointer', textAlign: 'left', color: t.key === activeTab ? C.blue : C.text, fontSize: 13, fontWeight: t.key === activeTab ? 600 : 400, display: 'block', boxSizing: 'border-box' }}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
         <button onClick={() => { setActiveTab('site'); setDropOpen(false); }} style={{ padding: '9px 16px', borderRadius: 6, border: `1px solid ${activeTab === 'site' ? C.blue : C.border}`, cursor: 'pointer', fontSize: 12, fontWeight: 600, background: activeTab === 'site' ? 'rgba(59,130,246,0.15)' : 'transparent', color: activeTab === 'site' ? C.blue : C.muted, whiteSpace: 'nowrap', transition: 'all 0.15s' }}>
           🌐 Site Settings
         </button>
       </div>
+
+      {/* Language tabs — per-page SEO can be authored per language */}
+      {isPage && (
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ display: 'inline-flex', gap: 2, background: '#0f172a', border: `1px solid ${C.border}`, borderRadius: 8, padding: 3 }}>
+            {SEO_LOCALES.map(l => (
+              <button
+                key={l.code}
+                onClick={() => setLocale(l.code)}
+                style={{ padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, background: locale === l.code ? C.blue : 'transparent', color: locale === l.code ? '#fff' : C.muted, transition: 'all 0.15s' }}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+          {locale !== 'en' && (
+            <p style={{ color: C.subtle, fontSize: 12, margin: '8px 0 0' }}>
+              Editing <strong style={{ color: C.muted }}>{SEO_LOCALES.find(l => l.code === locale)?.label}</strong>.
+              Leave a field blank to inherit the English value (shown as a placeholder).
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Site view */}
       {activeTab === 'site' && <SiteView tabs={tabs} />}
@@ -1041,11 +1104,11 @@ function SeoPage() {
 
               <Section title="Meta Tags">
                 <Field lbl="SEO Title" hint="Keep under 60 chars. Put your keyphrase near the front.">
-                  <input style={INP} value={seo.metaTitle} onChange={e => update({ metaTitle: e.target.value })} placeholder="Page title for search engines" />
+                  <input style={INP} value={seo.metaTitle} onChange={e => update({ metaTitle: e.target.value })} placeholder={baseSeo?.metaTitle || 'Page title for search engines'} />
                   <LenBar len={seo.metaTitle.length} max={60} min={30} />
                 </Field>
                 <Field lbl="Meta Description" hint="140–160 chars. Include the keyphrase and one compelling proof point.">
-                  <textarea style={TA} value={seo.metaDescription} onChange={e => update({ metaDescription: e.target.value })} placeholder="Summary shown in search results" />
+                  <textarea style={TA} value={seo.metaDescription} onChange={e => update({ metaDescription: e.target.value })} placeholder={baseSeo?.metaDescription || 'Summary shown in search results'} />
                   <LenBar len={seo.metaDescription.length} max={160} min={140} />
                 </Field>
                 <Field lbl="Canonical URL">
@@ -1060,8 +1123,8 @@ function SeoPage() {
               </Section>
 
               <Section title="Open Graph — Facebook & LinkedIn" defaultOpen={false}>
-                <Field lbl="OG Title"><input style={INP} value={seo.ogTitle} onChange={e => update({ ogTitle: e.target.value })} placeholder="Defaults to SEO title if empty" /></Field>
-                <Field lbl="OG Description"><textarea style={TA} value={seo.ogDescription} onChange={e => update({ ogDescription: e.target.value })} placeholder="Defaults to meta description if empty" /></Field>
+                <Field lbl="OG Title"><input style={INP} value={seo.ogTitle} onChange={e => update({ ogTitle: e.target.value })} placeholder={baseSeo?.ogTitle || 'Defaults to SEO title if empty'} /></Field>
+                <Field lbl="OG Description"><textarea style={TA} value={seo.ogDescription} onChange={e => update({ ogDescription: e.target.value })} placeholder={baseSeo?.ogDescription || 'Defaults to meta description if empty'} /></Field>
                 <Field lbl="OG Image"><UploadInput value={seo.ogImage} onChange={ogImage => update({ ogImage })} accept="image/*" /></Field>
               </Section>
 

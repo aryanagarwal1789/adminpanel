@@ -6819,9 +6819,27 @@ function renderBlockFields(
         <div className="space-y-4">
           <RichFieldGroup label="Badge" f={f} set={set} base="badge" segments={[{ key: 'badge' }]} />
           <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading — teal accent (optional)" f={f} set={set} base="headingGradient" segments={[{ key: 'headingGradient' }]} />
+          <RichFieldGroup label="Heading — suffix (optional)" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
           <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Stat cards (leave blank to hide)</p>
+          <div className="grid grid-cols-2 gap-2">
+            <TextInput label="Stat 1 value" value={f.stat1Value as string ?? ''} onChange={(v) => set('stat1Value', v)} />
+            <TextInput label="Stat 1 label" value={f.stat1Label as string ?? ''} onChange={(v) => set('stat1Label', v)} />
+            <TextInput label="Stat 2 value" value={f.stat2Value as string ?? ''} onChange={(v) => set('stat2Value', v)} />
+            <TextInput label="Stat 2 label" value={f.stat2Label as string ?? ''} onChange={(v) => set('stat2Label', v)} />
+            <TextInput label="Stat 3 value" value={f.stat3Value as string ?? ''} onChange={(v) => set('stat3Value', v)} />
+            <TextInput label="Stat 3 label" value={f.stat3Label as string ?? ''} onChange={(v) => set('stat3Label', v)} />
+            <TextInput label="Stat 4 value" value={f.stat4Value as string ?? ''} onChange={(v) => set('stat4Value', v)} />
+            <TextInput label="Stat 4 label" value={f.stat4Label as string ?? ''} onChange={(v) => set('stat4Label', v)} />
+          </div>
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="CTA label (leave blank to hide)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<Logo>
-            label="Logos"
+            label="Logos (static)"
             items={(f.logos as Logo[]) ?? []}
             onChange={(v) => set('logos', v)}
             newItem={() => ({ url: '', label: 'Customer' })}
