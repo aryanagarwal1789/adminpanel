@@ -17,6 +17,7 @@ export interface RichMark {
   type: "bold" | "italic" | "underline" | "strike" | "textStyle";
   attrs?: {
     color?: string;
+    gradient?: string; // e.g. "linear-gradient(96deg, #11D6C5 0%, #0A8F86 100%)" — clipped to text
     fontFamily?: string;
     fontSize?: string; // e.g. "20px"
     fontWeight?: string; // e.g. "600"
@@ -129,6 +130,14 @@ function markStyle(marks?: RichMark[]): React.CSSProperties {
       if (m.attrs.fontFamily) s.fontFamily = m.attrs.fontFamily;
       if (m.attrs.fontSize) s.fontSize = m.attrs.fontSize;
       if (m.attrs.fontWeight) s.fontWeight = m.attrs.fontWeight;
+      // Gradient text — clipped to the glyphs (overrides a solid color).
+      if (m.attrs.gradient) {
+        s.backgroundImage = m.attrs.gradient;
+        s.WebkitBackgroundClip = "text";
+        s.backgroundClip = "text";
+        s.WebkitTextFillColor = "transparent";
+        s.color = "transparent";
+      }
     }
   }
   if (decorations.length) s.textDecoration = decorations.join(" ");

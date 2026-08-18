@@ -9,7 +9,7 @@
  * zero editors on load. SSR-safe: editor uses immediatelyRender:false.
  */
 import React, { useEffect, useState } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import { Extension } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { TextStyle, Color, FontFamily, FontSize } from "@tiptap/extension-text-style";
@@ -32,6 +32,43 @@ const FontWeight = Extension.create({
     }];
   },
 });
+
+// Gradient text — a CSS linear-gradient clipped to the glyphs (background-clip:text).
+// Stored as a `gradient` attr on the textStyle mark, mirroring rich-text.tsx's markStyle.
+const Gradient = Extension.create({
+  name: "gradient",
+  addGlobalAttributes() {
+    return [{
+      types: ["textStyle"],
+      attributes: {
+        gradient: {
+          default: null,
+          parseHTML: (el: HTMLElement) =>
+            el.style.backgroundImage && el.style.backgroundImage.includes("gradient")
+              ? el.style.backgroundImage
+              : null,
+          renderHTML: (attrs: { gradient?: string | null }) =>
+            attrs.gradient
+              ? { style: `background-image:${attrs.gradient};-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent` }
+              : {},
+        },
+      },
+    }];
+  },
+});
+
+// Brand teal gradient (matches the site's accent used across hero/brand-strip headings).
+const BRAND_GRADIENT = "linear-gradient(96.47deg, #11D6C5 0%, #0A8F86 100%)";
+
+const GRADIENT_PRESETS: { label: string; value: string }[] = [
+  { label: "Teal", value: BRAND_GRADIENT },
+  { label: "Deep teal", value: "linear-gradient(94.79deg, #0BC5B5 0%, #29535D 100%)" },
+  { label: "Coral red", value: "linear-gradient(120deg, #E5484D 0%, #C73237 100%)" },
+  { label: "Purple", value: "linear-gradient(96deg, #7C3AED 0%, #4F46E5 100%)" },
+  { label: "Sunset", value: "linear-gradient(96deg, #F59E0B 0%, #EF4444 100%)" },
+  { label: "Ocean", value: "linear-gradient(96deg, #06B6D4 0%, #2563EB 100%)" },
+  { label: "Rose", value: "linear-gradient(96deg, #EC4899 0%, #8B5CF6 100%)" },
+];
 
 // One-click heading preset — matches the reference CSS:
 //   font-size: clamp(22px, 4vw, 40px); font-weight: 600;
@@ -99,12 +136,65 @@ function ToolbarButton({
   );
 }
 
+/** Gradient-text picker: brand presets + a custom two-colour + angle builder. */
+function GradientControl({ editor }: { editor: Editor | null }) {
+  const [open, setOpen] = useState(false);
+  const [c1, setC1] = useState("#11D6C5");
+  const [c2, setC2] = useState("#0A8F86");
+  const [angle, setAngle] = useState(96);
+  const active = !!editor?.getAttributes("textStyle").gradient;
+  const custom = `linear-gradient(${angle}deg, ${c1} 0%, ${c2} 100%)`;
+  const apply = (g: string | null) => {
+    editor?.chain().focus().setMark("textStyle", { gradient: g }).run();
+    setOpen(false);
+  };
+  const swatch = (v: string): React.CSSProperties => ({
+    width: 34, height: 22, borderRadius: 5, border: "1px solid #e2e8f0",
+    backgroundImage: v, cursor: "pointer", padding: 0,
+  });
+  return (
+    <div style={{ position: "relative", display: "inline-flex" }}>
+      <ToolbarButton title="Gradient text" active={active} onClick={() => setOpen((o) => !o)}>
+        <span style={{ fontWeight: 800, fontSize: 13, backgroundImage: BRAND_GRADIENT, WebkitBackgroundClip: "text", backgroundClip: "text", WebkitTextFillColor: "transparent" }}>A</span>
+      </ToolbarButton>
+      {open && (
+        <>
+          <div onMouseDown={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 40 }} />
+          <div
+            style={{ position: "absolute", top: "115%", left: 0, zIndex: 50, width: 224, background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, boxShadow: "0 10px 30px rgba(0,0,0,0.15)", padding: 10 }}
+          >
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em", color: "#94a3b8", marginBottom: 6 }}>Presets</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+              {GRADIENT_PRESETS.map((p) => (
+                <button key={p.value} type="button" title={p.label} onMouseDown={(e) => e.preventDefault()} onClick={() => apply(p.value)} style={swatch(p.value)} />
+              ))}
+            </div>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em", color: "#94a3b8", marginBottom: 6 }}>Custom</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <input type="color" value={c1} onChange={(e) => setC1(e.target.value)} title="Start colour" style={{ width: 30, height: 26, border: "none", background: "none", padding: 0, cursor: "pointer" }} />
+              <input type="color" value={c2} onChange={(e) => setC2(e.target.value)} title="End colour" style={{ width: 30, height: 26, border: "none", background: "none", padding: 0, cursor: "pointer" }} />
+              <label style={{ marginLeft: "auto", fontSize: 11, color: "#64748b", display: "inline-flex", alignItems: "center", gap: 3 }}>
+                <input type="number" value={angle} onChange={(e) => setAngle(Number(e.target.value) || 0)} style={{ width: 48, fontSize: 11, border: "1px solid #e2e8f0", borderRadius: 4, padding: "2px 4px" }} />°
+              </label>
+            </div>
+            <div style={{ height: 18, borderRadius: 4, backgroundImage: custom, marginBottom: 10, border: "1px solid #e2e8f0" }} />
+            <div style={{ display: "flex", gap: 6 }}>
+              <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => apply(custom)} style={{ flex: 1, fontSize: 12, fontWeight: 600, background: "#3b82f6", color: "#fff", border: "none", borderRadius: 6, padding: "5px 0", cursor: "pointer" }}>Apply</button>
+              <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => apply(null)} style={{ fontSize: 12, color: "#64748b", background: "#f1f5f9", border: "none", borderRadius: 6, padding: "5px 10px", cursor: "pointer" }}>Remove</button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 /** The actual TipTap editor — only mounted once the field is activated. */
 function RichEditor({ value, onChange }: { value: RichValue; onChange: (v: RichDoc) => void }) {
   const editor = useEditor({
     immediatelyRender: false,
     autofocus: "end",
-    extensions: [StarterKit, TextStyle, Color, FontFamily, FontSize, FontWeight],
+    extensions: [StarterKit, TextStyle, Color, FontFamily, FontSize, FontWeight, Gradient],
     content: toRichDoc(value),
     onUpdate: ({ editor }) => onChange(editor.getJSON() as RichDoc),
     editorProps: {
@@ -167,9 +257,12 @@ function RichEditor({ value, onChange }: { value: RichValue; onChange: (v: RichD
             style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}
           />
         </label>
-        <ToolbarButton title="Clear color" onClick={() => editor?.chain().focus().unsetColor().run()}>
+        <ToolbarButton title="Clear color" onClick={() => editor?.chain().focus().unsetColor().setMark("textStyle", { gradient: null }).run()}>
           <span style={{ fontSize: 11, color: "#94a3b8" }}>✕</span>
         </ToolbarButton>
+
+        {/* Gradient text — presets + custom builder */}
+        <GradientControl editor={editor} />
 
         {/* Font family */}
         <select

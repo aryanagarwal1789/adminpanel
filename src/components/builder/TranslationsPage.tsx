@@ -8,13 +8,24 @@ import {
   applyPageTranslations,
   type TransRow,
   type TranslatableBlock,
+  type TransValue,
 } from "@/lib/i18n-walk";
 import { OVERLAY_LOCALES as LOCALES } from "@/lib/i18n-images";
+import { RichTextInput } from "./RichTextInput";
+import type { RichValue } from "./rich-text";
+import { isRichDoc, richDocToText } from "@/lib/i18n-rich";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 const RENDERER = import.meta.env.VITE_RENDERER_URL ?? "https://demo-experience.salescode.ai";
 
 const blockLabel = (type: string) => BLOCK_LABELS[type as BlockType] ?? type;
+
+// A translation value counts as "set" when it has visible text — a non-blank
+// string or a rich doc with text. Empty values fall back to English.
+function hasTransValue(v: TransValue | undefined): boolean {
+  if (isRichDoc(v)) return richDocToText(v).trim() !== "";
+  return typeof v === "string" && v.trim() !== "";
+}
 
 interface PageListItem {
   pageKey: string;
@@ -30,7 +41,7 @@ export function TranslationsPage() {
   const [blocks, setBlocks] = useState<TranslatableBlock[]>([]);
   // Full locale bundle (all pages' keys). We must round-trip the WHOLE map on
   // save — the PUT replaces `strings` entirely — so other pages aren't wiped.
-  const [bundle, setBundle] = useState<Record<string, string>>({});
+  const [bundle, setBundle] = useState<Record<string, TransValue>>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
@@ -99,7 +110,7 @@ export function TranslationsPage() {
       // Desktop rows + any mobile-only strings (mobile reuses desktop keys, so
       // shared slots aren't listed twice).
       setRows(mergePageStrings(pageKey, pageBlocks, mobileBlocks, blockLabel));
-      setBundle((transData?.translation?.strings ?? {}) as Record<string, string>);
+      setBundle((transData?.translation?.strings ?? {}) as Record<string, TransValue>);
     } catch {
       toast.error("Failed to load translations");
     } finally {
@@ -159,15 +170,17 @@ export function TranslationsPage() {
 
   // Identical English copy → one shared translation. The same phrase ("Book a
   // Demo") repeats across CTAs/cards under different keys; typing it once fills
-  // every occurrence so the translator never repeats themselves.
+  // every occurrence so the translator never repeats themselves. Rich rows are
+  // excluded — a formatted doc shouldn't be broadcast onto plain fields.
   const englishByKey = useMemo(() => {
     const m = new Map<string, string>();
-    for (const r of rows) m.set(r.key, r.english);
+    for (const r of rows) if (!r.richBase && !r.segment) m.set(r.key, r.english);
     return m;
   }, [rows]);
   const keysByEnglish = useMemo(() => {
     const m = new Map<string, string[]>();
     for (const r of rows) {
+      if (r.richBase || r.segment) continue;
       const a = m.get(r.english) ?? [];
       if (!a.includes(r.key)) a.push(r.key);
       m.set(r.english, a);
@@ -176,8 +189,10 @@ export function TranslationsPage() {
   }, [rows]);
 
   const setValue = useCallback(
-    (key: string, value: string) => {
-      const eng = englishByKey.get(key);
+    (key: string, value: TransValue) => {
+      // Rich-doc translations are per-field; plain strings fan out to every key
+      // that shares the same English copy.
+      const eng = typeof value === "string" ? englishByKey.get(key) : undefined;
       const keys = (eng && keysByEnglish.get(eng)) || [key];
       setBundle((b) => {
         const next = { ...b };
@@ -191,10 +206,11 @@ export function TranslationsPage() {
   const save = async () => {
     setSaving(true);
     try {
-      // Drop empty values so those strings fall back to English on render.
-      const cleaned: Record<string, string> = {};
+      // Drop empty values (blank string OR empty rich doc) so those strings fall
+      // back to English on render.
+      const cleaned: Record<string, TransValue> = {};
       for (const [k, v] of Object.entries(bundle)) {
-        if (typeof v === "string" && v.trim() !== "") cleaned[k] = v;
+        if (hasTransValue(v)) cleaned[k] = v;
       }
       const res = await fetch(`${BACKEND}/site/builder/translations/${locale}`, {
         method: "PUT",
@@ -227,7 +243,7 @@ export function TranslationsPage() {
     return [...m.values()];
   }, [filtered]);
 
-  const translatedCount = rows.filter((r) => (bundle[r.key] ?? "").trim() !== "").length;
+  const translatedCount = rows.filter((r) => hasTransValue(bundle[r.key])).length;
 
   const inp = "w-full rounded-lg px-3 py-2 text-sm outline-none";
   const inpStyle = {
@@ -406,6 +422,15 @@ export function TranslationsPage() {
                               Mobile
                             </span>
                           )}
+                          {r.segment && (
+                            <span
+                              className="mr-2 align-middle rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase"
+                              style={{ background: "#3f2a1e", color: "#fdba74" }}
+                              title="This heading is stored as several styled parts — translate the whole sentence here (the accent styling isn't kept in translations)"
+                            >
+                              Joined
+                            </span>
+                          )}
                           {(keysByEnglish.get(r.english)?.length ?? 1) > 1 && (
                             <span
                               className="mr-2 align-middle rounded px-1.5 py-0.5 text-[10px] font-semibold"
@@ -417,14 +442,38 @@ export function TranslationsPage() {
                           )}
                           {r.english}
                         </div>
-                        <textarea
-                          rows={Math.min(4, Math.max(1, Math.ceil(r.english.length / 48)))}
-                          value={bundle[r.key] ?? ""}
-                          onChange={(e) => setValue(r.key, e.target.value)}
-                          placeholder={`${locale.toUpperCase()} — leave blank to keep English`}
-                          className={inp}
-                          style={{ ...inpStyle, resize: "vertical" }}
-                        />
+                        {r.richBase ? (
+                          <div>
+                            <div className="rounded-md overflow-hidden">
+                              <RichTextInput
+                                label=""
+                                value={(bundle[r.key] ?? undefined) as unknown as RichValue}
+                                onChange={(doc) => setValue(r.key, doc)}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setValue(r.key, JSON.parse(JSON.stringify(r.richBase)))
+                              }
+                              className="mt-1 text-[11px] text-teal-400 hover:underline bg-transparent border-none cursor-pointer px-0"
+                              title="Copy the English text + formatting so you can translate in place and keep the accent styling"
+                            >
+                              Start from English (keep formatting)
+                            </button>
+                          </div>
+                        ) : (
+                          <textarea
+                            rows={Math.min(4, Math.max(1, Math.ceil(r.english.length / 48)))}
+                            value={
+                              typeof bundle[r.key] === "string" ? (bundle[r.key] as string) : ""
+                            }
+                            onChange={(e) => setValue(r.key, e.target.value)}
+                            placeholder={`${locale.toUpperCase()} — leave blank to keep English`}
+                            className={inp}
+                            style={{ ...inpStyle, resize: "vertical" }}
+                          />
+                        )}
                       </div>
                     ))}
                   </div>
