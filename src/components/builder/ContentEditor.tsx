@@ -2634,16 +2634,52 @@ function renderBlockFields(
 
     case 'slick-sc-testimonials': {
       type Review = { photo?: string; title?: unknown; body?: unknown; brandLogo?: string; name?: string; role?: string; videoUrl?: string; flip?: boolean };
+      type Video = { thumb?: string; brandLogo?: string; name?: string; role?: string; videoUrl?: string };
       return (
         <div className="space-y-4">
-          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
-          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <div className="grid grid-cols-2 gap-2">
+            <TextInput label="Tab 1 label (videos)" value={f.tabVideosLabel as string ?? ''} onChange={(v) => set('tabVideosLabel', v)} placeholder="Video Testimonials" />
+            <TextInput label="Tab 2 label (reviews)" value={f.tabReviewsLabel as string ?? ''} onChange={(v) => set('tabReviewsLabel', v)} placeholder="Customer Reviews" />
+          </div>
+          <Select
+            label="Default open tab"
+            value={(f.defaultTab as string) ?? 'videos'}
+            onChange={(v) => set('defaultTab', v)}
+            options={[{ value: 'videos', label: 'Video Testimonials' }, { value: 'reviews', label: 'Customer Reviews' }]}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs font-semibold text-slate-400">Video tab — heading &amp; subheading</p>
+          <RichFieldGroup label="Videos heading" f={f} set={set} base="videosHeading" segments={[{ key: 'videosHeading' }]} />
+          <RichFieldGroup label="Videos subtitle" f={f} set={set} base="videosSub" segments={[{ key: 'videosSub' }]} />
+          <p className="text-xs font-semibold text-slate-400">Reviews tab — heading &amp; subheading</p>
+          <RichFieldGroup label="Reviews heading" f={f} set={set} base="reviewsHeading" segments={[{ key: 'reviewsHeading' }]} />
+          <RichFieldGroup label="Reviews subtitle" f={f} set={set} base="reviewsSub" segments={[{ key: 'reviewsSub' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<Video>
+            label="Video testimonials (Tab 1)"
+            items={(f.videos as Video[]) ?? []}
+            onChange={(v) => set('videos', v)}
+            newItem={() => ({ thumb: '', brandLogo: '', name: '', role: '', videoUrl: '' })}
+            itemPreview={(v) => v.name || '(video)'}
+            renderItem={(v, u) => (
+              <div className="space-y-2">
+                <ImageField label="Thumbnail (optional — falls back to YouTube thumbnail)" {...imageI18nProps(v, "thumb", (p) => u({ ...v, ...p }))} />
+                <ImageField label="Brand logo" {...imageI18nProps(v, "brandLogo", (p) => u({ ...v, ...p }))} />
+                <div className="grid grid-cols-2 gap-2">
+                  <TextInput label="Name" value={v.name ?? ''} onChange={(x) => u({ ...v, name: x })} />
+                  <TextInput label="Role / company" value={v.role ?? ''} onChange={(x) => u({ ...v, role: x })} />
+                </div>
+                <TextInput label="YouTube video URL" value={v.videoUrl ?? ''} onChange={(x) => u({ ...v, videoUrl: x })} placeholder="youtube.com/watch?v=… or youtu.be/…" />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<Review>
-            label="Reviews"
+            label="Customer reviews (Tab 2)"
             items={(f.reviews as Review[]) ?? []}
             onChange={(v) => set('reviews', v)}
             newItem={() => ({ photo: '', title: '', body: '', brandLogo: '', name: '', role: '', videoUrl: '', flip: false })}
-            itemPreview={(r) => r.name || r.title || '(review)'}
+            itemPreview={(r) => r.name || '(review)'}
             renderItem={(r, u) => (
               <div className="space-y-2">
                 <ImageField label="Customer photo" {...imageI18nProps(r, "photo", (p) => u({ ...r, ...p }))} />
