@@ -6241,7 +6241,8 @@ function renderBlockFields(
     case 'slick-sc-saudi-platform': {
       return (
         <div className="space-y-4">
-          <TextInput label="Video link (mp4/webm plays inline, or a YouTube URL) — overrides image" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <VideoField label="Upload video (mp4/webm) — overrides image" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <TextInput label="…or paste a video link (mp4/webm plays inline, or a YouTube URL)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <ImageField label="Section image (full-width) — also the video poster" {...imageI18nProps(f, "imageSrc", update)} />
           <RichFieldGroup label="CTA label (HTML ok)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
