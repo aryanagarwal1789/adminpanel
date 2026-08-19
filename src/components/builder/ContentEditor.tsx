@@ -2632,6 +2632,45 @@ function renderBlockFields(
       );
     }
 
+    case 'slick-sc-testimonials': {
+      type Review = { photo?: string; title?: unknown; body?: unknown; brandLogo?: string; name?: string; role?: string; videoUrl?: string; flip?: boolean };
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtitle" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <Repeater<Review>
+            label="Reviews"
+            items={(f.reviews as Review[]) ?? []}
+            onChange={(v) => set('reviews', v)}
+            newItem={() => ({ photo: '', title: '', body: '', brandLogo: '', name: '', role: '', videoUrl: '', flip: false })}
+            itemPreview={(r) => r.name || r.title || '(review)'}
+            renderItem={(r, u) => (
+              <div className="space-y-2">
+                <ImageField label="Customer photo" {...imageI18nProps(r, "photo", (p) => u({ ...r, ...p }))} />
+                <RichTextInput
+                  label="Pull-quote title (rich text)"
+                  value={r.title as never}
+                  onChange={(doc) => u({ ...r, title: doc })}
+                />
+                <RichTextInput
+                  label="Full transcript (rich text — bold / italic / color / lists)"
+                  value={r.body as never}
+                  onChange={(doc) => u({ ...r, body: doc })}
+                />
+                <ImageField label="Brand logo" {...imageI18nProps(r, "brandLogo", (p) => u({ ...r, ...p }))} />
+                <div className="grid grid-cols-2 gap-2">
+                  <TextInput label="Name" value={r.name ?? ''} onChange={(x) => u({ ...r, name: x })} />
+                  <TextInput label="Role" value={r.role ?? ''} onChange={(x) => u({ ...r, role: x })} />
+                </div>
+                <TextInput label="YouTube video URL (Watch button)" value={r.videoUrl ?? ''} onChange={(x) => u({ ...r, videoUrl: x })} placeholder="youtube.com/watch?v=… or youtu.be/…" />
+                <Toggle label="Photo on the right (swap layout)" value={Boolean(r.flip)} onChange={(v) => u({ ...r, flip: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
     case 'slick-sc-brand-strip': {
       type LogoField = { imageUrl: string; alt: string };
       return (

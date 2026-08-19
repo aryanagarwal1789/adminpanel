@@ -48,6 +48,7 @@ const GROUPS: Group[] = [
     { type: "slick-sc-platform-grid",  label: "SC — Platform Grid",  Icon: Grid      },
     { type: "slick-sc-privacy-policy", label: "SC — Privacy Policy", Icon: FileText  },
     { type: "slick-sc-brand-strip", label: "SC — Brand Strip", Icon: Grid2x2 },
+    { type: "slick-sc-testimonials", label: "SC — Testimonials (Reviews + Video)", Icon: MessageSquareQuote },
     { type: "slick-sc-founder-reels", label: "SC — Founder Reels", Icon: Grid2x2 },
     { type: "slick-sc-impact-stats", label: "SC — Impact Stats", Icon: TrendingUp },
     { type: "slick-sc-product-suite", label: "SC — Product Suite", Icon: Grid2x2 },

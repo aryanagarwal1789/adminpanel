@@ -1241,6 +1241,14 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
     ctaLabel: 'View All Success Stories',
     ctaUrl: '#all-stories',
   },
+  'slick-sc-testimonials': {
+    heading: 'The full conversations, in their words',
+    sub: 'Complete transcripts from each customer story.',
+    reviews: [
+      { photo: '', title: '“A genuine step-change in how we run the field.”', body: 'Sample transcript — replace with the customer’s actual words.\n\nAdd more paragraphs by leaving a blank line between them.', brandLogo: '', name: '[Customer Name]', role: 'Managing Director', videoUrl: '' },
+      { photo: '', title: '“The first platform that actually fits FMCG.”', body: 'Sample transcript — replace with the customer’s actual words.', brandLogo: '', name: '[Customer Name]', role: 'VP Sales', videoUrl: '' },
+    ],
+  },
   'slick-sc-brand-strip': {
     eyebrowLabel: 'Trusted Across Industries',
     headingPre: 'Trusted by ',

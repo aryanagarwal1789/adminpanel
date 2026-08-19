@@ -95,6 +95,7 @@ export type TemplateBlockType =
   | 'slick-sc-platform-grid'
   | 'slick-sc-privacy-policy'
   | 'slick-sc-brand-strip'
+  | 'slick-sc-testimonials'
   | 'slick-sc-founder-reels'
   | 'slick-sc-platform-branded'
   | 'slick-sc-impact-stats'
@@ -497,6 +498,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sc-platform-grid':   'SC — Platform Grid',
   'slick-sc-privacy-policy':  'SC — Privacy Policy',
   'slick-sc-brand-strip': 'SC — Brand Strip',
+  'slick-sc-testimonials': 'SC — Testimonials (Reviews + Video)',
   'slick-sc-founder-reels': 'SC — Founder Reels',
   'slick-sc-platform-branded': 'Platform — Sign-in Split',
   'slick-sc-impact-stats': 'SC — Impact Stats',
