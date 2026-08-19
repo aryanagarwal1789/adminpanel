@@ -4724,6 +4724,7 @@ function renderBlockFields(
     case 'slick-sc-navbar': {
       type NavItem = { name: string; desc: string; href: string; iconKey: string; ai?: boolean; iconImage?: string; iconBg?: string };
       type NavCat = { key: string; label: string; sub: string; accent: string; iconKey: string; items: NavItem[]; flagship?: boolean };
+      type PresenceItem = { name?: string; href?: string; desc?: string; iconEmoji?: string };
       return (
         <div className="space-y-4">
           <ImageField label="Logo image" {...imageI18nProps(f, "logoSrc", update)} />
@@ -4765,6 +4766,23 @@ function renderBlockFields(
                     </div>
                   )}
                 />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Global Presence dropdown</p>
+          <Repeater<PresenceItem>
+            label="Countries"
+            items={(f.globalPresence as PresenceItem[]) ?? []}
+            onChange={(v) => set('globalPresence', v)}
+            newItem={() => ({ name: 'Country Presence', href: '/global-presence/', desc: 'AI-native solutions', iconEmoji: '🌍' })}
+            itemPreview={(g) => g.name || '(country)'}
+            renderItem={(g, u) => (
+              <div className="space-y-2">
+                <TextInput label="Name" value={g.name ?? ''} onChange={(v) => u({ ...g, name: v })} placeholder="Nigeria Presence" />
+                <TextInput label="Flag emoji" value={g.iconEmoji ?? ''} onChange={(v) => u({ ...g, iconEmoji: v })} placeholder="🇳🇬" />
+                <TextInput label="Description" value={g.desc ?? ''} onChange={(v) => u({ ...g, desc: v })} placeholder="AI-native solutions in Nigeria" />
+                <PageLinkField label="Link URL" value={g.href ?? ''} onChange={(v) => u({ ...g, href: v })} />
               </div>
             )}
           />

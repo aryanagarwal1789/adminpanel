@@ -2651,6 +2651,12 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
     footerNote: '24 AI-native products across your entire route-to-market.',
     browseAllLabel: 'Browse all solutions',
     browseAllUrl: '/',
+    globalPresence: [
+      { name: 'Saudi Presence', href: '/global-presence/ai-native-solutions-ksa', desc: 'AI-native solutions in KSA', iconEmoji: '🇸🇦' },
+      { name: 'Indonesia Presence', href: '/global-presence/ai-native-solutions-id', desc: 'AI-native solutions in Indonesia', iconEmoji: '🇮🇩' },
+      { name: 'Nigeria Presence', href: '/global-presence/ai-native-solutions-ng', desc: 'AI-native solutions in Nigeria', iconEmoji: '🇳🇬' },
+      { name: 'Philippines Presence', href: '/global-presence/ai-native-solutions-ph', desc: 'AI-native solutions in the Philippines', iconEmoji: '🇵🇭' },
+    ],
     solutionCategories: [
       {
         key: 'core', label: 'Core Products', sub: 'The platforms and agents at the center of Salescode.ai', accent: '#16223e', iconKey: 'stack', flagship: true,
