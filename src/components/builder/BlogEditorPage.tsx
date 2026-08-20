@@ -270,6 +270,7 @@ const SLASH_OPTS: SlashOpt[] = [
   { t: "image-grid", tt: "Image grid", ds: "A 2–4 column gallery", ic: "▦", grp: "Media & blocks" },
   { t: "quote", tt: "Quote", ds: "Pull-quote with accent bar", ic: "❝", grp: "Media & blocks" },
   { t: "faq", tt: "FAQ", ds: "Question & answer list", ic: "?", grp: "Media & blocks" },
+  { t: "youtube", tt: "YouTube video", ds: "Embed a YouTube video by URL", ic: "▶", grp: "Media & blocks" },
   { t: "html", tt: "Custom HTML / Embed", ds: "Paste raw HTML or an embed snippet", ic: "</>", grp: "Media & blocks" },
   { t: "divider", tt: "Divider", ds: "Section break", ic: "—", grp: "Media & blocks" },
 ];
@@ -290,6 +291,9 @@ function newBlockOf(o: { t: ContentBlockType; ordered?: boolean }): ContentBlock
   if (o.t === "html") {
     nb.html = "";
   }
+  if (o.t === "youtube") {
+    nb.url = "";
+  }
   return nb;
 }
 const TYPE_LABEL: Record<ContentBlockType, string> = {
@@ -303,6 +307,7 @@ const TYPE_LABEL: Record<ContentBlockType, string> = {
   divider: "Divider",
   faq: "FAQ",
   html: "Custom HTML",
+  youtube: "YouTube video",
 };
 const TURN_INTO: ContentBlockType[] = ["paragraph", "heading2", "heading3", "quote"];
 
@@ -2607,6 +2612,8 @@ function BlockContent({
 
   if (block.type === "html") return <HtmlBlock block={block} updateBlock={updateBlock} />;
 
+  if (block.type === "youtube") return <YouTubeBlock block={block} updateBlock={updateBlock} />;
+
   return null;
 }
 
@@ -2974,6 +2981,75 @@ function HtmlBlock({
       ) : (
         <p style={{ fontSize: 12, color: "var(--faint)", marginTop: 6 }}>
           Renders exactly as pasted on the live blog. Use for embeds (video, forms, iframes) or bespoke markup.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ytEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url.trim());
+    let id = "";
+    if (u.hostname === "youtu.be") id = u.pathname.slice(1);
+    else if (u.pathname.startsWith("/shorts/")) id = u.pathname.split("/")[2] ?? "";
+    else if (u.pathname.includes("/embed/")) id = u.pathname.split("/embed/")[1]?.split(/[/?#]/)[0] ?? "";
+    else id = u.searchParams.get("v") ?? "";
+    return id ? `https://www.youtube.com/embed/${id}?rel=0` : null;
+  } catch {
+    return null;
+  }
+}
+
+function YouTubeBlock({
+  block,
+  updateBlock,
+}: {
+  block: ContentBlock;
+  updateBlock: (id: string, p: Partial<ContentBlock>) => void;
+}) {
+  const url = block.url ?? "";
+  const embed = url.trim() ? ytEmbedUrl(url) : null;
+  return (
+    <div>
+      <input
+        className="bs-fieldin"
+        value={url}
+        onChange={(e) => updateBlock(block.id, { url: e.target.value })}
+        placeholder="Paste a YouTube link (youtube.com/watch?v=… , youtu.be/… , or /shorts/…)"
+        spellCheck={false}
+      />
+      <input
+        className="bs-fieldin"
+        style={{ marginTop: 8 }}
+        value={block.caption ?? ""}
+        onChange={(e) => updateBlock(block.id, { caption: e.target.value })}
+        placeholder="Caption (optional)"
+      />
+      {url.trim() ? (
+        embed ? (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--faint)", marginBottom: 6 }}>
+              Live preview
+            </div>
+            <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 9", borderRadius: 10, overflow: "hidden", background: "#000" }}>
+              <iframe
+                src={embed}
+                title="YouTube preview"
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        ) : (
+          <p style={{ fontSize: 12, color: "#dc2626", marginTop: 6 }}>
+            That doesn’t look like a valid YouTube URL.
+          </p>
+        )
+      ) : (
+        <p style={{ fontSize: 12, color: "var(--faint)", marginTop: 6 }}>
+          Renders as a responsive 16:9 embedded player on the live blog.
         </p>
       )}
     </div>
