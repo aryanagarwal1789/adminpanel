@@ -16,10 +16,16 @@ interface UploadInputProps {
   label?: string;
   /** Whether to show image preview below */
   preview?: boolean;
+  /** Also show an editable text field so a URL (e.g. a YouTube link) can be
+   *  typed/pasted directly, not just uploaded as a file. */
+  allowPaste?: boolean;
+  /** Placeholder for the paste field (only used when allowPaste is true). */
+  placeholder?: string;
 }
 
-/** Upload-only field for image/video URLs in the CMS admin. */
-export function UploadInput({ value, onChange, accept = 'image/*,video/*', label, preview = true }: UploadInputProps) {
+/** Upload field for image/video URLs in the CMS admin — optionally also
+ *  accepts a pasted URL (e.g. a YouTube link) via `allowPaste`. */
+export function UploadInput({ value, onChange, accept = 'image/*,video/*', label, preview = true, allowPaste = false, placeholder }: UploadInputProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ref = useRef<HTMLInputElement>(null);
@@ -54,12 +60,16 @@ export function UploadInput({ value, onChange, accept = 'image/*,video/*', label
         >
           {uploading ? 'Uploading…' : value ? '↑ Replace' : '↑ Upload'}
         </button>
-        {/* Read-only URL display */}
-        {value && (
+        {/* Editable when allowPaste (type/paste a URL directly); otherwise a
+            read-only display of the uploaded file's URL. */}
+        {(value || allowPaste) && (
           <input
-            readOnly
-            style={{ ...inp, flex: 1, color: '#64748b', fontSize: 11 }}
+            type="text"
+            readOnly={!allowPaste}
+            style={{ ...inp, flex: 1, color: allowPaste ? '#f1f5f9' : '#64748b', fontSize: allowPaste ? 13 : 11 }}
             value={value}
+            placeholder={allowPaste ? (placeholder ?? 'Paste a YouTube link or video URL…') : undefined}
+            onChange={allowPaste ? (e) => onChange(e.target.value) : undefined}
             title={value}
           />
         )}
