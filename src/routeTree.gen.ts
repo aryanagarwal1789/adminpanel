@@ -18,11 +18,14 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminSeoRouteImport } from './routes/admin/seo'
 import { Route as AdminSectionsRouteImport } from './routes/admin/sections'
 import { Route as AdminProductsRouteImport } from './routes/admin/products'
+import { Route as AdminCoursesRouteImport } from './routes/admin/courses'
 import { Route as AdminContactRouteImport } from './routes/admin/contact'
 import { Route as AdminClientsRouteImport } from './routes/admin/clients'
 import { Route as AdminAboutRouteImport } from './routes/admin/about'
 import { Route as AdminProductsIndexRouteImport } from './routes/admin/products/index'
+import { Route as AdminCoursesIndexRouteImport } from './routes/admin/courses/index'
 import { Route as AdminProductsProductIdRouteImport } from './routes/admin/products.$productId'
+import { Route as AdminCoursesCourseIdRouteImport } from './routes/admin/courses.$courseId'
 
 const TranslationsRoute = TranslationsRouteImport.update({
   id: '/translations',
@@ -69,6 +72,11 @@ const AdminProductsRoute = AdminProductsRouteImport.update({
   path: '/products',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCoursesRoute = AdminCoursesRouteImport.update({
+  id: '/courses',
+  path: '/courses',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminContactRoute = AdminContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -89,10 +97,20 @@ const AdminProductsIndexRoute = AdminProductsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminProductsRoute,
 } as any)
+const AdminCoursesIndexRoute = AdminCoursesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminCoursesRoute,
+} as any)
 const AdminProductsProductIdRoute = AdminProductsProductIdRouteImport.update({
   id: '/$productId',
   path: '/$productId',
   getParentRoute: () => AdminProductsRoute,
+} as any)
+const AdminCoursesCourseIdRoute = AdminCoursesCourseIdRouteImport.update({
+  id: '/$courseId',
+  path: '/$courseId',
+  getParentRoute: () => AdminCoursesRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -104,11 +122,14 @@ export interface FileRoutesByFullPath {
   '/admin/about': typeof AdminAboutRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/contact': typeof AdminContactRoute
+  '/admin/courses': typeof AdminCoursesRouteWithChildren
   '/admin/products': typeof AdminProductsRouteWithChildren
   '/admin/sections': typeof AdminSectionsRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/courses/$courseId': typeof AdminCoursesCourseIdRoute
   '/admin/products/$productId': typeof AdminProductsProductIdRoute
+  '/admin/courses/': typeof AdminCoursesIndexRoute
   '/admin/products/': typeof AdminProductsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -122,7 +143,9 @@ export interface FileRoutesByTo {
   '/admin/sections': typeof AdminSectionsRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/courses/$courseId': typeof AdminCoursesCourseIdRoute
   '/admin/products/$productId': typeof AdminProductsProductIdRoute
+  '/admin/courses': typeof AdminCoursesIndexRoute
   '/admin/products': typeof AdminProductsIndexRoute
 }
 export interface FileRoutesById {
@@ -135,11 +158,14 @@ export interface FileRoutesById {
   '/admin/about': typeof AdminAboutRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/contact': typeof AdminContactRoute
+  '/admin/courses': typeof AdminCoursesRouteWithChildren
   '/admin/products': typeof AdminProductsRouteWithChildren
   '/admin/sections': typeof AdminSectionsRoute
   '/admin/seo': typeof AdminSeoRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/courses/$courseId': typeof AdminCoursesCourseIdRoute
   '/admin/products/$productId': typeof AdminProductsProductIdRoute
+  '/admin/courses/': typeof AdminCoursesIndexRoute
   '/admin/products/': typeof AdminProductsIndexRoute
 }
 export interface FileRouteTypes {
@@ -153,11 +179,14 @@ export interface FileRouteTypes {
     | '/admin/about'
     | '/admin/clients'
     | '/admin/contact'
+    | '/admin/courses'
     | '/admin/products'
     | '/admin/sections'
     | '/admin/seo'
     | '/admin/'
+    | '/admin/courses/$courseId'
     | '/admin/products/$productId'
+    | '/admin/courses/'
     | '/admin/products/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -171,7 +200,9 @@ export interface FileRouteTypes {
     | '/admin/sections'
     | '/admin/seo'
     | '/admin'
+    | '/admin/courses/$courseId'
     | '/admin/products/$productId'
+    | '/admin/courses'
     | '/admin/products'
   id:
     | '__root__'
@@ -183,11 +214,14 @@ export interface FileRouteTypes {
     | '/admin/about'
     | '/admin/clients'
     | '/admin/contact'
+    | '/admin/courses'
     | '/admin/products'
     | '/admin/sections'
     | '/admin/seo'
     | '/admin/'
+    | '/admin/courses/$courseId'
     | '/admin/products/$productId'
+    | '/admin/courses/'
     | '/admin/products/'
   fileRoutesById: FileRoutesById
 }
@@ -264,6 +298,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProductsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/courses': {
+      id: '/admin/courses'
+      path: '/courses'
+      fullPath: '/admin/courses'
+      preLoaderRoute: typeof AdminCoursesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/contact': {
       id: '/admin/contact'
       path: '/contact'
@@ -292,6 +333,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProductsIndexRouteImport
       parentRoute: typeof AdminProductsRoute
     }
+    '/admin/courses/': {
+      id: '/admin/courses/'
+      path: '/'
+      fullPath: '/admin/courses/'
+      preLoaderRoute: typeof AdminCoursesIndexRouteImport
+      parentRoute: typeof AdminCoursesRoute
+    }
     '/admin/products/$productId': {
       id: '/admin/products/$productId'
       path: '/$productId'
@@ -299,8 +347,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProductsProductIdRouteImport
       parentRoute: typeof AdminProductsRoute
     }
+    '/admin/courses/$courseId': {
+      id: '/admin/courses/$courseId'
+      path: '/$courseId'
+      fullPath: '/admin/courses/$courseId'
+      preLoaderRoute: typeof AdminCoursesCourseIdRouteImport
+      parentRoute: typeof AdminCoursesRoute
+    }
   }
 }
+
+interface AdminCoursesRouteChildren {
+  AdminCoursesCourseIdRoute: typeof AdminCoursesCourseIdRoute
+  AdminCoursesIndexRoute: typeof AdminCoursesIndexRoute
+}
+
+const AdminCoursesRouteChildren: AdminCoursesRouteChildren = {
+  AdminCoursesCourseIdRoute: AdminCoursesCourseIdRoute,
+  AdminCoursesIndexRoute: AdminCoursesIndexRoute,
+}
+
+const AdminCoursesRouteWithChildren = AdminCoursesRoute._addFileChildren(
+  AdminCoursesRouteChildren,
+)
 
 interface AdminProductsRouteChildren {
   AdminProductsProductIdRoute: typeof AdminProductsProductIdRoute
@@ -320,6 +389,7 @@ interface AdminRouteChildren {
   AdminAboutRoute: typeof AdminAboutRoute
   AdminClientsRoute: typeof AdminClientsRoute
   AdminContactRoute: typeof AdminContactRoute
+  AdminCoursesRoute: typeof AdminCoursesRouteWithChildren
   AdminProductsRoute: typeof AdminProductsRouteWithChildren
   AdminSectionsRoute: typeof AdminSectionsRoute
   AdminSeoRoute: typeof AdminSeoRoute
@@ -330,6 +400,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAboutRoute: AdminAboutRoute,
   AdminClientsRoute: AdminClientsRoute,
   AdminContactRoute: AdminContactRoute,
+  AdminCoursesRoute: AdminCoursesRouteWithChildren,
   AdminProductsRoute: AdminProductsRouteWithChildren,
   AdminSectionsRoute: AdminSectionsRoute,
   AdminSeoRoute: AdminSeoRoute,
