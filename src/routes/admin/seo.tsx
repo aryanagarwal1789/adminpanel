@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { UploadInput } from './upload-input';
 import { authJsonHeaders } from '@/lib/builder-drafts';
+import { LastUpdatedBy } from '@/lib/lastUpdated';
 
 export const Route = createFileRoute('/admin/seo')({ component: SeoPage });
 
@@ -52,6 +53,9 @@ interface SeoData {
     softwareApplication: boolean; faqPage: boolean;
     organization: boolean; speakable: boolean; breadcrumbList: boolean;
   };
+  // Stamped server-side on every save — not client-editable, just read back.
+  lastUpdatedBy?: string | null;
+  lastUpdatedAt?: string | null;
 }
 
 interface LlmsPage { name: string; url: string; description: string }
@@ -973,6 +977,11 @@ function SeoPage() {
         body: JSON.stringify({ seo: payload }),
       });
       if (!res.ok) throw new Error(`${res.status}`);
+      const data = (await res.json()) as { seo?: Partial<SeoData>; override?: Partial<SeoData> };
+      const saved = locale !== 'en' ? data.override : data.seo;
+      if (saved) {
+        setSeo(p => ({ ...p, lastUpdatedBy: saved.lastUpdatedBy ?? null, lastUpdatedAt: saved.lastUpdatedAt ?? null }));
+      }
       const langLabel = SEO_LOCALES.find(l => l.code === locale)?.label ?? locale;
       showToast({ type: 'success', message: `SEO settings saved${locale !== 'en' ? ` (${langLabel})` : ''}.` });
     } catch {
@@ -1001,6 +1010,11 @@ function SeoPage() {
         <div>
           <h1 style={{ color: C.text, fontSize: 20, fontWeight: 700, margin: 0 }}>SEO</h1>
           <p style={{ color: C.muted, fontSize: 12, margin: '3px 0 0' }}>Optimize for search engines and social sharing</p>
+          {isPage && (
+            <div style={{ marginTop: 4 }}>
+              <LastUpdatedBy by={seo.lastUpdatedBy} at={seo.lastUpdatedAt} />
+            </div>
+          )}
         </div>
         {isPage && (
           <button onClick={save} disabled={saving || loading} style={{ background: C.blue, color: '#fff', padding: '8px 16px', borderRadius: 6, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 13, opacity: saving || loading ? 0.6 : 1 }}>

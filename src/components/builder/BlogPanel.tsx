@@ -41,6 +41,18 @@ export interface BlogPost {
   createdAt?: string;
   updatedAt?: string;
   lastModifiedBy?: string;
+  seo?: BlogPostSeo;
+}
+
+// Per-post SEO overrides (edited in the blog editor). Blank fields fall back to
+// the post's title / excerpt / featured image at render time.
+export interface BlogPostSeo {
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  ogImage?: string;
+  canonicalUrl?: string;
+  robots?: string;
 }
 
 interface Props {

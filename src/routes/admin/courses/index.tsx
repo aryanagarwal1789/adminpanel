@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authJsonHeaders } from '@/lib/auth';
 import { useEffect, useRef, useState } from 'react';
+import { usePublishOtp, PublishOtpModal } from '@/lib/otpPublish';
+import { LastUpdatedBy } from '@/lib/lastUpdated';
 
 export const Route = createFileRoute('/admin/courses/')({ component: CoursesPage });
 
@@ -18,6 +19,8 @@ interface Course {
   enabled: boolean;
   order: number;
   lessons?: unknown[];
+  lastUpdatedBy?: string | null;
+  lastUpdatedAt?: string | null;
 }
 
 // Same categories the SFA Learning Portal renders as filter chips
@@ -56,10 +59,32 @@ function CoursesPage() {
   const [toast, setToast] = useState<Toast>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newCourse, setNewCourse] = useState<Omit<Course, 'order' | 'lessons'>>({ ...BLANK_NEW });
-  const [addSaving, setAddSaving] = useState(false);
-  const [savingSettings, setSavingSettings] = useState(false);
 
   const showToast = (t: Toast) => { setToast(t); setTimeout(() => setToast(null), 3000); };
+
+  // Every write on this page is OTP-gated (see /site/content-otp on the
+  // backend) — each action below just stages the change and opens the verify
+  // modal instead of writing directly.
+  const otp = usePublishOtp((body: { course?: Course; courseId?: string }, action: string) => {
+    if (action === 'learning.settings') {
+      showToast({ type: 'success', message: 'Portal copy saved' });
+    } else if (action === 'learning.courseCreate') {
+      setShowAddModal(false);
+      setNewCourse({ ...BLANK_NEW });
+      showToast({ type: 'success', message: 'Course created' });
+      if (body.course?.courseId) window.location.href = `/admin/courses/${body.course.courseId}`;
+    } else if (action === 'learning.courseUpdate') {
+      if (body.course) {
+        setCourses((prev) => prev.map((c) => (c.courseId === body.course!.courseId ? { ...c, ...body.course } : c)));
+      }
+      showToast({ type: 'success', message: 'Course updated' });
+    } else if (action === 'learning.courseDelete') {
+      setCourses((prev) => prev.filter((c) => c.courseId !== body.courseId));
+      showToast({ type: 'success', message: 'Course deleted' });
+    } else if (action === 'learning.reorder') {
+      showToast({ type: 'success', message: 'Order saved' });
+    }
+  });
 
   useEffect(() => {
     fetch(`${BACKEND}/site/learning`)
@@ -74,50 +99,24 @@ function CoursesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const saveSettings = async () => {
-    setSavingSettings(true);
-    try {
-      const res = await fetch(`${BACKEND}/site/learning/settings`, {
-        method: 'PUT', headers: authJsonHeaders(), body: JSON.stringify({ heading, subheading }),
-      });
-      if (!res.ok) throw new Error(`${res.status}`);
-      showToast({ type: 'success', message: 'Portal copy saved' });
-    } catch {
-      showToast({ type: 'error', message: 'Save failed' });
-    } finally { setSavingSettings(false); }
+  const saveSettings = () => {
+    otp.open('learning.settings', { heading, subheading });
   };
 
-  const toggleEnabled = async (c: Course) => {
-    const nextEnabled = !c.enabled;
-    setCourses((prev) => prev.map((x) => x.courseId === c.courseId ? { ...x, enabled: nextEnabled } : x));
-    try {
-      const res = await fetch(`${BACKEND}/site/learning/${c.courseId}`, {
-        method: 'PUT', headers: authJsonHeaders(), body: JSON.stringify({ enabled: nextEnabled }),
-      });
-      if (!res.ok) throw new Error(`${res.status}`);
-    } catch {
-      setCourses((prev) => prev.map((x) => x.courseId === c.courseId ? { ...x, enabled: c.enabled } : x));
-      showToast({ type: 'error', message: 'Update failed' });
-    }
+  const toggleEnabled = (c: Course) => {
+    otp.open('learning.courseUpdate', { enabled: !c.enabled }, { courseId: c.courseId });
   };
 
-  const handleDelete = async (courseId: string) => {
+  const handleDelete = (courseId: string) => {
     if (!window.confirm(`Delete course "${courseId}"?`)) return;
-    try {
-      const res = await fetch(`${BACKEND}/site/learning/${courseId}`, { method: 'DELETE', headers: authJsonHeaders() });
-      if (!res.ok) throw new Error(`${res.status}`);
-      setCourses((prev) => prev.filter((c) => c.courseId !== courseId));
-      showToast({ type: 'success', message: 'Course deleted' });
-    } catch {
-      showToast({ type: 'error', message: 'Delete failed' });
-    }
+    otp.open('learning.courseDelete', {}, { courseId });
   };
 
   // Drag-and-drop reorder
   const dragItem = useRef<number | null>(null);
   const [dragOver, setDragOver] = useState<number | null>(null);
 
-  const handleDrop = async (dropIdx: number) => {
+  const handleDrop = (dropIdx: number) => {
     setDragOver(null);
     if (dragItem.current === null || dragItem.current === dropIdx) return;
     const from = dragItem.current;
@@ -127,37 +126,18 @@ function CoursesPage() {
     next.splice(dropIdx, 0, moved);
     const reindexed = next.map((c, i) => ({ ...c, order: i }));
     setCourses(reindexed);
-    try {
-      const res = await fetch(`${BACKEND}/site/learning/reorder`, {
-        method: 'PUT', headers: authJsonHeaders(), body: JSON.stringify({ order: reindexed.map((c) => c.courseId) }),
-      });
-      if (!res.ok) throw new Error(`${res.status}`);
-    } catch {
-      showToast({ type: 'error', message: 'Reorder failed' });
-    }
+    otp.open('learning.reorder', { order: reindexed.map((c) => c.courseId) });
   };
 
-  const handleAddCourse = async (e: React.FormEvent) => {
+  const handleAddCourse = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCourse.courseId.trim() || !newCourse.title.trim()) return;
-    setAddSaving(true);
-    try {
-      const payload = {
-        ...newCourse,
-        courseId: newCourse.courseId.trim().toLowerCase().replace(/\s+/g, '-'),
-        title: newCourse.title.trim(),
-      };
-      const res = await fetch(`${BACKEND}/site/learning`, {
-        method: 'POST', headers: authJsonHeaders(), body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(`${res.status}`);
-      setShowAddModal(false);
-      setNewCourse({ ...BLANK_NEW });
-      showToast({ type: 'success', message: 'Course created' });
-      window.location.href = `/admin/courses/${payload.courseId}`;
-    } catch {
-      showToast({ type: 'error', message: 'Failed to create course' });
-    } finally { setAddSaving(false); }
+    const payload = {
+      ...newCourse,
+      courseId: newCourse.courseId.trim().toLowerCase().replace(/\s+/g, '-'),
+      title: newCourse.title.trim(),
+    };
+    otp.open('learning.courseCreate', payload);
   };
 
   return (
@@ -188,8 +168,10 @@ function CoursesPage() {
           <label style={lbl}>Hero subheading</label>
           <textarea style={textareaStyle} value={subheading} onChange={(e) => setSubheading(e.target.value)} rows={2} />
         </div>
-        <button style={saveBtn} onClick={saveSettings} disabled={savingSettings}>{savingSettings ? 'Saving…' : 'Save copy'}</button>
+        <button style={saveBtn} onClick={saveSettings}>Save copy</button>
       </div>
+
+      <PublishOtpModal otp={otp} title="Verify to save learning portal changes" />
 
       {loading ? (
         <div style={{ color: '#94a3b8', padding: 40, textAlign: 'center' }}>Loading…</div>
@@ -228,6 +210,7 @@ function CoursesPage() {
                 {c.category && <span style={{ padding: '2px 8px', borderRadius: 12, border: '1px solid #334155' }}>{c.category}</span>}
                 <span style={{ padding: '2px 8px', borderRadius: 12, border: '1px solid #334155' }}>{(c.lessons?.length ?? 0)} lessons</span>
               </div>
+              <LastUpdatedBy by={c.lastUpdatedBy} at={c.lastUpdatedAt} />
               <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#94a3b8', fontSize: 12, flex: 1 }}>
                   <input type="checkbox" checked={c.enabled} onChange={() => toggleEnabled(c)} />
@@ -275,8 +258,8 @@ function CoursesPage() {
                 <input type="checkbox" checked={newCourse.enabled} onChange={(e) => setNewCourse((p) => ({ ...p, enabled: e.target.checked }))} />
               </div>
               <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-                <button type="submit" style={{ ...saveBtn, flex: 1 }} disabled={addSaving}>{addSaving ? 'Creating…' : 'Create Course'}</button>
-                <button type="button" style={secBtn} onClick={() => setShowAddModal(false)} disabled={addSaving}>Cancel</button>
+                <button type="submit" style={{ ...saveBtn, flex: 1 }}>Create Course</button>
+                <button type="button" style={secBtn} onClick={() => setShowAddModal(false)}>Cancel</button>
               </div>
             </form>
           </div>

@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authJsonHeaders } from '@/lib/auth';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { usePublishOtp, PublishOtpModal } from '@/lib/otpPublish';
+import { LastUpdatedBy } from '@/lib/lastUpdated';
 
 export const Route = createFileRoute('/admin/products/')({ component: ProductsPage });
 
@@ -16,6 +17,8 @@ interface Product {
   highlight: string;
   enabled: boolean;
   order: number;
+  lastUpdatedBy?: string | null;
+  lastUpdatedAt?: string | null;
 }
 
 const DEFAULT_CATEGORIES = [
@@ -53,12 +56,34 @@ function ProductsPage() {
   const [toast, setToast] = useState<Toast>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newProduct, setNewProduct] = useState<Omit<Product, 'order'>>({ ...BLANK_NEW });
-  const [addSaving, setAddSaving] = useState(false);
 
   const showToast = (t: Toast) => {
     setToast(t);
     setTimeout(() => setToast(null), 3000);
   };
+
+  // Every write on this page is OTP-gated (see /site/content-otp on the
+  // backend) — each action below just stages the change and opens the verify
+  // modal instead of writing directly.
+  const otp = usePublishOtp((body: { product?: Product; productId?: string }, action: string) => {
+    if (action === 'products.create') {
+      if (body.product) setProducts((prev) => [...prev, body.product!]);
+      setShowAddModal(false);
+      setNewProduct({ ...BLANK_NEW });
+      showToast({ type: 'success', message: 'Product created' });
+      if (body.product?.productId) window.location.href = `/admin/products/${body.product.productId}`;
+    } else if (action === 'products.update') {
+      if (body.product) {
+        setProducts((prev) => prev.map((p) => (p.productId === body.product!.productId ? { ...p, ...body.product } : p)));
+      }
+      showToast({ type: 'success', message: 'Product updated' });
+    } else if (action === 'products.delete') {
+      setProducts((prev) => prev.filter((p) => p.productId !== body.productId));
+      showToast({ type: 'success', message: 'Product deleted' });
+    } else if (action === 'products.reorder') {
+      showToast({ type: 'success', message: 'Order saved' });
+    }
+  });
 
   useEffect(() => {
     fetch(`${BACKEND}/site/products`)
@@ -100,7 +125,7 @@ function ProductsPage() {
 
   const handleCatDragStart = (idx: number) => { dragCatItem.current = idx; };
 
-  const handleCatDrop = async (dropIdx: number) => {
+  const handleCatDrop = (dropIdx: number) => {
     setDragOverCat(null);
     if (dragCatItem.current === null || dragCatItem.current === dropIdx) return;
     const fromIdx = dragCatItem.current;
@@ -111,43 +136,16 @@ function ProductsPage() {
     setCategories(next);
     // Reorder all products to reflect new category order
     const newOrder = next.flatMap((c) => (grouped[c.id as CategoryId] ?? []).map(p => p.productId));
-    try {
-      await fetch(`${BACKEND}/site/products/reorder`, {
-        method: 'PUT',
-        headers: authJsonHeaders(),
-        body: JSON.stringify({ order: newOrder }),
-      });
-    } catch {
-      showToast({ type: 'error', message: 'Category reorder failed' });
-    }
+    otp.open('products.reorder', { order: newOrder });
   };
 
-  const toggleEnabled = async (p: Product) => {
-    const nextEnabled = !p.enabled;
-    setProducts((prev) => prev.map((x) => x.productId === p.productId ? { ...x, enabled: nextEnabled } : x));
-    try {
-      const res = await fetch(`${BACKEND}/site/products/${p.productId}`, {
-        method: 'PUT',
-        headers: authJsonHeaders(),
-        body: JSON.stringify({ enabled: nextEnabled }),
-      });
-      if (!res.ok) throw new Error(`${res.status}`);
-    } catch {
-      setProducts((prev) => prev.map((x) => x.productId === p.productId ? { ...x, enabled: p.enabled } : x));
-      showToast({ type: 'error', message: 'Update failed' });
-    }
+  const toggleEnabled = (p: Product) => {
+    otp.open('products.update', { enabled: !p.enabled }, { productId: p.productId });
   };
 
-  const handleDelete = async (productId: string) => {
+  const handleDelete = (productId: string) => {
     if (!window.confirm(`Delete product "${productId}"?`)) return;
-    try {
-      const res = await fetch(`${BACKEND}/site/products/${productId}`, { method: 'DELETE', headers: authJsonHeaders() });
-      if (!res.ok) throw new Error(`${res.status}`);
-      setProducts((prev) => prev.filter((p) => p.productId !== productId));
-      showToast({ type: 'success', message: 'Product deleted' });
-    } catch {
-      showToast({ type: 'error', message: 'Delete failed' });
-    }
+    otp.open('products.delete', {}, { productId });
   };
 
   // Drag-and-drop state
@@ -158,7 +156,7 @@ function ProductsPage() {
     dragItem.current = { categoryId, idx };
   };
 
-  const handleDrop = async (categoryId: string, dropIdx: number) => {
+  const handleDrop = (categoryId: string, dropIdx: number) => {
     setDragOverKey(null);
     if (!dragItem.current) return;
     const { categoryId: fromCat, idx: fromIdx } = dragItem.current;
@@ -171,48 +169,21 @@ function ProductsPage() {
     const otherProducts = products.filter((p) => p.category !== categoryId);
     const updatedCatItems = catItems.map((p, i) => ({ ...p, order: otherProducts.length + i }));
     setProducts([...otherProducts, ...updatedCatItems]);
-    try {
-      const res = await fetch(`${BACKEND}/site/products/reorder`, {
-        method: 'PUT',
-        headers: authJsonHeaders(),
-        body: JSON.stringify({ order: [...otherProducts.map(p => p.productId), ...catItems.map(p => p.productId)] }),
-      });
-      if (!res.ok) throw new Error(`${res.status}`);
-    } catch {
-      showToast({ type: 'error', message: 'Reorder failed' });
-    }
+    otp.open('products.reorder', { order: [...otherProducts.map(p => p.productId), ...catItems.map(p => p.productId)] });
   };
 
-  const handleAddProduct = async (e: React.FormEvent) => {
+  const handleAddProduct = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProduct.productId.trim() || !newProduct.name.trim()) return;
-    setAddSaving(true);
-    try {
-      const payload = {
-        ...newProduct,
-        productId: newProduct.productId.trim().toLowerCase().replace(/\s+/g, '-'),
-        name: newProduct.name.trim(),
-        description: newProduct.description.trim(),
-        highlight: newProduct.highlight.trim(),
-        status: newProduct.status || null,
-      };
-      const res = await fetch(`${BACKEND}/site/products`, {
-        method: 'POST',
-        headers: authJsonHeaders(),
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(`${res.status}`);
-      const data = (await res.json()) as { product?: Product };
-      if (data.product) setProducts((prev) => [...prev, data.product!]);
-      setShowAddModal(false);
-      setNewProduct({ ...BLANK_NEW });
-      showToast({ type: 'success', message: 'Product created' });
-      window.location.href = `/admin/products/${payload.productId}`;
-    } catch {
-      showToast({ type: 'error', message: 'Failed to create product' });
-    } finally {
-      setAddSaving(false);
-    }
+    const payload = {
+      ...newProduct,
+      productId: newProduct.productId.trim().toLowerCase().replace(/\s+/g, '-'),
+      name: newProduct.name.trim(),
+      description: newProduct.description.trim(),
+      highlight: newProduct.highlight.trim(),
+      status: newProduct.status || null,
+    };
+    otp.open('products.create', payload);
   };
 
   return (
@@ -232,6 +203,8 @@ function ProductsPage() {
           + Add Product
         </button>
       </div>
+
+      <PublishOtpModal otp={otp} title="Verify to save product changes" />
 
       {loading ? (
         <div style={{ color: '#94a3b8', padding: 40, textAlign: 'center' }}>Loading…</div>
@@ -307,6 +280,7 @@ function ProductsPage() {
                       {p.status && (
                         <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 12, border: '1px solid #334155', color: '#94a3b8', width: 'fit-content' }}>{p.status}</span>
                       )}
+                      <LastUpdatedBy by={p.lastUpdatedBy} at={p.lastUpdatedAt} />
                       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                         <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', color: '#94a3b8', fontSize: 12, flex: 1 }}>
                           <input type="checkbox" checked={p.enabled} onChange={() => toggleEnabled(p)} />
@@ -378,8 +352,8 @@ function ProductsPage() {
                 <input type="checkbox" checked={newProduct.enabled} onChange={(e) => setNewProduct((p) => ({ ...p, enabled: e.target.checked }))} />
               </div>
               <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-                <button type="submit" style={{ ...saveBtn, flex: 1 }} disabled={addSaving}>{addSaving ? 'Creating…' : 'Create Product'}</button>
-                <button type="button" style={secBtn} onClick={() => setShowAddModal(false)} disabled={addSaving}>Cancel</button>
+                <button type="submit" style={{ ...saveBtn, flex: 1 }}>Create Product</button>
+                <button type="button" style={secBtn} onClick={() => setShowAddModal(false)}>Cancel</button>
               </div>
             </form>
           </div>

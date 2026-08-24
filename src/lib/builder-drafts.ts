@@ -4,8 +4,10 @@ import { getAuth, getAppToken } from '@/lib/auth';
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 const BASE = `${BACKEND}/site/builder/pages`;
 
-// Builder write routes are protected by @Authenticate('token') on the backend —
-// attach the app JWT from login. Reads stay public so no header is needed there.
+// Builder write routes — and the get-my-draft read, since it returns full
+// unpublished content keyed only by a client-supplied ownerId — are protected
+// by @Authenticate('token') on the backend. Attach the app JWT from login.
+// Other reads (published pages, draft presence list) stay public.
 export function authJsonHeaders(): HeadersInit {
   const token = getAppToken();
   return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
@@ -47,7 +49,7 @@ export async function getMyDraft(pageKey: string): Promise<DraftDto | null> {
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), 10000);
   try {
-    const res = await fetch(`${BASE}/${pageKey}/draft?ownerId=${encodeURIComponent(ownerId)}`, { signal: c.signal });
+    const res = await fetch(`${BASE}/${pageKey}/draft?ownerId=${encodeURIComponent(ownerId)}`, { signal: c.signal, headers: authHeaders() });
     if (!res.ok) return null;
     const { draft } = (await res.json()) as { draft: DraftDto | null };
     return draft;

@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authJsonHeaders } from '@/lib/auth';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAdminPreview } from './preview-context';
 import { UploadInput } from './upload-input';
+import { usePublishOtp, PublishOtpModal } from '@/lib/otpPublish';
 
 export const Route = createFileRoute('/admin/sections')({ component: SectionsPage });
 
@@ -223,7 +223,6 @@ function SectionCard({ section, sIdx, totalSections, updateSection, updateItem, 
 function SectionsPage() {
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
   const { post, onPreviewReady } = useAdminPreview();
   const sectionsRef = useRef<Section[]>([]);
@@ -232,6 +231,20 @@ function SectionsPage() {
     setToast(t);
     setTimeout(() => setToast(null), 3000);
   };
+
+  // Every write on this page is OTP-gated (see /site/content-otp on the
+  // backend) — Save just stages the change and opens the verify modal instead
+  // of writing directly.
+  const otp = usePublishOtp((body: { sections?: Section[] }) => {
+    const saved = body.sections ?? [];
+    setSections(saved);
+    showToast({ type: 'success', message: 'Sections saved' });
+    // Send live preview updates after saving
+    post({ type: 'SECTIONS_ORDER', order: saved.map(s => ({ id: s.id, enabled: s.enabled !== false, label: s.label ?? '' })) });
+    for (const s of saved) {
+      post({ type: 'SECTION_UPDATE', sectionId: s.id, items: s.items ?? [], label: s.label ?? '' });
+    }
+  });
 
   useEffect(() => {
     fetch(`${BACKEND}/site/sections`)
@@ -307,43 +320,21 @@ function SectionsPage() {
     });
   };
 
-  const save = async () => {
-    setSaving(true);
-    try {
-      const payload = sections.map((s, i) => ({
-        id: s.id,
-        label: s.label,
-        kind: s.kind,
-        cardinality: s.cardinality,
-        enabled: s.enabled !== false,
-        order: i,
-        items: s.items.map((it, j) =>
-          s.kind === 'blog'
-            ? { id: it.blogId ?? it.id, blogId: it.blogId ?? it.id, order: j }
-            : { ...it, order: j }
-        ),
-      }));
-      const res = await fetch(`${BACKEND}/site/sections`, {
-        method: 'PUT',
-        headers: authJsonHeaders(),
-        body: JSON.stringify({ sections: payload }),
-      });
-      if (!res.ok) throw new Error(`${res.status}`);
-      const data = (await res.json()) as { sections?: Section[] };
-      setSections(data.sections ?? []);
-      showToast({ type: 'success', message: 'Sections saved' });
-
-      // Send live preview updates after saving
-      const saved = data.sections ?? [];
-      post({ type: 'SECTIONS_ORDER', order: saved.map(s => ({ id: s.id, enabled: s.enabled !== false, label: s.label ?? '' })) });
-      for (const s of saved) {
-        post({ type: 'SECTION_UPDATE', sectionId: s.id, items: s.items ?? [], label: s.label ?? '' });
-      }
-    } catch {
-      showToast({ type: 'error', message: 'Save failed' });
-    } finally {
-      setSaving(false);
-    }
+  const save = () => {
+    const payload = sections.map((s, i) => ({
+      id: s.id,
+      label: s.label,
+      kind: s.kind,
+      cardinality: s.cardinality,
+      enabled: s.enabled !== false,
+      order: i,
+      items: s.items.map((it, j) =>
+        s.kind === 'blog'
+          ? { id: it.blogId ?? it.id, blogId: it.blogId ?? it.id, order: j }
+          : { ...it, order: j }
+      ),
+    }));
+    otp.open('sections.update', { sections: payload });
   };
 
   return (
@@ -359,10 +350,10 @@ function SectionsPage() {
           <h1 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 700, margin: 0 }}>Sections & Media</h1>
           <p style={{ color: '#94a3b8', fontSize: 13, margin: '4px 0 0' }}>Images, videos, cards, and blog tiles on the landing page</p>
         </div>
-        <button style={saveBtn} onClick={save} disabled={saving || loading}>
-          {saving ? 'Saving…' : 'Save Changes'}
-        </button>
+        <button style={saveBtn} onClick={save} disabled={loading}>Save Changes</button>
       </div>
+
+      <PublishOtpModal otp={otp} title="Verify to save section changes" />
 
       {loading ? (
         <div style={{ color: '#94a3b8', padding: 40, textAlign: 'center' }}>Loading…</div>
