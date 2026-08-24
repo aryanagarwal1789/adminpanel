@@ -2328,6 +2328,12 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
     heading: 'A sales-tech company built at founder speed',
     body: "Salescode.ai is among the **world's leading sales-tech companies**, led by experts from Coca-Cola, Avaya and Shell. We've grown to an **INR 1,000 cr / USD 120M valuation** in eight years, and we're on track to triple by 2025. Come build the next chapter with us.",
   },
+  'slick-careers-jobs': {
+    heading: 'Current Open Positions',
+    kekaIdentifier: 'd96275cd-110b-4550-94da-4a1a661899f1',
+    kekaDomain: 'https://salescodeai.keka.com',
+    emptyText: 'No open positions right now. Please check back soon.',
+  },
   'slick-careers-hero': {
     pillText: 'Our Story',
     headingLine1: 'Founded And Managed By',
