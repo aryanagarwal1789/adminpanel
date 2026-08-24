@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authJsonHeaders } from '@/lib/auth';
 import { useEffect, useRef, useState } from 'react';
 import { UploadInput } from './upload-input';
+import { usePublishOtp, PublishOtpModal } from '@/lib/otpPublish';
+import { LastUpdatedBy } from '@/lib/lastUpdated';
 
 export const Route = createFileRoute('/admin/courses/$courseId')({ component: CourseDetailPage });
 
@@ -42,6 +43,8 @@ interface Course extends CourseDetails {
   courseId: string;
   enabled: boolean;
   lessons?: Lesson[];
+  lastUpdatedBy?: string | null;
+  lastUpdatedAt?: string | null;
 }
 
 type Toast = { type: 'success' | 'error'; message: string } | null;
@@ -72,11 +75,21 @@ function CourseDetailPage() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [loading, setLoading] = useState(true);
-  const [savingDetails, setSavingDetails] = useState(false);
-  const [savingLessons, setSavingLessons] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
 
   const showToast = (t: Toast) => { setToast(t); setTimeout(() => setToast(null), 3000); };
+
+  // Every write on this page is OTP-gated (see /site/content-otp on the
+  // backend) — Save just stages the change and opens the verify modal instead
+  // of writing directly.
+  const otp = usePublishOtp((body: { course?: Course; lessons?: Lesson[] }) => {
+    if (body.course) {
+      setCourse(body.course);
+      showToast({ type: 'success', message: 'Course details saved' });
+    } else if (body.lessons) {
+      showToast({ type: 'success', message: 'Lessons saved' });
+    }
+  });
 
   useEffect(() => {
     fetch(`${BACKEND}/site/learning/${courseId}`)
@@ -97,33 +110,13 @@ function CourseDetailPage() {
 
   const ud = (patch: Partial<CourseDetails>) => setDetails((d) => ({ ...d, ...patch }));
 
-  const saveDetails = async () => {
-    setSavingDetails(true);
-    try {
-      const res = await fetch(`${BACKEND}/site/learning/${courseId}`, {
-        method: 'PUT', headers: authJsonHeaders(), body: JSON.stringify(details),
-      });
-      if (!res.ok) throw new Error(`${res.status}`);
-      const data = (await res.json()) as { course?: Course };
-      if (data.course) setCourse(data.course);
-      showToast({ type: 'success', message: 'Course details saved' });
-    } catch {
-      showToast({ type: 'error', message: 'Save failed' });
-    } finally { setSavingDetails(false); }
+  const saveDetails = () => {
+    otp.open('learning.courseUpdate', details, { courseId });
   };
 
-  const saveLessons = async () => {
-    setSavingLessons(true);
-    try {
-      const payload = lessons.map((l, i) => ({ ...l, order: i }));
-      const res = await fetch(`${BACKEND}/site/learning/${courseId}/lessons`, {
-        method: 'PUT', headers: authJsonHeaders(), body: JSON.stringify({ lessons: payload }),
-      });
-      if (!res.ok) throw new Error(`${res.status}`);
-      showToast({ type: 'success', message: 'Lessons saved' });
-    } catch {
-      showToast({ type: 'error', message: 'Save failed' });
-    } finally { setSavingLessons(false); }
+  const saveLessons = () => {
+    const payload = lessons.map((l, i) => ({ ...l, order: i }));
+    otp.open('learning.lessons', { lessons: payload }, { courseId });
   };
 
   const updateLesson = (idx: number, patch: Partial<Lesson>) =>
@@ -176,9 +169,14 @@ function CourseDetailPage() {
           </div>
           <h1 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 700, margin: 0 }}>{details.title || course.courseId}</h1>
           <p style={{ color: '#94a3b8', fontSize: 13, margin: '4px 0 0' }}>Edit course details and its lessons</p>
+          <div style={{ marginTop: 4 }}>
+            <LastUpdatedBy by={course.lastUpdatedBy} at={course.lastUpdatedAt} />
+          </div>
         </div>
-        <button style={saveBtn} onClick={saveDetails} disabled={savingDetails}>{savingDetails ? 'Saving…' : 'Save Details'}</button>
+        <button style={saveBtn} onClick={saveDetails}>Save Details</button>
       </div>
+
+      <PublishOtpModal otp={otp} title="Verify to save course changes" />
 
       {/* Course details */}
       <div style={card}>
@@ -227,7 +225,7 @@ function CourseDetailPage() {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button style={secBtn} onClick={addLesson}>+ Add lesson</button>
-            <button style={saveBtn} onClick={saveLessons} disabled={savingLessons}>{savingLessons ? 'Saving…' : 'Save lessons'}</button>
+            <button style={saveBtn} onClick={saveLessons}>Save lessons</button>
           </div>
         </div>
 

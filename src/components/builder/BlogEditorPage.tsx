@@ -743,6 +743,11 @@ export function BlogEditorPage() {
     setForm((f) => ({ ...f, [k]: v }));
     setDirty(true);
   };
+  // Nested setter for the per-post SEO overrides.
+  const setSeo = (k: string, v: unknown) => {
+    setForm((f) => ({ ...f, seo: { ...(f.seo ?? {}), [k]: v } }));
+    setDirty(true);
+  };
   const handleTitleChange = (v: string) => {
     setForm((f) => ({ ...f, title: v, ...(slugManual ? {} : { slug: slugify(v) }) }));
     setDirty(true);
@@ -2014,6 +2019,92 @@ export function BlogEditorPage() {
                 onChange={(e) => set("readTime", e.target.value)}
                 placeholder="5 min read"
               />
+            </div>
+
+            {/* ── SEO overrides (optional; blank fields fall back to the post) ── */}
+            <div
+              style={{
+                borderTop: "1px solid var(--hair)",
+                margin: "14px 0 4px",
+                paddingTop: 12,
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: ".04em",
+                textTransform: "uppercase",
+                color: "var(--muted)",
+              }}
+            >
+              SEO
+            </div>
+            <div className="bs-field">
+              <label>
+                Search title <span className="bs-hint">defaults to the post title</span>
+              </label>
+              <input
+                value={form.seo?.metaTitle ?? ""}
+                onChange={(e) => setSeo("metaTitle", e.target.value)}
+                placeholder={form.title || "Page title for search engines"}
+              />
+            </div>
+            <div className="bs-field">
+              <label>
+                Meta description <span className="bs-hint">defaults to the excerpt</span>
+              </label>
+              <textarea
+                value={form.seo?.metaDescription ?? ""}
+                onChange={(e) => setSeo("metaDescription", e.target.value)}
+                placeholder="Override the excerpt for search results (optional)."
+              />
+            </div>
+            <div className="bs-field">
+              <label>
+                Focus keywords <span className="bs-hint">comma-separated</span>
+              </label>
+              <input
+                value={(form.seo?.keywords ?? []).join(", ")}
+                onChange={(e) =>
+                  setSeo(
+                    "keywords",
+                    e.target.value
+                      .split(",")
+                      .map((k) => k.trim())
+                      .filter(Boolean),
+                  )
+                }
+                placeholder="AI SFA, CPG sales, route to market"
+              />
+            </div>
+            <div className="bs-field">
+              <label>
+                Social image URL <span className="bs-hint">defaults to the cover image</span>
+              </label>
+              <input
+                value={form.seo?.ogImage ?? ""}
+                onChange={(e) => setSeo("ogImage", e.target.value)}
+                placeholder="https://…/og-image.jpg"
+              />
+            </div>
+            <div className="bs-field">
+              <label>
+                Canonical URL <span className="bs-hint">optional</span>
+              </label>
+              <input
+                value={form.seo?.canonicalUrl ?? ""}
+                onChange={(e) => setSeo("canonicalUrl", e.target.value)}
+                placeholder="https://salescode.ai/resources/blog/…"
+              />
+            </div>
+            <div className="bs-field">
+              <label>Search indexing</label>
+              <select
+                value={form.seo?.robots ?? ""}
+                onChange={(e) => setSeo("robots", e.target.value)}
+              >
+                <option value="">Index &amp; follow (default)</option>
+                <option value="index, follow">Index &amp; follow</option>
+                <option value="noindex, follow">No index, follow links</option>
+                <option value="noindex, nofollow">No index, no follow</option>
+              </select>
             </div>
 
             {!isNew && form.slug && (

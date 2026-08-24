@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { authJsonHeaders } from '@/lib/auth';
 import { useEffect, useState } from 'react';
 import { UploadInput } from './upload-input';
+import { usePublishOtp, PublishOtpModal } from '@/lib/otpPublish';
+import { LastUpdatedBy } from '@/lib/lastUpdated';
 
 export const Route = createFileRoute('/admin/products/$productId')({ component: ProductDetailPage });
 
@@ -50,6 +51,8 @@ interface Product extends ProductDetails {
   productId: string;
   enabled: boolean;
   sidebar?: SidebarItem[];
+  lastUpdatedBy?: string | null;
+  lastUpdatedAt?: string | null;
 }
 
 type Toast = { type: 'success' | 'error'; message: string } | null;
@@ -82,14 +85,20 @@ function ProductDetailPage() {
   const [items, setItems] = useState<SidebarItem[]>([]);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [loading, setLoading] = useState(true);
-  const [savingDetails, setSavingDetails] = useState(false);
-  const [savingSidebar, setSavingSidebar] = useState(false);
   const [toast, setToast] = useState<Toast>(null);
 
   const showToast = (t: Toast) => {
     setToast(t);
     setTimeout(() => setToast(null), 3000);
   };
+
+  // Every write on this page is OTP-gated (see /site/content-otp on the
+  // backend) — Save just stages the change and opens the verify modal instead
+  // of writing directly.
+  const otp = usePublishOtp((body: { product?: Product }) => {
+    if (body.product) setProduct(body.product);
+    showToast({ type: 'success', message: 'Saved' });
+  });
 
   useEffect(() => {
     fetch(`${BACKEND}/site/products/${productId}`)
@@ -125,51 +134,23 @@ function ProductDetailPage() {
   const ud = (patch: Partial<ProductDetails>) => setDetails((d) => ({ ...d, ...patch }));
   const udPreview = (patch: Partial<ProductPreview>) => setDetails((d) => ({ ...d, preview: { ...d.preview, ...patch } }));
 
-  const saveDetails = async () => {
-    setSavingDetails(true);
-    try {
-      const res = await fetch(`${BACKEND}/site/products/${productId}`, {
-        method: 'PUT',
-        headers: authJsonHeaders(),
-        body: JSON.stringify({
-          name: details.name,
-          description: details.description,
-          image: details.image,
-          category: details.category,
-          status: details.status || null,
-          timelineStage: details.timelineStage || null,
-          liveDate: details.liveDate || null,
-          highlight: details.highlight,
-          preview: details.preview,
-        }),
-      });
-      if (!res.ok) throw new Error(`${res.status}`);
-      const data = (await res.json()) as { product?: Product };
-      if (data.product) setProduct(data.product);
-      showToast({ type: 'success', message: 'Product details saved' });
-    } catch {
-      showToast({ type: 'error', message: 'Save failed' });
-    } finally {
-      setSavingDetails(false);
-    }
+  const saveDetails = () => {
+    otp.open('products.update', {
+      name: details.name,
+      description: details.description,
+      image: details.image,
+      category: details.category,
+      status: details.status || null,
+      timelineStage: details.timelineStage || null,
+      liveDate: details.liveDate || null,
+      highlight: details.highlight,
+      preview: details.preview,
+    }, { productId });
   };
 
-  const saveSidebar = async () => {
-    setSavingSidebar(true);
-    try {
-      const payload = items.map((it, i) => ({ ...it, order: i }));
-      const res = await fetch(`${BACKEND}/site/products/${productId}`, {
-        method: 'PUT',
-        headers: authJsonHeaders(),
-        body: JSON.stringify({ sidebar: payload }),
-      });
-      if (!res.ok) throw new Error(`${res.status}`);
-      showToast({ type: 'success', message: 'Sidebar saved' });
-    } catch {
-      showToast({ type: 'error', message: 'Save failed' });
-    } finally {
-      setSavingSidebar(false);
-    }
+  const saveSidebar = () => {
+    const payload = items.map((it, i) => ({ ...it, order: i }));
+    otp.open('products.update', { sidebar: payload }, { productId });
   };
 
   const updateItem = (idx: number, patch: Partial<SidebarItem>) =>
@@ -206,11 +187,14 @@ function ProductDetailPage() {
           </div>
           <h1 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 700, margin: 0 }}>{details.name || product.productId}</h1>
           <p style={{ color: '#94a3b8', fontSize: 13, margin: '4px 0 0' }}>Edit product details and sidebar menu items</p>
+          <div style={{ marginTop: 4 }}>
+            <LastUpdatedBy by={product.lastUpdatedBy} at={product.lastUpdatedAt} />
+          </div>
         </div>
-        <button style={saveBtn} onClick={saveDetails} disabled={savingDetails}>
-          {savingDetails ? 'Saving…' : 'Save Details'}
-        </button>
+        <button style={saveBtn} onClick={saveDetails}>Save Details</button>
       </div>
+
+      <PublishOtpModal otp={otp} title="Verify to save product changes" />
 
       {/* Product Details */}
       <div style={card}>
@@ -302,9 +286,7 @@ function ProductDetailPage() {
           <UploadInput value={details.preview.thumbnail} onChange={(thumbnail) => udPreview({ thumbnail })} accept="image/*" />
         </div>
         <div style={{ marginTop: 16, textAlign: 'right' }}>
-          <button style={saveBtn} onClick={saveDetails} disabled={savingDetails}>
-            {savingDetails ? 'Saving…' : 'Save Details'}
-          </button>
+          <button style={saveBtn} onClick={saveDetails}>Save Details</button>
         </div>
       </div>
 
@@ -317,9 +299,7 @@ function ProductDetailPage() {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button style={secBtn} onClick={addItem}>+ Add item</button>
-            <button style={saveBtn} onClick={saveSidebar} disabled={savingSidebar}>
-              {savingSidebar ? 'Saving…' : 'Save sidebar'}
-            </button>
+            <button style={saveBtn} onClick={saveSidebar}>Save sidebar</button>
           </div>
         </div>
 
