@@ -4257,6 +4257,22 @@ function renderBlockFields(
         </div>
       );
 
+    case 'slick-careers-jobs':
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Eyebrow pill (optional)" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
+          <RichFieldGroup label="Section heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtext (optional)" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
+          <TextInput label="Empty-state text (no jobs)" value={f.emptyText as string ?? ''} onChange={(v) => set('emptyText', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Keka embed identifier" value={f.kekaIdentifier as string ?? ''} onChange={(v) => set('kekaIdentifier', v)} />
+          <TextInput label="Keka domain" value={f.kekaDomain as string ?? ''} onChange={(v) => set('kekaDomain', v)} />
+          <p style={{ color: '#94a3b8', fontSize: 12, lineHeight: 1.5 }}>
+            Job cards are pulled live from Keka using the embed identifier above (found in the Keka careers
+            embed-jobs script URL). Search, department and location filters are generated automatically.
+          </p>
+        </div>
+      );
     case 'slick-careers-hero':
     case 'slick-ab-hero-v2':
       return (

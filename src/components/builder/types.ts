@@ -147,6 +147,7 @@ export type TemplateBlockType =
   | 'slick-ab-hero'
   | 'slick-ab-hero-v2'
   | 'slick-careers-hero'
+  | 'slick-careers-jobs'
   | 'slick-help-hero'
   | 'slick-clients-hero'
   | 'slick-blogs-hero'
@@ -550,6 +551,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-ab-hero': 'About Us — Hero',
   'slick-ab-hero-v2': 'About Us — Hero V2',
   'slick-careers-hero': 'Careers — Hero',
+  'slick-careers-jobs': 'Careers — Open Positions',
   'slick-help-hero': 'Help Center — Hero',
   'slick-clients-hero': 'Clients — Hero',
   'slick-blogs-hero': 'Blogs — Hero',

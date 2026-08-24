@@ -7,7 +7,7 @@ import {
   ListOrdered, CreditCard, MessageSquareQuote, Users, TrendingUp,
   ArrowRightCircle, Zap, ShoppingCart, Puzzle, BookOpen, PanelBottom,
   List, Tag, MessageSquare, BarChart3, GitBranch, Download, Layers, Mic,
-  Languages, Code,
+  Languages, Code, Briefcase,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { TemplateBlockType, LayoutVariant } from "./types";
@@ -110,6 +110,7 @@ const GROUPS: Group[] = [
   ]},
   { name: "Careers", items: [
     { type: "slick-careers-hero",  label: "Careers — Hero",  Icon: Sparkles },
+    { type: "slick-careers-jobs",  label: "Careers — Open Positions (Keka)", Icon: Briefcase },
     { type: "slick-help-hero",     label: "Help Center — Hero", Icon: Sparkles },
     { type: "slick-careers-about",   label: "Careers — About",   Icon: FileText },
     { type: "slick-careers-culture", label: "Careers — Culture", Icon: Users   },
