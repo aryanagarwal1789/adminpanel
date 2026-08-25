@@ -177,7 +177,10 @@ export function PublishOtpModal({
   if (!state) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
+    // z-index must beat every "Add X" modal it can open on top of (those use
+    // inline zIndex: 1000, e.g. courses/products "Add" modals) — otherwise the
+    // OTP dialog renders visually behind the still-open modal that triggered it.
+    <div className="fixed inset-0 flex items-center justify-center" style={{ zIndex: 2000 }} role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/50" onClick={cancel} />
       <div className="relative w-full max-w-sm rounded-lg border border-slate-700 bg-slate-900 text-slate-100 shadow-2xl">
         <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
