@@ -185,6 +185,13 @@ export type TemplateBlockType =
   | 'slick-sc-hero-v2'
   | 'slick-sc-hero-v3'
   | 'slick-conclave-hero'
+  | 'slick-conclave-trailer'
+  | 'slick-conclave-guest-scroller'
+  | 'slick-conclave-themes'
+  | 'slick-conclave-awards'
+  | 'slick-conclave-reels'
+  | 'slick-conclave-leaders'
+  | 'slick-conclave-gallery'
   | 'slick-conclave-speakers'
   | 'slick-conclave-agenda'
   | 'slick-conclave-stats'
@@ -589,6 +596,13 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sc-hero-v2': 'SC — Hero V2 (Person + Floating Cards)',
   'slick-sc-hero-v3': 'SC — Hero V3 (Center Image)',
   'slick-conclave-hero': 'Conclave — Hero',
+  'slick-conclave-trailer': 'Conclave — Trailer Video',
+  'slick-conclave-guest-scroller': 'Conclave — Guest Scroller',
+  'slick-conclave-themes': 'Conclave — Key Themes',
+  'slick-conclave-awards': 'Conclave — Awards Grid',
+  'slick-conclave-reels': 'Conclave — Highlight Reels',
+  'slick-conclave-leaders': 'Conclave — CPG Leaders Carousel',
+  'slick-conclave-gallery': 'Conclave — Photo Gallery',
   'slick-conclave-speakers': 'Conclave — Speakers Grid',
   'slick-conclave-agenda': 'Conclave — Agenda',
   'slick-conclave-stats': 'Conclave — Stats',

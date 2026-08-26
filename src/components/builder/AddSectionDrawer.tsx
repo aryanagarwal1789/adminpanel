@@ -279,6 +279,13 @@ const GROUPS: Group[] = [
   ]},
   { name: "CXO Conclave", items: [
     { type: "slick-conclave-hero",     label: "Conclave — Hero",          Icon: Sparkles },
+    { type: "slick-conclave-trailer",  label: "Conclave — Trailer Video", Icon: MonitorPlay },
+    { type: "slick-conclave-guest-scroller", label: "Conclave — Guest Scroller", Icon: Grid2x2 },
+    { type: "slick-conclave-themes", label: "Conclave — Key Themes", Icon: Columns },
+    { type: "slick-conclave-awards", label: "Conclave — Awards Grid", Icon: Grid2x2 },
+    { type: "slick-conclave-reels", label: "Conclave — Highlight Reels", Icon: Grid2x2 },
+    { type: "slick-conclave-leaders", label: "Conclave — CPG Leaders Carousel", Icon: MessageSquareQuote },
+    { type: "slick-conclave-gallery", label: "Conclave — Photo Gallery", Icon: ImageIcon },
     { type: "slick-conclave-speakers", label: "Conclave — Speakers Grid", Icon: Grid2x2 },
     { type: "slick-conclave-agenda",   label: "Conclave — Agenda",        Icon: ListOrdered },
     { type: "slick-conclave-stats",    label: "Conclave — Stats",         Icon: TrendingUp },

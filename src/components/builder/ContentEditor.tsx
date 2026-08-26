@@ -6176,7 +6176,7 @@ function renderBlockFields(
       );
 
     case 'slick-sc-platform-grid': {
-      type PlatformItem = { titleBold: string; titleLight: string; icon: string; tags: string[]; href: string; iconImage?: string; iconBg?: string };
+      type PlatformItem = { titleBold: string; titleLight: string; icon: string; tags: string[]; href: string; iconImage?: string; iconBg?: string; comingSoon?: boolean };
       const PG_ICON_OPTS = [
         'buildings','plant','binoculars','chart-line-up','warehouse','barn','shopping-cart','truck',
         'scan','camera','device-mobile-camera','headset','chalkboard-teacher','brain','rocket-launch',
@@ -6215,6 +6215,10 @@ function renderBlockFields(
                 <TextInput label="Link URL" value={it.href} onChange={(v) => u({ ...it, href: v })} />
                 <ImageField label="Upload icon (overrides the built-in icon below when set)" {...imageI18nProps(it, "iconImage", (p) => u({ ...it, ...p }))} />
                 <ColorPicker label="Icon card background (blank = category tint)" value={it.iconBg ?? ''} onChange={(v) => u({ ...it, iconBg: v })} />
+                <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                  <input type="checkbox" checked={it.comingSoon ?? false} onChange={(e) => u({ ...it, comingSoon: e.target.checked })} />
+                  Show "Coming Soon" badge
+                </label>
                 <div className="text-xs text-slate-400">Built-in icon</div>
                 <div className="flex gap-1.5 flex-wrap">
                   {PG_ICON_OPTS.map(ico => (
@@ -6261,6 +6265,141 @@ function renderBlockFields(
             </div>
           ))}
           <button type="button" className="text-xs text-teal-400 hover:text-teal-300" onClick={() => set('photos', [...((f.photos as string[]) ?? []), ''])}>+ Add photo</button>
+        </div>
+      );
+    }
+
+    case 'slick-conclave-trailer':
+      return (
+        <div className="space-y-4">
+          <TextInput label="Video URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+        </div>
+      );
+
+    case 'slick-conclave-guest-scroller': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <p className="text-xs text-slate-400">Photos (scrolling strip — add as many as needed)</p>
+          {((f.photos as string[]) ?? []).map((src: string, i: number) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className="flex-1">
+                <ImageField label={`Photo ${i + 1}`} value={src} onChange={(v) => { const arr = [...((f.photos as string[]) ?? [])]; arr[i] = v; set('photos', arr); }} />
+              </div>
+              <button type="button" className="text-xs text-red-400 hover:text-red-300 px-2 py-1 mt-5" onClick={() => { const arr = [...((f.photos as string[]) ?? [])]; arr.splice(i, 1); set('photos', arr); }}>✕</button>
+            </div>
+          ))}
+          <button type="button" className="text-xs text-teal-400 hover:text-teal-300" onClick={() => set('photos', [...((f.photos as string[]) ?? []), ''])}>+ Add photo</button>
+        </div>
+      );
+    }
+
+    case 'slick-conclave-themes': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Section heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<{ eyebrow: string; heading: string; description: string; sideImage?: string; image?: string }>
+            label="Theme rows"
+            items={(f.items as { eyebrow: string; heading: string; description: string; sideImage?: string; image?: string }[]) ?? []}
+            onChange={(v) => set('items', v)}
+            newItem={() => ({ eyebrow: 'Session type', heading: 'New theme heading', description: 'Description', sideImage: '', image: '' })}
+            itemPreview={(it) => it.heading || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Eyebrow" value={it.eyebrow ?? ''} onChange={(v) => u({ ...it, eyebrow: v })} />
+                <TextInput label="Heading" value={it.heading ?? ''} onChange={(v) => u({ ...it, heading: v })} />
+                <Textarea label="Description" value={it.description ?? ''} onChange={(v) => u({ ...it, description: v })} />
+                <ImageField label="Small side image (optional)" value={it.sideImage ?? ''} onChange={(v) => u({ ...it, sideImage: v })} />
+                <ImageField label="Main image" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-conclave-awards': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Section heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<{ image: string; name: string; description: string }>
+            label="Awards"
+            items={(f.items as { image: string; name: string; description: string }[]) ?? []}
+            onChange={(v) => set('items', v)}
+            newItem={() => ({ image: '', name: 'New award', description: 'Description' })}
+            itemPreview={(it) => it.name || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <ImageField label="Thumbnail" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
+                <TextInput label="Name" value={it.name ?? ''} onChange={(v) => u({ ...it, name: v })} />
+                <Textarea label="Description" value={it.description ?? ''} onChange={(v) => u({ ...it, description: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-conclave-reels': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Section heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <p className="text-xs text-slate-400">Reel thumbnails (portrait — add as many as needed)</p>
+          {((f.images as string[]) ?? []).map((src: string, i: number) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className="flex-1">
+                <ImageField label={`Image ${i + 1}`} value={src} onChange={(v) => { const arr = [...((f.images as string[]) ?? [])]; arr[i] = v; set('images', arr); }} />
+              </div>
+              <button type="button" className="text-xs text-red-400 hover:text-red-300 px-2 py-1 mt-5" onClick={() => { const arr = [...((f.images as string[]) ?? [])]; arr.splice(i, 1); set('images', arr); }}>✕</button>
+            </div>
+          ))}
+          <button type="button" className="text-xs text-teal-400 hover:text-teal-300" onClick={() => set('images', [...((f.images as string[]) ?? []), ''])}>+ Add image</button>
+        </div>
+      );
+    }
+
+    case 'slick-conclave-leaders': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Section heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<{ photo: string; name: string; title: string }>
+            label="Leaders"
+            items={(f.items as { photo: string; name: string; title: string }[]) ?? []}
+            onChange={(v) => set('items', v)}
+            newItem={() => ({ photo: '', name: 'New leader', title: 'Title, Company' })}
+            itemPreview={(it) => it.name || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <ImageField label="Photo" value={it.photo ?? ''} onChange={(v) => u({ ...it, photo: v })} />
+                <TextInput label="Name" value={it.name ?? ''} onChange={(v) => u({ ...it, name: v })} />
+                <TextInput label="Title / Company" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-conclave-gallery': {
+      return (
+        <div className="space-y-4">
+          <TextInput label="Section heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <TextInput label="'View all' button text" value={f.viewAllText as string ?? ''} onChange={(v) => set('viewAllText', v)} />
+          <TextInput label="'View all' button URL" value={f.viewAllUrl as string ?? ''} onChange={(v) => set('viewAllUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-400">Gallery images (add as many as needed)</p>
+          {((f.images as string[]) ?? []).map((src: string, i: number) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className="flex-1">
+                <ImageField label={`Image ${i + 1}`} value={src} onChange={(v) => { const arr = [...((f.images as string[]) ?? [])]; arr[i] = v; set('images', arr); }} />
+              </div>
+              <button type="button" className="text-xs text-red-400 hover:text-red-300 px-2 py-1 mt-5" onClick={() => { const arr = [...((f.images as string[]) ?? [])]; arr.splice(i, 1); set('images', arr); }}>✕</button>
+            </div>
+          ))}
+          <button type="button" className="text-xs text-teal-400 hover:text-teal-300" onClick={() => set('images', [...((f.images as string[]) ?? []), ''])}>+ Add image</button>
         </div>
       );
     }
