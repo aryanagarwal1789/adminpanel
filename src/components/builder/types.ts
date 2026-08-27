@@ -170,6 +170,7 @@ export type TemplateBlockType =
   | 'slick-ab-awards'
   | 'slick-ab-founders'
   | 'slick-ab-founders-v2'
+  | 'slick-ab-founders-voice'
   | 'slick-ab-investors'
   | 'slick-ab-investors-v2'
   | 'slick-ab-team-section'
@@ -581,6 +582,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-ab-awards': 'About Us — Awards',
   'slick-ab-founders': 'About Us — Founders',
   'slick-ab-founders-v2': 'About Us — Founders V2 (Photo)',
+  'slick-ab-founders-voice': "About Us — Founder's Voice (Videos)",
   'slick-ab-investors': 'About Us — Investors',
   'slick-ab-investors-v2': 'About Us — Investors V2 (Carousel)',
   'slick-ab-team-section': 'About Us — The Team (Tech + Biz)',

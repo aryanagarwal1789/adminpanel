@@ -2459,6 +2459,21 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
     heading: 'Founded by sales and tech experts.',
     sub: 'Every co-founder has lived the problem they are solving. Decades in CPG sales and enterprise technology, now building the answer together.',
   },
+  'slick-ab-founders-voice': {
+    pill: "Founder's Voice",
+    title: 'Straight from the ',
+    titleGrad: 'people who built it',
+    lead: "Two conversations on why we built an AI-native platform for CPG sales, and a personal note from each co-founder on what's next.",
+    landscape: [
+      { videoUrl: '', thumbnail: '' },
+      { videoUrl: '', thumbnail: '' },
+    ],
+    portrait: [
+      { videoUrl: '', thumbnail: '' },
+      { videoUrl: '', thumbnail: '' },
+      { videoUrl: '', thumbnail: '' },
+    ],
+  },
   'slick-ab-investors': {
     eyebrow: 'Investors & Advisors',
     heading: 'Backed by the best.',
