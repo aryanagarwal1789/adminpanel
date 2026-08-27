@@ -50,9 +50,17 @@ export interface BlogPostSeo {
   metaTitle?: string;
   metaDescription?: string;
   keywords?: string[];
+  focusKeyphrase?: string;
+  ogTitle?: string;
+  ogDescription?: string;
   ogImage?: string;
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImage?: string;
   canonicalUrl?: string;
   robots?: string;
+  /** Raw JSON-LD (e.g. a custom Article/FAQPage schema) stored as a string and injected verbatim. */
+  jsonLd?: string;
 }
 
 interface Props {

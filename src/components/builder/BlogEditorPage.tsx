@@ -516,6 +516,44 @@ const CSS = `
 .bstudio .bs-checks .r.ok .ic{color:var(--teal)}
 .bstudio .bs-checks .r small{font-size:11px;color:var(--faint)}
 
+/* ── top-level Editor / SEO tabs ── */
+.bstudio .bs-toptabs{display:flex;gap:3px;background:var(--surface-2);border:1px solid var(--hair);border-radius:9px;padding:3px}
+.bstudio .bs-toptabs button{display:flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.bstudio .bs-toptabs button.on{background:var(--surface-3);color:var(--teal)}
+.bstudio .bs-toptabs .bs-seobadge{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:20px;background:var(--surface);color:var(--muted)}
+.bstudio .bs-toptabs button.on .bs-seobadge{color:var(--teal);background:rgba(47,216,196,.14)}
+
+/* ── SEO tab (full-width) ── */
+.bstudio .bs-seoview{flex:1;overflow-y:auto;padding:32px clamp(20px,4vw,64px) 80px}
+.bstudio .bs-seoid{display:flex;align-items:center;gap:14px;max-width:1180px;margin:0 auto 20px}
+.bstudio .bs-seoid img,.bstudio .bs-seoid .ph{width:52px;height:52px;flex:0 0 52px;border-radius:10px;object-fit:cover;background:var(--surface-2);border:1px solid var(--hair);display:grid;place-items:center;color:var(--faint)}
+.bstudio .bs-seoid .t{min-width:0}
+.bstudio .bs-seoid .t b{display:block;font-size:16px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bstudio .bs-seoid .t span{font-size:12px;color:var(--faint)}
+.bstudio .bs-seogrid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:400px 1fr;gap:32px;align-items:start}
+.bstudio .bs-field textarea.bs-jsonld{width:100%;font-family:ui-monospace,monospace;font-size:12px;color:var(--ink);background:var(--surface-2);border:1px solid var(--hair);border-radius:9px;padding:10px 12px;outline:none;resize:vertical;min-height:560px;line-height:1.5}
+.bstudio .bs-jsonld:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.bstudio .bs-jsonld.err{border-color:var(--danger)}
+.bstudio .bs-jsonld-err{font-size:11.5px;color:var(--danger);margin-top:6px}
+.bstudio .bs-seocard{background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:20px 22px;margin-bottom:20px}
+.bstudio .bs-seocard h4{margin:0 0 4px;font-size:14px;font-weight:600;color:var(--ink)}
+.bstudio .bs-seocard .sub{font-size:12px;color:var(--faint);margin:0 0 16px}
+.bstudio .bs-scoreblock{display:flex;align-items:center;gap:16px;background:var(--surface-2);border:1px solid var(--hair);border-radius:14px;padding:18px;margin-bottom:20px}
+.bstudio .bs-scoreblock .lbl{font-size:12.5px;color:var(--muted)}
+.bstudio .bs-scoreblock .lbl b{display:block;color:var(--ink);font-size:16px;font-weight:600;margin-bottom:2px}
+.bstudio .bs-scoreblock .lbl small{display:block;font-size:11px;color:var(--faint);margin-top:2px}
+.bstudio .bs-checkgrp{margin-bottom:6px}
+.bstudio .bs-checkgrp h5{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
+.bstudio .bs-checkrow{display:flex;gap:9px;align-items:flex-start;padding:6px 0;font-size:12.5px;color:var(--ink-2)}
+.bstudio .bs-checkrow .dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:0 0 8px}
+.bstudio .bs-checkrow.good .dot{background:var(--teal)}
+.bstudio .bs-checkrow.ok .dot{background:#FBBF24}
+.bstudio .bs-checkrow.bad .dot{background:var(--danger)}
+.bstudio .bs-checkrow small{display:block;font-size:11px;color:var(--faint);margin-top:1px}
+.bstudio .bs-lenbar{height:3px;border-radius:3px;background:var(--hair);margin-top:6px;overflow:hidden}
+.bstudio .bs-lenbar i{display:block;height:100%;border-radius:3px;transition:width .15s}
+@media(max-width:1020px){.bstudio .bs-seogrid{grid-template-columns:1fr}}
+
 /* floating widgets */
 .bstudio .bs-fmt{position:fixed;z-index:80;display:none;align-items:center;gap:2px;background:var(--surface-3);border:1px solid var(--hair);border-radius:11px;padding:5px;box-shadow:var(--sh-lg);transform:translate(-50%,-100%)}
 .bstudio .bs-fmt.show{display:flex}
@@ -685,6 +723,13 @@ interface SeoCheck {
   d: string;
 }
 
+type SeoStatus = "good" | "ok" | "bad";
+interface SeoStatusCheck {
+  status: SeoStatus;
+  title: string;
+  detail: string;
+}
+
 // ═══════════════════════════════════════════════════════════════════
 export function BlogEditorPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -699,6 +744,7 @@ export function BlogEditorPage() {
   const [leftTab, setLeftTab] = useState<"posts" | "outline">("posts");
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
+  const [activeView, setActiveView] = useState<"editor" | "seo">("editor");
 
   const isNew = !selected;
   const upload = useUpload();
@@ -1540,14 +1586,7 @@ export function BlogEditorPage() {
   // ── SEO checks ──
   const checks: SeoCheck[] = useMemo(() => {
     const meta = form.excerpt.trim();
-    const words = countWords(blocks);
     const hs = blocks.filter((b) => b.type === "heading2" || b.type === "heading3").length;
-    const hasImg = blocks.some(
-      (b) =>
-        (b.type === "image" && b.url) ||
-        (b.type === "image-grid" && (b.images ?? []).some((i) => i.url)),
-    );
-    const hasLink = blocks.some((b) => /\]\([^)]+\)/.test(b.text ?? ""));
     return [
       {
         ok: form.title.trim().length >= 15 && form.title.trim().length <= 70,
@@ -1560,10 +1599,7 @@ export function BlogEditorPage() {
         d: "Summarises the post for Google",
       },
       { ok: hs >= 2, t: "Has 2+ sections", d: "Structure powers the outline & TOC" },
-      { ok: words >= 300, t: "300+ words of body copy", d: `${words} words so far` },
       { ok: !!form.featuredImage, t: "Hero image added", d: "Drives clicks on social" },
-      { ok: hasImg, t: "At least one in-body image", d: "Breaks up long text" },
-      { ok: hasLink, t: "Contains a link", d: "Internal or external reference" },
       {
         ok:
           tagInput
@@ -1575,16 +1611,102 @@ export function BlogEditorPage() {
       },
     ];
   }, [form, blocks, tagInput]);
-  const seoScore = Math.round((checks.filter((c) => c.ok).length / checks.length) * 100);
-  const seoLabel =
-    seoScore >= 85
-      ? "Ready to publish"
-      : seoScore >= 55
-        ? "Looking good"
-        : seoScore >= 25
-          ? "Getting there"
-          : "Getting started";
   const circ = 97.4;
+
+  const jsonLdValid = useMemo(() => {
+    const raw = (form.seo?.jsonLd ?? "").trim();
+    if (!raw) return true;
+    try {
+      JSON.parse(raw);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [form.seo?.jsonLd]);
+
+  // ── Meta & keyphrase checks (mirrors the scoring in /admin/seo) ──
+  const metaChecks: SeoStatusCheck[] = useMemo(() => {
+    const kp = (form.seo?.focusKeyphrase ?? "").toLowerCase().trim();
+    const title = (form.seo?.metaTitle || form.title).trim();
+    const desc = (form.seo?.metaDescription || form.excerpt).trim();
+    const tl = title.length;
+    const dl = desc.length;
+    const kpPos = kp ? title.toLowerCase().indexOf(kp) : -1;
+    const frontloaded = kpPos !== -1 && kpPos <= Math.ceil(tl * 0.4);
+    const robots = form.seo?.robots ?? "";
+    const indexable = !robots || robots.startsWith("index");
+
+    return [
+      {
+        status: kp ? "good" : "ok",
+        title: "Focus keyphrase set",
+        detail: kp ? `Targeting "${kp}"` : "Optional, but sharpens the other checks",
+      },
+      {
+        status: !kp ? "ok" : title.toLowerCase().includes(kp) ? "good" : "bad",
+        title: "Keyphrase in search title",
+        detail: !kp ? "Set a keyphrase to check" : title.toLowerCase().includes(kp) ? "Found in title" : "Not found in title",
+      },
+      {
+        status: !kp || !title ? "ok" : frontloaded ? "good" : "ok",
+        title: "Keyphrase near the start of the title",
+        detail: "Search engines weight the first ~40% of a title more heavily",
+      },
+      {
+        status: !kp ? "ok" : desc.toLowerCase().includes(kp) ? "good" : "bad",
+        title: "Keyphrase in meta description",
+        detail: !kp ? "Set a keyphrase to check" : desc.toLowerCase().includes(kp) ? "Found in description" : "Not found in description",
+      },
+      {
+        status: tl === 0 ? "bad" : tl >= 30 && tl <= 60 ? "good" : "ok",
+        title: "Search title length (30–60 ideal)",
+        detail: `${tl} character${tl === 1 ? "" : "s"}`,
+      },
+      {
+        status: dl === 0 ? "bad" : dl >= 140 && dl <= 160 ? "good" : dl >= 80 ? "ok" : "bad",
+        title: "Meta description length (140–160 ideal)",
+        detail: `${dl} character${dl === 1 ? "" : "s"}`,
+      },
+      {
+        status: indexable ? "good" : "bad",
+        title: "Indexable",
+        detail: indexable ? "Index & follow" : "Blocked from search indexing",
+      },
+      {
+        status: form.seo?.ogImage || form.featuredImage ? "good" : "ok",
+        title: "Social share image set",
+        detail: form.seo?.ogImage ? "Custom OG image set" : form.featuredImage ? "Falls back to the hero image" : "No image to share on social",
+      },
+      {
+        status: form.seo?.canonicalUrl ? "good" : "ok",
+        title: "Canonical URL set",
+        detail: form.seo?.canonicalUrl ? form.seo.canonicalUrl : "Optional — set if this content is duplicated elsewhere",
+      },
+      {
+        status: !form.seo?.jsonLd?.trim() ? "ok" : jsonLdValid ? "good" : "bad",
+        title: "Structured data (JSON-LD)",
+        detail: !form.seo?.jsonLd?.trim()
+          ? "Optional — none set"
+          : jsonLdValid
+            ? "Valid JSON-LD set"
+            : "Set but not valid JSON",
+      },
+    ];
+  }, [form, jsonLdValid]);
+
+  const contentStatusChecks: SeoStatusCheck[] = useMemo(
+    () => checks.map((c) => ({ status: c.ok ? "good" : "bad", title: c.t, detail: c.d })),
+    [checks],
+  );
+
+  const allSeoChecks = [...metaChecks, ...contentStatusChecks];
+  const seoGood = allSeoChecks.filter((c) => c.status === "good").length;
+  const seoBad = allSeoChecks.filter((c) => c.status === "bad").length;
+  const overallSeoPct = Math.round((seoGood / allSeoChecks.length) * 100);
+  const overallSeoStatus: SeoStatus =
+    seoBad === 0 && overallSeoPct >= 70 ? "good" : seoBad <= 2 ? "ok" : "bad";
+  const overallSeoLabel =
+    overallSeoStatus === "good" ? "Good" : overallSeoStatus === "ok" ? "OK" : "Needs improvement";
 
   const words = countWords(blocks);
   const readMin = Math.max(1, Math.ceil(words / 220));
@@ -1612,6 +1734,15 @@ export function BlogEditorPage() {
         </div>
         <div className="bs-vr" />
         <div className="bs-mini">{form.title || "Untitled"}</div>
+        <div className="bs-vr" />
+        <div className="bs-toptabs">
+          <button className={activeView === "editor" ? "on" : ""} onClick={() => setActiveView("editor")}>
+            Editor
+          </button>
+          <button className={activeView === "seo" ? "on" : ""} onClick={() => setActiveView("seo")}>
+            SEO <span className="bs-seobadge">{overallSeoPct}</span>
+          </button>
+        </div>
         <div className={`bs-pill${dirty ? " bs-dirty" : ""}`}>
           <span className="bs-dot" />
           <span>{dirty ? "Unsaved changes" : "All changes saved"}</span>
@@ -1678,6 +1809,7 @@ export function BlogEditorPage() {
         )}
       </header>
 
+      {activeView === "editor" && (
       <div className="bs-body">
         {/* ── Left rail ── */}
         <aside className={`bs-left${leftOpen ? "" : " bs-collapsed"}`}>
@@ -1863,56 +1995,6 @@ export function BlogEditorPage() {
             </button>
           </div>
           <div className="bs-rbody">
-            <div className="bs-seo">
-              <svg width="46" height="46" viewBox="0 0 36 36">
-                <path
-                  d="M18 2.5a15.5 15.5 0 1 1 0 31 15.5 15.5 0 0 1 0-31"
-                  fill="none"
-                  stroke="#242C3B"
-                  strokeWidth="3.5"
-                />
-                <path
-                  d="M18 2.5a15.5 15.5 0 1 1 0 31 15.5 15.5 0 0 1 0-31"
-                  fill="none"
-                  stroke="url(#bsg)"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                  strokeDasharray={circ}
-                  strokeDashoffset={circ - (circ * seoScore) / 100}
-                />
-                <defs>
-                  <linearGradient id="bsg" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stopColor="#5B8BFF" />
-                    <stop offset="1" stopColor="#2FD8C4" />
-                  </linearGradient>
-                </defs>
-                <text
-                  x="18"
-                  y="21.5"
-                  textAnchor="middle"
-                  fontSize="11"
-                  fontWeight="700"
-                  fill="#E9ECF4"
-                >
-                  {seoScore}
-                </text>
-              </svg>
-              <div className="lbl">
-                <b>{seoLabel}</b>Readiness for search &amp; readers
-              </div>
-            </div>
-            <div className="bs-checks">
-              {checks.map((c, i) => (
-                <div key={i} className={`r ${c.ok ? "ok" : "no"}`}>
-                  <span className="ic">{c.ok ? Ic.check : Ic.circle}</span>
-                  <div>
-                    <div>{c.t}</div>
-                    <small>{c.d}</small>
-                  </div>
-                </div>
-              ))}
-            </div>
-
             <div className="bs-field">
               <label>
                 Hero image <span className="bs-hint">upload or URL</span>
@@ -2021,106 +2103,298 @@ export function BlogEditorPage() {
               />
             </div>
 
-            {/* ── SEO overrides (optional; blank fields fall back to the post) ── */}
-            <div
-              style={{
-                borderTop: "1px solid var(--hair)",
-                margin: "14px 0 4px",
-                paddingTop: 12,
-                fontSize: 12,
-                fontWeight: 700,
-                letterSpacing: ".04em",
-                textTransform: "uppercase",
-                color: "var(--muted)",
-              }}
-            >
-              SEO
-            </div>
-            <div className="bs-field">
-              <label>
-                Search title <span className="bs-hint">defaults to the post title</span>
-              </label>
-              <input
-                value={form.seo?.metaTitle ?? ""}
-                onChange={(e) => setSeo("metaTitle", e.target.value)}
-                placeholder={form.title || "Page title for search engines"}
-              />
-            </div>
-            <div className="bs-field">
-              <label>
-                Meta description <span className="bs-hint">defaults to the excerpt</span>
-              </label>
-              <textarea
-                value={form.seo?.metaDescription ?? ""}
-                onChange={(e) => setSeo("metaDescription", e.target.value)}
-                placeholder="Override the excerpt for search results (optional)."
-              />
-            </div>
-            <div className="bs-field">
-              <label>
-                Focus keywords <span className="bs-hint">comma-separated</span>
-              </label>
-              <input
-                value={(form.seo?.keywords ?? []).join(", ")}
-                onChange={(e) =>
-                  setSeo(
-                    "keywords",
-                    e.target.value
-                      .split(",")
-                      .map((k) => k.trim())
-                      .filter(Boolean),
-                  )
-                }
-                placeholder="AI SFA, CPG sales, route to market"
-              />
-            </div>
-            <div className="bs-field">
-              <label>
-                Social image URL <span className="bs-hint">defaults to the cover image</span>
-              </label>
-              <input
-                value={form.seo?.ogImage ?? ""}
-                onChange={(e) => setSeo("ogImage", e.target.value)}
-                placeholder="https://…/og-image.jpg"
-              />
-            </div>
-            <div className="bs-field">
-              <label>
-                Canonical URL <span className="bs-hint">optional</span>
-              </label>
-              <input
-                value={form.seo?.canonicalUrl ?? ""}
-                onChange={(e) => setSeo("canonicalUrl", e.target.value)}
-                placeholder="https://salescode.ai/resources/blog/…"
-              />
-            </div>
-            <div className="bs-field">
-              <label>Search indexing</label>
-              <select
-                value={form.seo?.robots ?? ""}
-                onChange={(e) => setSeo("robots", e.target.value)}
+            <p className="bs-hint" style={{ display: "block", marginTop: 4 }}>
+              Search title, meta description, social cards and other SEO fields moved to the{" "}
+              <button
+                type="button"
+                onClick={() => setActiveView("seo")}
+                style={{ color: "var(--teal)", textDecoration: "underline" }}
               >
-                <option value="">Index &amp; follow (default)</option>
-                <option value="index, follow">Index &amp; follow</option>
-                <option value="noindex, follow">No index, follow links</option>
-                <option value="noindex, nofollow">No index, no follow</option>
-              </select>
-            </div>
-
-            {!isNew && form.slug && (
-              <a
-                className="bs-tbtn bs-ghost"
-                style={{ marginTop: 6 }}
-                href={`${RENDERER}/blog/${form.slug}?preview=1`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {Ic.ext}Open live preview
-              </a>
-            )}
+                SEO tab
+              </button>
+              .
+            </p>
           </div>
         </aside>
       </div>
+      )}
+
+      {activeView === "seo" && (
+        <div className="bs-seoview">
+          <div className="bs-seoid">
+            {form.featuredImage ? (
+              <img src={form.featuredImage} alt="" />
+            ) : (
+              <span className="ph">{Ic.outline}</span>
+            )}
+            <div className="t">
+              <b>{form.title || "Untitled post"}</b>
+              <span>{form.status === "published" ? "Published" : "Draft"} · /blog/{form.slug || "…"}</span>
+            </div>
+          </div>
+          <div className="bs-seogrid">
+            <div>
+              <div className="bs-scoreblock">
+                <svg width="64" height="64" viewBox="0 0 36 36">
+                  <path
+                    d="M18 2.5a15.5 15.5 0 1 1 0 31 15.5 15.5 0 0 1 0-31"
+                    fill="none"
+                    stroke="#242C3B"
+                    strokeWidth="3.5"
+                  />
+                  <path
+                    d="M18 2.5a15.5 15.5 0 1 1 0 31 15.5 15.5 0 0 1 0-31"
+                    fill="none"
+                    stroke="url(#bsg2)"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeDasharray={circ}
+                    strokeDashoffset={circ - (circ * overallSeoPct) / 100}
+                  />
+                  <defs>
+                    <linearGradient id="bsg2" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stopColor="#5B8BFF" />
+                      <stop offset="1" stopColor="#2FD8C4" />
+                    </linearGradient>
+                  </defs>
+                  <text x="18" y="21.5" textAnchor="middle" fontSize="11" fontWeight="700" fill="#E9ECF4">
+                    {overallSeoPct}
+                  </text>
+                </svg>
+                <div className="lbl">
+                  <b>{overallSeoLabel}</b>
+                  {seoGood}/{allSeoChecks.length} checks passing
+                  <small>Combines search metadata and content-quality signals.</small>
+                </div>
+              </div>
+
+              <div className="bs-seocard">
+                <h4>Meta &amp; keyphrase</h4>
+                <p className="sub">How this post's search title, description and keyphrase are set up.</p>
+                <div className="bs-checkgrp">
+                  {metaChecks.map((c, i) => (
+                    <div key={i} className={`bs-checkrow ${c.status}`}>
+                      <span className="dot" />
+                      <div>
+                        <div>{c.title}</div>
+                        <small>{c.detail}</small>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bs-seocard">
+                <h4>Content readiness</h4>
+                <p className="sub">Structure and depth signals search engines and readers both reward.</p>
+                <div className="bs-checkgrp">
+                  {contentStatusChecks.map((c, i) => (
+                    <div key={i} className={`bs-checkrow ${c.status}`}>
+                      <span className="dot" />
+                      <div>
+                        <div>{c.title}</div>
+                        <small>{c.detail}</small>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="bs-seocard">
+                <h4>Search &amp; social</h4>
+                <p className="sub">Blank fields fall back to the post's title, excerpt and hero image.</p>
+
+                <div className="bs-field">
+                  <label>Focus keyphrase</label>
+                  <input
+                    value={form.seo?.focusKeyphrase ?? ""}
+                    onChange={(e) => setSeo("focusKeyphrase", e.target.value)}
+                    placeholder="e.g. AI-native SFA"
+                  />
+                </div>
+
+                <div className="bs-field">
+                  <label>
+                    Search title <span className="bs-hint">defaults to the post title</span>
+                  </label>
+                  <input
+                    value={form.seo?.metaTitle ?? ""}
+                    onChange={(e) => setSeo("metaTitle", e.target.value)}
+                    placeholder={form.title || "Page title for search engines"}
+                  />
+                  <div className="bs-lenbar">
+                    <i
+                      style={{
+                        width: `${Math.min(100, ((form.seo?.metaTitle || form.title).length / 60) * 100)}%`,
+                        background:
+                          (form.seo?.metaTitle || form.title).length >= 30 &&
+                          (form.seo?.metaTitle || form.title).length <= 60
+                            ? "var(--teal)"
+                            : "#FBBF24",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="bs-field">
+                  <label>
+                    Meta description <span className="bs-hint">defaults to the excerpt</span>
+                  </label>
+                  <textarea
+                    value={form.seo?.metaDescription ?? ""}
+                    onChange={(e) => setSeo("metaDescription", e.target.value)}
+                    placeholder="Override the excerpt for search results (optional)."
+                  />
+                  <div className="bs-lenbar">
+                    <i
+                      style={{
+                        width: `${Math.min(100, ((form.seo?.metaDescription || form.excerpt).length / 160) * 100)}%`,
+                        background:
+                          (form.seo?.metaDescription || form.excerpt).length >= 140 &&
+                          (form.seo?.metaDescription || form.excerpt).length <= 160
+                            ? "var(--teal)"
+                            : "#FBBF24",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="bs-field">
+                  <label>
+                    Focus keywords <span className="bs-hint">comma-separated</span>
+                  </label>
+                  <input
+                    value={(form.seo?.keywords ?? []).join(", ")}
+                    onChange={(e) =>
+                      setSeo(
+                        "keywords",
+                        e.target.value
+                          .split(",")
+                          .map((k) => k.trim())
+                          .filter(Boolean),
+                      )
+                    }
+                    placeholder="AI SFA, CPG sales, route to market"
+                  />
+                </div>
+
+                <div className="bs-field">
+                  <label>Search indexing</label>
+                  <select value={form.seo?.robots ?? ""} onChange={(e) => setSeo("robots", e.target.value)}>
+                    <option value="">Index &amp; follow (default)</option>
+                    <option value="index, follow">Index &amp; follow</option>
+                    <option value="noindex, follow">No index, follow links</option>
+                    <option value="noindex, nofollow">No index, no follow</option>
+                  </select>
+                </div>
+
+                <div className="bs-field">
+                  <label>
+                    Canonical URL <span className="bs-hint">optional</span>
+                  </label>
+                  <input
+                    value={form.seo?.canonicalUrl ?? ""}
+                    onChange={(e) => setSeo("canonicalUrl", e.target.value)}
+                    placeholder="https://salescode.ai/resources/blog/…"
+                  />
+                </div>
+              </div>
+
+              <div className="bs-seocard">
+                <h4>Open Graph (Facebook / LinkedIn)</h4>
+                <p className="sub">Blank fields fall back to the search title / description / hero image above.</p>
+                <div className="bs-field">
+                  <label>OG title</label>
+                  <input
+                    value={form.seo?.ogTitle ?? ""}
+                    onChange={(e) => setSeo("ogTitle", e.target.value)}
+                    placeholder={form.seo?.metaTitle || form.title}
+                  />
+                </div>
+                <div className="bs-field">
+                  <label>OG description</label>
+                  <textarea
+                    value={form.seo?.ogDescription ?? ""}
+                    onChange={(e) => setSeo("ogDescription", e.target.value)}
+                    placeholder={form.seo?.metaDescription || form.excerpt}
+                  />
+                </div>
+                <div className="bs-field">
+                  <label>OG image URL</label>
+                  <input
+                    value={form.seo?.ogImage ?? ""}
+                    onChange={(e) => setSeo("ogImage", e.target.value)}
+                    placeholder={form.featuredImage || "https://…/og-image.jpg"}
+                  />
+                </div>
+              </div>
+
+              <div className="bs-seocard">
+                <h4>Twitter / X card</h4>
+                <p className="sub">Blank fields fall back to the Open Graph fields above.</p>
+                <div className="bs-field">
+                  <label>Twitter title</label>
+                  <input
+                    value={form.seo?.twitterTitle ?? ""}
+                    onChange={(e) => setSeo("twitterTitle", e.target.value)}
+                    placeholder={form.seo?.ogTitle || form.seo?.metaTitle || form.title}
+                  />
+                </div>
+                <div className="bs-field">
+                  <label>Twitter description</label>
+                  <textarea
+                    value={form.seo?.twitterDescription ?? ""}
+                    onChange={(e) => setSeo("twitterDescription", e.target.value)}
+                    placeholder={form.seo?.ogDescription || form.seo?.metaDescription || form.excerpt}
+                  />
+                </div>
+                <div className="bs-field">
+                  <label>Twitter image URL</label>
+                  <input
+                    value={form.seo?.twitterImage ?? ""}
+                    onChange={(e) => setSeo("twitterImage", e.target.value)}
+                    placeholder={form.seo?.ogImage || form.featuredImage || "https://…/twitter-card.jpg"}
+                  />
+                </div>
+              </div>
+
+              <div className="bs-seocard">
+                <h4>Structured data (JSON-LD)</h4>
+                <p className="sub">
+                  Optional. Paste a custom schema (e.g. <code>Article</code> or <code>FAQPage</code>) to
+                  inject verbatim in a <code>&lt;script type="application/ld+json"&gt;</code> tag. Leave
+                  blank to skip.
+                </p>
+                <div className="bs-field">
+                  <textarea
+                    className={`bs-jsonld${form.seo?.jsonLd?.trim() && !jsonLdValid ? " err" : ""}`}
+                    value={form.seo?.jsonLd ?? ""}
+                    onChange={(e) => setSeo("jsonLd", e.target.value)}
+                    placeholder={'{\n  "@context": "https://schema.org",\n  "@type": "Article",\n  "headline": "…"\n}'}
+                    spellCheck={false}
+                  />
+                  {form.seo?.jsonLd?.trim() && !jsonLdValid && (
+                    <div className="bs-jsonld-err">Not valid JSON — check for a trailing comma or missing quote.</div>
+                  )}
+                </div>
+              </div>
+
+              {!isNew && form.slug && (
+                <a
+                  className="bs-tbtn bs-ghost"
+                  href={`${RENDERER}/blog/${form.slug}?preview=1`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {Ic.ext}Open live preview
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Floating: slash menu ── */}
       {slash && (

@@ -54,6 +54,9 @@ interface SeoData {
     softwareApplication: boolean; faqPage: boolean;
     organization: boolean; speakable: boolean; breadcrumbList: boolean;
   };
+  // Raw JSON-LD (object or array), injected verbatim alongside the schemas
+  // above — for schema types (Review, custom Article, etc.) with no dedicated UI.
+  jsonLd: string;
   // Stamped server-side on every save — not client-editable, just read back.
   lastUpdatedBy?: string | null;
   lastUpdatedAt?: string | null;
@@ -66,7 +69,7 @@ const BLANK_SEO: SeoData = {
   metaTitle: '', metaDescription: '', keywords: [],
   ogTitle: '', ogDescription: '', ogImage: '',
   twitterTitle: '', twitterDescription: '', twitterImage: '',
-  canonicalUrl: '', focusKeyphrase: '', robots: 'index, follow',
+  canonicalUrl: '', focusKeyphrase: '', robots: 'index, follow', jsonLd: '',
   schemas: {
     softwareApplication: { name: '', description: '', url: '', price: '', priceCurrency: '', priceDescription: '', ratingValue: '', reviewCount: '', publisherName: '', publisherUrl: '' },
     faqPage:        { items: [] },
@@ -179,6 +182,11 @@ function computeChecks(seo: SeoData): SeoCheck[] {
         ? 'Structured data schema is enabled — great for rich results.'
         : 'No structured data schema enabled. Schema markup improves search visibility.',
     },
+    ...(seo.jsonLd.trim() ? [{
+      id: 'custom_jsonld',
+      status: (() => { try { JSON.parse(seo.jsonLd); return 'good' as CheckStatus; } catch { return 'bad' as CheckStatus; } })(),
+      message: (() => { try { JSON.parse(seo.jsonLd); return 'Custom JSON-LD is valid and will be injected.'; } catch { return 'Custom JSON-LD is not valid JSON — it will be skipped.'; } })(),
+    }] : []),
   ];
 }
 
@@ -1042,6 +1050,12 @@ function SeoPage() {
     } finally { setSaving(false); }
   };
 
+  const jsonLdValid = (() => {
+    const raw = seo.jsonLd.trim();
+    if (!raw) return true;
+    try { JSON.parse(raw); return true; } catch { return false; }
+  })();
+
   const checks        = isPage ? computeChecks(seo) : [];
   const contentChecks = isPage && pageContent ? computeContentChecks(pageContent, seo.focusKeyphrase.toLowerCase().trim()) : [];
   const sa     = seo.schemas.softwareApplication;
@@ -1203,6 +1217,25 @@ function SeoPage() {
 
               <Section title="Structured Data / Schema Markup" defaultOpen={false}>
                 <p style={{ color: C.subtle, fontSize: 12, margin: '0 0 14px' }}>Schema markup helps search engines unlock rich results in Google.</p>
+
+                <div style={{ border: `1px solid ${C.border}`, borderRadius: 6, marginBottom: 12, padding: '12px 14px' }}>
+                  <div style={{ color: C.text, fontSize: 13, fontWeight: 600, marginBottom: 6 }}>Custom JSON-LD</div>
+                  <p style={{ color: C.subtle, fontSize: 12, margin: '0 0 10px', lineHeight: 1.5 }}>
+                    Paste a raw schema (e.g. <code style={{ color: C.blue }}>Review</code>, <code style={{ color: C.blue }}>BreadcrumbList</code>, or a
+                    custom <code style={{ color: C.blue }}>Article</code>) here — it's injected verbatim as its own <code style={{ color: C.blue }}>&lt;script type="application/ld+json"&gt;</code> tag,
+                    alongside the structured schemas below. A JSON array injects multiple schemas at once. Leave blank to skip.
+                  </p>
+                  <textarea
+                    style={{ ...TA, fontFamily: 'ui-monospace, monospace', fontSize: 12, minHeight: 160, borderColor: seo.jsonLd.trim() && !jsonLdValid ? C.bad : C.border }}
+                    value={seo.jsonLd}
+                    onChange={e => update({ jsonLd: e.target.value })}
+                    placeholder={'{\n  "@context": "https://schema.org",\n  "@type": "Review",\n  …\n}'}
+                    spellCheck={false}
+                  />
+                  {seo.jsonLd.trim() && !jsonLdValid && (
+                    <div style={{ color: C.bad, fontSize: 11.5, marginTop: 6 }}>Not valid JSON — check for a trailing comma or missing quote.</div>
+                  )}
+                </div>
 
                 <SchemaCard title="Software Application" enabled={seo.schemasEnabled.softwareApplication} onToggle={v => toggleSchema('softwareApplication', v)}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
