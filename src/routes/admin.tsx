@@ -1,7 +1,7 @@
 import { Outlet, Link, useRouterState } from '@tanstack/react-router';
 import { createFileRoute } from '@tanstack/react-router';
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { Search, Image, Package, Info, Users, Phone, ArrowLeft, GraduationCap } from 'lucide-react';
+import { Search, Image, Package, Info, Users, Phone, ArrowLeft, GraduationCap, Link2 } from 'lucide-react';
 import { AdminPreviewContext } from './admin/preview-context';
 
 export const Route = createFileRoute('/admin')({ component: AdminLayout });
@@ -9,6 +9,7 @@ export const Route = createFileRoute('/admin')({ component: AdminLayout });
 const NAV = [
   { to: '/admin/seo',      label: 'SEO',             icon: Search  },
   { to: '/admin/sections', label: 'Sections & Media', icon: Image   },
+  { to: '/admin/media',    label: 'Media Links',      icon: Link2   },
   { to: '/admin/products', label: 'Products',         icon: Package },
   { to: '/admin/courses',  label: 'Learning Portal',  icon: GraduationCap },
   { to: '/admin/about',    label: 'About Us',         icon: Info    },

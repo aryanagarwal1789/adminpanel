@@ -4561,6 +4561,53 @@ function renderBlockFields(
         </div>
       );
 
+    case 'slick-ab-founders-voice': {
+      type FvVideo = Record<string, unknown>;
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Pill text" f={f} set={set} base="pill" segments={[{ key: 'pill' }]} />
+          <RichFieldGroup label="Heading (plain part)" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
+          <RichFieldGroup label="Heading (gradient part)" f={f} set={set} base="titleGrad" segments={[{ key: 'titleGrad' }]} />
+          <RichFieldGroup label="Lead paragraph" f={f} set={set} base="lead" segments={[{ key: 'lead' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-400">
+            Landscape videos (16:9). Paste any YouTube link — watch, youtu.be, or Shorts — it's converted to an
+            embed automatically. Leave the thumbnail empty to use YouTube's own.
+          </p>
+          <Repeater<FvVideo>
+            label="Landscape videos"
+            items={(f.landscape as FvVideo[]) ?? []}
+            onChange={(v) => set('landscape', v)}
+            newItem={() => ({ videoUrl: '', thumbnail: '' })}
+            itemPreview={(it) => (it.videoUrl as string) || '(empty)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Video URL (YouTube watch / Shorts / youtu.be)" value={it.videoUrl as string ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
+                <ImageField label="Thumbnail (optional)" value={it.thumbnail as string ?? ''} onChange={(v) => u({ ...it, thumbnail: v })} />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-400">
+            Portrait videos (9:16 — YouTube Shorts). Paste the Shorts URL. Leave the thumbnail empty to use YouTube's own.
+          </p>
+          <Repeater<FvVideo>
+            label="Portrait videos"
+            items={(f.portrait as FvVideo[]) ?? []}
+            onChange={(v) => set('portrait', v)}
+            newItem={() => ({ videoUrl: '', thumbnail: '' })}
+            itemPreview={(it) => (it.videoUrl as string) || '(empty)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Shorts URL (or any YouTube link)" value={it.videoUrl as string ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
+                <ImageField label="Thumbnail (optional)" value={it.thumbnail as string ?? ''} onChange={(v) => u({ ...it, thumbnail: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
     case 'slick-ab-investors':
       return (
         <div className="space-y-4">
