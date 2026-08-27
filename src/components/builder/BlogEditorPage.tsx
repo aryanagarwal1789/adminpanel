@@ -244,7 +244,7 @@ function htmlToMd(el: HTMLElement, mode: EditMode): string {
     .trim();
 }
 
-// ── Slash menu options (renderer-supported types only) ─────────────
+// ── Slash menu options (renderer-supported types only) ─────────────-
 interface SlashOpt {
   t: ContentBlockType;
   ordered?: boolean;
