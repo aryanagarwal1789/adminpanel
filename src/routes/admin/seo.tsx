@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { UploadInput } from './upload-input';
 import { authJsonHeaders } from '@/lib/builder-drafts';
 import { LastUpdatedBy } from '@/lib/lastUpdated';
+import { isRichDoc, richDocToText } from '@/lib/i18n-rich';
 
 export const Route = createFileRoute('/admin/seo')({ component: SeoPage });
 
@@ -190,19 +191,22 @@ function overallScore(checks: SeoCheck[]) {
   return                             { status: 'bad'  as CheckStatus, label: 'Needs improvement', pct };
 }
 
-// ─── Page content extraction — reads the live rendered HTML (T10, T13) ──────
-// In local dev, requests go through the Vite proxy (/renderer-proxy → experience.experience.salescode.ai)
-// to avoid CORS. In production the real URL is used directly.
+// ─── Page content extraction — reads the CMS blocks, not rendered HTML ──────
+// The marketing pages render their body client-side (BuilderPreviewPage bails to
+// CSR), so the server HTML has NO <h1>/<p>/<img> — the content lives in the RSC
+// script payload. A DOMParser (which never runs JS) therefore saw an empty body.
+// Instead we read the page's stored blocks straight from the CMS backend and
+// extract headings/paragraphs/images from the field values (including rich-text
+// docs and embedded HTML). CORS-free, and independent of SSR vs CSR.
 const RENDERER_BASE = import.meta.env.DEV
   ? '/renderer-proxy'
-  : (import.meta.env.VITE_RENDERER_URL ?? 'https://experience.experience.salescode.ai');
-
+  : (import.meta.env.VITE_RENDERER_URL ?? 'https://salescode.ai');
 const RENDERER_PATHS: Record<string, string> = {
-  'landing':    '/',
-  'blog':       '/blog',
-  'about-us':  '/about',
-  'contact-us': '/contact-us',
-  'client':     '/clients',
+  landing: '/',
+  blog: '/resources/blog',
+  'about-us': '/company/about-us',
+  'contact-us': '/company/contact-us',
+  client: '/company/clients',
 };
 
 interface PageContent {
@@ -211,34 +215,98 @@ interface PageContent {
   images: Array<{ src: string; alt: string }>;
 }
 
+// Field-name → content-type heuristics (CMS blocks name their fields
+// consistently: heading*, sub*/description, *image/*img/thumbnail/logo, …).
+const HEADING_KEY_RE = /heading|headline/i;
+const HEADING_KEYS = new Set(['title', 'titleBold', 'titleLight', 'q', 'pillText', 'eyebrowLabel']);
+const PARA_KEY_RE = /(^sub|description|^desc$|body|lead|excerpt|tagline|subtitle|^a$|answer|footnote|promise)/i;
+const IMG_EXT_RE = /\.(png|jpe?g|webp|gif|avif|svg)(\?|#|$)/i;
+
+function looksLikeImageUrl(v: string): boolean {
+  if (/youtu\.?be|youtube|vimeo|\.mp4|\.webm/i.test(v)) return false;
+  return IMG_EXT_RE.test(v) || v.includes('/api/cms-asset/') || /cloudfront\.net\/thumbnails\//i.test(v);
+}
+
 async function fetchPageContent(pageKey: string): Promise<PageContent> {
-  const url = `${RENDERER_BASE}${RENDERER_PATHS[pageKey] ?? '/en/' + pageKey}`;
-  const res  = await fetch(url, { mode: 'cors' });
+  const res = await fetch(`${BACKEND}/site/builder/pages/${pageKey}`);
   if (!res.ok) throw new Error(`${res.status}`);
-  const html = await res.text();
-  const doc  = new DOMParser().parseFromString(html, 'text/html');
+  const data = await res.json();
+  const blocks: Array<Record<string, unknown>> = data?.page?.blocks ?? [];
 
-  const headings = Array.from(doc.querySelectorAll('h1,h2,h3,h4,h5,h6'))
-    .map(el => ({ level: el.tagName.toLowerCase(), text: (el.textContent ?? '').trim() }))
-    .filter(h => h.text);
+  const headings: Array<{ level: string; text: string }> = [];
+  const paragraphs: string[] = [];
+  const images: Array<{ src: string; alt: string }> = [];
+  const seenImg = new Set<string>();
 
-  const paragraphs = Array.from(doc.querySelectorAll('p'))
-    .map(el => (el.textContent ?? '').trim())
-    .filter(Boolean);
+  const addImage = (src: string, alt = '') => {
+    if (src && !seenImg.has(src)) { seenImg.add(src); images.push({ src, alt }); }
+  };
 
-  const images = Array.from(doc.querySelectorAll('img'))
-    .map(el => ({ src: el.getAttribute('src') ?? '', alt: el.getAttribute('alt') ?? '' }))
-    .filter(img => img.src);
+  // Parse an embedded-HTML string (html-embed blocks) — this HTML is a static
+  // string, so DOMParser works on it (no JS needed).
+  const parseHtml = (html: string) => {
+    try {
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      doc.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach((el) => {
+        const t = (el.textContent ?? '').trim();
+        if (t) headings.push({ level: el.tagName.toLowerCase(), text: t });
+      });
+      doc.querySelectorAll('p').forEach((el) => {
+        const t = (el.textContent ?? '').trim();
+        if (t) paragraphs.push(t);
+      });
+      doc.querySelectorAll('img').forEach((el) => addImage(el.getAttribute('src') ?? '', el.getAttribute('alt') ?? ''));
+    } catch {
+      /* ignore malformed embed HTML */
+    }
+  };
+
+  const classify = (key: string, text: string) => {
+    if (!text) return;
+    if (looksLikeImageUrl(text)) { addImage(text); return; }
+    if (HEADING_KEY_RE.test(key) || HEADING_KEYS.has(key)) headings.push({ level: '', text });
+    else if (PARA_KEY_RE.test(key)) paragraphs.push(text);
+  };
+
+  const walk = (value: unknown) => {
+    if (value == null) return;
+    if (Array.isArray(value)) { value.forEach(walk); return; }
+    if (isRichDoc(value)) return; // handled by the parent via its key
+    if (typeof value !== 'object') return;
+    const obj = value as Record<string, unknown>;
+    // Prefer `${base}Rich` over the stale legacy `${base}` (mirrors the renderer).
+    const shadowed = new Set<string>();
+    for (const k of Object.keys(obj)) if (k.endsWith('Rich') && isRichDoc(obj[k])) shadowed.add(k.slice(0, -4));
+    for (const k of Object.keys(obj)) {
+      if (shadowed.has(k)) continue;
+      const child = obj[k];
+      if (k.endsWith('Rich') && isRichDoc(child)) { classify(k.slice(0, -4), richDocToText(child).trim()); continue; }
+      if (isRichDoc(child)) { classify(k, richDocToText(child).trim()); continue; }
+      if (typeof child === 'string') {
+        if (k === 'html' && child.includes('<')) parseHtml(child);
+        else classify(k, child.trim());
+        continue;
+      }
+      if (child && typeof child === 'object') walk(child);
+    }
+  };
+
+  for (const b of blocks) {
+    if (b?.hidden) continue; // hidden blocks aren't rendered → don't count them
+    walk(b.fields ?? {});
+  }
+
+  // The first heading found (top-most block's hero heading) is treated as the H1;
+  // the rest as H2. Good enough for the structure/keyphrase checks.
+  headings.forEach((h, i) => { if (!h.level) h.level = i === 0 ? 'h1' : 'h2'; });
 
   return { headings, paragraphs, images };
 }
 
 function computeContentChecks(content: PageContent, kp: string): SeoCheck[] {
   const h1s       = content.headings.filter(h => h.level === 'h1');
-  const noAlt     = content.images.filter(img => !img.alt.trim());
   const nums      = content.headings.map(h => parseInt(h.level.replace('h','')) || 0).filter(n => n > 0);
   const hasSkip   = nums.some((n, i) => i > 0 && n - nums[i - 1] > 1);
-  const firstPara = (content.paragraphs[0] ?? '').toLowerCase();
   const allText   = [...content.headings.map(h => h.text), ...content.paragraphs].join(' ');
   const words     = allText.split(/\s+/).filter(Boolean).length;
   const kpRe      = kp ? new RegExp(kp.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi') : null;
@@ -259,21 +327,6 @@ function computeContentChecks(content: PageContent, kp: string): SeoCheck[] {
       message: nums.length === 0 ? 'No headings detected on this page.'
         : hasSkip ? 'Heading levels skip a level (e.g. H1 → H3). Keep heading order logical.'
           : `Heading structure is logical (${content.headings.length} heading${content.headings.length !== 1 ? 's' : ''} found).`,
-    },
-    {
-      id: 'img_alt',
-      status: content.images.length === 0 ? 'ok' : noAlt.length === 0 ? 'good' : 'bad',
-      message: content.images.length === 0 ? 'No images detected on this page.'
-        : noAlt.length === 0 ? `All ${content.images.length} image(s) have alt text.`
-          : `${noAlt.length} of ${content.images.length} image(s) are missing alt text.`,
-    },
-    {
-      id: 'kp_intro',
-      status: !kp ? 'ok' : content.paragraphs.length === 0 ? 'ok' : firstPara.includes(kp) ? 'good' : 'ok',
-      message: !kp ? 'Set a keyphrase to check if it appears in the opening paragraph.'
-        : content.paragraphs.length === 0 ? 'No paragraph text found to check.'
-          : firstPara.includes(kp) ? 'The keyphrase appears in the opening paragraph.'
-            : 'The keyphrase does not appear in the opening paragraph. Add it early.',
     },
     {
       id: 'word_count',
@@ -351,7 +404,7 @@ function PageSpeedCard({ pageKey, canonicalUrl }: { pageKey: PageKey; canonicalU
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState<string | null>(null);
 
-  const targetUrl = canonicalUrl || `https://experience.experience.salescode.ai${RENDERER_PATHS[pageKey] ?? '/en/' + pageKey}`;
+  const targetUrl = canonicalUrl || `https://salescode.ai${RENDERER_PATHS[pageKey] ?? '/en/' + pageKey}`;
 
   useEffect(() => { setData(null); setError(null); }, [strategy]);
 
@@ -428,16 +481,16 @@ function PageSpeedCard({ pageKey, canonicalUrl }: { pageKey: PageKey; canonicalU
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function parseSerpUrl(canonicalUrl: string, pageKey: string) {
   const fallbackPath = pageKey === 'landing' ? '' : `› ${pageKey}`;
-  if (!canonicalUrl) return { domain: 'experience.salescode.ai', path: fallbackPath };
+  if (!canonicalUrl) return { domain: 'salescode.ai', path: fallbackPath };
   try {
     const u = new URL(canonicalUrl);
     const parts = u.pathname.split('/').filter(Boolean);
     return { domain: u.hostname, path: parts.length ? '› ' + parts.join(' › ') : '' };
-  } catch { return { domain: 'experience.salescode.ai', path: fallbackPath }; }
+  } catch { return { domain: 'salescode.ai', path: fallbackPath }; }
 }
 
 function getDomain(url: string) {
-  try { return new URL(url).hostname; } catch { return 'experience.salescode.ai'; }
+  try { return new URL(url).hostname; } catch { return 'salescode.ai'; }
 }
 
 function mergeSeo(loaded: Partial<SeoData>): SeoData {
@@ -642,7 +695,7 @@ function SerpPreview({ seo, pageKey }: { seo: SeoData; pageKey: string }) {
 // ─── Social card preview ──────────────────────────────────────────────────
 function SocialPreview({ seo }: { seo: SeoData }) {
   const [tab, setTab] = useState<'og' | 'twitter'>('og');
-  const domain  = seo.canonicalUrl ? getDomain(seo.canonicalUrl) : 'experience.salescode.ai';
+  const domain  = seo.canonicalUrl ? getDomain(seo.canonicalUrl) : 'salescode.ai';
   const ogTitle = seo.ogTitle      || seo.metaTitle;
   const ogDesc  = seo.ogDescription || seo.metaDescription;
   const twTitle = seo.twitterTitle  || seo.metaTitle;
@@ -688,7 +741,7 @@ function SocialPreview({ seo }: { seo: SeoData }) {
 function SiteView({ tabs }: { tabs: Array<{ key: string; label: string }> }) {
   const [pageData, setPageData]     = useState<Record<string, Partial<SeoData>> | null>(null);
   const [loadingMap, setLoadingMap] = useState(true);
-  const [llms, setLlms]             = useState<LlmsData>({ siteName: 'Salescode AI', tagline: '', pages: tabs.map(t => ({ name: t.label, url: t.key === 'landing' ? 'https://experience.salescode.ai/' : `https://experience.salescode.ai/${t.key}`, description: '' })) });
+  const [llms, setLlms]             = useState<LlmsData>({ siteName: 'Salescode AI', tagline: '', pages: tabs.map(t => ({ name: t.label, url: t.key === 'landing' ? 'https://salescode.ai/' : `https://salescode.ai/${t.key}`, description: '' })) });
   const [copied, setCopied]         = useState(false);
 
   useEffect(() => {
@@ -703,7 +756,7 @@ function SiteView({ tabs }: { tabs: Array<{ key: string; label: string }> }) {
             const d = results[i].seo ?? {} as Partial<SeoData>;
             return {
               name: t.label,
-              url:  d.canonicalUrl || (t.key === 'landing' ? 'https://experience.salescode.ai/' : `https://experience.salescode.ai/${t.key}`),
+              url:  d.canonicalUrl || (t.key === 'landing' ? 'https://salescode.ai/' : `https://salescode.ai/${t.key}`),
               description: prev.pages[i]?.description || d.metaDescription || '',
             };
           }),
@@ -763,7 +816,7 @@ function SiteView({ tabs }: { tabs: Array<{ key: string; label: string }> }) {
                     const d = pageData?.[t.key] ?? {};
                     const { indexing } = parseRobots(d.robots ?? 'index, follow');
                     const isIndexed    = indexing === 'index';
-                    const canonical    = d.canonicalUrl || `experience.salescode.ai/${t.key === 'landing' ? '' : t.key}`;
+                    const canonical    = d.canonicalUrl || `salescode.ai/${t.key === 'landing' ? '' : t.key}`;
                     return (
                       <tr key={t.key} style={{ borderBottom: `1px solid ${C.border}` }}>
                         <td style={{ padding: '10px 12px', color: C.text, fontWeight: 600 }}>{t.label}</td>
@@ -790,7 +843,7 @@ function SiteView({ tabs }: { tabs: Array<{ key: string; label: string }> }) {
           <div style={{ padding: '12px 16px', borderTop: `1px solid ${C.border}`, background: '#0f172a', borderRadius: '0 0 8px 8px' }}>
             <p style={{ color: C.subtle, fontSize: 11, margin: 0 }}>
               To change a page's indexing, open its tab above and update the <strong style={{ color: C.muted }}>Robots</strong> setting.
-              Your sitemap URL: <code style={{ color: C.blue }}>https://experience.salescode.ai/sitemap.xml</code>
+              Your sitemap URL: <code style={{ color: C.blue }}>https://salescode.ai/sitemap.xml</code>
             </p>
           </div>
         </div>
@@ -842,7 +895,7 @@ function SiteView({ tabs }: { tabs: Array<{ key: string; label: string }> }) {
             </div>
 
             <p style={{ color: C.subtle, fontSize: 11, margin: '12px 0 0', lineHeight: 1.6 }}>
-              After copying, save as <code style={{ color: C.blue }}>llms.txt</code> and publish it at <code style={{ color: C.blue }}>https://experience.salescode.ai/llms.txt</code> (in your public root folder).
+              After copying, save as <code style={{ color: C.blue }}>llms.txt</code> and publish it at <code style={{ color: C.blue }}>https://salescode.ai/llms.txt</code> (in your public root folder).
             </p>
           </div>
           {/* suppress unused var warning for SEL_SM */}
@@ -1126,7 +1179,7 @@ function SeoPage() {
                   <LenBar len={seo.metaDescription.length} max={160} min={140} />
                 </Field>
                 <Field lbl="Canonical URL">
-                  <input style={INP} value={seo.canonicalUrl} onChange={e => update({ canonicalUrl: e.target.value })} placeholder="https://experience.salescode.ai/…" />
+                  <input style={INP} value={seo.canonicalUrl} onChange={e => update({ canonicalUrl: e.target.value })} placeholder="https://salescode.ai/…" />
                 </Field>
                 <Field lbl="Robots — Indexing & Link Following" hint="Controls whether search engines index this page and follow its links.">
                   <RobotsControl value={seo.robots} onChange={v => update({ robots: v })} />
@@ -1154,7 +1207,7 @@ function SeoPage() {
                 <SchemaCard title="Software Application" enabled={seo.schemasEnabled.softwareApplication} onToggle={v => toggleSchema('softwareApplication', v)}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <Field lbl="Name"><input style={INP} value={sa.name} onChange={e => updateSchema('softwareApplication', { name: e.target.value })} placeholder="Salescode AI" /></Field>
-                    <Field lbl="URL"><input style={INP} value={sa.url} onChange={e => updateSchema('softwareApplication', { url: e.target.value })} placeholder="https://experience.salescode.ai" /></Field>
+                    <Field lbl="URL"><input style={INP} value={sa.url} onChange={e => updateSchema('softwareApplication', { url: e.target.value })} placeholder="https://salescode.ai" /></Field>
                   </div>
                   <Field lbl="Description"><textarea style={TA} value={sa.description} onChange={e => updateSchema('softwareApplication', { description: e.target.value })} /></Field>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -1170,7 +1223,7 @@ function SeoPage() {
                   {crumb.items.map((item, idx) => (
                     <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr auto', gap: 8, marginBottom: 8, alignItems: 'center' }}>
                       <input style={INP} value={item.name} onChange={e => updateCrumb(idx, { name: e.target.value })} placeholder={idx === 0 ? 'Home' : 'Page name'} />
-                      <input style={INP} value={item.url} onChange={e => updateCrumb(idx, { url: e.target.value })} placeholder={idx === 0 ? 'https://experience.salescode.ai/' : 'https://experience.salescode.ai/…'} />
+                      <input style={INP} value={item.url} onChange={e => updateCrumb(idx, { url: e.target.value })} placeholder={idx === 0 ? 'https://salescode.ai/' : 'https://salescode.ai/…'} />
                       <button onClick={() => removeCrumb(idx)} style={{ background: 'none', border: `1px solid ${C.bad}`, color: C.bad, padding: '6px 10px', borderRadius: 4, cursor: 'pointer', fontSize: 12 }}>✕</button>
                     </div>
                   ))}
@@ -1205,7 +1258,7 @@ function SeoPage() {
                 </SchemaCard>
 
                 <SchemaCard title="Speakable (Voice Search)" enabled={seo.schemasEnabled.speakable} onToggle={v => toggleSchema('speakable', v)}>
-                  <Field lbl="URL"><input style={INP} value={speak.url} onChange={e => updateSchema('speakable', { url: e.target.value })} placeholder="https://experience.salescode.ai/…" /></Field>
+                  <Field lbl="URL"><input style={INP} value={speak.url} onChange={e => updateSchema('speakable', { url: e.target.value })} placeholder="https://salescode.ai/…" /></Field>
                   <Field lbl="CSS Selectors (one per line)">
                     <textarea style={TA} value={speakableInput} onChange={e => setSpeakable(e.target.value)} placeholder={'.article-headline\n.article-body p'} rows={4} />
                   </Field>
