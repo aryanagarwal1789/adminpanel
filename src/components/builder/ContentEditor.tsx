@@ -1,11 +1,11 @@
 import { RichFieldGroup } from "./RichFieldGroup";
 import { RichTextInput } from "./RichTextInput";
 import { LinkField as PageLinkField } from "./LinkField";
-import { richItemProps } from "./rich-text";
+import { richItemProps, richItemText } from "./rich-text";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import {
-  BlogPicker, ButtonEditor, ColorPicker, ImageField, LinkItemEditor, NumberInput, Repeater, Select, TextInput, Textarea, Toggle, VideoField,
+  BlogPicker, ButtonEditor, ColorPicker, ImageField, LinkItemEditor, MultiImageUploadButton, NumberInput, Repeater, Select, TextInput, Textarea, Toggle, VideoField,
   imageI18nProps,
 } from "./fields";
 import type { ButtonField, LinkField } from "./defaults";
@@ -6254,7 +6254,7 @@ function renderBlockFields(
             items={(f.items as PlatformItem[]) ?? []}
             onChange={(v) => set('items', v)}
             newItem={() => ({ titleBold: 'AI Native', titleLight: 'New Product', icon: 'buildings', tags: ['sales'], href: '#' })}
-            itemPreview={(it) => `${it.titleBold} ${it.titleLight}`}
+            itemPreview={(it) => `${richItemText(it, 'titleBold')} ${richItemText(it, 'titleLight')}`}
             renderItem={(it, u) => (
               <div className="space-y-2">
                 <RichTextInput label="Title (bold)" {...richItemProps(it, 'titleBold', u)} />
@@ -6438,6 +6438,7 @@ function renderBlockFields(
           <TextInput label="'View all' button URL" value={f.viewAllUrl as string ?? ''} onChange={(v) => set('viewAllUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs text-slate-400">Gallery images (add as many as needed)</p>
+          <MultiImageUploadButton onUploaded={(urls) => set('images', [...((f.images as string[]) ?? []), ...urls])} />
           {((f.images as string[]) ?? []).map((src: string, i: number) => (
             <div key={i} className="flex items-center gap-2">
               <div className="flex-1">

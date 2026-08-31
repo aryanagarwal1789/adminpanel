@@ -340,3 +340,29 @@ export function richItemProps<T>(it: T, key: string, update: (next: T) => void) 
     onChange: (doc: RichDoc) => update({ ...it, [key + "Rich"]: doc } as T),
   };
 }
+
+/**
+ * Plain-text label for a repeater item's `richItemProps`-bound field — for
+ * sidebar/list preview strings only (formatting stripped). `richItemProps`
+ * writes edits to `${key}Rich` and never touches the legacy `item[key]`
+ * string, so any preview reading `item[key]` directly goes stale the moment a
+ * field becomes rich (it renders correctly everywhere else because
+ * `resolveRichFields` collapses `${key}Rich` back onto `key` at publish/render
+ * time — the sidebar list is the one place that never runs that resolution).
+ */
+export function richItemText(it: unknown, key: string): string {
+  const rec = it as Record<string, unknown>;
+  const rich = rec[key + "Rich"];
+  if (isRichDoc(rich)) {
+    let text = "";
+    const walk = (nodes: RichNode[] | undefined) => {
+      for (const n of nodes ?? []) {
+        if (n.type === "text") text += n.text ?? "";
+        else walk(n.content);
+      }
+    };
+    walk((rich as RichDoc).content);
+    return text;
+  }
+  return (rec[key] as string) ?? "";
+}

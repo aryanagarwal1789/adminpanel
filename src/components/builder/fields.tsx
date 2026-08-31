@@ -240,6 +240,66 @@ export function ImageField({
 }
 
 /**
+ * Uploads several files at once and hands back their URLs in selection order —
+ * for repeater-of-images fields (e.g. a photo gallery) where adding N photos
+ * one ImageField at a time is the bottleneck. Purely additive: callers append
+ * `urls` to their existing array, this component holds no list state itself.
+ */
+export function MultiImageUploadButton({ onUploaded }: { onUploaded: (urls: string[]) => void }) {
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (!files.length) return;
+    setUploading(true);
+    setError(null);
+    setProgress({ done: 0, total: files.length });
+    const urls: string[] = [];
+    let failed = 0;
+    for (const file of files) {
+      try {
+        const form = new FormData();
+        form.append("file", file);
+        const res = await fetch(UPLOAD_URL, { method: "POST", headers: authUploadHeaders(), body: form });
+        if (!res.ok) throw new Error(`${res.status}`);
+        const data = await res.json() as { url?: string };
+        if (data.url) urls.push(data.url);
+        else failed++;
+      } catch {
+        failed++;
+      }
+      setProgress((p) => (p ? { ...p, done: p.done + 1 } : p));
+    }
+    if (urls.length) onUploaded(urls);
+    if (failed) setError(`${failed} of ${files.length} file${files.length === 1 ? "" : "s"} failed to upload`);
+    setUploading(false);
+    setProgress(null);
+  };
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="w-full py-2 text-xs rounded-md pb-transition font-medium disabled:opacity-50"
+        style={{ background: "#1e40af", color: "#fff", border: "none", cursor: uploading ? "default" : "pointer" }}
+      >
+        {uploading
+          ? `Uploading ${progress ? `${progress.done}/${progress.total}` : "…"}`
+          : "↑ Upload multiple images"}
+      </button>
+      <input ref={inputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={handleFiles} />
+      {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+    </div>
+  );
+}
+
+/**
  * Bind ImageField's per-locale override props to a container object: reads
  * `container[key]` as the base value, and writes/reads the override sidecar
  * `container[key + 'I18n']` on the SAME container. Works for both block fields
