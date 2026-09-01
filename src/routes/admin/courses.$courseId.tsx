@@ -66,6 +66,54 @@ function blankLesson(): Lesson {
   return { id: `lesson-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, title: '', description: '', duration: '', videoUrl: '', thumbnail: '', order: 0 };
 }
 
+// ── Auto-fill duration from a YouTube link (YouTube Data API v3) ────────────
+const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY ?? '';
+
+/** Extract an 11-char YouTube video id from any common URL shape, or null. */
+function youTubeIdFrom(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (u.hostname === 'youtu.be') return u.pathname.slice(1) || null;
+    if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/')[2] ?? null;
+    if (u.pathname.includes('/embed/')) return u.pathname.split('/embed/')[1]?.split(/[/?#]/)[0] ?? null;
+    if (u.hostname.includes('youtube.com')) return u.searchParams.get('v');
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/** ISO 8601 duration ("PT1H5M3S") → the "h:mm:ss" / "mm:ss" format the
+ *  lesson's Duration field already stores (see l.duration usage in
+ *  LearningPortal.tsx, which parses it back with split(':')). */
+function formatIsoDuration(iso: string): string | null {
+  const m = iso.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
+  if (!m) return null;
+  const h = parseInt(m[1] ?? '0', 10);
+  const mi = parseInt(m[2] ?? '0', 10);
+  const s = parseInt(m[3] ?? '0', 10);
+  const ss = String(s).padStart(2, '0');
+  return h > 0 ? `${h}:${String(mi).padStart(2, '0')}:${ss}` : `${mi}:${ss}`;
+}
+
+/** Fetches a YouTube video's duration, already formatted. Returns null on any
+ *  failure (missing key, network error, private/unlisted video, etc.) — the
+ *  caller falls back to leaving the Duration field untouched. */
+async function fetchYouTubeDuration(videoId: string): Promise<string | null> {
+  if (!YOUTUBE_API_KEY) return null;
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${YOUTUBE_API_KEY}`,
+    );
+    if (!res.ok) return null;
+    const data = await res.json() as { items?: { contentDetails?: { duration?: string } }[] };
+    const iso = data.items?.[0]?.contentDetails?.duration;
+    return iso ? formatIsoDuration(iso) : null;
+  } catch {
+    return null;
+  }
+}
+
 function CourseDetailPage() {
   const { courseId } = Route.useParams();
   const [course, setCourse] = useState<Course | null>(null);
@@ -121,6 +169,21 @@ function CourseDetailPage() {
 
   const updateLesson = (idx: number, patch: Partial<Lesson>) =>
     setLessons((prev) => prev.map((l, i) => (i === idx ? { ...l, ...patch } : l)));
+
+  // Auto-fill Duration whenever a lesson's video URL resolves to a YouTube
+  // link. Keyed by lesson id (not index) so an in-flight fetch can't land on
+  // the wrong row after a reorder/removal.
+  const [detectingDuration, setDetectingDuration] = useState<Set<string>>(() => new Set());
+  const detectDuration = async (lessonId: string, url: string) => {
+    const videoId = youTubeIdFrom(url);
+    if (!videoId) return;
+    setDetectingDuration((prev) => new Set(prev).add(lessonId));
+    const duration = await fetchYouTubeDuration(videoId);
+    setDetectingDuration((prev) => { const next = new Set(prev); next.delete(lessonId); return next; });
+    if (duration) {
+      setLessons((prev) => prev.map((l) => (l.id === lessonId ? { ...l, duration } : l)));
+    }
+  };
   const removeLesson = (idx: number) => setLessons((prev) => prev.filter((_, i) => i !== idx));
   const addLesson = () => {
     const l = blankLesson();
@@ -269,7 +332,20 @@ function CourseDetailPage() {
                       <input style={inp} value={l.title} onChange={(e) => updateLesson(idx, { title: e.target.value })} placeholder="e.g. Getting started with SFA" />
                     </div>
                     <div>
-                      <label style={lbl}>Duration</label>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                        <label style={lbl}>Duration</label>
+                        {youTubeIdFrom(l.videoUrl) && (
+                          <button
+                            type="button"
+                            onClick={() => detectDuration(l.id, l.videoUrl)}
+                            disabled={detectingDuration.has(l.id)}
+                            style={{ background: 'none', border: 'none', color: detectingDuration.has(l.id) ? '#475569' : '#3b82f6', cursor: detectingDuration.has(l.id) ? 'default' : 'pointer', fontSize: 11, padding: 0, marginBottom: 6 }}
+                            title="Fetch duration from YouTube"
+                          >
+                            {detectingDuration.has(l.id) ? 'Detecting…' : '↻ Detect'}
+                          </button>
+                        )}
+                      </div>
                       <input style={inp} value={l.duration} onChange={(e) => updateLesson(idx, { duration: e.target.value })} placeholder="21:52" />
                     </div>
                   </div>
@@ -278,8 +354,14 @@ function CourseDetailPage() {
                     <textarea style={textareaStyle} value={l.description} onChange={(e) => updateLesson(idx, { description: e.target.value })} rows={2} />
                   </div>
                   <div style={{ marginTop: 10 }}>
-                    <label style={lbl}>Video URL (paste a YouTube link, or upload a direct .mp4 / HLS file)</label>
-                    <UploadInput value={l.videoUrl} onChange={(videoUrl) => updateLesson(idx, { videoUrl })} accept="video/*" preview={false} allowPaste placeholder="youtube.com/watch?v=… or youtu.be/… — or upload a file" />
+                    <label style={lbl}>Video URL (paste a YouTube link, or upload a direct .mp4 / HLS file — YouTube links auto-fill Duration above)</label>
+                    <UploadInput
+                      value={l.videoUrl}
+                      onChange={(videoUrl) => {
+                        updateLesson(idx, { videoUrl });
+                        if (!l.duration.trim()) detectDuration(l.id, videoUrl);
+                      }}
+                      accept="video/*" preview={false} allowPaste placeholder="youtube.com/watch?v=… or youtu.be/… — or upload a file" />
                   </div>
                   <div style={{ marginTop: 10 }}>
                     <label style={lbl}>Thumbnail (optional — shown in the playlist and as the video poster)</label>
