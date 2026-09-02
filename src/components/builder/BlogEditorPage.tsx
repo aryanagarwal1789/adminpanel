@@ -22,7 +22,7 @@ function isValidOtpEmail(email: string): boolean {
   );
 }
 
-// ── Utilities (unchanged data-layer helpers) ──────────────────────
+// ── Utilities (unchanged data-layer helpers)  ──────────────────────
 function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
