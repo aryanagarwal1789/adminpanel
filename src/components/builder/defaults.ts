@@ -295,6 +295,7 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
   "clients-page-slot": {},
   "contact-page-slot": {},
   "blog-page-slot": {},
+  "case-studies-page-slot": {},
   'slick-hero-split': {
     badge: "New · Spring release",
     headlineStart: "Run your whole business on",

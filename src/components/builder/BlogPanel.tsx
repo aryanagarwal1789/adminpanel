@@ -26,6 +26,10 @@ export interface BlogPost {
   _id?: string;
   slug: string;
   title: string;
+  /** Which listing this post belongs to — Blog and Case Studies share this
+   *  exact editor/model. Missing on posts created before this field existed;
+   *  every reader treats that as 'blog'. */
+  type?: 'blog' | 'case-study';
   category?: string;
   excerpt: string;
   body: string;

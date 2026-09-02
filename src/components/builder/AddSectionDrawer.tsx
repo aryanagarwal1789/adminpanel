@@ -39,6 +39,7 @@ const GROUPS: Group[] = [
     { type: "clients-page-slot", label: "Clients Page", Icon: Users },
     { type: "contact-page-slot", label: "Contact Us Page", Icon: Megaphone },
     { type: "blog-page-slot", label: "Blog Page", Icon: FileText },
+    { type: "case-studies-page-slot", label: "Case Studies Page", Icon: FileText },
     { type: "slick-sc-faq-explorer", label: "FAQ Explorer (382 Q&A, search + filters)", Icon: HelpCircle },
   ]},
   { name: "Salescode Landing", items: [

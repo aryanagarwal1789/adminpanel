@@ -215,6 +215,7 @@ const RENDERER_PATHS: Record<string, string> = {
   'about-us': '/company/about-us',
   'contact-us': '/company/contact-us',
   client: '/company/clients',
+  'case-studies': '/resources/case-studies',
 };
 
 interface PageContent {

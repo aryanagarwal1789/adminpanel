@@ -40,6 +40,7 @@ export type TemplateBlockType =
   | "clients-page-slot"
   | "contact-page-slot"
   | "blog-page-slot"
+  | "case-studies-page-slot"
   | 'slick-hero-split'
   | 'slick-hero-video'
   | 'slick-features-bento'
@@ -452,6 +453,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   "clients-page-slot": "Clients Page",
   "contact-page-slot": "Contact Us Page",
   "blog-page-slot": "Blog Page",
+  "case-studies-page-slot": "Case Studies Page",
   'slick-hero-split': 'Hero — Split Gradient',
   'slick-hero-video': 'Hero — Centered Video',
   'slick-features-bento': 'Features — Bento Grid',

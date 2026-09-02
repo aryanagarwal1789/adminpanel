@@ -71,6 +71,7 @@ function countWords(blocks: ContentBlock[]): number {
 const EMPTY: Omit<BlogPost, "_id"> = {
   slug: "",
   title: "",
+  type: "blog",
   category: "Blog",
   excerpt: "",
   body: "",
@@ -740,6 +741,9 @@ export function BlogEditorPage() {
   const [slugManual, setSlugManual] = useState(false);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
+  // Which listing the sidebar shows / a new post is seeded as. Posts saved
+  // before this field existed have no `type` — treated as 'blog' everywhere.
+  const [listType, setListType] = useState<"blog" | "case-study">("blog");
   const [dirty, setDirty] = useState(false);
   const [leftTab, setLeftTab] = useState<"posts" | "outline">("posts");
   const [leftOpen, setLeftOpen] = useState(true);
@@ -766,7 +770,7 @@ export function BlogEditorPage() {
       setTagInput((selected.tags ?? []).join(", "));
       setSlugManual(true);
     } else {
-      setForm({ ...EMPTY });
+      setForm({ ...EMPTY, type: listType, category: listType === "blog" ? "Blog" : "Case Study" });
       setTagInput("");
       setSlugManual(false);
     }
@@ -1569,9 +1573,10 @@ export function BlogEditorPage() {
 
   const filtered = posts.filter(
     (p) =>
-      !search ||
-      p.title.toLowerCase().includes(search.toLowerCase()) ||
-      (p.excerpt ?? "").toLowerCase().includes(search.toLowerCase()),
+      (p.type ?? "blog") === listType &&
+      (!search ||
+        p.title.toLowerCase().includes(search.toLowerCase()) ||
+        (p.excerpt ?? "").toLowerCase().includes(search.toLowerCase())),
   );
 
   // ── Outline (from headings) ──
@@ -1827,9 +1832,17 @@ export function BlogEditorPage() {
 
           {leftTab === "posts" ? (
             <>
+              <div className="bs-seg">
+                <button className={listType === "blog" ? "on" : ""} onClick={() => setListType("blog")}>
+                  Blog
+                </button>
+                <button className={listType === "case-study" ? "on" : ""} onClick={() => setListType("case-study")}>
+                  Case Studies
+                </button>
+              </div>
               <div className="bs-lp">
                 <button className="bs-newbtn" onClick={newPost}>
-                  {Ic.plus} New Post
+                  {Ic.plus} New {listType === "blog" ? "Post" : "Case Study"}
                 </button>
                 <div className="bs-search">
                   <input
@@ -1872,7 +1885,9 @@ export function BlogEditorPage() {
                 )}
               </div>
               <div className="bs-lfoot">
-                {posts.length} post{posts.length !== 1 ? "s" : ""}
+                {filtered.length} {listType === "blog"
+                  ? `post${filtered.length !== 1 ? "s" : ""}`
+                  : `case stud${filtered.length !== 1 ? "ies" : "y"}`}
               </div>
             </>
           ) : (
@@ -2038,6 +2053,27 @@ export function BlogEditorPage() {
               />
             </div>
             <div className="bs-field">
+              <label>
+                Type <span className="bs-hint">where this appears — Blog or Case Studies listing</span>
+              </label>
+              <div className="bs-seg" style={{ margin: "0" }}>
+                <button
+                  type="button"
+                  className={(form.type ?? "blog") === "blog" ? "on" : ""}
+                  onClick={() => { set("type", "blog"); set("category", "Blog"); }}
+                >
+                  Blog
+                </button>
+                <button
+                  type="button"
+                  className={form.type === "case-study" ? "on" : ""}
+                  onClick={() => { set("type", "case-study"); set("category", "Case Study"); }}
+                >
+                  Case Study
+                </button>
+              </div>
+            </div>
+            <div className="bs-field">
               <label>Category</label>
               <input
                 value={form.category ?? ""}
@@ -2059,7 +2095,7 @@ export function BlogEditorPage() {
                 placeholder="my-post-slug"
               />
               <div className="bs-permalink">
-                /blog/<b>{form.slug || "…"}</b>
+                {form.type === "case-study" ? "/resources/case-studies/" : "/resources/blog/"}<b>{form.slug || "…"}</b>
               </div>
             </div>
 

@@ -737,6 +737,7 @@ function renderBlockFields(
     case 'clients-page-slot':
     case 'contact-page-slot':
     case 'blog-page-slot':
+    case 'case-studies-page-slot':
       return (
         <div style={{ padding: '16px', background: '#1e293b', borderRadius: 8, fontSize: 12, color: '#94a3b8', textAlign: 'center' }}>
           This section manages its own content and data.
