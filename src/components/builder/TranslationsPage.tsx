@@ -6,15 +6,30 @@ import { BLOCK_LABELS, type BlockType } from "./types";
 import {
   mergePageStrings,
   applyPageTranslations,
+  tryParseRichDoc,
   type TransRow,
   type TranslatableBlock,
 } from "@/lib/i18n-walk";
 import { OVERLAY_LOCALES as LOCALES } from "@/lib/i18n-images";
+import { RichTextInput } from "./RichTextInput";
+import type { RichDoc, RichValue } from "./rich-text";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 const RENDERER = import.meta.env.VITE_RENDERER_URL ?? "https://demo-experience.salescode.ai";
 
 const blockLabel = (type: string) => BLOCK_LABELS[type as BlockType] ?? type;
+
+// A saved translation for a *Rich row is either a JSON RichDoc (written by
+// RichTextInput below) or plain text (legacy — every translation saved before
+// this control existed). i18n-walk's RichDoc and rich-text.tsx's RichDoc are
+// two independently-declared but structurally identical types (same JSON
+// shape, kept dependency-free so this logic can be mirrored in the backend
+// overlay) — the cast just bridges the two declarations, not the runtime value.
+function richValueFor(raw: string | undefined): RichValue {
+  if (!raw) return "";
+  const parsed = tryParseRichDoc(raw);
+  return parsed ? (parsed as unknown as RichDoc) : raw;
+}
 
 interface PageListItem {
   pageKey: string;
@@ -67,6 +82,13 @@ export function TranslationsPage() {
       { type: "BUILDER_BLOCKS_REORDER", blocks: next },
       "*",
     );
+  }, []);
+
+  // Highlight the section being translated — the preview iframe (rendered in
+  // the same edit-mode canvas as the page builder) already outlines whichever
+  // block id it receives a SECTION_SELECT for; we just drive it from row focus.
+  const selectBlock = useCallback((blockId: string | null) => {
+    iframeRef.current?.contentWindow?.postMessage({ type: "SECTION_SELECT", blockId }, "*");
   }, []);
 
   // Load the page list once.
@@ -417,14 +439,26 @@ export function TranslationsPage() {
                           )}
                           {r.english}
                         </div>
-                        <textarea
-                          rows={Math.min(4, Math.max(1, Math.ceil(r.english.length / 48)))}
-                          value={bundle[r.key] ?? ""}
-                          onChange={(e) => setValue(r.key, e.target.value)}
-                          placeholder={`${locale.toUpperCase()} — leave blank to keep English`}
-                          className={inp}
-                          style={{ ...inpStyle, resize: "vertical" }}
-                        />
+                        {r.richBase ? (
+                          <div onFocus={() => selectBlock(r.blockId)} onBlur={() => selectBlock(null)}>
+                            <RichTextInput
+                              label={`${locale.toUpperCase()} — leave blank to keep English`}
+                              value={richValueFor(bundle[r.key])}
+                              onChange={(doc) => setValue(r.key, JSON.stringify(doc))}
+                            />
+                          </div>
+                        ) : (
+                          <textarea
+                            rows={Math.min(4, Math.max(1, Math.ceil(r.english.length / 48)))}
+                            value={bundle[r.key] ?? ""}
+                            onChange={(e) => setValue(r.key, e.target.value)}
+                            onFocus={() => selectBlock(r.blockId)}
+                            onBlur={() => selectBlock(null)}
+                            placeholder={`${locale.toUpperCase()} — leave blank to keep English`}
+                            className={inp}
+                            style={{ ...inpStyle, resize: "vertical" }}
+                          />
+                        )}
                       </div>
                     ))}
                   </div>
