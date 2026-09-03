@@ -20,6 +20,7 @@ export interface RichMark {
     fontFamily?: string;
     fontSize?: string; // e.g. "20px"
     fontWeight?: string; // e.g. "600"
+    gradient?: string; // CSS gradient value, e.g. "linear-gradient(96.47deg, #11D6C5 0%, #0A8F86 100%)"
   };
 }
 
@@ -129,6 +130,16 @@ function markStyle(marks?: RichMark[]): React.CSSProperties {
       if (m.attrs.fontFamily) s.fontFamily = m.attrs.fontFamily;
       if (m.attrs.fontSize) s.fontSize = m.attrs.fontSize;
       if (m.attrs.fontWeight) s.fontWeight = m.attrs.fontWeight;
+      // Gradient text — clip the gradient to the glyphs, same technique used
+      // by every hardcoded ".xx-grad" class across the slick-blocks. Applied
+      // last so its transparent fill always wins over a plain `color` above.
+      if (m.attrs.gradient) {
+        s.background = m.attrs.gradient;
+        s.WebkitBackgroundClip = "text";
+        s.backgroundClip = "text";
+        s.WebkitTextFillColor = "transparent";
+        s.color = "transparent";
+      }
     }
   }
   if (decorations.length) s.textDecoration = decorations.join(" ");

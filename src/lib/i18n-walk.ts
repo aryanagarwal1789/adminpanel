@@ -46,7 +46,11 @@ function isWholeFieldRich(key: string, value: unknown): value is RichDoc {
   return key.endsWith("Rich") && isRichDoc(value) && isInlineRichDoc(value);
 }
 
-function walk(value: unknown, path: string, push: (path: string, str: string) => void): void {
+function walk(
+  value: unknown,
+  path: string,
+  push: (path: string, str: string, richBase?: RichDoc) => void,
+): void {
   if (typeof value === "string") {
     if (isTranslatableString(value)) push(path, value);
     return;
@@ -69,10 +73,11 @@ function walk(value: unknown, path: string, push: (path: string, str: string) =>
       if (shadowed.has(k)) continue;
       const child = obj[k];
       const childPath = path ? `${path}.${k}` : k;
-      // Inline rich field → one row for the whole sentence (don't descend).
+      // Inline rich field → one row for the whole sentence (don't descend),
+      // carrying the source doc so the editor can offer real rich-text controls.
       if (isWholeFieldRich(k, child)) {
         const text = richDocToText(child);
-        if (isTranslatableString(text)) push(childPath, text);
+        if (isTranslatableString(text)) push(childPath, text, child);
         continue;
       }
       walk(child, childPath, push);
@@ -80,10 +85,27 @@ function walk(value: unknown, path: string, push: (path: string, str: string) =>
   }
 }
 
+// A translation value is either plain text (legacy — every row before this
+// feature, and any row a translator hasn't reformatted) or a JSON-serialized
+// RichDoc (new — produced by the rich-text editor for *Rich rows). Try the
+// latter first so a translator's formatting round-trips; malformed/non-doc
+// JSON and ordinary text both fall through to the plain-text path untouched.
+export function tryParseRichDoc(s: string): RichDoc | null {
+  const t = s.trim();
+  if (!t.startsWith("{")) return null;
+  try {
+    const parsed = JSON.parse(t);
+    return isRichDoc(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 export interface TranslatableBlock {
   id: string;
   type: string;
   fields?: Record<string, unknown>;
+  hidden?: boolean;
 }
 
 export interface TransRow {
@@ -93,6 +115,10 @@ export interface TransRow {
   key: string; // `${pageKey}.${blockId}.${path}` — matches the render overlay
   english: string;
   variant?: "mobile"; // only set for strings that exist ONLY on the mobile layout
+  // The source RichDoc, present only for *Rich whole-field rows — lets the
+  // editor render the same rich-text control used elsewhere in the builder
+  // instead of a plain textarea.
+  richBase?: RichDoc;
 }
 
 export function walkPageStrings(
@@ -103,10 +129,15 @@ export function walkPageStrings(
 ): TransRow[] {
   const rows: TransRow[] = [];
   for (const b of blocks) {
-    walk(b.fields ?? {}, "", (path, str) => {
+    // A hidden block never renders on the live site, so translating it wastes
+    // effort and clutters the list — same rule the SEO content-extraction and
+    // the public renderer already apply.
+    if (b.hidden) continue;
+    walk(b.fields ?? {}, "", (path, str, richBase) => {
       rows.push({
         blockId: b.id,
         blockLabel: blockLabel(b.type),
+        ...(richBase ? { richBase } : {}),
         path,
         key: `${pageKey}.${b.id}.${path}`,
         english: str,
@@ -166,9 +197,13 @@ function applyWalk(
       const child = (value as Record<string, unknown>)[k];
       const childPath = path ? `${path}.${k}` : k;
       // Inline rich field → rebuild the whole doc from its one translated row.
+      // The rich-text editor writes a JSON RichDoc (preserves per-run marks);
+      // older/plain-text translations for the same key still work via the
+      // legacy richDocFromText rebuild.
       if (isWholeFieldRich(k, child)) {
         const t = resolve(childPath);
-        out[k] = t != null && t.trim() !== "" ? richDocFromText(t, child) : child;
+        out[k] =
+          t != null && t.trim() !== "" ? (tryParseRichDoc(t) ?? richDocFromText(t, child)) : child;
         continue;
       }
       out[k] = applyWalk(child, childPath, resolve);
