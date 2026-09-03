@@ -6347,11 +6347,11 @@ function renderBlockFields(
         <div className="space-y-4">
           <TextInput label="Section heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <Repeater<{ eyebrow: string; heading: string; description: string; sideImage?: string; image?: string }>
+          <Repeater<{ eyebrow: string; heading: string; description: string; sideImage?: string; image?: string; videoUrl?: string }>
             label="Theme rows"
-            items={(f.items as { eyebrow: string; heading: string; description: string; sideImage?: string; image?: string }[]) ?? []}
+            items={(f.items as { eyebrow: string; heading: string; description: string; sideImage?: string; image?: string; videoUrl?: string }[]) ?? []}
             onChange={(v) => set('items', v)}
-            newItem={() => ({ eyebrow: 'Session type', heading: 'New theme heading', description: 'Description', sideImage: '', image: '' })}
+            newItem={() => ({ eyebrow: 'Session type', heading: 'New theme heading', description: 'Description', sideImage: '', image: '', videoUrl: '' })}
             itemPreview={(it) => it.heading || '(untitled)'}
             renderItem={(it, u) => (
               <div className="space-y-2">
@@ -6359,10 +6359,18 @@ function renderBlockFields(
                 <TextInput label="Heading" value={it.heading ?? ''} onChange={(v) => u({ ...it, heading: v })} />
                 <Textarea label="Description" value={it.description ?? ''} onChange={(v) => u({ ...it, description: v })} />
                 <ImageField label="Small side image (optional)" value={it.sideImage ?? ''} onChange={(v) => u({ ...it, sideImage: v })} />
-                <ImageField label="Main image" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
+                <ImageField label="Main image / video thumbnail" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
+                <TextInput label="Video link (YouTube / Shorts / URL)" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
+                <VideoField label="…or upload a video" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
               </div>
             )}
           />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-400">Extended recap banner (bottom of the section). One clickable image — the copy &amp; “Watch Now” are baked into the artwork. Leave blank to hide.</p>
+          <ImageField label="Recap banner — desktop" value={f.recapImage as string ?? ''} onChange={(v) => set('recapImage', v)} />
+          <ImageField label="Recap banner — mobile (optional)" value={f.recapImageMobile as string ?? ''} onChange={(v) => set('recapImageMobile', v)} />
+          <TextInput label="Recap video link (YouTube / Shorts / URL)" value={f.recapVideoUrl as string ?? ''} onChange={(v) => set('recapVideoUrl', v)} />
+          <VideoField label="…or upload a recap video" value={f.recapVideoUrl as string ?? ''} onChange={(v) => set('recapVideoUrl', v)} />
         </div>
       );
     }
@@ -6372,15 +6380,17 @@ function renderBlockFields(
         <div className="space-y-4">
           <TextInput label="Section heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <Repeater<{ image: string; name: string; description: string }>
+          <Repeater<{ image: string; name: string; description: string; videoUrl?: string }>
             label="Awards"
-            items={(f.items as { image: string; name: string; description: string }[]) ?? []}
+            items={(f.items as { image: string; name: string; description: string; videoUrl?: string }[]) ?? []}
             onChange={(v) => set('items', v)}
-            newItem={() => ({ image: '', name: 'New award', description: 'Description' })}
+            newItem={() => ({ image: '', name: 'New award', description: 'Description', videoUrl: '' })}
             itemPreview={(it) => it.name || '(untitled)'}
             renderItem={(it, u) => (
               <div className="space-y-2">
                 <ImageField label="Thumbnail" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
+                <TextInput label="Video link (YouTube / Shorts / URL)" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
+                <VideoField label="…or upload a video" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
                 <TextInput label="Name" value={it.name ?? ''} onChange={(v) => u({ ...it, name: v })} />
                 <Textarea label="Description" value={it.description ?? ''} onChange={(v) => u({ ...it, description: v })} />
               </div>
@@ -6391,19 +6401,30 @@ function renderBlockFields(
     }
 
     case 'slick-conclave-reels': {
+      // Migrate the legacy `images: string[]` into the new `items` shape on first
+      // edit, so existing pages keep their thumbnails and gain the video field.
+      const reelItems =
+        (f.items as { image: string; videoUrl?: string }[]) ??
+        ((f.images as string[])?.map((src) => ({ image: src }))) ??
+        [];
       return (
         <div className="space-y-4">
           <TextInput label="Section heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
-          <p className="text-xs text-slate-400">Reel thumbnails (portrait — add as many as needed)</p>
-          {((f.images as string[]) ?? []).map((src: string, i: number) => (
-            <div key={i} className="flex items-center gap-2">
-              <div className="flex-1">
-                <ImageField label={`Image ${i + 1}`} value={src} onChange={(v) => { const arr = [...((f.images as string[]) ?? [])]; arr[i] = v; set('images', arr); }} />
+          <p className="text-xs text-slate-400">Reels (portrait). Add a thumbnail and a video link (or upload).</p>
+          <Repeater<{ image: string; videoUrl?: string }>
+            label="Reels"
+            items={reelItems}
+            onChange={(v) => set('items', v)}
+            newItem={() => ({ image: '', videoUrl: '' })}
+            itemPreview={(it) => (it.videoUrl || it.image ? 'Reel' : '(empty)')}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <ImageField label="Thumbnail (portrait)" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
+                <TextInput label="Video link (YouTube / Shorts / URL)" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
+                <VideoField label="…or upload a video" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
               </div>
-              <button type="button" className="text-xs text-red-400 hover:text-red-300 px-2 py-1 mt-5" onClick={() => { const arr = [...((f.images as string[]) ?? [])]; arr.splice(i, 1); set('images', arr); }}>✕</button>
-            </div>
-          ))}
-          <button type="button" className="text-xs text-teal-400 hover:text-teal-300" onClick={() => set('images', [...((f.images as string[]) ?? []), ''])}>+ Add image</button>
+            )}
+          />
         </div>
       );
     }
@@ -6413,15 +6434,17 @@ function renderBlockFields(
         <div className="space-y-4">
           <TextInput label="Section heading" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <Repeater<{ photo: string; name: string; title: string }>
+          <Repeater<{ photo: string; name: string; title: string; videoUrl?: string }>
             label="Leaders"
-            items={(f.items as { photo: string; name: string; title: string }[]) ?? []}
+            items={(f.items as { photo: string; name: string; title: string; videoUrl?: string }[]) ?? []}
             onChange={(v) => set('items', v)}
-            newItem={() => ({ photo: '', name: 'New leader', title: 'Title, Company' })}
+            newItem={() => ({ photo: '', name: 'New leader', title: 'Title, Company', videoUrl: '' })}
             itemPreview={(it) => it.name || '(untitled)'}
             renderItem={(it, u) => (
               <div className="space-y-2">
                 <ImageField label="Photo" value={it.photo ?? ''} onChange={(v) => u({ ...it, photo: v })} />
+                <TextInput label="Video link (YouTube / Shorts / URL)" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
+                <VideoField label="…or upload a video" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
                 <TextInput label="Name" value={it.name ?? ''} onChange={(v) => u({ ...it, name: v })} />
                 <TextInput label="Title / Company" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
               </div>
@@ -6679,6 +6702,245 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="CTA label (HTML ok)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+        </div>
+      );
+    }
+
+    case 'slick-ea-hero': {
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Badge text" f={f} set={set} base="badgeText" segments={[{ key: 'badgeText' }]} />
+          <RichFieldGroup label="Badge highlight (pill)" f={f} set={set} base="badgeHighlight" segments={[{ key: 'badgeHighlight' }]} />
+          <RichFieldGroup label="Headline (static line)" f={f} set={set} base="headline" segments={[{ key: 'headline' }]} />
+          <Textarea label="Rotating phrases (one per line — typed animation)" value={((f.animatedPhrases as string[]) ?? []).join('\n')} onChange={(v) => set('animatedPhrases', v.split('\n'))} />
+          <RichFieldGroup label="Description" f={f} set={set} base="description" segments={[{ key: 'description' }]} />
+          <TextInput label="Button text" value={f.buttonText as string ?? ''} onChange={(v) => set('buttonText', v)} />
+          <RichFieldGroup label="Credits line" f={f} set={set} base="creditsText" segments={[{ key: 'creditsText' }]} />
+        </div>
+      );
+    }
+
+    case 'slick-ea-problem': {
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading (white part)" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
+          <RichFieldGroup label="Heading (red part)" f={f} set={set} base="headingRed" segments={[{ key: 'headingRed' }]} />
+          <NumberInput label="Loss percent (drives big stat + bar)" value={f.lossPercent as number ?? 33} onChange={(v) => set('lossPercent', v)} />
+          <RichFieldGroup label="Loss label" f={f} set={set} base="lossLabel" segments={[{ key: 'lossLabel' }]} />
+          <TextInput label="Bar 'handled' label" value={f.handledLabel as string ?? ''} onChange={(v) => set('handledLabel', v)} />
+          <TextInput label="Bar 'lost' label" value={f.lostLabel as string ?? ''} onChange={(v) => set('lostLabel', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<{ value: string; text: string }>
+            label="Stat cards"
+            items={(f.stats as { value: string; text: string }[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ value: '00%', text: 'Description' })}
+            itemPreview={(it) => it.value || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Value" value={it.value ?? ''} onChange={(v) => u({ ...it, value: v })} />
+                <TextInput label="Text" value={it.text ?? ''} onChange={(v) => u({ ...it, text: v })} />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="Callout text (teal)" f={f} set={set} base="calloutText" segments={[{ key: 'calloutText' }]} />
+        </div>
+      );
+    }
+
+    case 'slick-ea-capabilities': {
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<{ value: string; label: string; compare: string }>
+            label="Capability cards"
+            items={(f.cards as { value: string; label: string; compare: string }[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ value: 'Value', label: 'Label', compare: 'Comparison' })}
+            itemPreview={(it) => it.value || '(untitled)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <TextInput label="Big value" value={it.value ?? ''} onChange={(v) => u({ ...it, value: v })} />
+                <TextInput label="Label" value={it.label ?? ''} onChange={(v) => u({ ...it, label: v })} />
+                <TextInput label="Comparison line" value={it.compare ?? ''} onChange={(v) => u({ ...it, compare: v })} />
+              </div>
+            )}
+          />
+          <RichFieldGroup label="Footnote" f={f} set={set} base="footnote" segments={[{ key: 'footnote' }]} />
+        </div>
+      );
+    }
+
+    case 'slick-ea-languages': {
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
+          <Textarea label="Row 1 words (one per line — scrolls right)" value={((f.rowOne as string[]) ?? []).join('\n')} onChange={(v) => set('rowOne', v.split('\n'))} />
+          <Textarea label="Row 2 words (one per line — scrolls left)" value={((f.rowTwo as string[]) ?? []).join('\n')} onChange={(v) => set('rowTwo', v.split('\n'))} />
+        </div>
+      );
+    }
+
+    case 'slick-ea-best': {
+      type Tab = Record<string, unknown>;
+      const VIS_OPTS = [
+        { value: 'bar', label: 'Bar chart (SCAI vs competitor)' },
+        { value: 'steps', label: 'Numbered steps' },
+        { value: 'labeledRows', label: 'Labeled rows' },
+      ] as const;
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Section heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Section subheading" f={f} set={set} base="subheading" segments={[{ key: 'subheading' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<Tab>
+            label="Tabs"
+            items={(f.tabs as Tab[]) ?? []}
+            onChange={(v) => set('tabs', v)}
+            newItem={() => ({ tab: 'NEW TAB', heading: 'Heading', description: 'Description', statValue: '00', statCaption: 'Caption', bullets: [], visualType: 'bar', barYLabel: 'Label', barScaiH: 140, barCompH: 279, barScaiLabel: 'Our Agent', barCompLabel: 'Others' })}
+            itemPreview={(it) => (it.tab as string) || '(tab)'}
+            renderItem={(it, u) => {
+              const vis = (it.visualType as string) ?? 'bar';
+              return (
+                <div className="space-y-2">
+                  <TextInput label="Tab label" value={it.tab as string ?? ''} onChange={(v) => u({ ...it, tab: v })} />
+                  <RichTextInput label="Heading" {...richItemProps(it, 'heading', u)} />
+                  <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
+                  <TextInput label="Big stat value" value={it.statValue as string ?? ''} onChange={(v) => u({ ...it, statValue: v })} />
+                  <TextInput label="Stat caption" value={it.statCaption as string ?? ''} onChange={(v) => u({ ...it, statCaption: v })} />
+                  <Repeater<{ title: string; text: string }>
+                    label="Bullets"
+                    items={(it.bullets as { title: string; text: string }[]) ?? []}
+                    onChange={(v) => u({ ...it, bullets: v })}
+                    newItem={() => ({ title: 'Title', text: 'Text' })}
+                    itemPreview={(b) => b.title || '(bullet)'}
+                    renderItem={(b, bu) => (
+                      <div className="space-y-2">
+                        <TextInput label="Title" value={b.title ?? ''} onChange={(v) => bu({ ...b, title: v })} />
+                        <TextInput label="Text" value={b.text ?? ''} onChange={(v) => bu({ ...b, text: v })} />
+                      </div>
+                    )}
+                  />
+                  <Select<'bar' | 'steps' | 'labeledRows'>
+                    label="Right-side visual"
+                    value={vis as 'bar' | 'steps' | 'labeledRows'}
+                    onChange={(v) => u({ ...it, visualType: v })}
+                    options={VIS_OPTS as unknown as { value: 'bar' | 'steps' | 'labeledRows'; label: string }[]}
+                  />
+                  {vis === 'bar' && (
+                    <>
+                      <TextInput label="Chart Y-axis label" value={it.barYLabel as string ?? ''} onChange={(v) => u({ ...it, barYLabel: v })} />
+                      <NumberInput label="Our bar height (0–279)" value={it.barScaiH as number ?? 140} onChange={(v) => u({ ...it, barScaiH: v })} />
+                      <NumberInput label="Competitor bar height (0–279)" value={it.barCompH as number ?? 279} onChange={(v) => u({ ...it, barCompH: v })} />
+                      <TextInput label="Our bar label" value={it.barScaiLabel as string ?? ''} onChange={(v) => u({ ...it, barScaiLabel: v })} />
+                      <TextInput label="Competitor bar label" value={it.barCompLabel as string ?? ''} onChange={(v) => u({ ...it, barCompLabel: v })} />
+                    </>
+                  )}
+                  {vis === 'steps' && (
+                    <>
+                      <TextInput label="Steps caption" value={it.stepsTitle as string ?? ''} onChange={(v) => u({ ...it, stepsTitle: v })} />
+                      <Textarea label="Steps (one per line)" value={((it.steps as string[]) ?? []).join('\n')} onChange={(v) => u({ ...it, steps: v.split('\n') })} />
+                    </>
+                  )}
+                  {vis === 'labeledRows' && (
+                    <Repeater<{ label: string; text: string }>
+                      label="Rows"
+                      items={(it.rows as { label: string; text: string }[]) ?? []}
+                      onChange={(v) => u({ ...it, rows: v })}
+                      newItem={() => ({ label: 'LABEL', text: 'Text' })}
+                      itemPreview={(r) => r.label || '(row)'}
+                      renderItem={(r, ru) => (
+                        <div className="space-y-2">
+                          <TextInput label="Label" value={r.label ?? ''} onChange={(v) => ru({ ...r, label: v })} />
+                          <TextInput label="Text" value={r.text ?? ''} onChange={(v) => ru({ ...r, text: v })} />
+                        </div>
+                      )}
+                    />
+                  )}
+                </div>
+              );
+            }}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-ea-enterprise': {
+      type EntCard = Record<string, unknown>;
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
+          <TextInput label="Button text" value={f.buttonText as string ?? ''} onChange={(v) => set('buttonText', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-400">Feature cards — pick the little diagram (visual) shown inside each card.</p>
+          <Repeater<EntCard>
+            label="Feature cards"
+            items={(f.cards as EntCard[]) ?? []}
+            onChange={(v) => set('cards', v)}
+            newItem={() => ({ title: 'New feature', description: 'Description', visualType: 'chips', chips: [] })}
+            itemPreview={(it) => (it.title as string) || '(untitled)'}
+            renderItem={(it, u) => {
+              const vis = (it.visualType as string) ?? 'chips';
+              return (
+                <div className="space-y-2">
+                  <RichTextInput label="Title" {...richItemProps(it, 'title', u)} />
+                  <RichTextInput label="Description" {...richItemProps(it, 'description', u)} />
+                  <Select<'flow' | 'stat' | 'grid' | 'chips'>
+                    label="Diagram type"
+                    value={vis as 'flow' | 'stat' | 'grid' | 'chips'}
+                    onChange={(v) => u({ ...it, visualType: v })}
+                    options={[
+                      { value: 'chips', label: 'Chips (pill row)' },
+                      { value: 'flow', label: 'Flow (pill → pill)' },
+                      { value: 'stat', label: 'Chips + big stat' },
+                      { value: 'grid', label: '3-tile grid' },
+                    ]}
+                  />
+                  {vis === 'chips' && (
+                    <TextInput label="Chips (comma-separated)" value={((it.chips as string[]) ?? []).join(', ')} onChange={(v) => u({ ...it, chips: v.split(',').map((s) => s.trim()) })} />
+                  )}
+                  {vis === 'flow' && (
+                    <>
+                      <TextInput label="From pill" value={it.flowFrom as string ?? ''} onChange={(v) => u({ ...it, flowFrom: v })} />
+                      <Select<'accent' | 'neutral'> label="From pill style" value={(it.flowFromStyle as 'accent' | 'neutral') ?? 'neutral'} onChange={(v) => u({ ...it, flowFromStyle: v })} options={[{ value: 'neutral', label: 'Neutral' }, { value: 'accent', label: 'Accent (teal outline)' }]} />
+                      <TextInput label="To pill" value={it.flowTo as string ?? ''} onChange={(v) => u({ ...it, flowTo: v })} />
+                      <Select<'filled' | 'accent' | 'neutral'> label="To pill style" value={(it.flowToStyle as 'filled' | 'accent' | 'neutral') ?? 'filled'} onChange={(v) => u({ ...it, flowToStyle: v })} options={[{ value: 'filled', label: 'Filled (teal)' }, { value: 'accent', label: 'Accent (teal outline)' }, { value: 'neutral', label: 'Neutral' }]} />
+                    </>
+                  )}
+                  {vis === 'stat' && (
+                    <>
+                      <TextInput label="Chips (comma-separated)" value={((it.statChips as string[]) ?? []).join(', ')} onChange={(v) => u({ ...it, statChips: v.split(',').map((s) => s.trim()) })} />
+                      <TextInput label="Stat value" value={it.statValue as string ?? ''} onChange={(v) => u({ ...it, statValue: v })} />
+                      <TextInput label="Stat label" value={it.statLabel as string ?? ''} onChange={(v) => u({ ...it, statLabel: v })} />
+                    </>
+                  )}
+                  {vis === 'grid' && (
+                    <Repeater<{ code: string; label: string }>
+                      label="Tiles (3)"
+                      items={(it.tiles as { code: string; label: string }[]) ?? []}
+                      onChange={(v) => u({ ...it, tiles: v })}
+                      newItem={() => ({ code: 'X', label: 'Label' })}
+                      itemPreview={(t) => t.code || '(tile)'}
+                      renderItem={(t, tu) => (
+                        <div className="space-y-2">
+                          <TextInput label="Code" value={t.code ?? ''} onChange={(v) => tu({ ...t, code: v })} />
+                          <TextInput label="Label" value={t.label ?? ''} onChange={(v) => tu({ ...t, label: v })} />
+                        </div>
+                      )}
+                    />
+                  )}
+                </div>
+              );
+            }}
+          />
         </div>
       );
     }

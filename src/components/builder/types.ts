@@ -199,6 +199,12 @@ export type TemplateBlockType =
   | 'slick-conclave-stats'
   | 'slick-conclave-register'
   | 'slick-conclave-guests'
+  | 'slick-ea-hero'
+  | 'slick-ea-problem'
+  | 'slick-ea-capabilities'
+  | 'slick-ea-languages'
+  | 'slick-ea-best'
+  | 'slick-ea-enterprise'
   | 'slick-sc-saudi-hero'
   | 'slick-sc-saudi-leadership'
   | 'slick-sc-saudi-presence'
@@ -612,6 +618,12 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-conclave-stats': 'Conclave — Stats',
   'slick-conclave-register': 'Conclave — Register Form',
   'slick-conclave-guests': 'Conclave — Guests Grid',
+  'slick-ea-hero': 'Enquiry Agent — Hero',
+  'slick-ea-problem': 'Enquiry Agent — Cost of Poor Support',
+  'slick-ea-capabilities': 'Enquiry Agent — Built To Do',
+  'slick-ea-languages': 'Enquiry Agent — Multilingual',
+  'slick-ea-best': 'Enquiry Agent — Best AI Agent (Tabs)',
+  'slick-ea-enterprise': 'Enquiry Agent — Enterprise',
   'slick-sc-saudi-hero': 'SC — Saudi Presence Hero',
   'slick-sc-saudi-leadership': 'SC — Saudi Leadership Team',
   'slick-sc-saudi-presence': 'SC — Saudi Presence Photos',

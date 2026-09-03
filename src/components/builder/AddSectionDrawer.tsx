@@ -294,6 +294,14 @@ const GROUPS: Group[] = [
     { type: "slick-conclave-register", label: "Conclave — Register Form", Icon: MessageSquare },
     { type: "slick-conclave-guests",   label: "Conclave — Guests Grid",   Icon: Grid2x2 },
   ]},
+  { name: "Enquiry Agent", items: [
+    { type: "slick-ea-hero",         label: "Enquiry Agent — Hero",                 Icon: Sparkles },
+    { type: "slick-ea-problem",      label: "Enquiry Agent — Cost of Poor Support", Icon: TrendingUp },
+    { type: "slick-ea-capabilities", label: "Enquiry Agent — Built To Do",          Icon: Grid2x2 },
+    { type: "slick-ea-languages",    label: "Enquiry Agent — Multilingual",         Icon: Languages },
+    { type: "slick-ea-best",         label: "Enquiry Agent — Best AI Agent (Tabs)", Icon: BarChart3 },
+    { type: "slick-ea-enterprise",   label: "Enquiry Agent — Enterprise",           Icon: Briefcase },
+  ]},
   { name: "SFA Landing", items: [
     { type: "slick-sfa-hero", label: "SFA — Hero", Icon: Sparkles },
     { type: "slick-sfa-hero-v2", label: "SFA — Hero V2", Icon: Sparkles },

@@ -990,6 +990,43 @@ export function PageBuilder() {
     setSelectedBlockId(null);
   };
 
+  // Duplicate the CURRENTLY OPEN page — its content is guaranteed loaded (any
+  // other page's `pageBlocks` entry may be stale/unfetched, so this only ever
+  // reads from the active page's live state, same source publishPage() uses).
+  // Mirrors copyBlockToClipboard's clone-with-fresh-ids approach, but remaps
+  // desktop and mobile TOGETHER through one id map — mobile blocks intentionally
+  // reuse desktop block ids for shared slots (see i18n-walk.ts), so remapping
+  // them independently would silently break that pairing in the copy.
+  const duplicatePage = () => {
+    const src = currentPage;
+    const name = window.prompt("New page name?", `${src.title} copy`);
+    if (!name) return;
+    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || `p_${Date.now()}`;
+    if (pages.some((p) => p.id === id)) {
+      toast.error("A page with that slug already exists");
+      return;
+    }
+    const idMap = new Map<string, string>();
+    const cloneWithNewIds = (list: Block[]) =>
+      list.map((b) => {
+        const newId = idMap.get(b.id) ?? `b_${Math.random().toString(36).slice(2, 9)}`;
+        idMap.set(b.id, newId);
+        return { ...JSON.parse(JSON.stringify(b)), id: newId };
+      });
+    const srcEntry = pageBlocks[activePage] ?? { desktop: [], mobile: null };
+    const newEntry: PageVariants = {
+      desktop: cloneWithNewIds(srcEntry.desktop),
+      mobile: srcEntry.mobile ? cloneWithNewIds(srcEntry.mobile) : null,
+    };
+    const newPage: Page = { id, name, slug: `/${id}`, title: name, hostnames: [] };
+    commit({ pages: [...pages, newPage], pageBlocks: { ...pageBlocks, [id]: newEntry } });
+    const srcThemes = themesByPage[activePage] ?? DEFAULT_THEME_VARIANTS;
+    setThemesByPage((cur) => ({ ...cur, [id]: JSON.parse(JSON.stringify(srcThemes)) }));
+    setActivePage(id);
+    setSelectedBlockId(null);
+    toast.success(`Duplicated "${src.title}" — review and Publish to make it live`);
+  };
+
   const onThemeChange = (t: Theme) => {
     // The [theme] effect below pushes BUILDER_THEME_UPDATE to the iframe — no direct send here
     setThemesByPage((cur) => {
@@ -1364,6 +1401,11 @@ export function PageBuilder() {
           <button onClick={redo} disabled={!canRedo} className="p-2 rounded hover:bg-slate-800 pb-transition disabled:opacity-30 disabled:hover:bg-transparent" title="Redo"><Redo2 size={16} /></button>
           <button onClick={() => openVersions(activePage)} className="p-2 rounded hover:bg-slate-800 pb-transition" title="Version history"><History size={16} /></button>
           <button onClick={() => setThemeOpen(true)} className="p-2 rounded hover:bg-slate-800 pb-transition" title="Theme"><Palette size={16} /></button>
+          {activePage !== "__blog__" && (
+            <button onClick={duplicatePage} className="p-2 rounded hover:bg-slate-800 pb-transition" title="Duplicate this page">
+              <Copy size={16} />
+            </button>
+          )}
           <button onClick={() => setPreviewOpen(true)} className="px-3 py-1.5 text-sm rounded-md border border-slate-600 hover:bg-slate-800 pb-transition inline-flex items-center gap-1.5">
             <Play size={13} /> Preview
           </button>
