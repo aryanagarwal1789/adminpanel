@@ -4785,6 +4785,21 @@ function renderBlockFields(
         </div>
       );
 
+    case 'slick-sc-reinvent-hero':
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="Button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <TextInput label="Button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <Textarea label="Stats (one per line — separated by a divider)" value={((f.stats as string[]) ?? []).join('\n')} onChange={(v) => set('stats', v.split('\n'))} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-400">Right side: leave empty for the animated SCAI logo, or upload custom artwork to override it.</p>
+          <ImageField label="Right image (optional)" value={f.rightImage as string ?? ''} onChange={(v) => set('rightImage', v)} />
+        </div>
+      );
+
     case 'slick-sc-navbar': {
       type NavItem = { name: string; desc: string; href: string; iconKey: string; ai?: boolean; iconImage?: string; iconBg?: string };
       type NavCat = { key: string; label: string; sub: string; accent: string; iconKey: string; items: NavItem[]; flagship?: boolean };

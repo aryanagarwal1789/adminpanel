@@ -186,6 +186,7 @@ export type TemplateBlockType =
   | 'slick-sc-navbar'
   | 'slick-sc-hero-v2'
   | 'slick-sc-hero-v3'
+  | 'slick-sc-reinvent-hero'
   | 'slick-conclave-hero'
   | 'slick-conclave-trailer'
   | 'slick-conclave-guest-scroller'
@@ -605,6 +606,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sc-navbar': 'SC — Navbar',
   'slick-sc-hero-v2': 'SC — Hero V2 (Person + Floating Cards)',
   'slick-sc-hero-v3': 'SC — Hero V3 (Center Image)',
+  'slick-sc-reinvent-hero': 'SC — Reinvent Hero (Split + Blob)',
   'slick-conclave-hero': 'Conclave — Hero',
   'slick-conclave-trailer': 'Conclave — Trailer Video',
   'slick-conclave-guest-scroller': 'Conclave — Guest Scroller',
