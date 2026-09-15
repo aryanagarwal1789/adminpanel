@@ -3,6 +3,7 @@ import { authJsonHeaders, authHeaders } from "@/lib/builder-drafts";
 import { getAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import type { BlogPost, ContentBlock, ContentBlockType } from "./BlogPanel";
+import { importBlogFile } from "./blogImport";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 const UPLOAD_URL = `${BACKEND}/site/upload`;
@@ -753,8 +754,13 @@ export function BlogEditorPage() {
   const isNew = !selected;
   const upload = useUpload();
 
-  // docKey remounts contentEditable surfaces only when switching posts, never mid-edit.
-  const docKey = selected?._id ?? selected?.slug ?? "new";
+  // Bumped to force a fresh remount of the uncontrolled contentEditable surfaces
+  // (title/excerpt/body) when the form is replaced without a post switch — e.g.
+  // after a Markdown import, whose `selected` stays null.
+  const [remountNonce, setRemountNonce] = useState(0);
+  // docKey remounts contentEditable surfaces only when switching posts (or on an
+  // explicit nonce bump), never mid-edit.
+  const docKey = `${selected?._id ?? selected?.slug ?? "new"}#${remountNonce}`;
 
   // Sync editable state SYNCHRONOUSLY when the selected post changes (React's
   // "adjust state while rendering" pattern). Doing this in a useEffect instead
@@ -778,6 +784,43 @@ export function BlogEditorPage() {
   }
 
   const uploadImg = async (file: File): Promise<string | null> => upload(file);
+
+  // ── Markdown / .zip import ──────────────────────────────────────────
+  // Parses the file into the SAME BlogPost + ContentBlock[] shape the editor
+  // produces manually, then loads it as a fresh unsaved draft for review.
+  const [importing, setImporting] = useState(false);
+  const handleImportFile = async (file: File) => {
+    setImporting(true);
+    const tId = toast.loading(`Importing ${file.name}…`);
+    try {
+      const { form: imported, tagInput: ti, report } = await importBlogFile(file, uploadImg, listType);
+      // Enter "new draft" mode: bump the nonce so the title/excerpt/body surfaces
+      // remount and re-read the imported form, and pre-set prevDocKey to the
+      // resulting docKey so the render-time sync doesn't reset the form to EMPTY.
+      const nextNonce = remountNonce + 1;
+      prevDocKey.current = `new#${nextNonce}`;
+      setSelected(null);
+      setRemountNonce(nextNonce);
+      setForm({ ...EMPTY, ...imported });
+      setTagInput(ti);
+      setSlugManual(true);
+      setDirty(true);
+      toast.success(report[0] ?? "Imported — review, then Publish", { id: tId });
+      const notes = report.slice(1);
+      if (notes.length) toast.message(`${notes.length} note(s)`, { description: notes.join("\n"), duration: 8000 });
+    } catch (e) {
+      toast.error(`Import failed: ${(e as Error).message}`, { id: tId });
+    } finally {
+      setImporting(false);
+    }
+  };
+  const pickImportFile = () => {
+    const inp = document.createElement("input");
+    inp.type = "file";
+    inp.accept = ".md,.markdown,.zip";
+    inp.onchange = () => { const f = inp.files?.[0]; if (f) void handleImportFile(f); };
+    inp.click();
+  };
 
   // Fetch posts
   useEffect(() => {
@@ -1778,6 +1821,9 @@ export function BlogEditorPage() {
           onClick={() => setRightOpen((o) => !o)}
         >
           {Ic.settings}
+        </button>
+        <button className="bs-tbtn bs-ghost" onClick={pickImportFile} disabled={importing} title="Import a Markdown (.md) or .zip package">
+          {Ic.download}{importing ? "Importing…" : "Import"}
         </button>
         <button className="bs-tbtn bs-ghost" onClick={() => setExportKind("html")}>
           {Ic.download}Export

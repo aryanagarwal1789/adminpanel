@@ -218,7 +218,7 @@ function RootComponent() {
           <Outlet />
         </AuthGate>
       </ClientOnly>
-      <Toaster richColors position="top-right" />
+      <Toaster richColors position="top-right" closeButton />
     </QueryClientProvider>
   );
 }
