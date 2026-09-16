@@ -2683,7 +2683,7 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
     imgCenter:     '',
   },
   'slick-sc-reinvent-hero': {
-    heading: 'We reinvented\nSFA / DMS',
+    heading: 'We reinvented\nSFA/DMS',
     sub: 'and every Sales & RTM automation\ninvented in the last 30 years',
     ctaLabel: 'Request Trial Access',
     ctaUrl: '#',
