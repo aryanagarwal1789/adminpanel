@@ -2403,6 +2403,25 @@ function renderBlockFields(
         </div>
       );
 
+    case 'slick-iff-register':
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
+          <RichFieldGroup label="Heading Accent (gradient word)" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
+          <RichFieldGroup label="Heading Tail (after accent)" f={f} set={set} base="headingTail" segments={[{ key: 'headingTail' }]} />
+          <RichFieldGroup label="Body text" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="Form title" f={f} set={set} base="formTitle" segments={[{ key: 'formTitle' }]} />
+          <RichFieldGroup label="Form subtext" f={f} set={set} base="formSubtext" segments={[{ key: 'formSubtext' }]} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <RichFieldGroup label="API endpoint (POST)" f={f} set={set} base="apiEndpoint" segments={[{ key: 'apiEndpoint' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Hardcoded City (sent in payload — not shown in form)" value={(f.hardcodedCity as string) ?? ''} onChange={(v) => set('hardcodedCity', v)} />
+          <TextInput label="Hardcoded Joining As (sent in payload — not shown in form)" value={(f.hardcodedJoiningAs as string) ?? ''} onChange={(v) => set('hardcodedJoiningAs', v)} />
+        </div>
+      );
+
     case 'slick-sc-product-cards': {
       type PcCard = { title?: string; description?: string; logoImg?: string; logoAlt?: string; logoText?: string; logoColor?: string; href?: string };
       return (

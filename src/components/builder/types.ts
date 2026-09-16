@@ -64,6 +64,7 @@ export type TemplateBlockType =
   | 'slick-dv-carousel'
   | 'slick-dv-split'
   | 'slick-dv-register'
+  | 'slick-iff-register'
   | 'slick-dv-vision'
   | 'slick-dv-video-split'
   | 'slick-dv-video-pointers'
@@ -484,6 +485,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-dv-carousel': 'DigiVyapar — Platform Carousel',
   'slick-dv-split': 'DigiVyapar — Split Section',
   'slick-dv-register': 'DigiVyapar — Register Form',
+  'slick-iff-register': 'India Food Forum — Booth Register',
   'slick-dv-vision': 'DigiVyapar — Vision & Stats',
   'slick-dv-video-split': 'DigiVyapar — Video + Copy Split',
   'slick-dv-video-pointers': 'DigiVyapar — Video + Pointers Split',
