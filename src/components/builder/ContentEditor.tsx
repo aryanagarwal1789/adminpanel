@@ -4795,8 +4795,9 @@ function renderBlockFields(
           <TextInput label="Button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <Textarea label="Stats (one per line — separated by a divider)" value={((f.stats as string[]) ?? []).join('\n')} onChange={(v) => set('stats', v.split('\n'))} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <p className="text-xs text-slate-400">Right side: leave empty for the animated SCAI logo, or upload custom artwork to override it.</p>
-          <ImageField label="Right image (optional)" value={f.rightImage as string ?? ''} onChange={(v) => set('rightImage', v)} />
+          <p className="text-xs text-slate-400">Right side: leave empty for the animated SCAI logo, or override it — paste an image/SVG URL, or upload artwork.</p>
+          <TextInput label="Right image URL (paste an image/SVG link)" value={f.rightImage as string ?? ''} onChange={(v) => set('rightImage', v)} />
+          <ImageField label="…or upload artwork" value={f.rightImage as string ?? ''} onChange={(v) => set('rightImage', v)} />
         </div>
       );
 
@@ -4923,6 +4924,7 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <p className="text-xs text-slate-500 font-medium">Dare to Compare card</p>
+          <Toggle label="Show Dare to Compare card" value={(f.showDtc as boolean) ?? true} onChange={(v) => set('showDtc', v)} />
           <ImageField label="Logo" {...imageI18nProps(f, "dtcLogo", update)} />
           <RichFieldGroup label="Heading (normal part)" f={f} set={set} base="dtcHeadingPre" segments={[{ key: 'dtcHeadingPre' }]} />
           <RichFieldGroup label="Heading (gold accent)" f={f} set={set} base="dtcHeadingAccent" segments={[{ key: 'dtcHeadingAccent' }]} />
