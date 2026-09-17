@@ -164,6 +164,7 @@ export type TemplateBlockType =
   | 'slick-scai-video-showcase'
   | 'slick-scai-agents'
   | 'slick-ab-intro'
+  | 'slick-ab-intro-v2'
   | 'slick-ab-mission-vision'
   | 'slick-ab-founder-banner'
   | 'slick-ab-stats'
@@ -188,6 +189,7 @@ export type TemplateBlockType =
   | 'slick-sc-hero-v2'
   | 'slick-sc-hero-v3'
   | 'slick-sc-reinvent-hero'
+  | 'slick-sc-reinvent-hero-v2'
   | 'slick-conclave-hero'
   | 'slick-conclave-trailer'
   | 'slick-conclave-guest-scroller'
@@ -585,6 +587,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-scai-video-showcase': 'SCAI — Video Showcase',
   'slick-scai-agents': 'SCAI — Agent Ecosystem',
   'slick-ab-intro': 'About Us — Intro & Video',
+  'slick-ab-intro-v2': 'About Us — Intro & Video V2',
   'slick-ab-mission-vision': 'About Us — Mission & Vision',
   'slick-ab-founder-banner': 'About Us — Founder Banner',
   'slick-ab-stats': 'About Us — Stats',
@@ -609,6 +612,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sc-hero-v2': 'SC — Hero V2 (Person + Floating Cards)',
   'slick-sc-hero-v3': 'SC — Hero V3 (Center Image)',
   'slick-sc-reinvent-hero': 'SC — Reinvent Hero (Split + Blob)',
+  'slick-sc-reinvent-hero-v2': 'SC — Reinvent Hero (Image BG)',
   'slick-conclave-hero': 'Conclave — Hero',
   'slick-conclave-trailer': 'Conclave — Trailer Video',
   'slick-conclave-guest-scroller': 'Conclave — Guest Scroller',

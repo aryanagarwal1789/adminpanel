@@ -2403,24 +2403,56 @@ function renderBlockFields(
         </div>
       );
 
-    case 'slick-iff-register':
+    case 'slick-iff-register': {
+      type IffBenefit = { icon?: string; line1?: string; line2?: string };
+      const iffIcons = [
+        { value: 'calendar', label: 'Calendar' },
+        { value: 'lightning', label: 'Lightning' },
+        { value: 'team', label: 'Team' },
+        { value: 'person', label: 'Person' },
+        { value: 'building', label: 'Building' },
+        { value: 'email', label: 'Email' },
+      ];
       return (
         <div className="space-y-4">
-          <RichFieldGroup label="Eyebrow" f={f} set={set} base="eyebrow" segments={[{ key: 'eyebrow' }]} />
+          <div className="grid grid-cols-2 gap-2">
+            <TextInput label="Badge lead-in" value={(f.eyebrow as string) ?? ''} onChange={(v) => set('eyebrow', v)} placeholder="Meet us live at" />
+            <TextInput label="Badge highlight" value={(f.eyebrowStrong as string) ?? ''} onChange={(v) => set('eyebrowStrong', v)} placeholder="Booth A38" />
+          </div>
           <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <RichFieldGroup label="Heading Accent (gradient word)" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
           <RichFieldGroup label="Heading Tail (after accent)" f={f} set={set} base="headingTail" segments={[{ key: 'headingTail' }]} />
           <RichFieldGroup label="Body text" f={f} set={set} base="body" segments={[{ key: 'body' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<IffBenefit>
+            label="Benefit chips (left column)"
+            items={(f.benefits as IffBenefit[]) ?? []}
+            onChange={(v) => set('benefits', v)}
+            newItem={() => ({ icon: 'lightning', line1: 'New benefit', line2: '' })}
+            itemPreview={(b) => b.line1 || '(benefit)'}
+            renderItem={(b, u) => (
+              <div className="space-y-2">
+                <Select label="Icon" value={b.icon ?? 'lightning'} onChange={(x) => u({ ...b, icon: x })} options={iffIcons} />
+                <TextInput label="Line 1" value={b.line1 ?? ''} onChange={(x) => u({ ...b, line1: x })} />
+                <TextInput label="Line 2" value={b.line2 ?? ''} onChange={(x) => u({ ...b, line2: x })} />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Form title" f={f} set={set} base="formTitle" segments={[{ key: 'formTitle' }]} />
           <RichFieldGroup label="Form subtext" f={f} set={set} base="formSubtext" segments={[{ key: 'formSubtext' }]} />
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <TextInput label="Privacy note (below button)" value={(f.privacyText as string) ?? ''} onChange={(v) => set('privacyText', v)} />
           <RichFieldGroup label="API endpoint (POST)" f={f} set={set} base="apiEndpoint" segments={[{ key: 'apiEndpoint' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="Success title" f={f} set={set} base="successTitle" segments={[{ key: 'successTitle' }]} />
+          <RichFieldGroup label="Success message" f={f} set={set} base="successMessage" segments={[{ key: 'successMessage' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <TextInput label="Hardcoded City (sent in payload — not shown in form)" value={(f.hardcodedCity as string) ?? ''} onChange={(v) => set('hardcodedCity', v)} />
           <TextInput label="Hardcoded Joining As (sent in payload — not shown in form)" value={(f.hardcodedJoiningAs as string) ?? ''} onChange={(v) => set('hardcodedJoiningAs', v)} />
         </div>
       );
+    }
 
     case 'slick-sc-product-cards': {
       type PcCard = { title?: string; description?: string; logoImg?: string; logoAlt?: string; logoText?: string; logoColor?: string; href?: string };
@@ -4435,6 +4467,7 @@ function renderBlockFields(
       );
 
     case 'slick-ab-intro':
+    case 'slick-ab-intro-v2':
       return (
         <div className="space-y-4">
           <RichFieldGroup label="Pill text" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
@@ -4817,6 +4850,36 @@ function renderBlockFields(
           <p className="text-xs text-slate-400">Right side: leave empty for the animated SCAI logo, or override it — paste an image/SVG URL, or upload artwork.</p>
           <TextInput label="Right image URL (paste an image/SVG link)" value={f.rightImage as string ?? ''} onChange={(v) => set('rightImage', v)} />
           <ImageField label="…or upload artwork" value={f.rightImage as string ?? ''} onChange={(v) => set('rightImage', v)} />
+        </div>
+      );
+
+    case 'slick-sc-reinvent-hero-v2':
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Heading line 1" f={f} set={set} base="line1" segments={[{ key: 'line1' }]} />
+          <RichFieldGroup label="Heading line 2 (use / for the thin slash)" f={f} set={set} base="line2" segments={[{ key: 'line2' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-400">Background image — defaults to /bg.webp.</p>
+          <TextInput label="Background image URL" value={f.bgImage as string ?? ''} onChange={(v) => set('bgImage', v)} />
+          <ImageField label="…or upload background" value={f.bgImage as string ?? ''} onChange={(v) => set('bgImage', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<{ num: string; label: string }>
+            label="Stats"
+            items={(f.stats as { num: string; label: string }[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ num: '0+', label: 'Label' })}
+            itemPreview={(it) => `${it.num} ${it.label}`}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <RichTextInput label="Number / word" {...richItemProps(it, 'num', u)} />
+                <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="Button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <TextInput label="Button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
 
