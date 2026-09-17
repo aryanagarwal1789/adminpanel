@@ -47,6 +47,7 @@ const GROUPS: Group[] = [
     { type: "slick-sc-hero-v3",        label: "SC — Hero V3 (Center Image)", Icon: Sparkles },
     { type: "slick-sc-reinvent-hero",  label: "SC — Reinvent Hero (Split + Blob)", Icon: Sparkles },
     { type: "slick-sc-reinvent-hero-v2", label: "SC — Reinvent Hero (Image BG)", Icon: Sparkles },
+    { type: "slick-sc-reinvent-hero-v3", label: "SC — Reinvent Hero (Video)", Icon: MonitorPlay },
     { type: "slick-sc-video-showcase", label: "SC — Video Showcase", Icon: MonitorPlay },
     { type: "slick-sc-platform-grid",  label: "SC — Platform Grid",  Icon: Grid      },
     { type: "slick-sc-privacy-policy", label: "SC — Privacy Policy", Icon: FileText  },

@@ -4883,6 +4883,45 @@ function renderBlockFields(
         </div>
       );
 
+    case 'slick-sc-reinvent-hero-v3':
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Heading line 1" f={f} set={set} base="line1" segments={[{ key: 'line1' }]} />
+          <RichFieldGroup label="Product word (use / for the thin slash)" f={f} set={set} base="line2" segments={[{ key: 'line2' }]} />
+          <p className="text-xs text-slate-400">Heading and product word render on one line.</p>
+          <RichFieldGroup label="Subtext (single line)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="Button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <TextInput label="Button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-400">Video shown inside the device frame. Leave blank to show just the poster / empty frame.</p>
+          <VideoField label="Upload video (mp4/webm)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <TextInput label="…or paste a video URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <ImageField label="Poster / fallback image" value={f.posterImage as string ?? ''} onChange={(v) => set('posterImage', v)} />
+          <Toggle label="Blue drop shadow around video" value={f.videoGlow !== false} onChange={(v) => set('videoGlow', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-400">Background image — defaults to /bg.webp.</p>
+          <TextInput label="Background image URL" value={f.bgImage as string ?? ''} onChange={(v) => set('bgImage', v)} />
+          <ImageField label="…or upload background" value={f.bgImage as string ?? ''} onChange={(v) => set('bgImage', v)} />
+          <TextInput label="Mobile background URL (≤860px)" value={f.mobileBgImage as string ?? ''} onChange={(v) => set('mobileBgImage', v)} />
+          <ImageField label="…or upload mobile background" value={f.mobileBgImage as string ?? ''} onChange={(v) => set('mobileBgImage', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<{ num: string; label: string }>
+            label="Stats"
+            items={(f.stats as { num: string; label: string }[]) ?? []}
+            onChange={(v) => set('stats', v)}
+            newItem={() => ({ num: '0+', label: 'Label' })}
+            itemPreview={(it) => `${it.num} ${it.label}`}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <RichTextInput label="Number / word" {...richItemProps(it, 'num', u)} />
+                <RichTextInput label="Label" {...richItemProps(it, 'label', u)} />
+              </div>
+            )}
+          />
+        </div>
+      );
+
     case 'slick-sc-navbar': {
       type NavItem = { name: string; desc: string; href: string; iconKey: string; ai?: boolean; iconImage?: string; iconBg?: string };
       type NavCat = { key: string; label: string; sub: string; accent: string; iconKey: string; items: NavItem[]; flagship?: boolean };
