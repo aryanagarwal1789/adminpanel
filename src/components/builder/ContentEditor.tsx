@@ -4899,6 +4899,9 @@ function renderBlockFields(
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <p className="text-xs text-slate-400">Secondary button (shown to the left of the primary). Leave the label blank to hide it.</p>
+          <TextInput label="Secondary button label" value={f.cta2Label as string ?? ''} onChange={(v) => set('cta2Label', v)} />
+          <TextInput label="Secondary button URL" value={f.cta2Url as string ?? ''} onChange={(v) => set('cta2Url', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs text-slate-400">Video shown inside the device frame. Leave blank to show just the poster / empty frame.</p>
           <VideoField label="Upload video (mp4/webm)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
