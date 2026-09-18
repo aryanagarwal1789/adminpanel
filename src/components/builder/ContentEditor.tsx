@@ -4891,6 +4891,12 @@ function renderBlockFields(
           <p className="text-xs text-slate-400">Heading and product word render on one line.</p>
           <RichFieldGroup label="Subtext (single line)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-400">Agent strip — icon graphic, labels under each icon, and the tagline below.</p>
+          <ImageField label="Agent strip image" value={f.logoImage as string ?? ''} onChange={(v) => set('logoImage', v)} />
+          <Textarea label="Agent labels (one per line, last word is bold)" value={f.agentLabels as string ?? ''} onChange={(v) => set('agentLabels', v)} />
+          <TextInput label="Tagline" value={f.tagline as string ?? ''} onChange={(v) => set('tagline', v)} />
+          <TextInput label="Tagline highlight (accent)" value={f.taglineHighlight as string ?? ''} onChange={(v) => set('taglineHighlight', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Button label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="Button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
