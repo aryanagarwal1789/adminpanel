@@ -2645,17 +2645,35 @@ function renderBlockFields(
       );
     }
 
-    case 'slick-sc-platform-branded':
+    case 'slick-sc-platform-branded': {
+      type AgentItem = { icon?: string; label?: string };
       return (
         <div className="space-y-4">
-          <RichFieldGroup label="Pill / eyebrow" f={f} set={set} base="pillText" segments={[{ key: 'pillText' }]} />
-          <RichFieldGroup label="Heading (plain start)" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
-          <RichFieldGroup label="Heading (teal accent word)" f={f} set={set} base="headingAccent" segments={[{ key: 'headingAccent' }]} />
-          <RichFieldGroup label="Heading (second line)" f={f} set={set} base="headingLine2" segments={[{ key: 'headingLine2' }]} />
-          <RichFieldGroup label="Subtext" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
-          <p className="text-xs text-slate-500">The right side embeds the live sign-in / sign-up (same as the /login page) — no fields to edit.</p>
+          <ImageField label="Brand logo (top-left)" value={f.logoImage as string ?? ''} onChange={(v) => set('logoImage', v)} />
+          <RichFieldGroup label="Heading line 1" f={f} set={set} base="line1" segments={[{ key: 'line1' }]} />
+          <RichFieldGroup label="Product word (use / for the thin slash)" f={f} set={set} base="line2" segments={[{ key: 'line2' }]} />
+          <RichFieldGroup label="Subtext (teal)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <Repeater<AgentItem>
+            label="Agent strip (icon + label, last word bold)"
+            items={(f.agents as AgentItem[]) ?? []}
+            onChange={(v) => set('agents', v)}
+            newItem={() => ({ icon: '', label: 'Agent New' })}
+            itemPreview={(it) => it.label || 'Agent'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <ImageField label="Icon" value={it.icon ?? ''} onChange={(v) => u({ ...it, icon: v })} />
+                <TextInput label="Label" value={it.label ?? ''} onChange={(v) => u({ ...it, label: v })} />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Tagline" value={f.tagline as string ?? ''} onChange={(v) => set('tagline', v)} />
+          <TextInput label="Tagline highlight (accent)" value={f.taglineHighlight as string ?? ''} onChange={(v) => set('taglineHighlight', v)} />
+          <p className="text-xs text-slate-500">The right side embeds the live sign-in (same as the /login page) — no fields to edit.</p>
         </div>
       );
+    }
 
     case 'slick-sc-founder-reels': {
       type ReelItem = { posterUrl?: string; videoUrl?: string };
@@ -6396,6 +6414,10 @@ function renderBlockFields(
           <RichFieldGroup label="Footer pre-text" f={f} set={set} base="ctaPreText" segments={[{ key: 'ctaPreText' }]} />
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-400">Coming-soon badge (above the coming-soon group). Leave the text blank to hide it; leave the URL blank for a non-clickable badge.</p>
+          <TextInput label="Coming-soon badge text" value={f.soonBadgeText as string ?? ''} onChange={(v) => set('soonBadgeText', v)} />
+          <TextInput label="Coming-soon badge URL" value={f.soonBadgeUrl as string ?? ''} onChange={(v) => set('soonBadgeUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<PlatformItem>
             label="Product cards"
