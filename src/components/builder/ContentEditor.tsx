@@ -4511,6 +4511,22 @@ function renderBlockFields(
         </div>
       );
 
+    case 'slick-video-intro':
+      return (
+        <div className="space-y-4">
+          <p style={{ fontSize: 11, color: '#64748b', margin: 0 }}>Title — the accent word renders in teal</p>
+          <RichFieldGroup label="Title before accent" f={f} set={set} base="titlePre" segments={[{ key: 'titlePre' }]} />
+          <RichFieldGroup label="Accent word (teal)" f={f} set={set} base="titleAccent" segments={[{ key: 'titleAccent' }]} />
+          <RichFieldGroup label="Title after accent" f={f} set={set} base="titlePost" segments={[{ key: 'titlePost' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Video URL (YouTube, Vimeo, or .mp4 — autoplays muted)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <ImageField label="Video poster / thumbnail (optional)" {...imageI18nProps(f, "posterUrl", update)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+        </div>
+      );
+
     case 'slick-ab-founder-banner':
       return (
         <div className="space-y-4">

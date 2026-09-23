@@ -165,6 +165,7 @@ export type TemplateBlockType =
   | 'slick-scai-agents'
   | 'slick-ab-intro'
   | 'slick-ab-intro-v2'
+  | 'slick-video-intro'
   | 'slick-ab-mission-vision'
   | 'slick-ab-founder-banner'
   | 'slick-ab-stats'
@@ -589,6 +590,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-scai-agents': 'SCAI — Agent Ecosystem',
   'slick-ab-intro': 'About Us — Intro & Video',
   'slick-ab-intro-v2': 'About Us — Intro & Video V2',
+  'slick-video-intro': 'Personal Video Intro',
   'slick-ab-mission-vision': 'About Us — Mission & Vision',
   'slick-ab-founder-banner': 'About Us — Founder Banner',
   'slick-ab-stats': 'About Us — Stats',
