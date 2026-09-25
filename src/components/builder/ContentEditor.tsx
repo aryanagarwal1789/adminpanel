@@ -6029,7 +6029,7 @@ function renderBlockFields(
 
     case 'slick-scai-industry': {
       type IndustryCat = { label: string; icon: string };
-      const ICON_OPTS = ['cupSoda','cookie','milk','candy','sparkles','wrench','pill','wheat','snowflake','croissant'] as const;
+      const ICON_OPTS = ['none','cupSoda','cookie','milk','candy','sparkles','wrench','pill','wheat','snowflake','croissant'] as const;
       return (
         <div className="space-y-4">
           <RichFieldGroup label="Heading White" f={f} set={set} base="headingWhite" segments={[{ key: 'headingWhite' }]} />
@@ -6052,8 +6052,8 @@ function renderBlockFields(
                 <div className="flex gap-1.5 flex-wrap">
                   {ICON_OPTS.map(ico => (
                     <button key={ico} onClick={() => u({ ...c, icon: ico })}
-                      className={`px-2 py-1 text-xs rounded ${c.icon === ico ? 'bg-teal-700 text-white' : 'bg-slate-700 text-slate-300'}`}>
-                      {ico}
+                      className={`px-2 py-1 text-xs rounded ${(c.icon || 'sparkles') === ico ? 'bg-teal-700 text-white' : 'bg-slate-700 text-slate-300'}`}>
+                      {ico === 'none' ? 'No icon (text only)' : ico}
                     </button>
                   ))}
                 </div>
@@ -6121,6 +6121,9 @@ function renderBlockFields(
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <RichFieldGroup label="CTA bold suffix" f={f} set={set} base="ctaBold" segments={[{ key: 'ctaBold' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Contact button text (leave blank to hide)" value={f.contactLabel as string ?? ''} onChange={(v) => set('contactLabel', v)} />
+          <TextInput label="Contact button URL" value={f.contactUrl as string ?? ''} onChange={(v) => set('contactUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Background image" {...imageI18nProps(f, "bgImageUrl", update)} />
         </div>
@@ -6899,7 +6902,12 @@ function renderBlockFields(
           <RichFieldGroup label="Headline (static line)" f={f} set={set} base="headline" segments={[{ key: 'headline' }]} />
           <Textarea label="Rotating phrases (one per line — typed animation)" value={((f.animatedPhrases as string[]) ?? []).join('\n')} onChange={(v) => set('animatedPhrases', v.split('\n'))} />
           <RichFieldGroup label="Description" f={f} set={set} base="description" segments={[{ key: 'description' }]} />
-          <TextInput label="Button text" value={f.buttonText as string ?? ''} onChange={(v) => set('buttonText', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="Primary button text (teal)" f={f} set={set} base="primaryButtonText" segments={[{ key: 'primaryButtonText' }]} />
+          <TextInput label="Primary button URL (optional)" value={f.primaryButtonUrl as string ?? ''} onChange={(v) => set('primaryButtonUrl', v)} />
+          <TextInput label="Secondary button text" value={f.buttonText as string ?? ''} onChange={(v) => set('buttonText', v)} />
+          <TextInput label="Secondary button URL (optional)" value={f.buttonUrl as string ?? ''} onChange={(v) => set('buttonUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="Credits line" f={f} set={set} base="creditsText" segments={[{ key: 'creditsText' }]} />
         </div>
       );
@@ -7063,7 +7071,11 @@ function renderBlockFields(
         <div className="space-y-4">
           <RichFieldGroup label="Heading" f={f} set={set} base="heading" segments={[{ key: 'heading' }]} />
           <RichFieldGroup label="Subtext" f={f} set={set} base="subtext" segments={[{ key: 'subtext' }]} />
-          <TextInput label="Button text" value={f.buttonText as string ?? ''} onChange={(v) => set('buttonText', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="Primary button text (teal)" f={f} set={set} base="primaryButtonText" segments={[{ key: 'primaryButtonText' }]} />
+          <TextInput label="Primary button URL (optional)" value={f.primaryButtonUrl as string ?? ''} onChange={(v) => set('primaryButtonUrl', v)} />
+          <TextInput label="Secondary button text" value={f.buttonText as string ?? ''} onChange={(v) => set('buttonText', v)} />
+          <TextInput label="Secondary button URL (optional)" value={f.buttonUrl as string ?? ''} onChange={(v) => set('buttonUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs text-slate-400">Feature cards — pick the little diagram (visual) shown inside each card.</p>
           <Repeater<EntCard>
