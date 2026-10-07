@@ -177,6 +177,7 @@ export type TemplateBlockType =
   | 'slick-ab-founders-voice'
   | 'slick-ab-investors'
   | 'slick-ab-investors-v2'
+  | 'slick-ab-team-experts'
   | 'slick-ab-team-section'
   | 'slick-ab-journey'
   | 'slick-ab-cta'
@@ -380,6 +381,9 @@ export interface Block {
   type: BlockType;
   order: number;
   hidden?: boolean;
+  // Locales this block is hidden in, independent of `hidden` (which hides it
+  // everywhere). Missing/empty = visible in every locale (default).
+  hiddenLocales?: string[];
   fields: Record<string, unknown>;
   style: BlockStyle;
   layout?: LayoutVariant;
@@ -601,6 +605,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-ab-founders-v2': 'About Us — Founders V2 (Photo)',
   'slick-ab-founders-voice': "About Us — Founder's Voice (Videos)",
   'slick-ab-investors': 'About Us — Investors',
+  'slick-ab-team-experts': 'About Us — Team & Investors',
   'slick-ab-investors-v2': 'About Us — Investors V2 (Carousel)',
   'slick-ab-team-section': 'About Us — The Team (Tech + Biz)',
   'slick-ab-journey': 'About Us — Our Journey (Timeline)',

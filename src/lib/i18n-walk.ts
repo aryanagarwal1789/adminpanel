@@ -106,6 +106,9 @@ export interface TranslatableBlock {
   type: string;
   fields?: Record<string, unknown>;
   hidden?: boolean;
+  // Locales this block is hidden in, independent of `hidden`. Missing/empty =
+  // visible in every locale.
+  hiddenLocales?: string[];
 }
 
 export interface TransRow {

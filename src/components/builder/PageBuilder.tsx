@@ -25,6 +25,7 @@ import {
 } from "./types";
 import { getMyDraft, saveMyDraft, authJsonHeaders } from "@/lib/builder-drafts";
 import { getAuth } from "@/lib/auth";
+import { OVERLAY_LOCALES } from "@/lib/i18n-images";
 
 // Recursively find a widget by id in a widget array (handles row nesting)
 function findWidgetInArray(widgets: Widget[], id: string): Widget | null {
@@ -281,6 +282,7 @@ export function PageBuilder() {
   const [pageSearch, setPageSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [localeMenuForBlockId, setLocaleMenuForBlockId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"content" | "style">("content");
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingPageHostnames, setEditingPageHostnames] = useState<string | null>(null);
@@ -306,6 +308,13 @@ export function PageBuilder() {
       window.history.pushState({ preview: true }, '');
     }
   }, [previewOpen]);
+
+  useEffect(() => {
+    if (!localeMenuForBlockId) return;
+    const close = () => setLocaleMenuForBlockId(null);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [localeMenuForBlockId]);
 
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {
@@ -913,6 +922,19 @@ export function PageBuilder() {
 
   const toggleHidden = (id: string) => {
     setBlocks(blocks.map((b) => (b.id === id ? { ...b, hidden: !b.hidden } : b)));
+  };
+
+  const toggleHiddenLocale = (id: string, locale: string) => {
+    setBlocks(
+      blocks.map((b) => {
+        if (b.id !== id) return b;
+        const current = b.hiddenLocales ?? [];
+        const next = current.includes(locale)
+          ? current.filter((l) => l !== locale)
+          : [...current, locale];
+        return { ...b, hiddenLocales: next.length ? next : undefined };
+      }),
+    );
   };
 
   const addBlock = (type: BlockType, index: number, layout?: LayoutVariant) => {
@@ -1726,6 +1748,48 @@ export function PageBuilder() {
                         >
                           {b.hidden ? <EyeOff size={13} /> : <Eye size={13} />}
                         </button>
+                        <div className="relative">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setLocaleMenuForBlockId((cur) => (cur === b.id ? null : b.id));
+                            }}
+                            className={`opacity-60 hover:opacity-100 ${b.hiddenLocales?.length ? "text-amber-400 opacity-100" : ""}`}
+                            title={
+                              b.hiddenLocales?.length
+                                ? `Hidden in: ${b.hiddenLocales.join(", ")}`
+                                : "Hide in specific locales"
+                            }
+                          >
+                            <Globe size={13} />
+                          </button>
+                          {localeMenuForBlockId === b.id && (
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className="absolute right-0 top-full mt-1 z-20 w-44 rounded border border-slate-700 bg-slate-900 shadow-lg py-1"
+                            >
+                              <div className="px-2.5 py-1 text-[10px] uppercase tracking-wide text-slate-500">
+                                Hide in locale
+                              </div>
+                              {OVERLAY_LOCALES.map((loc) => {
+                                const isHidden = !!b.hiddenLocales?.includes(loc.code);
+                                return (
+                                  <label
+                                    key={loc.code}
+                                    className="flex items-center gap-2 px-2.5 py-1 text-xs text-slate-200 hover:bg-slate-800 cursor-pointer"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isHidden}
+                                      onChange={() => toggleHiddenLocale(b.id, loc.code)}
+                                    />
+                                    {loc.label}
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
                         <button
                           onClick={(e) => { e.stopPropagation(); copyBlockToClipboard(b.id); }}
                           className="opacity-60 hover:opacity-100 hover:text-blue-400"

@@ -3277,6 +3277,9 @@ function renderBlockFields(
           <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
           <RichFieldGroup label="Lead paragraph" f={f} set={set} base="lead" segments={[{ key: 'lead' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Button label (leave blank to hide)" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+          <TextInput label="Button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<InsightCard>
             label="Video Cards"
             items={(f.cards as InsightCard[]) ?? []}
@@ -4688,6 +4691,53 @@ function renderBlockFields(
               <div className="space-y-2">
                 <TextInput label="Shorts URL (or any YouTube link)" value={it.videoUrl as string ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
                 <ImageField label="Thumbnail (optional)" value={it.thumbnail as string ?? ''} onChange={(v) => u({ ...it, thumbnail: v })} />
+              </div>
+            )}
+          />
+        </div>
+      );
+    }
+
+    case 'slick-ab-team-experts': {
+      type TeamImage = { img?: string; alt?: string };
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Eyebrow pill" f={f} set={set} base="eyebrowLabel" segments={[{ key: 'eyebrowLabel' }]} />
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Grad (gradient)" f={f} set={set} base="headingGrad" segments={[{ key: 'headingGrad' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <RichFieldGroup label="Lead paragraph" f={f} set={set} base="lead" segments={[{ key: 'lead' }]} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Team title (left)" value={f.membersTitle as string ?? ''} onChange={(v) => set('membersTitle', v)} />
+          <p className="text-xs text-slate-400">Team members — upload each member card as one image. Use the button to add several at once.</p>
+          <MultiImageUploadButton onUploaded={(urls) => set('members', [...((f.members as TeamImage[]) ?? []), ...urls.map((u) => ({ img: u, alt: '' }))])} />
+          <Repeater<TeamImage>
+            label="Team member images"
+            items={(f.members as TeamImage[]) ?? []}
+            onChange={(v) => set('members', v)}
+            newItem={() => ({ img: '', alt: '' })}
+            itemPreview={(m) => m.alt || '(member image)'}
+            renderItem={(m, u) => (
+              <div className="space-y-2">
+                <ImageField label="Member card image" {...imageI18nProps(m, "img", (p) => u({ ...m, ...p }))} />
+                <TextInput label="Alt text" value={m.alt ?? ''} onChange={(v) => u({ ...m, alt: v })} />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <TextInput label="Investors title" value={f.investorsTitle as string ?? ''} onChange={(v) => set('investorsTitle', v)} />
+          <p className="text-xs text-slate-400">Investors — upload each investor card as one image. Use the button to add several at once.</p>
+          <MultiImageUploadButton onUploaded={(urls) => set('investors', [...((f.investors as TeamImage[]) ?? []), ...urls.map((u) => ({ img: u, alt: '' }))])} />
+          <Repeater<TeamImage>
+            label="Investor images"
+            items={(f.investors as TeamImage[]) ?? []}
+            onChange={(v) => set('investors', v)}
+            newItem={() => ({ img: '', alt: '' })}
+            itemPreview={(m) => m.alt || '(investor image)'}
+            renderItem={(m, u) => (
+              <div className="space-y-2">
+                <ImageField label="Investor card image" {...imageI18nProps(m, "img", (p) => u({ ...m, ...p }))} />
+                <TextInput label="Alt text" value={m.alt ?? ''} onChange={(v) => u({ ...m, alt: v })} />
               </div>
             )}
           />

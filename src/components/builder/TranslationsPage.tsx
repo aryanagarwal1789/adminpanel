@@ -69,8 +69,11 @@ export function TranslationsPage() {
   // Blocks with the in-progress (unsaved) translations applied — this is what
   // the preview renders, so edits appear live before any save.
   const translatedBlocks = useMemo(
-    () => applyPageTranslations(pageKey, blocks, bundle),
-    [pageKey, blocks, bundle],
+    () =>
+      applyPageTranslations(pageKey, blocks, bundle).filter(
+        (b) => !b.hiddenLocales?.includes(locale),
+      ),
+    [pageKey, blocks, bundle, locale],
   );
   // Latest translated blocks for the message handler (avoids a stale closure on
   // the PREVIEW_READY reply, which fires outside React's render cycle).
@@ -115,8 +118,12 @@ export function TranslationsPage() {
       ]);
       const pageData = await pageRes.json();
       const transData = await transRes.json();
-      const pageBlocks = (pageData?.page?.blocks ?? []) as TranslatableBlock[];
-      const mobileBlocks = (pageData?.page?.mobileBlocks ?? []) as TranslatableBlock[];
+      // Blocks hidden for the locale being edited never render there, so their
+      // strings aren't worth listing — same rationale as the `hidden` check
+      // walkPageStrings already applies.
+      const forLocale = (b: TranslatableBlock) => !b.hiddenLocales?.includes(locale);
+      const pageBlocks = ((pageData?.page?.blocks ?? []) as TranslatableBlock[]).filter(forLocale);
+      const mobileBlocks = ((pageData?.page?.mobileBlocks ?? []) as TranslatableBlock[]).filter(forLocale);
       setBlocks(pageBlocks);
       // Desktop rows + any mobile-only strings (mobile reuses desktop keys, so
       // shared slots aren't listed twice).
