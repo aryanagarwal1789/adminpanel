@@ -27,6 +27,14 @@ import { getMyDraft, saveMyDraft, authJsonHeaders } from "@/lib/builder-drafts";
 import { getAuth } from "@/lib/auth";
 import { OVERLAY_LOCALES } from "@/lib/i18n-images";
 
+// Per-block locale-visibility toggle needs English too (e.g. "hide this in
+// English but show it in Spanish") — unlike OVERLAY_LOCALES (translation-only
+// locales, English excluded since it's the base copy, not an override target).
+const BLOCK_VISIBILITY_LOCALES: { code: string; label: string }[] = [
+  { code: "en", label: "English (en)" },
+  ...OVERLAY_LOCALES,
+];
+
 // Recursively find a widget by id in a widget array (handles row nesting)
 function findWidgetInArray(widgets: Widget[], id: string): Widget | null {
   for (const w of widgets) {
@@ -1771,7 +1779,7 @@ export function PageBuilder() {
                               <div className="px-2.5 py-1 text-[10px] uppercase tracking-wide text-slate-500">
                                 Hide in locale
                               </div>
-                              {OVERLAY_LOCALES.map((loc) => {
+                              {BLOCK_VISIBILITY_LOCALES.map((loc) => {
                                 const isHidden = !!b.hiddenLocales?.includes(loc.code);
                                 return (
                                   <label
