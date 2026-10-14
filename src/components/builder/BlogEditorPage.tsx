@@ -357,7 +357,7 @@ const CSS = `
 .bstudio input,.bstudio textarea{font-family:inherit}
 .bstudio .bs-teal{color:var(--teal)}
 
-.bstudio .bs-top{height:56px;flex:0 0 56px;display:flex;align-items:center;gap:12px;padding:0 14px;background:var(--surface);border-bottom:1px solid var(--hair);z-index:40}
+.bstudio .bs-top{height:56px;flex:0 0 56px;display:flex;align-items:center;gap:8px;padding:0 14px;background:var(--surface);border-bottom:1px solid var(--hair);z-index:40}
 .bstudio .bs-brand{display:flex;align-items:center;gap:9px;font-weight:600;font-size:14px}
 .bstudio .bs-logo{width:26px;height:26px;border-radius:7px;background:var(--grad);display:grid;place-items:center;color:#06121a;font-size:13px;font-weight:700}
 .bstudio .bs-brand small{display:block;font-weight:400;font-size:10.5px;color:var(--faint);margin-top:-2px}
@@ -369,7 +369,7 @@ const CSS = `
 .bstudio .bs-spacer{flex:1}
 .bstudio .bs-stats{font-size:11.5px;color:var(--muted);display:flex;gap:12px}
 .bstudio .bs-stats b{color:var(--ink-2);font-weight:600}
-.bstudio .bs-tbtn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:9px;font-size:12.5px;font-weight:500;color:var(--ink-2);border:1px solid transparent;transition:.15s;white-space:nowrap}
+.bstudio .bs-tbtn{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 10px;border-radius:9px;font-size:12.5px;font-weight:500;color:var(--ink-2);border:1px solid transparent;transition:.15s;white-space:nowrap}
 .bstudio .bs-tbtn:hover{background:var(--surface-2)}
 .bstudio .bs-tbtn.bs-active{background:var(--blue-soft);color:var(--blue)}
 .bstudio .bs-tbtn.bs-ghost{border-color:var(--hair);background:var(--surface-2)}
@@ -670,6 +670,12 @@ const Ic = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
       <circle cx="12" cy="12" r="3" />
+    </svg>
+  ),
+  link: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
     </svg>
   ),
   send: (
@@ -1763,6 +1769,27 @@ export function BlogEditorPage() {
   const [preview, setPreview] = useState(false);
   const [exportKind, setExportKind] = useState<null | "html" | "md" | "json">(null);
 
+  // Shareable preview link — works for a draft or a published post. The renderer's
+  // `?preview=1` route renders live/uncached from the builder (draft-inclusive)
+  // feed, so the link always shows the post's current saved state.
+  const previewLink =
+    !isNew && form.slug
+      ? `${RENDERER}/${form.type === "case-study" ? "case-studies" : "blog"}/${form.slug}?preview=1`
+      : "";
+  const copyPreviewLink = async () => {
+    if (!previewLink) {
+      toast.error("Save the draft first to get a preview link.");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(previewLink);
+      toast.success("Preview link copied — share it to preview this post.");
+    } catch {
+      // Clipboard API can be blocked (e.g. insecure context); surface the URL.
+      toast.error(`Couldn't copy. Link: ${previewLink}`);
+    }
+  };
+
   const scrollToBlock = (id: string) => {
     const el = document.querySelector<HTMLElement>(`.bstudio .bs-row[data-id="${id}"]`);
     el?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1830,6 +1857,14 @@ export function BlogEditorPage() {
         </button>
         <button className="bs-tbtn bs-ghost" onClick={() => setPreview(true)}>
           {Ic.eye}Preview
+        </button>
+        <button
+          className="bs-tbtn bs-ghost"
+          onClick={copyPreviewLink}
+          disabled={!previewLink}
+          title={previewLink ? "Copy a shareable preview link (draft or published)" : "Save the draft first to get a preview link"}
+        >
+          {Ic.link}Copy link
         </button>
         {form.status === "published" ? (
           <>
