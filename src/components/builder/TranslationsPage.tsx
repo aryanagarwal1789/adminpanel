@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Languages, Save, Search, Eye, EyeOff, RefreshCw, ChevronDown, Check } from "lucide-react";
+import { Languages, Save, Search, Eye, EyeOff, RefreshCw, ChevronDown, Check, Download, Upload } from "lucide-react";
+import * as XLSX from "xlsx";
 import { authJsonHeaders } from "@/lib/builder-drafts";
 import { BLOCK_LABELS, type BlockType } from "./types";
 import {
@@ -10,9 +11,46 @@ import {
   type TransRow,
   type TranslatableBlock,
 } from "@/lib/i18n-walk";
+import { richDocToText } from "@/lib/i18n-rich";
 import { OVERLAY_LOCALES as LOCALES } from "@/lib/i18n-images";
 import { RichTextInput } from "./RichTextInput";
 import type { RichDoc, RichValue } from "./rich-text";
+
+// A saved bundle value is either plain text or a JSON-serialized RichDoc (see
+// richValueFor below) — Excel only ever sees plain text, so every read/compare
+// against a spreadsheet cell goes through this to flatten rich values first.
+function plainTextFor(raw: string | undefined): string {
+  if (!raw) return "";
+  const parsed = tryParseRichDoc(raw);
+  return parsed ? richDocToText(parsed) : raw;
+}
+
+const EXPORT_HEADERS = {
+  num: "#",
+  section: "Section",
+  variant: "Variant",
+  english: "English (Original)",
+  key: "Key",
+} as const;
+
+// Navbar/footer repeat on nearly every page — they're meant to be translated
+// ONCE via the "_globals" page instead, so a per-page export would just be the
+// same handful of strings duplicated across dozens of files. Excluded from the
+// Excel export only — still fully editable here in /translations like any
+// other block, this just keeps the exported sheet to per-page copy.
+const GLOBAL_CHROME_BLOCK_TYPES = new Set<string>([
+  "slick-sc-navbar",
+  "slick-sc-footer",
+  "slick-sc-footer-v2",
+  "slick-footer-complex",
+]);
+
+interface ImportPreview {
+  // key -> new value ("" means clear back to English)
+  updates: Record<string, string>;
+  changedCount: number;
+  clearedCount: number;
+}
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 const RENDERER = import.meta.env.VITE_RENDERER_URL ?? "https://demo-experience.salescode.ai";
@@ -217,12 +255,16 @@ export function TranslationsPage() {
     [englishByKey, keysByEnglish],
   );
 
-  const save = async () => {
+  // Takes an explicit bundle (rather than always reading the `bundle` state)
+  // so a caller that just computed a new bundle — e.g. import, right after its
+  // own setBundle — can persist it immediately without waiting a render for
+  // state to catch up.
+  const save = async (toSave: Record<string, string> = bundle) => {
     setSaving(true);
     try {
       // Drop empty values so those strings fall back to English on render.
       const cleaned: Record<string, string> = {};
-      for (const [k, v] of Object.entries(bundle)) {
+      for (const [k, v] of Object.entries(toSave)) {
         if (typeof v === "string" && v.trim() !== "") cleaned[k] = v;
       }
       const res = await fetch(`${BACKEND}/site/builder/translations/${locale}`, {
@@ -238,6 +280,123 @@ export function TranslationsPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  // ── Export to Excel ─────────────────────────────────────────────────────
+  // blockId -> type, so export can drop navbar/footer rows without needing
+  // `type` added to TransRow itself (shared/dependency-free util — see
+  // i18n-walk.ts's own comments on why it stays that way).
+  const blockTypeById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const b of blocks) m.set(b.id, b.type);
+    return m;
+  }, [blocks]);
+
+  // One row per row shown in the editor (not deduped by English text, so it's
+  // a 1:1 mirror of what's on screen) — includes whatever is in `bundle` right
+  // now, saved or not, so an in-progress review session exports faithfully.
+  // Navbar/footer excluded — see GLOBAL_CHROME_BLOCK_TYPES.
+  const exportTranslations = () => {
+    const exportRows = rows.filter((r) => {
+      const type = blockTypeById.get(r.blockId);
+      return !type || !GLOBAL_CHROME_BLOCK_TYPES.has(type);
+    });
+    if (!exportRows.length) {
+      toast.error("Nothing to export — this page has no translatable text.");
+      return;
+    }
+    const data = exportRows.map((r, i) => ({
+      [EXPORT_HEADERS.num]: i + 1,
+      [EXPORT_HEADERS.section]: r.blockLabel,
+      [EXPORT_HEADERS.variant]: r.variant === "mobile" ? "Mobile" : "",
+      [EXPORT_HEADERS.english]: r.english,
+      [`Translation (${locale.toUpperCase()})`]: plainTextFor(bundle[r.key]),
+      [EXPORT_HEADERS.key]: r.key,
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws["!cols"] = [{ wch: 5 }, { wch: 22 }, { wch: 9 }, { wch: 60 }, { wch: 60 }, { wch: 46 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Translations");
+    XLSX.writeFile(wb, `${pageKey}-${locale}-translations.xlsx`);
+  };
+
+  // ── Import from Excel ───────────────────────────────────────────────────
+  // Parses the uploaded file and computes a diff against the current bundle,
+  // WITHOUT applying anything yet — the confirm modal (driven by
+  // `importPreview`) is what actually calls save(). Matches primarily by the
+  // Key column (exact, stable); falls back to matching by English text for a
+  // row whose Key cell was edited/removed, since a shared English phrase is
+  // already how the editor itself groups rows (see keysByEnglish above) — a
+  // row with neither a usable Key nor a recognized English value is skipped.
+  const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportFile = async (file: File) => {
+    let json: Record<string, unknown>[];
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      json = XLSX.utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "", raw: false });
+    } catch {
+      toast.error("Couldn't read that file — is it a valid .xlsx export?");
+      return;
+    }
+    if (!json.length) {
+      toast.error("That file has no rows.");
+      return;
+    }
+
+    const headers = Object.keys(json[0]);
+    const keyHeader = headers.find((h) => h.trim().toLowerCase() === EXPORT_HEADERS.key.toLowerCase());
+    const englishHeader = headers.find((h) => /^english/i.test(h.trim()));
+    const translationHeader = headers.find((h) => /^translation/i.test(h.trim()));
+
+    if (!translationHeader) {
+      toast.error('No "Translation" column found in that file.');
+      return;
+    }
+
+    const byKey = new Map<string, string>();
+    const byEnglish = new Map<string, string>();
+    for (const row of json) {
+      const value = String(row[translationHeader] ?? "").trim();
+      const key = keyHeader ? String(row[keyHeader] ?? "").trim() : "";
+      const english = englishHeader ? String(row[englishHeader] ?? "").trim() : "";
+      if (key) byKey.set(key, value);
+      else if (english) byEnglish.set(english, value);
+    }
+
+    const updates: Record<string, string> = {};
+    let changedCount = 0;
+    let clearedCount = 0;
+    for (const r of rows) {
+      const matched = byKey.has(r.key) ? byKey.get(r.key)! : byEnglish.get(r.english);
+      if (matched === undefined) continue;
+      const currentPlain = plainTextFor(bundle[r.key]).trim();
+      if (matched === currentPlain) continue;
+      updates[r.key] = matched;
+      changedCount++;
+      if (!matched) clearedCount++;
+    }
+
+    if (changedCount === 0) {
+      toast.info("No changes — that file matches what's already here.");
+      return;
+    }
+    setImportPreview({ updates, changedCount, clearedCount });
+  };
+
+  const confirmImport = async () => {
+    if (!importPreview) return;
+    const next = { ...bundle };
+    for (const [k, v] of Object.entries(importPreview.updates)) {
+      if (v) next[k] = v;
+      else delete next[k]; // empty cell → clear → falls back to English
+    }
+    setBundle(next);
+    setImportPreview(null);
+    await save(next);
   };
 
   const filtered = useMemo(
@@ -386,7 +545,36 @@ export function TranslationsPage() {
             {showPreview ? <Eye size={14} /> : <EyeOff size={14} />} Preview
           </button>
           <button
-            onClick={save}
+            onClick={exportTranslations}
+            disabled={loading || !rows.length}
+            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium disabled:opacity-50"
+            style={{ color: "#94a3b8", border: "1px solid #374151" }}
+            title="Download this page's text (this locale) as an Excel file"
+          >
+            <Download size={14} /> Export
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = ""; // allow re-selecting the same file next time
+              if (file) void handleImportFile(file);
+            }}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={loading || !rows.length}
+            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium disabled:opacity-50"
+            style={{ color: "#94a3b8", border: "1px solid #374151" }}
+            title="Upload a filled-in Excel export to bulk-fill translations"
+          >
+            <Upload size={14} /> Import
+          </button>
+          <button
+            onClick={() => save()}
             disabled={saving || loading}
             className="inline-flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
             style={{ background: "#22c55e" }}
@@ -395,6 +583,50 @@ export function TranslationsPage() {
           </button>
         </div>
       </header>
+
+      {importPreview && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.6)" }}
+        >
+          <div
+            className="w-full max-w-sm rounded-xl p-5"
+            style={{ background: "#111827", border: "1px solid #374151" }}
+          >
+            <h2 className="text-sm font-semibold mb-2">Apply imported translations?</h2>
+            <p className="text-sm text-slate-300 mb-1">
+              <span className="font-semibold text-teal-400">{importPreview.changedCount}</span>{" "}
+              row{importPreview.changedCount === 1 ? "" : "s"} will be updated for{" "}
+              <span className="font-semibold">{locale.toUpperCase()}</span>.
+            </p>
+            {importPreview.clearedCount > 0 && (
+              <p className="text-xs text-amber-400 mb-3">
+                {importPreview.clearedCount} of those have an empty cell and will be cleared back
+                to English.
+              </p>
+            )}
+            <p className="text-xs text-slate-500 mb-4">
+              This will save immediately — there's no further confirmation after this.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setImportPreview(null)}
+                className="rounded-lg px-3 py-1.5 text-sm"
+                style={{ color: "#94a3b8", border: "1px solid #374151" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmImport}
+                className="rounded-lg px-3 py-1.5 text-sm font-medium text-white"
+                style={{ background: "#0f857a" }}
+              >
+                Apply &amp; Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Body — editor list (left) + live website preview (right) */}
       <div className="flex-1 min-h-0 flex">
