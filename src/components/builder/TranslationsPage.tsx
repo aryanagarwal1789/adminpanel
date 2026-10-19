@@ -295,9 +295,14 @@ export function TranslationsPage() {
   // One row per row shown in the editor (not deduped by English text, so it's
   // a 1:1 mirror of what's on screen) — includes whatever is in `bundle` right
   // now, saved or not, so an in-progress review session exports faithfully.
-  // Navbar/footer excluded — see GLOBAL_CHROME_BLOCK_TYPES.
+  // Navbar/footer excluded — see GLOBAL_CHROME_BLOCK_TYPES — EXCEPT when the
+  // page being exported IS "_globals" itself: that's the one place navbar/
+  // footer copy actually lives, so excluding it there would leave it with no
+  // export at all.
   const exportTranslations = () => {
+    const isGlobalsPage = pageKey === "_globals";
     const exportRows = rows.filter((r) => {
+      if (isGlobalsPage) return true;
       const type = blockTypeById.get(r.blockId);
       return !type || !GLOBAL_CHROME_BLOCK_TYPES.has(type);
     });
