@@ -5019,6 +5019,8 @@ function renderBlockFields(
       type NavItem = { name: string; desc: string; href: string; iconKey: string; ai?: boolean; iconImage?: string; iconBg?: string };
       type NavCat = { key: string; label: string; sub: string; accent: string; iconKey: string; items: NavItem[]; flagship?: boolean };
       type PresenceItem = { name?: string; href?: string; desc?: string; iconEmoji?: string };
+      type NavMenuItem = { name: string; href: string; desc: string; iconKey: string };
+      type SidebarStat = { val: string; lbl: string };
       return (
         <div className="space-y-4">
           <ImageField label="Logo image" {...imageI18nProps(f, "logoSrc", update)} />
@@ -5080,6 +5082,109 @@ function renderBlockFields(
               </div>
             )}
           />
+
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Menu trigger labels</p>
+          <RichFieldGroup label="'Solutions' label" f={f} set={set} base="solutionsMenuLabel" segments={[{ key: 'solutionsMenuLabel' }]} />
+          <RichFieldGroup label="'Customers' label" f={f} set={set} base="customersLabel" segments={[{ key: 'customersLabel' }]} />
+          <TextInput label="Customers URL" value={f.customersUrl as string ?? ''} onChange={(v) => set('customersUrl', v)} />
+          <RichFieldGroup label="'Resources' label" f={f} set={set} base="resourcesMenuLabel" segments={[{ key: 'resourcesMenuLabel' }]} />
+          <RichFieldGroup label="'Company' label" f={f} set={set} base="companyMenuLabel" segments={[{ key: 'companyMenuLabel' }]} />
+          <RichFieldGroup label="'CXO Events' label" f={f} set={set} base="cxoEventsMenuLabel" segments={[{ key: 'cxoEventsMenuLabel' }]} />
+          <RichFieldGroup label="'Global Presence' label" f={f} set={set} base="globalPresenceMenuLabel" segments={[{ key: 'globalPresenceMenuLabel' }]} />
+
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Resources dropdown</p>
+          <Repeater<NavMenuItem>
+            label="Resources items"
+            items={(f.resourcesItems as NavMenuItem[]) ?? []}
+            onChange={(v) => set('resourcesItems', v)}
+            newItem={() => ({ name: 'New item', href: '#', desc: 'Description', iconKey: 'blog' })}
+            itemPreview={(r) => r.name}
+            renderItem={(r, u) => (
+              <div className="space-y-2">
+                <RichTextInput label="Name" {...richItemProps(r, 'name', u)} />
+                <RichTextInput label="Description" {...richItemProps(r, 'desc', u)} />
+                <PageLinkField label="Link URL" value={r.href ?? ''} onChange={(v) => u({ ...r, href: v })} />
+                <TextInput label="Icon key (blog, experience, case-study)" value={r.iconKey ?? ''} onChange={(v) => u({ ...r, iconKey: v })} />
+              </div>
+            )}
+          />
+
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>CXO Events dropdown</p>
+          <Repeater<NavMenuItem>
+            label="CXO Events items"
+            items={(f.cxoEventsItems as NavMenuItem[]) ?? []}
+            onChange={(v) => set('cxoEventsItems', v)}
+            newItem={() => ({ name: 'New item', href: '#', desc: 'Description', iconKey: 'cxo-main' })}
+            itemPreview={(c) => c.name}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <RichTextInput label="Name" {...richItemProps(c, 'name', u)} />
+                <RichTextInput label="Description" {...richItemProps(c, 'desc', u)} />
+                <PageLinkField label="Link URL" value={c.href ?? ''} onChange={(v) => u({ ...c, href: v })} />
+                <TextInput label="Icon key (cxo-main, cxo-2024, gallery)" value={c.iconKey ?? ''} onChange={(v) => u({ ...c, iconKey: v })} />
+              </div>
+            )}
+          />
+
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Company dropdown</p>
+          <Repeater<NavMenuItem>
+            label="Company items"
+            items={(f.companyItems as NavMenuItem[]) ?? []}
+            onChange={(v) => set('companyItems', v)}
+            newItem={() => ({ name: 'New item', href: '#', desc: 'Description', iconKey: 'info' })}
+            itemPreview={(c) => c.name}
+            renderItem={(c, u) => (
+              <div className="space-y-2">
+                <RichTextInput label="Name" {...richItemProps(c, 'name', u)} />
+                <RichTextInput label="Description" {...richItemProps(c, 'desc', u)} />
+                <PageLinkField label="Link URL" value={c.href ?? ''} onChange={(v) => u({ ...c, href: v })} />
+                <TextInput label="Icon key (info, briefcase, testimonial, mail)" value={c.iconKey ?? ''} onChange={(v) => u({ ...c, iconKey: v })} />
+              </div>
+            )}
+          />
+
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mega-menu micro-copy</p>
+          <RichFieldGroup label="'Categories' rail label" f={f} set={set} base="categoriesRailLabel" segments={[{ key: 'categoriesRailLabel' }]} />
+          <RichFieldGroup label="'Flagship' badge label" f={f} set={set} base="flagshipBadgeLabel" segments={[{ key: 'flagshipBadgeLabel' }]} />
+          <RichFieldGroup label="'AI' badge label" f={f} set={set} base="aiBadgeLabel" segments={[{ key: 'aiBadgeLabel' }]} />
+
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>"Why Salescode.ai" sidebar</p>
+          <RichFieldGroup label="Eyebrow" f={f} set={set} base="sidebarEyebrow" segments={[{ key: 'sidebarEyebrow' }]} />
+          <RichFieldGroup label="Headline — line 1" f={f} set={set} base="sidebarHeadlineLine1" segments={[{ key: 'sidebarHeadlineLine1' }]} />
+          <RichFieldGroup label="Headline — line 2" f={f} set={set} base="sidebarHeadlineLine2" segments={[{ key: 'sidebarHeadlineLine2' }]} />
+          <RichFieldGroup label="Subtext" f={f} set={set} base="sidebarSubtext" segments={[{ key: 'sidebarSubtext' }]} />
+          <Repeater<SidebarStat>
+            label="Stats"
+            items={(f.sidebarStats as SidebarStat[]) ?? []}
+            onChange={(v) => set('sidebarStats', v)}
+            newItem={() => ({ val: '0', lbl: 'New stat' })}
+            itemPreview={(s) => `${s.val} — ${s.lbl}`}
+            renderItem={(s, u) => (
+              <div className="space-y-2">
+                <TextInput label="Value (e.g. 3%, 85+)" value={s.val ?? ''} onChange={(v) => u({ ...s, val: v })} />
+                <TextInput label="Label" value={s.lbl ?? ''} onChange={(v) => u({ ...s, lbl: v })} />
+              </div>
+            )}
+          />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="sidebarCtaLabel" segments={[{ key: 'sidebarCtaLabel' }]} />
+          <RichFieldGroup label="Trust line" f={f} set={set} base="sidebarTrustText" segments={[{ key: 'sidebarTrustText' }]} />
+
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p style={{ fontSize: 11, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Phone &amp; accessibility labels</p>
+          <RichFieldGroup label="Phone number" f={f} set={set} base="phone" segments={[{ key: 'phone' }]} />
+          <RichFieldGroup label="Phone hours" f={f} set={set} base="phoneHours" segments={[{ key: 'phoneHours' }]} />
+          <RichFieldGroup label="Logo aria-label" f={f} set={set} base="logoAriaLabel" segments={[{ key: 'logoAriaLabel' }]} />
+          <RichFieldGroup label="'Select language' aria-label" f={f} set={set} base="selectLanguageAriaLabel" segments={[{ key: 'selectLanguageAriaLabel' }]} />
+          <RichFieldGroup label="'Open menu' aria-label" f={f} set={set} base="openMenuAriaLabel" segments={[{ key: 'openMenuAriaLabel' }]} />
+          <RichFieldGroup label="'Close menu' aria-label" f={f} set={set} base="closeMenuAriaLabel" segments={[{ key: 'closeMenuAriaLabel' }]} />
+          <RichFieldGroup label="Mobile menu aria-label" f={f} set={set} base="mobileMenuAriaLabel" segments={[{ key: 'mobileMenuAriaLabel' }]} />
+          <RichFieldGroup label="'Language' section label (mobile)" f={f} set={set} base="languageSectionLabel" segments={[{ key: 'languageSectionLabel' }]} />
         </div>
       );
     }
