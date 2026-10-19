@@ -292,6 +292,15 @@ export function TranslationsPage() {
     return m;
   }, [blocks]);
 
+  // Excel's hard per-cell limit (XLSX spec) is 32,767 characters — SheetJS
+  // throws if anything exceeds it. Raw HTML-embed blocks (e.g. a full
+  // standalone <html> doc with an inline base64 image) can run past 100KB, so
+  // those rows are excluded from export rather than crashing it — they aren't
+  // a realistic "type a translation in a spreadsheet cell" job anyway; see the
+  // manual HTML-text-splice approach used for ai-native-sfa's embed blocks.
+  // Margin below the real 32767 limit to leave room for the other columns.
+  const EXCEL_CELL_LIMIT = 32000;
+
   // One row per row shown in the editor (not deduped by English text, so it's
   // a 1:1 mirror of what's on screen) — includes whatever is in `bundle` right
   // now, saved or not, so an in-progress review session exports faithfully.
@@ -300,29 +309,46 @@ export function TranslationsPage() {
   // footer copy actually lives, so excluding it there would leave it with no
   // export at all.
   const exportTranslations = () => {
-    const isGlobalsPage = pageKey === "_globals";
-    const exportRows = rows.filter((r) => {
-      if (isGlobalsPage) return true;
-      const type = blockTypeById.get(r.blockId);
-      return !type || !GLOBAL_CHROME_BLOCK_TYPES.has(type);
-    });
-    if (!exportRows.length) {
-      toast.error("Nothing to export — this page has no translatable text.");
-      return;
+    try {
+      const isGlobalsPage = pageKey === "_globals";
+      let oversizedCount = 0;
+      const exportRows = rows.filter((r) => {
+        if (!isGlobalsPage) {
+          const type = blockTypeById.get(r.blockId);
+          if (type && GLOBAL_CHROME_BLOCK_TYPES.has(type)) return false;
+        }
+        const translation = plainTextFor(bundle[r.key]);
+        if (r.english.length > EXCEL_CELL_LIMIT || translation.length > EXCEL_CELL_LIMIT) {
+          oversizedCount++;
+          return false;
+        }
+        return true;
+      });
+      if (!exportRows.length) {
+        toast.error("Nothing to export — this page has no translatable text that fits in a spreadsheet.");
+        return;
+      }
+      const data = exportRows.map((r, i) => ({
+        [EXPORT_HEADERS.num]: i + 1,
+        [EXPORT_HEADERS.section]: r.blockLabel,
+        [EXPORT_HEADERS.variant]: r.variant === "mobile" ? "Mobile" : "",
+        [EXPORT_HEADERS.english]: r.english,
+        [`Translation (${locale.toUpperCase()})`]: plainTextFor(bundle[r.key]),
+        [EXPORT_HEADERS.key]: r.key,
+      }));
+      const ws = XLSX.utils.json_to_sheet(data);
+      ws["!cols"] = [{ wch: 5 }, { wch: 22 }, { wch: 9 }, { wch: 60 }, { wch: 60 }, { wch: 46 }];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Translations");
+      XLSX.writeFile(wb, `${pageKey}-${locale}-translations.xlsx`);
+      if (oversizedCount > 0) {
+        toast.warning(
+          `Exported — skipped ${oversizedCount} block${oversizedCount === 1 ? "" : "s"} too large for a spreadsheet cell (raw HTML embeds). Translate ${oversizedCount === 1 ? "it" : "those"} directly in the row list below instead.`,
+        );
+      }
+    } catch (err) {
+      toast.error(`Export failed: ${err}`);
     }
-    const data = exportRows.map((r, i) => ({
-      [EXPORT_HEADERS.num]: i + 1,
-      [EXPORT_HEADERS.section]: r.blockLabel,
-      [EXPORT_HEADERS.variant]: r.variant === "mobile" ? "Mobile" : "",
-      [EXPORT_HEADERS.english]: r.english,
-      [`Translation (${locale.toUpperCase()})`]: plainTextFor(bundle[r.key]),
-      [EXPORT_HEADERS.key]: r.key,
-    }));
-    const ws = XLSX.utils.json_to_sheet(data);
-    ws["!cols"] = [{ wch: 5 }, { wch: 22 }, { wch: 9 }, { wch: 60 }, { wch: 60 }, { wch: 46 }];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Translations");
-    XLSX.writeFile(wb, `${pageKey}-${locale}-translations.xlsx`);
   };
 
   // ── Import from Excel ───────────────────────────────────────────────────
