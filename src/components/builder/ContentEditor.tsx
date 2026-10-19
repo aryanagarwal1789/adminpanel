@@ -5274,6 +5274,7 @@ function renderBlockFields(
           <RichFieldGroup label="Email label" f={f} set={set} base="emailLabel" segments={[{ key: 'emailLabel' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs text-slate-500 font-medium">All Products mega-grid (grouped columns)</p>
+          <RichFieldGroup label="'All Products' eyebrow label" f={f} set={set} base="allProductsTitle" segments={[{ key: 'allProductsTitle' }]} />
           <Repeater<PGroup>
             label="Product groups"
             items={(f.productGroups as PGroup[]) ?? []}

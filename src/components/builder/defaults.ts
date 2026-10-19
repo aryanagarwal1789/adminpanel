@@ -2941,6 +2941,7 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
     dtcCtaLabel: 'Take the Challenge',
     dtcCtaUrl: '/contact-us',
     dtcFootnote: 'Open to any competing SFA, DMS or eB2B provider. Audit must be a Big 4 firm using a scorecard agreed with SalesCode.ai in advance.',
+    allProductsTitle: 'All Products',
     productGroups: [
       { label: 'AI Native Products', items: [
         { label: 'AI Native SFA', href: 'page:ai-native-sfa' },
