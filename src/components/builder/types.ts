@@ -166,6 +166,11 @@ export type TemplateBlockType =
   | 'slick-ab-intro'
   | 'slick-ab-intro-v2'
   | 'slick-video-intro'
+  | 'slick-rtai-hero'
+  | 'slick-rtai-agenda'
+  | 'slick-rtai-why'
+  | 'slick-rtai-stack'
+  | 'slick-rtai-register'
   | 'slick-ab-mission-vision'
   | 'slick-ab-founder-banner'
   | 'slick-ab-stats'
@@ -595,6 +600,11 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-ab-intro': 'About Us — Intro & Video',
   'slick-ab-intro-v2': 'About Us — Intro & Video V2',
   'slick-video-intro': 'Personal Video Intro',
+  'slick-rtai-hero': 'Route to AI — Hero',
+  'slick-rtai-agenda': 'Route to AI — Agenda',
+  'slick-rtai-why': 'Route to AI — Why Attend',
+  'slick-rtai-stack': 'Route to AI — Your Stack',
+  'slick-rtai-register': 'Route to AI — Register',
   'slick-ab-mission-vision': 'About Us — Mission & Vision',
   'slick-ab-founder-banner': 'About Us — Founder Banner',
   'slick-ab-stats': 'About Us — Stats',
