@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import {
   BlogPicker, ButtonEditor, ColorPicker, ImageField, LinkItemEditor, MultiImageUploadButton, NumberInput, Repeater, Select, TextInput, Textarea, Toggle, VideoField,
-  imageI18nProps,
+  imageI18nProps, videoI18nProps,
 } from "./fields";
 import type { ButtonField, LinkField } from "./defaults";
 import type { Block } from "./types";
@@ -614,7 +614,7 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <RichFieldGroup label="Title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
-          <ImageField label="Video" {...imageI18nProps(f, "videoUrl", update)} />
+          <VideoField label="Video" {...videoI18nProps(f, "videoUrl", update)} />
           <Repeater<{ value: string; suffix: string; description: string }>
             label="Stats"
             items={(f.stats as { value: string; suffix: string; description: string }[]) ?? []}
@@ -668,7 +668,7 @@ function renderBlockFields(
         <div className="space-y-4">
           <RichFieldGroup label="Title" f={f} set={set} base="title" segments={[{ key: 'title' }]} />
           <RichFieldGroup label="Subtitle (teal, below title)" f={f} set={set} base="subtitle" segments={[{ key: 'subtitle' }]} />
-          <ImageField label="Video" {...imageI18nProps(f, "videoUrl", update)} />
+          <VideoField label="Video" {...videoI18nProps(f, "videoUrl", update)} />
         </div>
       );
 
@@ -2167,7 +2167,7 @@ function renderBlockFields(
           <ImageField label="Video thumbnail URL" {...imageI18nProps(f, "videoThumb", update)} />
           <FitSelect label="Video thumbnail fit" fitKey="videoThumbFit" f={f} set={set} def="cover" />
           <RichFieldGroup label="Video caption" f={f} set={set} base="videoLabel" segments={[{ key: 'videoLabel' }]} />
-          <TextInput label="Video embed URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <VideoField label="Video" {...videoI18nProps(f, "videoUrl", update)} />
         </div>
       );
 
@@ -2200,7 +2200,7 @@ function renderBlockFields(
           <ImageField label="Video thumbnail URL" {...imageI18nProps(f, "videoThumb", update)} />
           <FitSelect label="Video thumbnail fit" fitKey="videoThumbFit" f={f} set={set} def="cover" />
           <RichFieldGroup label="Video caption" f={f} set={set} base="videoLabel" segments={[{ key: 'videoLabel' }]} />
-          <TextInput label="Video embed URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <VideoField label="Video" {...videoI18nProps(f, "videoUrl", update)} />
         </div>
       );
     }
@@ -3295,7 +3295,7 @@ function renderBlockFields(
                 <RichTextInput label="Logo text (fallback)" {...richItemProps(c, 'logoText', u)} />
                 <ColorPicker label="Logo text color" value={c.logoColor ?? '#082B4B'} onChange={(v) => u({ ...c, logoColor: v })} />
                 <ImageField label="Video thumbnail" {...imageI18nProps(c, "thumbnail", (p) => u({ ...c, ...p }))} />
-                <TextInput label="Video URL" value={c.videoUrl ?? ''} onChange={(v) => u({ ...c, videoUrl: v })} />
+                <VideoField label="Video (YouTube, Vimeo, or direct URL/upload)" {...videoI18nProps(c, "videoUrl", (p) => u({ ...c, ...p }))} />
               </div>
             )}
           />
@@ -4507,7 +4507,7 @@ function renderBlockFields(
           <RichFieldGroup label="Text 6 (normal)" f={f} set={set} base="textSeg6" segments={[{ key: 'textSeg6' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Video poster" {...imageI18nProps(f, "posterUrl", update)} />
-          <TextInput label="Video URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <VideoField label="Video (YouTube, Vimeo, or direct URL/upload)" {...videoI18nProps(f, "videoUrl", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
@@ -5150,8 +5150,7 @@ function renderBlockFields(
           <TextInput label="Secondary button URL" value={f.cta2Url as string ?? ''} onChange={(v) => set('cta2Url', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs text-slate-400">Video shown inside the device frame. Leave blank to show just the poster / empty frame.</p>
-          <VideoField label="Upload video (mp4/webm)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
-          <TextInput label="…or paste a video URL" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <VideoField label="Video (YouTube, Vimeo, or direct URL/upload)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <ImageField label="Poster / fallback image" value={f.posterImage as string ?? ''} onChange={(v) => set('posterImage', v)} />
           <Toggle label="Blue drop shadow around video" value={f.videoGlow !== false} onChange={(v) => set('videoGlow', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
@@ -6395,8 +6394,7 @@ function renderBlockFields(
           <TextInput label="Primary CTA URL" value={f.primaryCtaUrl as string ?? ''} onChange={(v) => set('primaryCtaUrl', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <ImageField label="Video thumbnail" {...imageI18nProps(f, "thumbnailUrl", update)} />
-          <VideoField label="Upload video" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
-          <TextInput label="…or paste a video URL (YouTube / .mp4)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <VideoField label="Video (YouTube, Vimeo, or direct URL/upload)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <RichFieldGroup label="Video caption" f={f} set={set} base="videoCaption" segments={[{ key: 'videoCaption' }]} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <Repeater<QGStep>
@@ -6866,8 +6864,7 @@ function renderBlockFields(
                 <Textarea label="Description" value={it.description ?? ''} onChange={(v) => u({ ...it, description: v })} />
                 <ImageField label="Small side image (optional)" value={it.sideImage ?? ''} onChange={(v) => u({ ...it, sideImage: v })} />
                 <ImageField label="Main image / video thumbnail" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
-                <TextInput label="Video link (YouTube / Shorts / URL)" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
-                <VideoField label="…or upload a video" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
+                <VideoField label="Video (YouTube, Vimeo, or direct URL/upload)" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
               </div>
             )}
           />
@@ -6875,8 +6872,7 @@ function renderBlockFields(
           <p className="text-xs text-slate-400">Extended recap banner (bottom of the section). One clickable image — the copy &amp; “Watch Now” are baked into the artwork. Leave blank to hide.</p>
           <ImageField label="Recap banner — desktop" value={f.recapImage as string ?? ''} onChange={(v) => set('recapImage', v)} />
           <ImageField label="Recap banner — mobile (optional)" value={f.recapImageMobile as string ?? ''} onChange={(v) => set('recapImageMobile', v)} />
-          <TextInput label="Recap video link (YouTube / Shorts / URL)" value={f.recapVideoUrl as string ?? ''} onChange={(v) => set('recapVideoUrl', v)} />
-          <VideoField label="…or upload a recap video" value={f.recapVideoUrl as string ?? ''} onChange={(v) => set('recapVideoUrl', v)} />
+          <VideoField label="Recap video (YouTube, Vimeo, or direct URL/upload)" value={f.recapVideoUrl as string ?? ''} onChange={(v) => set('recapVideoUrl', v)} />
         </div>
       );
     }
@@ -6895,8 +6891,7 @@ function renderBlockFields(
             renderItem={(it, u) => (
               <div className="space-y-2">
                 <ImageField label="Thumbnail" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
-                <TextInput label="Video link (YouTube / Shorts / URL)" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
-                <VideoField label="…or upload a video" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
+                <VideoField label="Video (YouTube, Vimeo, or direct URL/upload)" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
                 <TextInput label="Name" value={it.name ?? ''} onChange={(v) => u({ ...it, name: v })} />
                 <Textarea label="Description" value={it.description ?? ''} onChange={(v) => u({ ...it, description: v })} />
               </div>
@@ -6926,8 +6921,7 @@ function renderBlockFields(
             renderItem={(it, u) => (
               <div className="space-y-2">
                 <ImageField label="Thumbnail (portrait)" value={it.image ?? ''} onChange={(v) => u({ ...it, image: v })} />
-                <TextInput label="Video link (YouTube / Shorts / URL)" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
-                <VideoField label="…or upload a video" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
+                <VideoField label="Video (YouTube, Vimeo, or direct URL/upload)" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
               </div>
             )}
           />
@@ -6949,8 +6943,7 @@ function renderBlockFields(
             renderItem={(it, u) => (
               <div className="space-y-2">
                 <ImageField label="Photo" value={it.photo ?? ''} onChange={(v) => u({ ...it, photo: v })} />
-                <TextInput label="Video link (YouTube / Shorts / URL)" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
-                <VideoField label="…or upload a video" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
+                <VideoField label="Video (YouTube, Vimeo, or direct URL/upload)" value={it.videoUrl ?? ''} onChange={(v) => u({ ...it, videoUrl: v })} />
                 <TextInput label="Name" value={it.name ?? ''} onChange={(v) => u({ ...it, name: v })} />
                 <TextInput label="Title / Company" value={it.title ?? ''} onChange={(v) => u({ ...it, title: v })} />
               </div>
@@ -7067,8 +7060,7 @@ function renderBlockFields(
     case 'slick-sc-saudi-platform': {
       return (
         <div className="space-y-4">
-          <VideoField label="Upload video (mp4/webm) — overrides image" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
-          <TextInput label="…or paste a video link (mp4/webm plays inline, or a YouTube URL)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
+          <VideoField label="Video (YouTube, Vimeo, or direct URL/upload) — overrides image" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <ImageField label="Section image (full-width) — also the video poster" {...imageI18nProps(f, "imageSrc", update)} />
           <RichFieldGroup label="CTA label (HTML ok)" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
           <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
@@ -7124,8 +7116,7 @@ function renderBlockFields(
                 <RichTextInput label="CTA label" {...richItemProps(p, 'ctaLabel', u)} />
                 <TextInput label="CTA URL" value={p.ctaHref ?? ''} onChange={(v) => u({ ...p, ctaHref: v })} />
                 <ImageField label="Product image (also used as video poster)" {...imageI18nProps(p, "imageSrc", (patch) => u({ ...p, ...patch }))} />
-                <VideoField label="Product video — upload (autoplays; overrides image when set)" value={p.videoSrc ?? ''} onChange={(v) => u({ ...p, videoSrc: v })} />
-                <TextInput label="…or paste a video link (mp4/webm URL)" value={p.videoSrc ?? ''} onChange={(v) => u({ ...p, videoSrc: v })} />
+                <VideoField label="Product video (autoplays; overrides image when set)" value={p.videoSrc ?? ''} onChange={(v) => u({ ...p, videoSrc: v })} />
               </div>
             )}
           />
