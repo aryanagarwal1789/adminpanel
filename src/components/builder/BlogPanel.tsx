@@ -26,6 +26,10 @@ export interface BlogPost {
   _id?: string;
   slug: string;
   title: string;
+  /** Which listing this post belongs to — Blog and Case Studies share this
+   *  exact editor/model. Missing on posts created before this field existed;
+   *  every reader treats that as 'blog'. */
+  type?: 'blog' | 'case-study';
   category?: string;
   excerpt: string;
   body: string;
@@ -50,9 +54,17 @@ export interface BlogPostSeo {
   metaTitle?: string;
   metaDescription?: string;
   keywords?: string[];
+  focusKeyphrase?: string;
+  ogTitle?: string;
+  ogDescription?: string;
   ogImage?: string;
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImage?: string;
   canonicalUrl?: string;
   robots?: string;
+  /** Raw JSON-LD (e.g. a custom Article/FAQPage schema) stored as a string and injected verbatim. */
+  jsonLd?: string;
 }
 
 interface Props {

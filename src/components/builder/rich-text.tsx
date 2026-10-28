@@ -20,6 +20,7 @@ export interface RichMark {
     fontFamily?: string;
     fontSize?: string; // e.g. "20px"
     fontWeight?: string; // e.g. "600"
+    gradient?: string; // CSS gradient value, e.g. "linear-gradient(96.47deg, #11D6C5 0%, #0A8F86 100%)"
   };
 }
 
@@ -129,6 +130,16 @@ function markStyle(marks?: RichMark[]): React.CSSProperties {
       if (m.attrs.fontFamily) s.fontFamily = m.attrs.fontFamily;
       if (m.attrs.fontSize) s.fontSize = m.attrs.fontSize;
       if (m.attrs.fontWeight) s.fontWeight = m.attrs.fontWeight;
+      // Gradient text — clip the gradient to the glyphs, same technique used
+      // by every hardcoded ".xx-grad" class across the slick-blocks. Applied
+      // last so its transparent fill always wins over a plain `color` above.
+      if (m.attrs.gradient) {
+        s.background = m.attrs.gradient;
+        s.WebkitBackgroundClip = "text";
+        s.backgroundClip = "text";
+        s.WebkitTextFillColor = "transparent";
+        s.color = "transparent";
+      }
     }
   }
   if (decorations.length) s.textDecoration = decorations.join(" ");
@@ -339,4 +350,30 @@ export function richItemProps<T>(it: T, key: string, update: (next: T) => void) 
     value: (rec[key + "Rich"] ?? rec[key]) as RichValue,
     onChange: (doc: RichDoc) => update({ ...it, [key + "Rich"]: doc } as T),
   };
+}
+
+/**
+ * Plain-text label for a repeater item's `richItemProps`-bound field — for
+ * sidebar/list preview strings only (formatting stripped). `richItemProps`
+ * writes edits to `${key}Rich` and never touches the legacy `item[key]`
+ * string, so any preview reading `item[key]` directly goes stale the moment a
+ * field becomes rich (it renders correctly everywhere else because
+ * `resolveRichFields` collapses `${key}Rich` back onto `key` at publish/render
+ * time — the sidebar list is the one place that never runs that resolution).
+ */
+export function richItemText(it: unknown, key: string): string {
+  const rec = it as Record<string, unknown>;
+  const rich = rec[key + "Rich"];
+  if (isRichDoc(rich)) {
+    let text = "";
+    const walk = (nodes: RichNode[] | undefined) => {
+      for (const n of nodes ?? []) {
+        if (n.type === "text") text += n.text ?? "";
+        else walk(n.content);
+      }
+    };
+    walk((rich as RichDoc).content);
+    return text;
+  }
+  return (rec[key] as string) ?? "";
 }

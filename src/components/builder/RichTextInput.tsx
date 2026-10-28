@@ -37,6 +37,43 @@ const FontWeight = Extension.create({
 //   font-size: clamp(22px, 4vw, 40px); font-weight: 600;
 // (responsive 22px→40px, NOT a fixed 22px which would render small on desktop.)
 const HEADING_PRESET = { fontSize: "clamp(22px, 4vw, 40px)", fontWeight: "600" };
+
+// Gradient text presets — the same two gradients already hardcoded across the
+// slick-blocks (".xx-grad" classes: teal accent word, coral "problem" word).
+// Only these two for now; add more here as design calls for them.
+const GRADIENT_PRESETS = [
+  { label: "Teal", value: "linear-gradient(96.47deg, #11D6C5 0%, #0A8F86 100%)" },
+  { label: "Coral", value: "linear-gradient(120deg, #E5484D 0%, #c73237 100%)" },
+];
+
+// Adds a `gradient` attribute to the `textStyle` mark — rendered as a single
+// `style` string (background + background-clip + transparent fill) so the mark
+// carries everything renderRichText's markStyle() needs, matching how Color/
+// FontSize/FontWeight already attach their own style fragment to the same mark.
+const GradientText = Extension.create({
+  name: "gradientText",
+  addGlobalAttributes() {
+    return [{
+      types: ["textStyle"],
+      attributes: {
+        gradient: {
+          default: null,
+          parseHTML: (el: HTMLElement) => el.dataset.grad || null,
+          renderHTML: (attrs: { gradient?: string | null }) =>
+            attrs.gradient
+              ? {
+                  "data-grad": attrs.gradient,
+                  // caret-color is pinned explicitly — the caret defaults to
+                  // currentColor, which is transparent here, so without this
+                  // the blinking cursor vanishes while typing gradient text.
+                  style: `background:${attrs.gradient};-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;caret-color:#0f172a;`,
+                }
+              : {},
+        },
+      },
+    }];
+  },
+});
 import {
   Bold as BoldIcon,
   Italic as ItalicIcon,
@@ -104,7 +141,7 @@ function RichEditor({ value, onChange }: { value: RichValue; onChange: (v: RichD
   const editor = useEditor({
     immediatelyRender: false,
     autofocus: "end",
-    extensions: [StarterKit, TextStyle, Color, FontFamily, FontSize, FontWeight],
+    extensions: [StarterKit, TextStyle, Color, FontFamily, FontSize, FontWeight, GradientText],
     content: toRichDoc(value),
     onUpdate: ({ editor }) => onChange(editor.getJSON() as RichDoc),
     editorProps: {
@@ -128,6 +165,7 @@ function RichEditor({ value, onChange }: { value: RichValue; onChange: (v: RichD
   const currentFont = (editor?.getAttributes("textStyle").fontFamily as string) || "";
   const currentSize = (editor?.getAttributes("textStyle").fontSize as string) || "";
   const currentWeight = (editor?.getAttributes("textStyle").fontWeight as string) || "";
+  const currentGradient = (editor?.getAttributes("textStyle").gradient as string) || "";
   const isHeadingPreset = currentSize === HEADING_PRESET.fontSize && currentWeight === HEADING_PRESET.fontWeight;
 
   return (
@@ -168,6 +206,23 @@ function RichEditor({ value, onChange }: { value: RichValue; onChange: (v: RichD
           />
         </label>
         <ToolbarButton title="Clear color" onClick={() => editor?.chain().focus().unsetColor().run()}>
+          <span style={{ fontSize: 11, color: "#94a3b8" }}>✕</span>
+        </ToolbarButton>
+
+        <span className="w-px h-4 bg-slate-200 mx-0.5" />
+
+        {/* Gradient text presets */}
+        {GRADIENT_PRESETS.map((g) => (
+          <ToolbarButton
+            key={g.label}
+            title={`${g.label} gradient text`}
+            active={currentGradient === g.value}
+            onClick={() => editor?.chain().focus().setMark("textStyle", { gradient: g.value }).run()}
+          >
+            <span style={{ width: 14, height: 14, borderRadius: "50%", background: g.value, display: "block", border: "1px solid rgba(0,0,0,0.1)" }} />
+          </ToolbarButton>
+        ))}
+        <ToolbarButton title="Clear gradient" onClick={() => editor?.chain().focus().setMark("textStyle", { gradient: null }).run()}>
           <span style={{ fontSize: 11, color: "#94a3b8" }}>✕</span>
         </ToolbarButton>
 

@@ -40,6 +40,7 @@ export type TemplateBlockType =
   | "clients-page-slot"
   | "contact-page-slot"
   | "blog-page-slot"
+  | "case-studies-page-slot"
   | 'slick-hero-split'
   | 'slick-hero-video'
   | 'slick-features-bento'
@@ -63,6 +64,7 @@ export type TemplateBlockType =
   | 'slick-dv-carousel'
   | 'slick-dv-split'
   | 'slick-dv-register'
+  | 'slick-iff-register'
   | 'slick-dv-vision'
   | 'slick-dv-video-split'
   | 'slick-dv-video-pointers'
@@ -162,6 +164,13 @@ export type TemplateBlockType =
   | 'slick-scai-video-showcase'
   | 'slick-scai-agents'
   | 'slick-ab-intro'
+  | 'slick-ab-intro-v2'
+  | 'slick-video-intro'
+  | 'slick-rtai-hero'
+  | 'slick-rtai-agenda'
+  | 'slick-rtai-why'
+  | 'slick-rtai-stack'
+  | 'slick-rtai-register'
   | 'slick-ab-mission-vision'
   | 'slick-ab-founder-banner'
   | 'slick-ab-stats'
@@ -173,6 +182,7 @@ export type TemplateBlockType =
   | 'slick-ab-founders-voice'
   | 'slick-ab-investors'
   | 'slick-ab-investors-v2'
+  | 'slick-ab-team-experts'
   | 'slick-ab-team-section'
   | 'slick-ab-journey'
   | 'slick-ab-cta'
@@ -185,6 +195,9 @@ export type TemplateBlockType =
   | 'slick-sc-navbar'
   | 'slick-sc-hero-v2'
   | 'slick-sc-hero-v3'
+  | 'slick-sc-reinvent-hero'
+  | 'slick-sc-reinvent-hero-v2'
+  | 'slick-sc-reinvent-hero-v3'
   | 'slick-conclave-hero'
   | 'slick-conclave-trailer'
   | 'slick-conclave-guest-scroller'
@@ -198,6 +211,12 @@ export type TemplateBlockType =
   | 'slick-conclave-stats'
   | 'slick-conclave-register'
   | 'slick-conclave-guests'
+  | 'slick-ea-hero'
+  | 'slick-ea-problem'
+  | 'slick-ea-capabilities'
+  | 'slick-ea-languages'
+  | 'slick-ea-best'
+  | 'slick-ea-enterprise'
   | 'slick-sc-saudi-hero'
   | 'slick-sc-saudi-leadership'
   | 'slick-sc-saudi-presence'
@@ -367,6 +386,9 @@ export interface Block {
   type: BlockType;
   order: number;
   hidden?: boolean;
+  // Locales this block is hidden in, independent of `hidden` (which hides it
+  // everywhere). Missing/empty = visible in every locale (default).
+  hiddenLocales?: string[];
   fields: Record<string, unknown>;
   style: BlockStyle;
   layout?: LayoutVariant;
@@ -452,6 +474,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   "clients-page-slot": "Clients Page",
   "contact-page-slot": "Contact Us Page",
   "blog-page-slot": "Blog Page",
+  "case-studies-page-slot": "Case Studies Page",
   'slick-hero-split': 'Hero — Split Gradient',
   'slick-hero-video': 'Hero — Centered Video',
   'slick-features-bento': 'Features — Bento Grid',
@@ -475,6 +498,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-dv-carousel': 'DigiVyapar — Platform Carousel',
   'slick-dv-split': 'DigiVyapar — Split Section',
   'slick-dv-register': 'DigiVyapar — Register Form',
+  'slick-iff-register': 'India Food Forum — Booth Register',
   'slick-dv-vision': 'DigiVyapar — Vision & Stats',
   'slick-dv-video-split': 'DigiVyapar — Video + Copy Split',
   'slick-dv-video-pointers': 'DigiVyapar — Video + Pointers Split',
@@ -574,6 +598,13 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-scai-video-showcase': 'SCAI — Video Showcase',
   'slick-scai-agents': 'SCAI — Agent Ecosystem',
   'slick-ab-intro': 'About Us — Intro & Video',
+  'slick-ab-intro-v2': 'About Us — Intro & Video V2',
+  'slick-video-intro': 'Personal Video Intro',
+  'slick-rtai-hero': 'Route to AI — Hero',
+  'slick-rtai-agenda': 'Route to AI — Agenda',
+  'slick-rtai-why': 'Route to AI — Why Attend',
+  'slick-rtai-stack': 'Route to AI — Your Stack',
+  'slick-rtai-register': 'Route to AI — Register',
   'slick-ab-mission-vision': 'About Us — Mission & Vision',
   'slick-ab-founder-banner': 'About Us — Founder Banner',
   'slick-ab-stats': 'About Us — Stats',
@@ -584,6 +615,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-ab-founders-v2': 'About Us — Founders V2 (Photo)',
   'slick-ab-founders-voice': "About Us — Founder's Voice (Videos)",
   'slick-ab-investors': 'About Us — Investors',
+  'slick-ab-team-experts': 'About Us — Team & Investors',
   'slick-ab-investors-v2': 'About Us — Investors V2 (Carousel)',
   'slick-ab-team-section': 'About Us — The Team (Tech + Biz)',
   'slick-ab-journey': 'About Us — Our Journey (Timeline)',
@@ -597,6 +629,9 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-sc-navbar': 'SC — Navbar',
   'slick-sc-hero-v2': 'SC — Hero V2 (Person + Floating Cards)',
   'slick-sc-hero-v3': 'SC — Hero V3 (Center Image)',
+  'slick-sc-reinvent-hero': 'SC — Reinvent Hero (Split + Blob)',
+  'slick-sc-reinvent-hero-v2': 'SC — Reinvent Hero (Image BG)',
+  'slick-sc-reinvent-hero-v3': 'SC — Reinvent Hero (Video)',
   'slick-conclave-hero': 'Conclave — Hero',
   'slick-conclave-trailer': 'Conclave — Trailer Video',
   'slick-conclave-guest-scroller': 'Conclave — Guest Scroller',
@@ -610,6 +645,12 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   'slick-conclave-stats': 'Conclave — Stats',
   'slick-conclave-register': 'Conclave — Register Form',
   'slick-conclave-guests': 'Conclave — Guests Grid',
+  'slick-ea-hero': 'Enquiry Agent — Hero',
+  'slick-ea-problem': 'Enquiry Agent — Cost of Poor Support',
+  'slick-ea-capabilities': 'Enquiry Agent — Built To Do',
+  'slick-ea-languages': 'Enquiry Agent — Multilingual',
+  'slick-ea-best': 'Enquiry Agent — Best AI Agent (Tabs)',
+  'slick-ea-enterprise': 'Enquiry Agent — Enterprise',
   'slick-sc-saudi-hero': 'SC — Saudi Presence Hero',
   'slick-sc-saudi-leadership': 'SC — Saudi Leadership Team',
   'slick-sc-saudi-presence': 'SC — Saudi Presence Photos',

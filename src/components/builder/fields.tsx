@@ -43,10 +43,87 @@ export function Textarea({ label, value, onChange, rows = 3 }: { label: string; 
 
 const UPLOAD_URL = `${import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai"}/site/upload`;
 
-export function VideoField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+const DIRECT_VIDEO_FILE_RE = /\.(mp4|webm|ogg|mov)(\?.*)?$/i;
+
+// Normalizes a YouTube/Vimeo watch/share link into its embeddable iframe URL,
+// for the editor's own preview — same shape of logic WidgetRenderer.tsx uses on
+// the public site, kept independent since this only drives the CMS preview.
+// Returns null for anything that isn't a recognized YouTube/Vimeo link (e.g. an
+// unsupported host, or a direct file URL, which is handled separately).
+function toEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+    if (host === "youtu.be") {
+      const id = u.pathname.slice(1);
+      return id ? `https://www.youtube.com/embed/${id}` : null;
+    }
+    if (host.endsWith("youtube.com")) {
+      if (u.pathname === "/watch") {
+        const id = u.searchParams.get("v");
+        return id ? `https://www.youtube.com/embed/${id}` : null;
+      }
+      if (u.pathname.startsWith("/shorts/")) {
+        const id = u.pathname.split("/")[2];
+        return id ? `https://www.youtube.com/embed/${id}` : null;
+      }
+      if (u.pathname.startsWith("/embed/")) return url;
+    }
+    if (host === "vimeo.com") {
+      const id = u.pathname.split("/").filter(Boolean)[0];
+      return id && /^\d+$/.test(id) ? `https://player.vimeo.com/video/${id}` : null;
+    }
+    if (host === "player.vimeo.com") return url;
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+/**
+ * A video field that accepts EITHER a pasted link (YouTube, Vimeo, or a direct
+ * .mp4/.webm/etc URL) OR an uploaded file, with the same optional per-locale
+ * override support as ImageField (pass `i18n`/`onI18nChange`, e.g. via
+ * `imageI18nProps` — the override shape is identical, so that helper is reused
+ * as-is rather than duplicated). Omit them to keep plain English-only behavior.
+ */
+export function VideoField({
+  label,
+  value,
+  onChange,
+  i18n,
+  onI18nChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  i18n?: ImageI18n;
+  onI18nChange?: (next: ImageI18n | undefined) => void;
+}) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [locale, setLocale] = useState<string>(DEFAULT_LOCALE);
+
+  const localeAware = onI18nChange !== undefined;
+  const isEnglish = !localeAware || locale === DEFAULT_LOCALE;
+  const override = localeAware ? i18n?.[locale] : undefined;
+  const hasOverride = isUsableVariant(override);
+  // What this control edits right now: the base value on English, else the
+  // current locale's override (or nothing, when it inherits English).
+  const editValue = isEnglish ? value : (hasOverride ? (override as string) : "");
+
+  const setOverride = (url: string) => {
+    if (!onI18nChange) return;
+    onI18nChange({ ...i18n, [locale]: url });
+  };
+  const clearOverride = () => {
+    if (!onI18nChange) return;
+    const next = { ...i18n };
+    delete next[locale];
+    onI18nChange(Object.keys(next).length ? next : undefined);
+  };
+  const setValue = (v: string) => (isEnglish ? onChange(v) : setOverride(v));
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -60,7 +137,7 @@ export function VideoField({ label, value, onChange }: { label: string; value: s
       const res = await fetch(UPLOAD_URL, { method: "POST", headers: authUploadHeaders(), body: form });
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json() as { url?: string };
-      if (data.url) onChange(data.url);
+      if (data.url) setValue(data.url);
     } catch {
       setError("Upload failed");
     } finally {
@@ -68,39 +145,79 @@ export function VideoField({ label, value, onChange }: { label: string; value: s
     }
   };
 
-  const isVideo = value && /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(value);
+  const handleRemove = () => (isEnglish ? onChange("") : clearOverride());
+
+  const previewSrc = editValue || (!isEnglish ? value : "");
+  const isDirectFile = !!previewSrc && DIRECT_VIDEO_FILE_RE.test(previewSrc);
+  const embedUrl = !isDirectFile && previewSrc ? toEmbedUrl(previewSrc) : null;
 
   return (
     <div>
-      <Label>{label}</Label>
+      <div className="flex items-center justify-between mb-1.5">
+        <Label>{label}</Label>
+        {localeAware && (
+          <select
+            className="text-xs rounded-md px-1.5 py-0.5 outline-none pb-transition"
+            style={{ background: "#f8fafc", border: "1px solid #e2e8f0", color: "#0f172a", borderRadius: 6 }}
+            value={locale}
+            onChange={(e) => setLocale(e.target.value)}
+          >
+            <option value={DEFAULT_LOCALE}>English</option>
+            {OVERLAY_LOCALES.map((l) => (
+              <option key={l.code} value={l.code}>
+                {isUsableVariant(i18n?.[l.code]) ? `● ${l.label}` : l.label}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+      {!isEnglish && !hasOverride && (
+        <p className="text-xs text-slate-500 mb-1">Inherits English — no override set</p>
+      )}
+      <input
+        className={fieldBase}
+        style={fieldStyle}
+        value={editValue}
+        placeholder="Paste a YouTube, Vimeo, or direct video URL…"
+        onChange={(e) => setValue(e.target.value)}
+      />
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
-        className="w-full py-2 text-xs rounded-md pb-transition font-medium disabled:opacity-50"
+        className="w-full mt-1.5 py-2 text-xs rounded-md pb-transition font-medium disabled:opacity-50"
         style={{ background: "#7c3aed", color: "#fff", border: "none", cursor: uploading ? "default" : "pointer" }}
       >
-        {uploading ? "Uploading…" : value ? "↑ Replace video" : "↑ Upload video"}
+        {uploading
+          ? "Uploading…"
+          : isEnglish
+            ? (value ? "↑ Replace uploaded file" : "↑ Upload video file")
+            : (hasOverride ? "↑ Replace override file" : `↑ Upload ${locale.toUpperCase()} override file`)}
       </button>
       <input ref={inputRef} type="file" accept="video/*" style={{ display: "none" }} onChange={handleFile} />
       {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
-      <div className="mt-2 w-full rounded-md overflow-hidden border border-slate-700 bg-slate-800 flex items-center justify-center" style={{ aspectRatio: "16/9" }}>
-        {value && isVideo ? (
-          <video src={value} className="w-full h-full object-cover" controls />
-        ) : value ? (
-          <span className="text-xs text-slate-400 px-2 text-center break-all">{value}</span>
+      <div
+        className="mt-2 w-full rounded-md overflow-hidden border border-slate-700 bg-slate-800 flex items-center justify-center"
+        style={{ aspectRatio: "16/9", ...(!isEnglish && !hasOverride ? { opacity: 0.5 } : {}) }}
+      >
+        {previewSrc && isDirectFile ? (
+          <video src={previewSrc} className="w-full h-full object-cover" controls />
+        ) : previewSrc && embedUrl ? (
+          <iframe src={embedUrl} className="w-full h-full" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />
+        ) : previewSrc ? (
+          <span className="text-xs text-slate-400 px-2 text-center break-all">{previewSrc}</span>
         ) : (
-          <span className="text-xs text-slate-500">No video uploaded</span>
+          <span className="text-xs text-slate-500">No video set</span>
         )}
       </div>
-      {value && (
+      {(isEnglish ? !!value : hasOverride) && (
         <button
           type="button"
-          onClick={() => onChange("")}
+          onClick={handleRemove}
           className="mt-1 text-xs text-red-400 hover:text-red-300 pb-transition"
           style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
         >
-          Remove
+          {isEnglish ? "Remove" : "Use English"}
         </button>
       )}
     </div>
@@ -240,6 +357,66 @@ export function ImageField({
 }
 
 /**
+ * Uploads several files at once and hands back their URLs in selection order —
+ * for repeater-of-images fields (e.g. a photo gallery) where adding N photos
+ * one ImageField at a time is the bottleneck. Purely additive: callers append
+ * `urls` to their existing array, this component holds no list state itself.
+ */
+export function MultiImageUploadButton({ onUploaded }: { onUploaded: (urls: string[]) => void }) {
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (!files.length) return;
+    setUploading(true);
+    setError(null);
+    setProgress({ done: 0, total: files.length });
+    const urls: string[] = [];
+    let failed = 0;
+    for (const file of files) {
+      try {
+        const form = new FormData();
+        form.append("file", file);
+        const res = await fetch(UPLOAD_URL, { method: "POST", headers: authUploadHeaders(), body: form });
+        if (!res.ok) throw new Error(`${res.status}`);
+        const data = await res.json() as { url?: string };
+        if (data.url) urls.push(data.url);
+        else failed++;
+      } catch {
+        failed++;
+      }
+      setProgress((p) => (p ? { ...p, done: p.done + 1 } : p));
+    }
+    if (urls.length) onUploaded(urls);
+    if (failed) setError(`${failed} of ${files.length} file${files.length === 1 ? "" : "s"} failed to upload`);
+    setUploading(false);
+    setProgress(null);
+  };
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="w-full py-2 text-xs rounded-md pb-transition font-medium disabled:opacity-50"
+        style={{ background: "#1e40af", color: "#fff", border: "none", cursor: uploading ? "default" : "pointer" }}
+      >
+        {uploading
+          ? `Uploading ${progress ? `${progress.done}/${progress.total}` : "…"}`
+          : "↑ Upload multiple images"}
+      </button>
+      <input ref={inputRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={handleFiles} />
+      {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
+    </div>
+  );
+}
+
+/**
  * Bind ImageField's per-locale override props to a container object: reads
  * `container[key]` as the base value, and writes/reads the override sidecar
  * `container[key + 'I18n']` on the SAME container. Works for both block fields
@@ -265,6 +442,15 @@ export function imageI18nProps<C>(
     onI18nChange: (next: ImageI18n | undefined) => merge({ [i18nKey]: next } as Partial<C>),
   };
 }
+
+/**
+ * Same binding as `imageI18nProps` — the `fooI18n` sidecar shape is identical
+ * for any field, image or video — aliased for readability at VideoField call
+ * sites:
+ *
+ *   <VideoField label="Hero video" {...videoI18nProps(f, 'videoUrl', update)} />
+ */
+export const videoI18nProps = imageI18nProps;
 
 export function ColorPicker({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
