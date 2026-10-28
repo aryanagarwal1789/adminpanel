@@ -2851,6 +2851,7 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
     videoUrl: '',
     posterImage: '',
     videoGlow: true,
+    showMute: true,
     bgImage: '/bg 1.webp',
     mobileBgImage: '/mobile view.webp',
     stats: [

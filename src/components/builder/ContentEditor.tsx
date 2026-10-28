@@ -5153,6 +5153,7 @@ function renderBlockFields(
           <VideoField label="Video (YouTube, Vimeo, or direct URL/upload)" value={f.videoUrl as string ?? ''} onChange={(v) => set('videoUrl', v)} />
           <ImageField label="Poster / fallback image" value={f.posterImage as string ?? ''} onChange={(v) => set('posterImage', v)} />
           <Toggle label="Blue drop shadow around video" value={f.videoGlow !== false} onChange={(v) => set('videoGlow', v)} />
+          <Toggle label="Show mute / speaker button on video" value={f.showMute !== false} onChange={(v) => set('showMute', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <p className="text-xs text-slate-400">Background image — defaults to /bg.webp.</p>
           <TextInput label="Background image URL" value={f.bgImage as string ?? ''} onChange={(v) => set('bgImage', v)} />
