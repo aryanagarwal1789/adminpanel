@@ -1317,6 +1317,7 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
   },
   'slick-sc-platform-branded': {
     logoImage: '/marketing_assets/scainewlogo.webp',
+    backgroundImage: '',
     line1: 'We reinvented',
     line2: 'SFA/DMS',
     sub: 'And every Sales & RTM automation invented in the last 30 years',

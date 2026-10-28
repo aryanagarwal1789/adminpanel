@@ -2650,6 +2650,7 @@ function renderBlockFields(
       return (
         <div className="space-y-4">
           <ImageField label="Brand logo (top-left)" value={f.logoImage as string ?? ''} onChange={(v) => set('logoImage', v)} />
+          <ImageField label="Background image (optional)" value={f.backgroundImage as string ?? ''} onChange={(v) => set('backgroundImage', v)} />
           <RichFieldGroup label="Heading line 1" f={f} set={set} base="line1" segments={[{ key: 'line1' }]} />
           <RichFieldGroup label="Product word (use / for the thin slash)" f={f} set={set} base="line2" segments={[{ key: 'line2' }]} />
           <RichFieldGroup label="Subtext (teal)" f={f} set={set} base="sub" segments={[{ key: 'sub' }]} />

@@ -27,6 +27,9 @@ interface Lesson {
   videoUrl: string;
   thumbnail: string;
   order: number;
+  screenshots?: string[];
+  workflow?: { role: string; text: string }[];
+  builtForCoke?: boolean;
 }
 
 interface CourseDetails {
@@ -37,7 +40,13 @@ interface CourseDetails {
   accent: string;
   icon: string;
   image: string;
+  productId?: string;
+  /** Ordered courseIds of the module courses under this product course. */
+  modules?: string[];
 }
+
+interface ProductOption { productId: string; name: string }
+interface CourseOption { courseId: string; title: string }
 
 interface Course extends CourseDetails {
   courseId: string;
@@ -119,7 +128,10 @@ function CourseDetailPage() {
   const [course, setCourse] = useState<Course | null>(null);
   const [details, setDetails] = useState<CourseDetails>({
     eyebrow: '', title: '', description: '', category: '', accent: 'rgba(0,163,146,1)', icon: '', image: '',
+    productId: '', modules: [],
   });
+  const [products, setProducts] = useState<ProductOption[]>([]);
+  const [otherCourses, setOtherCourses] = useState<CourseOption[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [loading, setLoading] = useState(true);
@@ -149,6 +161,7 @@ function CourseDetailPage() {
         setDetails({
           eyebrow: c.eyebrow ?? '', title: c.title ?? '', description: c.description ?? '',
           category: c.category ?? '', accent: c.accent ?? 'rgba(0,163,146,1)', icon: c.icon ?? '', image: c.image ?? '',
+          productId: c.productId ?? '', modules: c.modules ?? [],
         });
         setLessons([...(c.lessons ?? [])].sort((a, b) => a.order - b.order));
       })
@@ -156,7 +169,29 @@ function CourseDetailPage() {
       .finally(() => setLoading(false));
   }, [courseId]);
 
+  // Pickers for the productId select and the module list.
+  useEffect(() => {
+    fetch(`${BACKEND}/site/products`)
+      .then((r) => r.json())
+      .then((d: { products?: ProductOption[] }) => setProducts(d.products ?? []))
+      .catch(() => {});
+    fetch(`${BACKEND}/site/learning`)
+      .then((r) => r.json())
+      .then((d: { learning?: { courses?: CourseOption[] } }) =>
+        setOtherCourses((d.learning?.courses ?? []).filter((c) => c.courseId !== courseId)))
+      .catch(() => {});
+  }, [courseId]);
+
   const ud = (patch: Partial<CourseDetails>) => setDetails((d) => ({ ...d, ...patch }));
+
+  const modules = details.modules ?? [];
+  const moveModule = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= modules.length) return;
+    const next = [...modules];
+    [next[i], next[j]] = [next[j], next[i]];
+    ud({ modules: next });
+  };
 
   const saveDetails = () => {
     otp.open('learning.courseUpdate', details, { courseId });
@@ -263,6 +298,37 @@ function CourseDetailPage() {
             <span style={{ fontSize: 11, color: '#64748b', marginTop: 4, display: 'block' }}>The card accent color is derived from the category automatically.</span>
           </div>
         </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 14 }}>
+          <div>
+            <label style={lbl}>Product (optional)</label>
+            <select style={selectStyle} value={details.productId ?? ''} onChange={(e) => ud({ productId: e.target.value })}>
+              <option value="">None</option>
+              {products.map((p) => <option key={p.productId} value={p.productId}>{p.name}</option>)}
+            </select>
+          </div>
+        </div>
+        <div style={{ marginTop: 14 }}>
+          <label style={lbl}>Modules (ordered courses shown under this product)</label>
+          {modules.map((mid, i) => (
+            <div key={mid} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <span style={{ color: '#475569', fontSize: 12, width: 20 }}>{i + 1}</span>
+              <span style={{ flex: 1, color: '#f1f5f9', fontSize: 13 }}>{otherCourses.find((c) => c.courseId === mid)?.title || mid}</span>
+              <button style={secBtn} onClick={() => moveModule(i, -1)} disabled={i === 0}>↑</button>
+              <button style={secBtn} onClick={() => moveModule(i, 1)} disabled={i === modules.length - 1}>↓</button>
+              <button style={dangerBtn} onClick={() => ud({ modules: modules.filter((m) => m !== mid) })}>Remove</button>
+            </div>
+          ))}
+          <select
+            style={selectStyle}
+            value=""
+            onChange={(e) => { if (e.target.value) ud({ modules: [...modules, e.target.value] }); }}
+          >
+            <option value="">+ Add module course…</option>
+            {otherCourses.filter((c) => !modules.includes(c.courseId)).map((c) => (
+              <option key={c.courseId} value={c.courseId}>{c.title || c.courseId}</option>
+            ))}
+          </select>
+        </div>
         <div style={{ marginTop: 14 }}>
           <label style={lbl}>Description</label>
           <textarea style={textareaStyle} value={details.description} onChange={(e) => ud({ description: e.target.value })} placeholder="Shown on the course detail banner" rows={2} />
@@ -366,6 +432,45 @@ function CourseDetailPage() {
                   <div style={{ marginTop: 10 }}>
                     <label style={lbl}>Thumbnail (optional — shown in the playlist and as the video poster)</label>
                     <UploadInput value={l.thumbnail} onChange={(thumbnail) => updateLesson(idx, { thumbnail })} accept="image/*" />
+                  </div>
+                  <div style={{ marginTop: 10 }}>
+                    <label style={lbl}>Screenshots (optional)</label>
+                    {(l.screenshots ?? []).map((src, si) => (
+                      <div key={si} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 8 }}>
+                        <div style={{ flex: 1 }}>
+                          <UploadInput
+                            value={src}
+                            onChange={(url) => updateLesson(idx, { screenshots: (l.screenshots ?? []).map((s, k) => (k === si ? url : s)) })}
+                            accept="image/*"
+                          />
+                        </div>
+                        <button style={dangerBtn} onClick={() => updateLesson(idx, { screenshots: (l.screenshots ?? []).filter((_, k) => k !== si) })}>Remove</button>
+                      </div>
+                    ))}
+                    <button style={secBtn} onClick={() => updateLesson(idx, { screenshots: [...(l.screenshots ?? []), ''] })}>+ Add screenshot</button>
+                  </div>
+                  <div style={{ marginTop: 10 }}>
+                    <label style={lbl}>Workflow steps (role + text)</label>
+                    {(l.workflow ?? []).map((step, wi) => (
+                      <div key={wi} style={{ display: 'grid', gridTemplateColumns: '140px 1fr auto', gap: 8, marginBottom: 8 }}>
+                        <input
+                          style={inp} value={step.role} placeholder="Role"
+                          onChange={(e) => updateLesson(idx, { workflow: (l.workflow ?? []).map((w, k) => (k === wi ? { ...w, role: e.target.value } : w)) })}
+                        />
+                        <input
+                          style={inp} value={step.text} placeholder="Step"
+                          onChange={(e) => updateLesson(idx, { workflow: (l.workflow ?? []).map((w, k) => (k === wi ? { ...w, text: e.target.value } : w)) })}
+                        />
+                        <button style={dangerBtn} onClick={() => updateLesson(idx, { workflow: (l.workflow ?? []).filter((_, k) => k !== wi) })}>Remove</button>
+                      </div>
+                    ))}
+                    <button style={secBtn} onClick={() => updateLesson(idx, { workflow: [...(l.workflow ?? []), { role: '', text: '' }] })}>+ Add step</button>
+                  </div>
+                  <div style={{ marginTop: 10 }}>
+                    <label style={{ ...lbl, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                      <input type="checkbox" checked={!!l.builtForCoke} onChange={(e) => updateLesson(idx, { builtForCoke: e.target.checked })} />
+                      Built for Coke (shown only on the Coke platform portal)
+                    </label>
                   </div>
                 </div>
               )}
