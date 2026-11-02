@@ -3089,7 +3089,7 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
     trust: [
       '3% Uplift Guarantee',
       'Published in IEEE Xplore',
-      '65+ Brands · 18+ Countries',
+      '85+ Brands · 25+ Countries · 3M+ Users',
     ],
     copyright: '© 2026 Applicate IT Solutions Pvt. Ltd. All rights reserved.',
     legal: [
