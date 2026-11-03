@@ -4,6 +4,7 @@ import { getAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import type { BlogPost, ContentBlock, ContentBlockType } from "./BlogPanel";
 import { importBlogFile } from "./blogImport";
+import { ImageField, VideoField, imageI18nProps, videoI18nProps } from "./fields";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "https://salescode-marketplace.salescode.ai";
 const UPLOAD_URL = `${BACKEND}/site/upload`;
@@ -2109,20 +2110,9 @@ export function BlogEditorPage() {
           </div>
           <div className="bs-rbody">
             <div className="bs-field">
-              <label>
-                Hero image <span className="bs-hint">upload or URL</span>
-              </label>
-              <UploadBtn
-                label="Upload hero image"
-                onUpload={uploadImg}
-                onDone={(u) => set("featuredImage", u)}
-                value={form.featuredImage}
-              />
-              <input
-                style={{ marginTop: 8 }}
-                value={form.featuredImage}
-                onChange={(e) => set("featuredImage", e.target.value)}
-                placeholder="…or paste an image URL"
+              <ImageField
+                label="Hero image"
+                {...imageI18nProps(form, "featuredImage", (patch) => setForm((f) => ({ ...f, ...patch })))}
               />
               {form.featuredImage && (
                 <input
@@ -2954,40 +2944,6 @@ function Cover({
   );
 }
 
-// ── Upload button (settings + blocks) ───────────────────────────────
-function UploadBtn({
-  label,
-  value,
-  onUpload,
-  onDone,
-  small,
-}: {
-  label: string;
-  value?: string;
-  onUpload: (f: File) => Promise<string | null>;
-  onDone: (u: string) => void;
-  small?: boolean;
-}) {
-  const [busy, setBusy] = useState(false);
-  return (
-    <button
-      className="bs-upbtn"
-      disabled={busy}
-      style={small ? { height: 30, fontSize: 12 } : { width: "100%", justifyContent: "center" }}
-      onClick={() =>
-        pickFile(false, async (f) => {
-          setBusy(true);
-          const u = await onUpload(f[0]);
-          setBusy(false);
-          if (u) onDone(u);
-        })
-      }
-    >
-      {busy ? "Uploading…" : value ? `Replace ${label.toLowerCase()}` : label}
-    </button>
-  );
-}
-
 // ── Block row (gutter + content) ────────────────────────────────────
 interface BlockRowProps {
   block: ContentBlock;
@@ -3102,7 +3058,7 @@ function BlockContent({
   if (block.type === "list") return <ListBlock block={block} updateBlock={updateBlock} />;
 
   if (block.type === "image")
-    return <ImageBlock block={block} updateBlock={updateBlock} uploadImg={uploadImg} />;
+    return <ImageBlock block={block} updateBlock={updateBlock} />;
 
   if (block.type === "image-grid")
     return <GridBlock block={block} updateBlock={updateBlock} uploadImg={uploadImg} />;
@@ -3289,68 +3245,19 @@ function ListItem({
 function ImageBlock({
   block,
   updateBlock,
-  uploadImg,
 }: {
   block: ContentBlock;
   updateBlock: (id: string, p: Partial<ContentBlock>) => void;
-  uploadImg: (f: File) => Promise<string | null>;
 }) {
-  const [url, setUrl] = useState("");
-  const [busy, setBusy] = useState(false);
-  const pick = () =>
-    pickFile(false, async (f) => {
-      setBusy(true);
-      const u = await uploadImg(f[0]);
-      setBusy(false);
-      if (u) updateBlock(block.id, { url: u });
-    });
   return (
     <div>
-      <div className="bs-frame">
-        {block.url ? (
-          <>
-            <img src={block.url} alt={block.alt ?? ""} />
-            <div className="bs-imgtools">
-              <button onClick={pick}>Replace</button>
-              <button onClick={() => updateBlock(block.id, { url: "" })}>Remove</button>
-            </div>
-          </>
-        ) : (
-          <div className="bs-uz">
-            <div className="bs-uprow">
-              <button className="bs-upbtn" disabled={busy} onClick={pick}>
-                {busy ? "Uploading…" : "Upload image"}
-              </button>
-              <span style={{ color: "var(--faint)", fontSize: 12 }}>or</span>
-              <input
-                className="bs-urlin"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="paste image URL"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && url.trim()) {
-                    updateBlock(block.id, { url: url.trim() });
-                    setUrl("");
-                  }
-                }}
-              />
-              <button
-                className="bs-upbtn"
-                onClick={() => {
-                  if (url.trim()) {
-                    updateBlock(block.id, { url: url.trim() });
-                    setUrl("");
-                  }
-                }}
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      <ImageField
+        label="Image"
+        {...imageI18nProps(block, "url", (patch) => updateBlock(block.id, patch))}
+      />
       <input
         className="bs-cap"
+        style={{ marginTop: 8 }}
         value={block.caption ?? ""}
         onChange={(e) => updateBlock(block.id, { caption: e.target.value })}
         placeholder="Add a caption…"
@@ -3378,7 +3285,7 @@ function GridBlock({
 }) {
   const images = block.images ?? [];
   const cols = block.columns ?? 2;
-  const setImg = (i: number, patch: Partial<{ url: string; caption: string; alt: string }>) => {
+  const setImg = (i: number, patch: Partial<{ url: string; urlI18n: Partial<Record<string, string>>; caption: string; alt: string }>) => {
     const arr = images.map((im, idx) => (idx === i ? { ...im, ...patch } : im));
     updateBlock(block.id, { images: arr });
   };
@@ -3419,15 +3326,9 @@ function GridBlock({
               </button>
             )}
           </div>
-          {im.url && (
-            <img src={im.url} alt="" style={{ width: "100%", borderRadius: 8, display: "block" }} />
-          )}
-          <UploadBtn
-            label="Upload image"
-            value={im.url}
-            small
-            onUpload={uploadImg}
-            onDone={(u) => setImg(i, { url: u })}
+          <ImageField
+            label="Image"
+            {...imageI18nProps(im, "url", (patch) => setImg(i, patch))}
           />
           <input
             className="bs-fieldin"
@@ -3486,20 +3387,6 @@ function HtmlBlock({
   );
 }
 
-function ytEmbedUrl(url: string): string | null {
-  try {
-    const u = new URL(url.trim());
-    let id = "";
-    if (u.hostname === "youtu.be") id = u.pathname.slice(1);
-    else if (u.pathname.startsWith("/shorts/")) id = u.pathname.split("/")[2] ?? "";
-    else if (u.pathname.includes("/embed/")) id = u.pathname.split("/embed/")[1]?.split(/[/?#]/)[0] ?? "";
-    else id = u.searchParams.get("v") ?? "";
-    return id ? `https://www.youtube.com/embed/${id}?rel=0` : null;
-  } catch {
-    return null;
-  }
-}
-
 function YouTubeBlock({
   block,
   updateBlock,
@@ -3507,16 +3394,11 @@ function YouTubeBlock({
   block: ContentBlock;
   updateBlock: (id: string, p: Partial<ContentBlock>) => void;
 }) {
-  const url = block.url ?? "";
-  const embed = url.trim() ? ytEmbedUrl(url) : null;
   return (
     <div>
-      <input
-        className="bs-fieldin"
-        value={url}
-        onChange={(e) => updateBlock(block.id, { url: e.target.value })}
-        placeholder="Paste a YouTube link (youtube.com/watch?v=… , youtu.be/… , or /shorts/…)"
-        spellCheck={false}
+      <VideoField
+        label="YouTube link"
+        {...videoI18nProps(block, "url", (patch) => updateBlock(block.id, patch))}
       />
       <input
         className="bs-fieldin"
@@ -3525,32 +3407,6 @@ function YouTubeBlock({
         onChange={(e) => updateBlock(block.id, { caption: e.target.value })}
         placeholder="Caption (optional)"
       />
-      {url.trim() ? (
-        embed ? (
-          <div style={{ marginTop: 8 }}>
-            <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--faint)", marginBottom: 6 }}>
-              Live preview
-            </div>
-            <div style={{ position: "relative", width: "100%", aspectRatio: "16 / 9", borderRadius: 10, overflow: "hidden", background: "#000" }}>
-              <iframe
-                src={embed}
-                title="YouTube preview"
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
-            </div>
-          </div>
-        ) : (
-          <p style={{ fontSize: 12, color: "#dc2626", marginTop: 6 }}>
-            That doesn’t look like a valid YouTube URL.
-          </p>
-        )
-      ) : (
-        <p style={{ fontSize: 12, color: "var(--faint)", marginTop: 6 }}>
-          Renders as a responsive 16:9 embedded player on the live blog.
-        </p>
-      )}
     </div>
   );
 }

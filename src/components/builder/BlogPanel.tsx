@@ -11,14 +11,18 @@ export interface ContentBlock {
   type: ContentBlockType;
   text?: string;        // paragraph / heading2 / heading3 / quote / faq (section title)
   attribution?: string; // quote
-  url?: string;         // image
+  url?: string;         // image / youtube
+  /** Per-locale overrides for `url`, keyed by non-English locale code — see
+   *  pagecraft-studio/src/lib/i18n-images.ts and Salescode-self-serve's
+   *  localizeDeep (the same mechanism page blocks use for bgImage/videoUrl). */
+  urlI18n?: Partial<Record<string, string>>;
   caption?: string;     // image
   alt?: string;         // image
   items?: string[];     // list
   ordered?: boolean;    // list
   faqItems?: { q: string; a: string }[]; // faq
   columns?: 2 | 3 | 4; // image-grid
-  images?: { url: string; caption?: string; alt?: string }[]; // image-grid
+  images?: { url: string; urlI18n?: Partial<Record<string, string>>; caption?: string; alt?: string }[]; // image-grid
   html?: string;       // html (custom HTML / embed)
 }
 
@@ -38,6 +42,8 @@ export interface BlogPost {
   authorRole?: string;
   readTime?: string;
   featuredImage: string;
+  /** Per-locale overrides for `featuredImage` — see ContentBlock.urlI18n above. */
+  featuredImageI18n?: Partial<Record<string, string>>;
   featuredImageCaption?: string;
   tags: string[];
   status: "draft" | "published";

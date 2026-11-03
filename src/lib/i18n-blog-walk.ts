@@ -39,6 +39,14 @@ const EXCLUDED_KEYS = new Set([
   "html",
 ]);
 
+// Per-locale image/video override sidecars (e.g. `featuredImageI18n`,
+// `urlI18n` — see i18n-images.ts) are edited via ImageField/VideoField's own
+// locale picker, not as translation rows, and are resolved by the renderer's
+// localizeDeep. Same guard as the backend's I18N_SIDECAR_KEY_RE in
+// i18nOverlay.ts — without it, `walk` would descend into the sidecar object
+// and surface its per-locale URLs as spurious translatable-string rows.
+const I18N_SIDECAR_KEY_RE = /I18n$/;
+
 // Content-block types whose `text` is markdown-flavoured copy (see
 // BlogEditorPage.tsx's mdToHtml/blockMode) — everything else (quote, list
 // items, captions, faqItems) is plain text with no markup support.
@@ -80,7 +88,7 @@ function walk(value: unknown, path: string, push: (path: string, str: string) =>
   }
   if (value && typeof value === "object") {
     for (const k of Object.keys(value as Record<string, unknown>)) {
-      if (EXCLUDED_KEYS.has(k)) continue;
+      if (EXCLUDED_KEYS.has(k) || I18N_SIDECAR_KEY_RE.test(k)) continue;
       walk((value as Record<string, unknown>)[k], path ? `${path}.${k}` : k, push);
     }
   }
