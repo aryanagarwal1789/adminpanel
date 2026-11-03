@@ -93,7 +93,7 @@ const EMPTY: Omit<BlogPost, "_id"> = {
 //   heading2/3 → **text** (renders teal; no links)
 //   quote / list items / captions → plain text (no markup)
 // contentEditable produces HTML, so we bridge in both directions per mode.
-type EditMode = "paragraph" | "heading" | "plain";
+export type EditMode = "paragraph" | "heading" | "plain";
 function blockMode(type: ContentBlockType): EditMode | null {
   if (type === "paragraph") return "paragraph";
   if (type === "heading2" || type === "heading3") return "heading";
@@ -120,8 +120,11 @@ function toHex(color: string): string {
   return c;
 }
 
-// md → HTML for the contentEditable surface.
-function mdToHtml(md: string, mode: EditMode): string {
+// md → HTML for the contentEditable surface. Also reused by TranslationsPage
+// to render a formatted preview of a translated paragraph/heading so
+// translators can see **bold**/*italic*/++underline++/[link](url)/==teal==
+// rendered instead of raw markup while they type.
+export function mdToHtml(md: string, mode: EditMode): string {
   if (!md) return "";
   if (mode === "plain") return escapeHtml(md);
   if (mode === "heading") {
@@ -721,6 +724,12 @@ const Ic = {
   ext: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+    </svg>
+  ),
+  languages: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M5 8h8M9 5v3M12 8c-1 3.5-3.5 6-6.5 7.5M7 10.5c1.3 1.7 3 3 5 4" />
+      <path d="M14 21l4-9 4 9M15.5 18h5" />
     </svg>
   ),
 };
@@ -1865,6 +1874,14 @@ export function BlogEditorPage() {
           title={previewLink ? "Copy a shareable preview link (draft or published)" : "Save the draft first to get a preview link"}
         >
           {Ic.link}Copy link
+        </button>
+        <button
+          className="bs-tbtn bs-ghost"
+          onClick={() => window.open(`/translations?blog=${encodeURIComponent(form.slug)}`, "_blank")}
+          disabled={isNew || !form.slug}
+          title={isNew || !form.slug ? "Save the post first to translate it" : "Translate this post"}
+        >
+          {Ic.languages}Translate
         </button>
         {form.status === "published" ? (
           <>

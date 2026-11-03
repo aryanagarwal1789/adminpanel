@@ -122,6 +122,10 @@ export interface TransRow {
   // editor render the same rich-text control used elsewhere in the builder
   // instead of a plain textarea.
   richBase?: RichDoc;
+  // Blog-only: set when this row's English text is a markdown-flavoured blog
+  // paragraph/heading (see i18n-blog-walk.ts) — lets the editor show a live
+  // formatted preview under the plain textarea instead of a RichTextInput.
+  markupMode?: "paragraph" | "heading";
 }
 
 export function walkPageStrings(

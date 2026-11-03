@@ -11,10 +11,15 @@ import {
   type TransRow,
   type TranslatableBlock,
 } from "@/lib/i18n-walk";
+import { walkBlogStrings } from "@/lib/i18n-blog-walk";
+import { mdToHtml } from "./BlogEditorPage";
 import { richDocToText } from "@/lib/i18n-rich";
 import { OVERLAY_LOCALES as LOCALES } from "@/lib/i18n-images";
 import { RichTextInput } from "./RichTextInput";
 import type { RichDoc, RichValue } from "./rich-text";
+import type { BlogPost } from "./BlogPanel";
+
+type EntityKind = "page" | "blog";
 
 // A saved bundle value is either plain text or a JSON-serialized RichDoc (see
 // richValueFor below) — Excel only ever sees plain text, so every read/compare
@@ -73,9 +78,19 @@ interface PageListItem {
   pageKey: string;
 }
 
+// Deep-link from the blog editor's "Translate" button: /translations?blog=<slug>
+// opens straight into Blog Posts mode with that post pre-selected.
+function blogSlugFromUrl(): string {
+  return new URLSearchParams(window.location.search).get("blog") ?? "";
+}
+
 export function TranslationsPage() {
+  const initialBlogSlug = blogSlugFromUrl();
+  const [kind, setKind] = useState<EntityKind>(initialBlogSlug ? "blog" : "page");
   const [pages, setPages] = useState<string[]>([]);
   const [pageKey, setPageKey] = useState<string>("");
+  const [blogPosts, setBlogPosts] = useState<{ slug: string; title: string }[]>([]);
+  const [blogSlug, setBlogSlug] = useState<string>(initialBlogSlug);
   const [locale, setLocale] = useState<string>(LOCALES[0].code);
 
   const [rows, setRows] = useState<TransRow[]>([]);
@@ -96,6 +111,13 @@ export function TranslationsPage() {
   const filteredPages = useMemo(
     () => pages.filter((k) => k.toLowerCase().includes(pageSearch.trim().toLowerCase())),
     [pages, pageSearch],
+  );
+  const filteredBlogPosts = useMemo(
+    () =>
+      blogPosts.filter((p) =>
+        `${p.title} ${p.slug}`.toLowerCase().includes(pageSearch.trim().toLowerCase()),
+      ),
+    [blogPosts, pageSearch],
   );
 
   // ── Live website preview bridge (reuses the page-builder iframe protocol) ──
@@ -132,7 +154,7 @@ export function TranslationsPage() {
     iframeRef.current?.contentWindow?.postMessage({ type: "SECTION_SELECT", blockId }, "*");
   }, []);
 
-  // Load the page list once.
+  // Load the page list + blog post list once.
   useEffect(() => {
     fetch(`${BACKEND}/site/builder/pages`)
       .then((r) => r.json())
@@ -142,11 +164,41 @@ export function TranslationsPage() {
         if (keys.length && !pageKey) setPageKey(keys[0]);
       })
       .catch(() => toast.error("Failed to load pages"));
+    fetch(`${BACKEND}/site/builder/blog/posts`)
+      .then((r) => r.json())
+      .then((d: { posts?: { slug: string; title: string }[] }) => {
+        const list = (d.posts ?? [])
+          .map((p) => ({ slug: p.slug, title: p.title }))
+          .sort((a, b) => a.title.localeCompare(b.title));
+        setBlogPosts(list);
+        if (list.length && !blogSlug) setBlogSlug(list[0].slug);
+      })
+      .catch(() => toast.error("Failed to load blog posts"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load the selected page's translatable strings + the locale bundle.
+  // Load the selected page/post's translatable strings + the locale bundle.
   const load = useCallback(async () => {
+    if (kind === "blog") {
+      if (!blogSlug) return;
+      setLoading(true);
+      try {
+        const [postRes, transRes] = await Promise.all([
+          fetch(`${BACKEND}/site/builder/blog/posts/${blogSlug}`),
+          fetch(`${BACKEND}/site/builder/translations/${locale}`),
+        ]);
+        const postData = await postRes.json();
+        const transData = await transRes.json();
+        setBlocks([]);
+        setRows(postData?.post ? walkBlogStrings(postData.post as BlogPost) : []);
+        setBundle((transData?.translation?.strings ?? {}) as Record<string, string>);
+      } catch {
+        toast.error("Failed to load translations");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
     if (!pageKey) return;
     setLoading(true);
     try {
@@ -172,7 +224,7 @@ export function TranslationsPage() {
     } finally {
       setLoading(false);
     }
-  }, [pageKey, locale]);
+  }, [kind, pageKey, blogSlug, locale]);
 
   useEffect(() => {
     void load();
@@ -182,7 +234,7 @@ export function TranslationsPage() {
   // document re-announces PREVIEW_READY, so drop the ACK until it does.
   useEffect(() => {
     ackedRef.current = false;
-  }, [pageKey]);
+  }, [pageKey, kind]);
 
   // ACK the preview when it announces itself, then push the current translation.
   useEffect(() => {
@@ -197,13 +249,18 @@ export function TranslationsPage() {
     return () => window.removeEventListener("message", onMessage);
   }, [pushBlocks]);
 
+  // Live website preview only exists for builder pages — blog posts don't run
+  // through the page-builder iframe protocol (no BUILDER_BLOCKS_REORDER
+  // listener on the blog render route), so there's nothing to push to there.
+  const previewAvailable = kind === "page";
+
   // Re-render the preview as translations change (debounced so fast typing
   // doesn't thrash the iframe). Only pushes once the preview has ACKed.
   useEffect(() => {
-    if (!showPreview || !ackedRef.current) return;
+    if (!previewAvailable || !showPreview || !ackedRef.current) return;
     const t = setTimeout(() => pushBlocks(translatedBlocks), 250);
     return () => clearTimeout(t);
-  }, [translatedBlocks, showPreview, pushBlocks]);
+  }, [translatedBlocks, showPreview, previewAvailable, pushBlocks]);
 
   // Close the page picker on outside click / Escape.
   useEffect(() => {
@@ -340,7 +397,7 @@ export function TranslationsPage() {
       ws["!cols"] = [{ wch: 5 }, { wch: 22 }, { wch: 9 }, { wch: 60 }, { wch: 60 }, { wch: 46 }];
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Translations");
-      XLSX.writeFile(wb, `${pageKey}-${locale}-translations.xlsx`);
+      XLSX.writeFile(wb, `${kind === "blog" ? blogSlug : pageKey}-${locale}-translations.xlsx`);
       if (oversizedCount > 0) {
         toast.warning(
           `Exported — skipped ${oversizedCount} block${oversizedCount === 1 ? "" : "s"} too large for a spreadsheet cell (raw HTML embeds). Translate ${oversizedCount === 1 ? "it" : "those"} directly in the row list below instead.`,
@@ -457,25 +514,72 @@ export function TranslationsPage() {
 
   return (
     <div className="h-screen flex flex-col text-slate-100" style={{ background: "#0b1120" }}>
+      {/* mdToHtml's markup output (bold/italic/underline/links/teal) rendered
+          outside the blog editor's own .bstudio-scoped styles — restyle here. */}
+      <style>{`
+        .i18n-md-preview b, .i18n-md-preview strong { font-weight: 700; color: #f1f5f9; }
+        .i18n-md-preview i, .i18n-md-preview em { font-style: italic; }
+        .i18n-md-preview u { text-decoration: underline; }
+        .i18n-md-preview a { color: #5eead4; text-decoration: underline; }
+        .i18n-md-preview .bs-teal { color: #5eead4; }
+      `}</style>
       {/* Header */}
       <header
-        className="shrink-0 flex items-center gap-3 px-5 py-3 border-b"
+        className="shrink-0 flex flex-wrap items-center gap-3 px-5 py-3 border-b"
         style={{ borderColor: "#1f2937" }}
       >
-        <Languages size={18} className="text-teal-400" />
-        <span className="text-sm font-semibold">Translations</span>
+        <div className="flex items-center gap-2 shrink-0">
+          <Languages size={18} className="text-teal-400" />
+          <span className="text-sm font-semibold whitespace-nowrap">Translations</span>
+        </div>
 
-        <div className="relative ml-4" ref={pageMenuRef}>
+        <div
+          className="flex items-center rounded-lg overflow-hidden shrink-0"
+          style={{ border: "1px solid #374151" }}
+        >
+          <button
+            onClick={() => {
+              setKind("page");
+              setPageSearch("");
+            }}
+            className="px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors"
+            style={{
+              background: kind === "page" ? "#0f857a" : "transparent",
+              color: kind === "page" ? "#fff" : "#94a3b8",
+            }}
+          >
+            Pages
+          </button>
+          <button
+            onClick={() => {
+              setKind("blog");
+              setPageSearch("");
+            }}
+            className="px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors"
+            style={{
+              background: kind === "blog" ? "#0f857a" : "transparent",
+              color: kind === "blog" ? "#fff" : "#94a3b8",
+            }}
+          >
+            Blog Posts
+          </button>
+        </div>
+
+        <div className="relative min-w-0 flex-1 basis-56" ref={pageMenuRef}>
           <button
             onClick={() => {
               setPageSearch("");
               setPageMenuOpen((o) => !o);
             }}
-            className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm min-w-[180px]"
+            className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm w-full"
             style={inpStyle}
-            title="Choose a page"
+            title={kind === "page" ? "Choose a page" : "Choose a blog post"}
           >
-            <span className="truncate">{pageKey || "Select a page"}</span>
+            <span className="truncate">
+              {kind === "page"
+                ? pageKey || "Select a page"
+                : blogPosts.find((p) => p.slug === blogSlug)?.title || blogSlug || "Select a post"}
+            </span>
             <ChevronDown size={14} className="ml-auto shrink-0 text-slate-500" />
           </button>
 
@@ -493,31 +597,54 @@ export function TranslationsPage() {
                   autoFocus
                   value={pageSearch}
                   onChange={(e) => setPageSearch(e.target.value)}
-                  placeholder="Search pages…"
+                  placeholder={kind === "page" ? "Search pages…" : "Search posts…"}
                   className="w-full rounded-md pl-7 pr-3 py-1.5 text-sm"
                   style={inpStyle}
                 />
               </div>
               <div className="max-h-72 overflow-y-auto py-1">
-                {filteredPages.length === 0 ? (
-                  <p className="px-3 py-3 text-xs text-slate-500 text-center">No pages match</p>
+                {kind === "page" ? (
+                  filteredPages.length === 0 ? (
+                    <p className="px-3 py-3 text-xs text-slate-500 text-center">No pages match</p>
+                  ) : (
+                    filteredPages.map((k) => (
+                      <button
+                        key={k}
+                        onClick={() => {
+                          setPageKey(k);
+                          setPageMenuOpen(false);
+                        }}
+                        className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-slate-700/50"
+                        style={{ color: k === pageKey ? "#5eead4" : "#e2e8f0" }}
+                      >
+                        {k === pageKey ? (
+                          <Check size={14} className="shrink-0 text-teal-400" />
+                        ) : (
+                          <span className="w-[14px] shrink-0" />
+                        )}
+                        <span className="truncate">{k}</span>
+                      </button>
+                    ))
+                  )
+                ) : filteredBlogPosts.length === 0 ? (
+                  <p className="px-3 py-3 text-xs text-slate-500 text-center">No posts match</p>
                 ) : (
-                  filteredPages.map((k) => (
+                  filteredBlogPosts.map((p) => (
                     <button
-                      key={k}
+                      key={p.slug}
                       onClick={() => {
-                        setPageKey(k);
+                        setBlogSlug(p.slug);
                         setPageMenuOpen(false);
                       }}
                       className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm hover:bg-slate-700/50"
-                      style={{ color: k === pageKey ? "#5eead4" : "#e2e8f0" }}
+                      style={{ color: p.slug === blogSlug ? "#5eead4" : "#e2e8f0" }}
                     >
-                      {k === pageKey ? (
+                      {p.slug === blogSlug ? (
                         <Check size={14} className="shrink-0 text-teal-400" />
                       ) : (
                         <span className="w-[14px] shrink-0" />
                       )}
-                      <span className="truncate">{k}</span>
+                      <span className="truncate">{p.title}</span>
                     </button>
                   ))
                 )}
@@ -527,14 +654,14 @@ export function TranslationsPage() {
         </div>
 
         <div
-          className="flex items-center rounded-lg overflow-hidden"
+          className="flex items-center rounded-lg overflow-hidden shrink-0"
           style={{ border: "1px solid #374151" }}
         >
           {LOCALES.map((l) => (
             <button
               key={l.code}
               onClick={() => setLocale(l.code)}
-              className="px-3 py-1.5 text-xs font-medium transition-colors"
+              className="px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors"
               style={{
                 background: locale === l.code ? "#0f857a" : "transparent",
                 color: locale === l.code ? "#fff" : "#94a3b8",
@@ -545,11 +672,11 @@ export function TranslationsPage() {
           ))}
         </div>
 
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-slate-500 shrink-0 whitespace-nowrap">
           {translatedCount}/{rows.length} translated
         </span>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap shrink-0 ml-auto">
           <div className="relative">
             <Search
               size={13}
@@ -563,18 +690,20 @@ export function TranslationsPage() {
               style={inpStyle}
             />
           </div>
-          <button
-            onClick={() => setShowPreview((p) => !p)}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium"
-            style={{
-              background: showPreview ? "#0f857a" : "transparent",
-              color: showPreview ? "#fff" : "#94a3b8",
-              border: "1px solid #374151",
-            }}
-            title="Toggle live website preview"
-          >
-            {showPreview ? <Eye size={14} /> : <EyeOff size={14} />} Preview
-          </button>
+          {previewAvailable && (
+            <button
+              onClick={() => setShowPreview((p) => !p)}
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium"
+              style={{
+                background: showPreview ? "#0f857a" : "transparent",
+                color: showPreview ? "#fff" : "#94a3b8",
+                border: "1px solid #374151",
+              }}
+              title="Toggle live website preview"
+            >
+              {showPreview ? <Eye size={14} /> : <EyeOff size={14} />} Preview
+            </button>
+          )}
           <button
             onClick={exportTranslations}
             disabled={loading || !rows.length}
@@ -661,7 +790,7 @@ export function TranslationsPage() {
 
       {/* Body — editor list (left) + live website preview (right) */}
       <div className="flex-1 min-h-0 flex">
-        <main className={`${showPreview ? "w-1/2" : "flex-1"} overflow-y-auto px-5 py-5`}>
+        <main className={`${showPreview && previewAvailable ? "w-1/2" : "flex-1"} overflow-y-auto px-5 py-5`}>
           {loading ? (
             <p className="text-sm text-slate-500 text-center py-16">Loading…</p>
           ) : rows.length === 0 ? (
@@ -718,16 +847,29 @@ export function TranslationsPage() {
                             />
                           </div>
                         ) : (
-                          <textarea
-                            rows={Math.min(4, Math.max(1, Math.ceil(r.english.length / 48)))}
-                            value={bundle[r.key] ?? ""}
-                            onChange={(e) => setValue(r.key, e.target.value)}
-                            onFocus={() => selectBlock(r.blockId)}
-                            onBlur={() => selectBlock(null)}
-                            placeholder={`${locale.toUpperCase()} — leave blank to keep English`}
-                            className={inp}
-                            style={{ ...inpStyle, resize: "vertical" }}
-                          />
+                          <div>
+                            <textarea
+                              rows={Math.min(4, Math.max(1, Math.ceil(r.english.length / 48)))}
+                              value={bundle[r.key] ?? ""}
+                              onChange={(e) => setValue(r.key, e.target.value)}
+                              onFocus={() => selectBlock(r.blockId)}
+                              onBlur={() => selectBlock(null)}
+                              placeholder={
+                                r.markupMode
+                                  ? `${locale.toUpperCase()} — keep **bold**, *italic*, ++underline++, [link](url), ==teal== as you translate`
+                                  : `${locale.toUpperCase()} — leave blank to keep English`
+                              }
+                              className={inp}
+                              style={{ ...inpStyle, resize: "vertical" }}
+                            />
+                            {r.markupMode && (bundle[r.key] ?? "").trim() !== "" && (
+                              <div
+                                className="i18n-md-preview mt-1.5 rounded-lg px-3 py-2 text-sm leading-relaxed"
+                                style={{ background: "#0f1420", border: "1px dashed #374151", color: "#cbd5e1" }}
+                                dangerouslySetInnerHTML={{ __html: mdToHtml(bundle[r.key] ?? "", r.markupMode) }}
+                              />
+                            )}
+                          </div>
                         )}
                       </div>
                     ))}
@@ -738,7 +880,7 @@ export function TranslationsPage() {
           )}
         </main>
 
-        {showPreview && (
+        {showPreview && previewAvailable && (
           <div className="w-1/2 flex flex-col min-h-0" style={{ borderLeft: "1px solid #1f2937" }}>
             <div
               className="shrink-0 flex items-center gap-2 px-4 py-2 border-b"
