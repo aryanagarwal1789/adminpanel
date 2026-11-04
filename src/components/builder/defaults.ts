@@ -1930,7 +1930,7 @@ export const DEFAULT_FIELDS: Record<Exclude<BlockType, "layout">, Record<string,
     videoUrl:  'https://d3k6auglia2ji4.cloudfront.net/thumbnails/1792136649733_platform%20video%20for%20web%20161026_7%20comp.mp4',
     posterUrl: '',
     ctaLabel:  'Explore More Products',
-    ctaUrl:    '/#all-solutions',
+    ctaUrl:    'https://salescode.ai/#all-solutions',
   },
   'slick-video-intro': {
     titlePre:      'Hey! I made a ',

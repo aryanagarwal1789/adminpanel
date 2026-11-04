@@ -4524,7 +4524,7 @@ function renderBlockFields(
           <VideoField label="Video (YouTube, Vimeo, or direct URL/upload)" {...videoI18nProps(f, "videoUrl", update)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
           <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
-          <TextInput label="CTA URL (/#all-solutions = home page Platform Grid, smooth scroll)" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          <TextInput label="CTA URL (opens in a new tab)" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
         </div>
       );
 
