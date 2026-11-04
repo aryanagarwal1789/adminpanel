@@ -4531,7 +4531,7 @@ function renderBlockFields(
       );
 
     case 'slick-rtai-hero': {
-      type Fact = { icon?: string; text?: string };
+      type Fact = { icon?: string; label?: string; text?: string };
       const icons = ['pin', 'cal', 'clock'].map((v) => ({ value: v, label: v }));
       return (
         <div className="space-y-4">
@@ -4539,16 +4539,19 @@ function renderBlockFields(
           <ImageField label="Background image" {...imageI18nProps(f, "bgImage", update)} />
           <ImageField label="Wordmark logo (Route to AI)" {...imageI18nProps(f, "logoImage", update)} />
           <ImageField label="Sub logo (CXO Roadshow)" {...imageI18nProps(f, "subImage", update)} />
-          <Textarea label="Lead paragraph (HTML allowed)" value={f.lead as string ?? ''} onChange={(v) => set('lead', v)} />
+          <TextInput label="City pill name (empty hides the pill)" value={f.cityName as string ?? ''} onChange={(v) => set('cityName', v)} />
+          <ImageField label="City pill flag" {...imageI18nProps(f, "cityFlag", update)} />
+          <Textarea label="Lead paragraph (HTML allowed, empty hides it)" value={f.lead as string ?? ''} onChange={(v) => set('lead', v)} />
           <Repeater<Fact>
             label="Facts (location / date)"
             items={(f.facts as Fact[]) ?? []}
             onChange={(v) => set('facts', v)}
-            newItem={() => ({ icon: 'pin', text: '' })}
+            newItem={() => ({ icon: 'pin', label: '', text: '' })}
             itemPreview={(it) => it.text || '(fact)'}
             renderItem={(it, u) => (
               <div className="space-y-2">
                 <Select label="Icon" value={it.icon ?? 'pin'} onChange={(x) => u({ ...it, icon: x })} options={icons} />
+                <TextInput label="Label (e.g. Location)" value={it.label ?? ''} onChange={(x) => u({ ...it, label: x })} />
                 <TextInput label="Text" value={it.text ?? ''} onChange={(x) => u({ ...it, text: x })} />
               </div>
             )}
@@ -4644,6 +4647,41 @@ function renderBlockFields(
       );
     }
 
+    case 'slick-rtai-products': {
+      type Product = { image?: string; video?: string; ratio?: string; tag?: string; name?: string; desc?: string; url?: string };
+      const ratios = [{ value: '16:9', label: '16:9 (landscape)' }, { value: '9:16', label: '9:16 (vertical)' }];
+      return (
+        <div className="space-y-4">
+          <TextInput label="Pill" value={f.pill as string ?? ''} onChange={(v) => set('pill', v)} />
+          <Textarea label="Heading (HTML)" value={f.heading as string ?? ''} onChange={(v) => set('heading', v)} />
+          <Textarea label="Lead (HTML)" value={f.lead as string ?? ''} onChange={(v) => set('lead', v)} />
+          <Repeater<Product>
+            label="Product cards"
+            items={(f.products as Product[]) ?? []}
+            onChange={(v) => set('products', v)}
+            newItem={() => ({ image: '', video: '', ratio: '16:9', tag: '', name: '', desc: '', url: '' })}
+            itemPreview={(it) => it.name || '(product)'}
+            renderItem={(it, u) => (
+              <div className="space-y-2">
+                <ImageField label="Cover image" value={it.image ?? ''} onChange={(x) => u({ ...it, image: x })} />
+                <TextInput label="YouTube link" value={it.video ?? ''} onChange={(x) => u({ ...it, video: x })} />
+                <Select label="Video shape" value={it.ratio ?? '16:9'} onChange={(x) => u({ ...it, ratio: x })} options={ratios} />
+                <TextInput label="Tag (e.g. AI Agent)" value={it.tag ?? ''} onChange={(x) => u({ ...it, tag: x })} />
+                <TextInput label="Name" value={it.name ?? ''} onChange={(x) => u({ ...it, name: x })} />
+                <Textarea label="Description" value={it.desc ?? ''} onChange={(x) => u({ ...it, desc: x })} />
+                <TextInput label="Explore link" value={it.url ?? ''} onChange={(x) => u({ ...it, url: x })} />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <div className="grid grid-cols-2 gap-2">
+            <TextInput label="Button label" value={f.ctaLabel as string ?? ''} onChange={(v) => set('ctaLabel', v)} />
+            <TextInput label="Button URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+          </div>
+        </div>
+      );
+    }
+
     case 'slick-rtai-register': {
       type Fact = { icon?: string; text?: string };
       const icons = ['cal', 'clock', 'pin'].map((v) => ({ value: v, label: v }));
@@ -4674,6 +4712,8 @@ function renderBlockFields(
             <TextInput label="Email placeholder" value={f.emailPlaceholder as string ?? ''} onChange={(v) => set('emailPlaceholder', v)} />
             <TextInput label="Company label" value={f.companyLabel as string ?? ''} onChange={(v) => set('companyLabel', v)} />
             <TextInput label="Company placeholder" value={f.companyPlaceholder as string ?? ''} onChange={(v) => set('companyPlaceholder', v)} />
+            <TextInput label="Designation label" value={f.designationLabel as string ?? ''} onChange={(v) => set('designationLabel', v)} />
+            <TextInput label="Designation placeholder" value={f.designationPlaceholder as string ?? ''} onChange={(v) => set('designationPlaceholder', v)} />
             <TextInput label="Phone label" value={f.phoneLabel as string ?? ''} onChange={(v) => set('phoneLabel', v)} />
             <TextInput label="Phone placeholder" value={f.phonePlaceholder as string ?? ''} onChange={(v) => set('phonePlaceholder', v)} />
           </div>
@@ -4682,12 +4722,9 @@ function renderBlockFields(
           <Textarea label="Success title (HTML)" value={f.successTitle as string ?? ''} onChange={(v) => set('successTitle', v)} />
           <Textarea label="Success message" value={f.successMessage as string ?? ''} onChange={(v) => set('successMessage', v)} />
           <TextInput label="Reset link label" value={f.resetLabel as string ?? ''} onChange={(v) => set('resetLabel', v)} />
+          <TextInput label="Send-failure error text" value={f.sendErrorText as string ?? ''} onChange={(v) => set('sendErrorText', v)} />
           <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
-          <TextInput label="API endpoint (POST)" value={f.apiEndpoint as string ?? ''} onChange={(v) => set('apiEndpoint', v)} />
-          <div className="grid grid-cols-2 gap-2">
-            <TextInput label="Hardcoded City (payload)" value={f.hardcodedCity as string ?? ''} onChange={(v) => set('hardcodedCity', v)} />
-            <TextInput label="Hardcoded Joining As (payload)" value={f.hardcodedJoiningAs as string ?? ''} onChange={(v) => set('hardcodedJoiningAs', v)} />
-          </div>
+          <TextInput label="Form key (recipient + email template configured on the backend)" value={f.formKey as string ?? ''} onChange={(v) => set('formKey', v)} />
         </div>
       );
     }

@@ -133,6 +133,7 @@ const GROUPS: Group[] = [
     { type: "slick-rtai-agenda",         label: "Route to AI — Agenda", Icon: ListOrdered },
     { type: "slick-rtai-why",            label: "Route to AI — Why Attend", Icon: Grid2x2 },
     { type: "slick-rtai-stack",          label: "Route to AI — Your Stack", Icon: Layers },
+    { type: "slick-rtai-products",       label: "Route to AI — Products", Icon: MonitorPlay },
     { type: "slick-rtai-register",       label: "Route to AI — Register", Icon: FileText },
     { type: "slick-ab-mission-vision",   label: "About — Mission & Vision", Icon: BookOpen    },
     { type: "slick-ab-founder-banner", label: "About — Founder Banner", Icon: Star },
