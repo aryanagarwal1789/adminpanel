@@ -128,6 +128,7 @@ const GROUPS: Group[] = [
     { type: "slick-ab-hero-v2", label: "About — Hero V2", Icon: Sparkles },
     { type: "slick-ab-intro",            label: "About — Intro & Video",    Icon: MonitorPlay },
     { type: "slick-ab-intro-v2",         label: "About — Intro & Video V2", Icon: MonitorPlay },
+    { type: "slick-ab-intro-v3",         label: "About — Intro & Video V3", Icon: MonitorPlay },
     { type: "slick-video-intro",         label: "Personal Video Intro", Icon: MonitorPlay },
     { type: "slick-rtai-hero",           label: "Route to AI — Hero", Icon: Sparkles },
     { type: "slick-rtai-agenda",         label: "Route to AI — Agenda", Icon: ListOrdered },
