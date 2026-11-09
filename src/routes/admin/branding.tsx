@@ -6,7 +6,7 @@ import { usePublishOtp, PublishOtpModal } from '@/lib/otpPublish';
 export const Route = createFileRoute('/admin/branding')({ component: BrandingPage });
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? 'https://salescode-marketplace.salescode.ai';
-const PORTAL = 'coke-platform';
+const PORTAL = 'cokeworld';
 
 interface PortalBranding {
   accent: string;
