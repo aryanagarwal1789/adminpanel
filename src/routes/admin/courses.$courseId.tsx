@@ -17,6 +17,10 @@ const CATEGORIES = [
   { id: 'agents', label: 'AI Agents' },
   { id: 'plugin', label: 'AI Plugins' },
   { id: 'conn', label: 'Connectors' },
+  // Module courses (a module is a course listed under a product). The Coke
+  // portal groups them under these headings in Product Videos.
+  { id: 'sfa-modules', label: 'SFA Modules' },
+  { id: 'modules', label: 'Modules (other products)' },
 ];
 
 interface Lesson {
