@@ -2647,9 +2647,35 @@ function renderBlockFields(
 
     case 'slick-sc-platform-branded': {
       type AgentItem = { icon?: string; label?: string };
+      type StatItem = { value?: string; label?: string };
+      const isCoke = ((f.variant as string) ?? 'default') === 'coke';
       return (
         <div className="space-y-4">
-          <ImageField label="Brand logo (top-left)" value={f.logoImage as string ?? ''} onChange={(v) => set('logoImage', v)} />
+          <Select
+            label="Layout"
+            value={(f.variant as string) ?? 'default'}
+            onChange={(v) => set('variant', v)}
+            options={[{ value: 'default', label: 'Default (dark, centred)' }, { value: 'coke', label: 'Coke (red, left-aligned, stats row)' }]}
+          />
+          {isCoke && (
+            <>
+              <ImageField label="Partner logo (Coke layout, above heading)" value={f.brandLogo as string ?? ''} onChange={(v) => set('brandLogo', v)} />
+              <Repeater<StatItem>
+                label="Stats row (Coke layout)"
+                items={(f.stats as StatItem[]) ?? []}
+                onChange={(v) => set('stats', v)}
+                newItem={() => ({ value: '', label: '' })}
+                itemPreview={(it) => `${it.value ?? ''} ${it.label ?? ''}`.trim() || 'Stat'}
+                renderItem={(it, u) => (
+                  <div className="space-y-2">
+                    <TextInput label="Value" value={it.value ?? ''} onChange={(v) => u({ ...it, value: v })} />
+                    <TextInput label="Label" value={it.label ?? ''} onChange={(v) => u({ ...it, label: v })} />
+                  </div>
+                )}
+              />
+            </>
+          )}
+          <ImageField label="Brand logo (top-left; top-right in Coke layout)" value={f.logoImage as string ?? ''} onChange={(v) => set('logoImage', v)} />
           <ImageField label="Background image (optional)" value={f.backgroundImage as string ?? ''} onChange={(v) => set('backgroundImage', v)} />
           <RichFieldGroup label="Heading line 1" f={f} set={set} base="line1" segments={[{ key: 'line1' }]} />
           <RichFieldGroup label="Product word (use / for the thin slash)" f={f} set={set} base="line2" segments={[{ key: 'line2' }]} />
