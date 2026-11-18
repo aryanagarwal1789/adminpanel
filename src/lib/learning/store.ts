@@ -106,9 +106,28 @@ export const newCourseId = (d: Learning, title: string): string =>
 export const newModuleId = (d: Learning, title: string): string =>
   uniqueId(toId(title) || "module", allIds(d));
 
+/** Why `id` cannot be a new course's id, or null. Course and module ids share one namespace. */
+export function courseIdProblem(d: Learning, id: string): string | null {
+  const n = toId(id);
+  if (!n) return "Course ID is required.";
+  if (allIds(d).includes(n)) return `"${n}" is already used by a course or module.`;
+  return null;
+}
+
+/**
+ * True when a GET /site/learning?v=2 body carries a numeric revision. An
+ * un-upgraded backend ignores ?v=2 and returns the legacy shape without one.
+ */
+export function hasServerRevision(body: unknown): boolean {
+  const l = (body as { learning?: { revision?: unknown } } | null)?.learning;
+  return typeof l?.revision === "number";
+}
+
 export function blankCourse(
   d: Learning,
   fields: {
+    /** Admin-chosen id; defaults to one derived from the title. */
+    courseId?: string;
     title: string;
     category: string;
     description: string;
@@ -118,7 +137,7 @@ export function blankCourse(
 ): LearningCourse {
   const title = fields.title.trim();
   const course: LearningCourse = {
-    courseId: newCourseId(d, title),
+    courseId: (fields.courseId && toId(fields.courseId)) || newCourseId(d, title),
     eyebrow: "AI Native",
     title,
     description: fields.description,

@@ -12,6 +12,7 @@ import { fromServer, type Draft } from "./draft";
 import { summarize, type ChangeItem } from "./diff";
 import {
   clearStoredDraft,
+  hasServerRevision,
   isStale,
   loadStoredDraft,
   rebaseDraft,
@@ -34,6 +35,8 @@ interface LearningContextValue {
   draft: Draft | null;
   loading: boolean;
   loadError: boolean;
+  /** The backend ignored ?v=2 (no numeric revision): no draft is built, editing is off. */
+  backendOutdated: boolean;
   /** Draft was started from an older server revision than the current base. */
   stale: boolean;
   changes: ChangeItem[];
@@ -59,10 +62,16 @@ interface LearningContextValue {
 
 const Ctx = createContext<LearningContextValue | null>(null);
 
+export const BACKEND_OUTDATED_MESSAGE =
+  "The learning backend hasn't been upgraded yet \u2014 editing is unavailable.";
+
+class BackendOutdatedError extends Error {}
+
 async function fetchBase(): Promise<Learning> {
   const r = await fetch(`${BACKEND}/site/learning?v=2`);
   if (!r.ok) throw new Error(String(r.status));
   const d = (await r.json()) as { learning?: Partial<Learning> };
+  if (!hasServerRevision(d)) throw new BackendOutdatedError();
   const l = d.learning ?? {};
   return fromServer({
     heading: l.heading ?? "",
@@ -77,6 +86,7 @@ export function LearningProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<DraftState | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [backendOutdated, setBackendOutdated] = useState(false);
   const [products, setProducts] = useState<ProductOption[]>([]);
   const [focus, setFocus] = useState<LearningContextValue["focus"]>(null);
   const nonce = useRef(0);
@@ -89,7 +99,11 @@ export function LearningProvider({ children }: { children: ReactNode }) {
         setBase(b);
         setState(resolveDraft(b, loadStoredDraft()));
       })
-      .catch(() => live && setLoadError(true))
+      .catch((e: unknown) => {
+        if (!live) return;
+        if (e instanceof BackendOutdatedError) setBackendOutdated(true);
+        else setLoadError(true);
+      })
       .finally(() => live && setLoading(false));
     fetch(`${BACKEND}/site/products`)
       .then((r) => r.json())
@@ -164,6 +178,7 @@ export function LearningProvider({ children }: { children: ReactNode }) {
     draft: state?.draft ?? null,
     loading,
     loadError,
+    backendOutdated,
     stale,
     changes,
     problems,
@@ -181,7 +196,7 @@ export function LearningProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
+// eslint-disable-next-line react-refresh/only-export-components -- hook and provider share the private context; splitting files would only move it
 export function useLearning(): LearningContextValue {
   const v = useContext(Ctx);
   if (!v) throw new Error("useLearning must be used inside LearningProvider");

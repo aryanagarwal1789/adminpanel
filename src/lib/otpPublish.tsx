@@ -56,7 +56,7 @@ export function usePublishOtp(
    * learning.publish LEARNING_STALE) or a 400 carrying `problems`. Return true
    * when handled: the modal then closes instead of showing a generic error.
    */
-  onFailure?: (status: number, body: any, action: string) => boolean,
+  onFailure?: (status: number, body: unknown, action: string) => boolean,
 ) {
   const [state, setState] = useState<PublishOtpState | null>(null);
   const [otpInput, setOtpInput] = useState("");
@@ -136,7 +136,10 @@ export function usePublishOtp(
             setOtpInput("");
             return;
           }
-          if ((res.status === 409 || (res.status === 400 && Array.isArray(d.problems))) && onFailure?.(res.status, d, cur.action)) {
+          if (
+            (res.status === 409 || (res.status === 400 && Array.isArray(d.problems))) &&
+            onFailure?.(res.status, d, cur.action)
+          ) {
             setState(null);
             setOtpInput("");
             return;

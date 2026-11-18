@@ -2,10 +2,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { usePublishOtp, PublishOtpModal } from "@/lib/otpPublish";
 import { LastUpdatedBy } from "@/lib/lastUpdated";
-import { useLearning } from "@/lib/learning/LearningProvider";
-import { addCourse, removeCourse, reorderCourses, setCourseVisible } from "@/lib/learning/draft";
+import { BACKEND_OUTDATED_MESSAGE, useLearning } from "@/lib/learning/LearningProvider";
+import { addCourse, removeCourse, reorderCourses, updateCourse } from "@/lib/learning/draft";
+import { toId } from "@/lib/learning/ids";
 import { CATEGORIES } from "@/lib/learning/categories";
-import { blankCourse, newCourseId } from "@/lib/learning/store";
+import { blankCourse, courseIdProblem, newCourseId } from "@/lib/learning/store";
 import { PublishBar } from "@/components/learning/PublishBar";
 import { useDragReorder } from "@/components/learning/useDragReorder";
 import {
@@ -24,6 +25,9 @@ type Toast = { type: "success" | "error"; message: string } | null;
 
 const BLANK_NEW = {
   title: "",
+  courseId: "",
+  /** Admin typed in the ID field: stop following the title. */
+  idEdited: false,
   category: "sales",
   productId: "",
   description: "",
@@ -69,6 +73,7 @@ function CoursesPage() {
   const handleAddCourse = (e: React.FormEvent) => {
     e.preventDefault();
     if (!L.draft || !newCourse.title.trim()) return;
+    if (courseIdProblem(L.draft, newCourse.courseId)) return;
     const course = blankCourse(L.draft, newCourse);
     L.edit((d) => addCourse(d, course));
     setShowAddModal(false);
@@ -81,7 +86,18 @@ function CoursesPage() {
     L.edit((d) => removeCourse(d, courseId));
   };
 
-  const previewId = L.draft && newCourse.title.trim() ? newCourseId(L.draft, newCourse.title) : "";
+  const idProblem =
+    L.draft && newCourse.courseId ? courseIdProblem(L.draft, newCourse.courseId) : null;
+  const onTitleChange = (title: string) =>
+    setNewCourse((p) => ({
+      ...p,
+      title,
+      courseId: p.idEdited
+        ? p.courseId
+        : L.draft && title.trim()
+          ? newCourseId(L.draft, title)
+          : "",
+    }));
 
   return (
     <div>
@@ -163,6 +179,7 @@ function CoursesPage() {
         </div>
         <button
           style={saveBtn}
+          disabled={!L.base}
           onClick={() => otp.open("learning.settings", { heading, subheading })}
         >
           Save copy
@@ -173,6 +190,10 @@ function CoursesPage() {
 
       {L.loading ? (
         <div style={{ color: "#94a3b8", padding: 40, textAlign: "center" }}>Loading…</div>
+      ) : L.backendOutdated ? (
+        <div style={{ color: "#fbbf24", padding: 40, textAlign: "center" }}>
+          {BACKEND_OUTDATED_MESSAGE}
+        </div>
       ) : L.loadError ? (
         <div style={{ color: "#f87171", padding: 40, textAlign: "center" }}>
           Failed to load learning portal
@@ -291,7 +312,9 @@ function CoursesPage() {
                     <input
                       type="checkbox"
                       checked={c.enabled}
-                      onChange={() => L.edit((d) => setCourseVisible(d, c.courseId, !c.enabled))}
+                      onChange={() =>
+                        L.edit((d) => updateCourse(d, c.courseId, { enabled: !c.enabled }))
+                      }
                     />
                     Visible
                   </label>
@@ -352,13 +375,34 @@ function CoursesPage() {
                 <input
                   style={inp}
                   value={newCourse.title}
-                  onChange={(e) => setNewCourse((p) => ({ ...p, title: e.target.value }))}
+                  onChange={(e) => onTitleChange(e.target.value)}
                   placeholder="e.g. SFA"
                   required
                   autoFocus
                 />
-                <span style={{ fontSize: 11, color: "#64748b", marginTop: 3, display: "block" }}>
-                  Course ID: {previewId || "…"} (made from the title; cannot be changed later).
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                <label style={lbl}>
+                  Course ID <span style={{ color: "#ef4444" }}>*</span>
+                </label>
+                <input
+                  style={inp}
+                  value={newCourse.courseId}
+                  onChange={(e) =>
+                    setNewCourse((p) => ({ ...p, courseId: toId(e.target.value), idEdited: true }))
+                  }
+                  placeholder="made from the title"
+                  required
+                />
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: idProblem ? "#f87171" : "#64748b",
+                    marginTop: 3,
+                    display: "block",
+                  }}
+                >
+                  {idProblem ?? "Used in the course URL; cannot be changed later."}
                 </span>
               </div>
               <div style={{ marginBottom: 14 }}>
@@ -408,7 +452,11 @@ function CoursesPage() {
                 />
               </div>
               <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-                <button type="submit" style={{ ...saveBtn, flex: 1 }}>
+                <button
+                  type="submit"
+                  disabled={!!idProblem || !newCourse.courseId}
+                  style={{ ...saveBtn, flex: 1 }}
+                >
                   Create Course
                 </button>
                 <button type="button" style={secBtn} onClick={() => setShowAddModal(false)}>

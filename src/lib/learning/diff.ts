@@ -18,13 +18,17 @@ function changedFields(a: object, b: object, skip: Set<string>): string[] {
   return keys.filter((k) => JSON.stringify(x[k] ?? null) !== JSON.stringify(y[k] ?? null));
 }
 
-// Ids present in both lists, in each list's order: differ => reordered.
-function reordered(before: string[], after: string[]): boolean {
+// Ids present in both lists, each in its own list's order.
+function common(before: string[], after: string[]): [string[], string[]] {
   const inAfter = new Set(after);
   const inBefore = new Set(before);
-  const a = before.filter((id) => inAfter.has(id));
-  const b = after.filter((id) => inBefore.has(id));
-  return a.some((id, i) => id !== b[i]);
+  return [before.filter((id) => inAfter.has(id)), after.filter((id) => inBefore.has(id))];
+}
+
+// First id whose position differs among the shared ids, or null when none moved.
+function firstMoved(before: string[], after: string[]): string | null {
+  const [a, b] = common(before, after);
+  return a.find((id, i) => id !== b[i]) ?? null;
 }
 
 const byId = <T>(list: T[], key: (t: T) => string) => new Map(list.map((t) => [key(t), t]));
@@ -53,22 +57,16 @@ export function summarize(base: Learning, draft: Learning): ChangeItem[] {
         locator: { courseId: c.courseId },
       });
   }
-  if (
-    reordered(
-      base.courses.map((c) => c.courseId),
-      draft.courses.map((c) => c.courseId),
-    )
-  )
+  const movedCourse = firstMoved(
+    base.courses.map((c) => c.courseId),
+    draft.courses.map((c) => c.courseId),
+  );
+  if (movedCourse !== null)
     out.push({
       kind: "reordered",
       entity: "course",
       label: "Reordered courses",
-      locator: {
-        courseId: firstMoved(
-          base.courses.map((c) => c.courseId),
-          draft.courses.map((c) => c.courseId),
-        ),
-      },
+      locator: { courseId: movedCourse },
     });
 
   for (const c of draft.courses) {
@@ -76,14 +74,6 @@ export function summarize(base: Learning, draft: Learning): ChangeItem[] {
     if (b) diffCourse(b, c, out);
   }
   return out;
-}
-
-function firstMoved(before: string[], after: string[]): string {
-  const inAfter = new Set(after);
-  const inBefore = new Set(before);
-  const a = before.filter((id) => inAfter.has(id));
-  const b = after.filter((id) => inBefore.has(id));
-  return a.find((id, i) => id !== b[i]) ?? a[0];
 }
 
 function diffCourse(b: LearningCourse, c: LearningCourse, out: ChangeItem[]) {
@@ -117,7 +107,7 @@ function diffCourse(b: LearningCourse, c: LearningCourse, out: ChangeItem[]) {
       });
   const bIds = b.modules.map((m) => m.moduleId);
   const dIds = c.modules.map((m) => m.moduleId);
-  if (reordered(bIds, dIds))
+  if (firstMoved(bIds, dIds) !== null)
     out.push({
       kind: "reordered",
       entity: "module",
@@ -167,10 +157,10 @@ function diffModule(
         locator: { courseId: cid, moduleId: mid, lessonId: l.id },
       });
   if (
-    reordered(
+    firstMoved(
       b.lessons.map((l) => l.id),
       m.lessons.map((l) => l.id),
-    )
+    ) !== null
   )
     out.push({
       kind: "reordered",

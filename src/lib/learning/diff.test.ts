@@ -10,7 +10,6 @@ import {
   reorderCourses,
   reorderLessons,
   reorderModules,
-  setCourseVisible,
   updateCourse,
   updateLesson,
   updateModule,
@@ -51,7 +50,7 @@ describe("summarize", () => {
     expect(r[0].label).toBe('Edited course "N" (title, description)');
   });
   it("visibility change is an edit of enabled", () => {
-    const r = summarize(base(), setCourseVisible(base(), "b", false));
+    const r = summarize(base(), updateCourse(base(), "b", { enabled: false }));
     expect(r[0].label).toContain("enabled");
   });
   it("module added/removed/edited", () => {

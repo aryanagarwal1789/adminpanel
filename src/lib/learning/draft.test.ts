@@ -10,7 +10,6 @@ import {
   reorderCourses,
   reorderLessons,
   reorderModules,
-  setCourseVisible,
   updateCourse,
   updateLesson,
   updateModule,
@@ -27,8 +26,7 @@ const base = () =>
 describe("fromServer", () => {
   it("deep-clones, defaults modules and sets order from index", () => {
     const src = base();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (src.courses[1] as any).modules = undefined;
+    (src.courses[1] as { modules?: unknown }).modules = undefined;
     const d = fromServer(src);
     expect(d).not.toBe(src);
     expect(d.courses[1].modules).toEqual([]);
@@ -65,9 +63,6 @@ describe("course ops", () => {
     const n = reorderCourses(base(), 0, 2);
     expect(n.courses.map((c) => c.courseId)).toEqual(["b", "c", "a"]);
     expect(n.courses.map((c) => c.order)).toEqual([0, 1, 2]);
-  });
-  it("setCourseVisible sets enabled", () => {
-    expect(setCourseVisible(base(), "a", false).courses[0].enabled).toBe(false);
   });
   it("unknown id is a no-op", () => {
     const d = base();

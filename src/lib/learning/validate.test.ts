@@ -25,6 +25,22 @@ describe("validate", () => {
       p.find((x) => x.locator.moduleId === "m1" && x.locator.courseId === "n")?.locator.field,
     ).toBe("moduleId");
   });
+  it("moduleId equal to any courseId", () => {
+    const d = learning([
+      course("a", [mod("empty", [lesson("l1")])]),
+      course("empty", [mod("m9", [lesson("l2")])]),
+    ]);
+    const p = validate(base(), d);
+    expect(
+      p.some(
+        (x) =>
+          x.locator.courseId === "a" &&
+          x.locator.moduleId === "empty" &&
+          x.locator.field === "moduleId" &&
+          /course id/i.test(x.message),
+      ),
+    ).toBe(true);
+  });
   it("duplicate lesson ids within a module, same id across modules ok", () => {
     const d = learning([
       course("a", [mod("m1", [lesson("l1"), lesson("l1")]), mod("m2", [lesson("l1")])]),

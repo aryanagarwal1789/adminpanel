@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   allIds,
   blankCourse,
+  courseIdProblem,
+  hasServerRevision,
   buildPublishPayload,
   clearStoredDraft,
   isStale,
@@ -129,5 +131,34 @@ describe("ids", () => {
         productId: "p",
       }).productId,
     ).toBe("p");
+  });
+});
+
+describe("course id field", () => {
+  const b = () => learning([course("sfa", [mod("intro", [])])]);
+  const fields = { title: "T", category: "sales", description: "", enabled: true };
+
+  it("blankCourse uses an admin-chosen id, re-normalised", () => {
+    expect(blankCourse(b(), { ...fields, courseId: " My Course! " }).courseId).toBe("my-course");
+  });
+  it("blankCourse falls back to the title-derived id when none given", () => {
+    expect(blankCourse(b(), { ...fields, title: "SFA" }).courseId).toBe("sfa-2");
+  });
+  it("courseIdProblem flags empty ids and ids taken by a course or a module", () => {
+    expect(courseIdProblem(b(), "")).toMatch(/required/i);
+    expect(courseIdProblem(b(), "sfa")).toMatch(/already/i);
+    expect(courseIdProblem(b(), "intro")).toMatch(/already/i);
+    expect(courseIdProblem(b(), "fresh")).toBeNull();
+  });
+});
+
+describe("hasServerRevision", () => {
+  it("true only for a numeric revision on the learning object", () => {
+    expect(hasServerRevision({ learning: { revision: 0, courses: [] } })).toBe(true);
+    expect(hasServerRevision({ learning: { revision: 7 } })).toBe(true);
+    expect(hasServerRevision({ learning: { courses: [] } })).toBe(false);
+    expect(hasServerRevision({ learning: { revision: "3" } })).toBe(false);
+    expect(hasServerRevision({})).toBe(false);
+    expect(hasServerRevision(null)).toBe(false);
   });
 });

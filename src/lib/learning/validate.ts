@@ -17,6 +17,7 @@ export function validate(base: Learning, draft: Learning): Problem[] {
   const baseModules = new Map(
     base.courses.flatMap((c) => c.modules.map((m) => [m.moduleId, m] as const)),
   );
+  const courseIds = new Set(draft.courses.map((c) => c.courseId));
   const seenCourses = new Set<string>();
   const seenModules = new Set<string>();
 
@@ -44,6 +45,11 @@ export function validate(base: Learning, draft: Learning): Problem[] {
           `Module id "${mid}" must be unique across all courses.`,
         );
       seenModules.add(mid);
+      if (courseIds.has(mid))
+        add(
+          { courseId: cid, moduleId: mid, field: "moduleId" },
+          `Module id "${mid}" must not equal a course id.`,
+        );
       if (blank(m.title))
         add({ courseId: cid, moduleId: mid, field: "title" }, `Module "${mid}" needs a title.`);
       const existed = baseModules.get(mid);

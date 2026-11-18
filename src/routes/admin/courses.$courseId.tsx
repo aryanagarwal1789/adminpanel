@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { UploadInput } from "./upload-input";
 import { LastUpdatedBy } from "@/lib/lastUpdated";
-import { useLearning } from "@/lib/learning/LearningProvider";
+import { BACKEND_OUTDATED_MESSAGE, useLearning } from "@/lib/learning/LearningProvider";
 import { addModule, reorderModules, updateCourse } from "@/lib/learning/draft";
 import { CATEGORIES } from "@/lib/learning/categories";
 import { newModuleId } from "@/lib/learning/store";
@@ -63,11 +63,17 @@ function CourseDetailPage() {
       50,
     );
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only on a new focus request (nonce) or course change; `toggle` is recreated each render
   }, [focus?.nonce, courseId, hasCourse]);
 
   if (L.loading)
     return <div style={{ color: "#94a3b8", padding: 40, textAlign: "center" }}>Loading…</div>;
+  if (L.backendOutdated)
+    return (
+      <div style={{ color: "#fbbf24", padding: 40, textAlign: "center" }}>
+        {BACKEND_OUTDATED_MESSAGE}
+      </div>
+    );
   if (!L.draft || !course)
     return (
       <div style={{ color: "#94a3b8", padding: 40, textAlign: "center" }}>

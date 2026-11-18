@@ -67,8 +67,6 @@ export const reorderCourses = (d: Draft, from: number, to: number): Draft => ({
   ...d,
   courses: renumberCourses(move(d.courses, from, to)),
 });
-export const setCourseVisible = (d: Draft, courseId: string, enabled: boolean): Draft =>
-  updateCourse(d, courseId, { enabled });
 
 // modules
 export const addModule = (d: Draft, courseId: string, module: LearningModule): Draft =>
