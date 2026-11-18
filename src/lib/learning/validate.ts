@@ -12,6 +12,11 @@ export function validate(base: Learning, draft: Learning): Problem[] {
   const add = (locator: Locator, message: string) => problems.push({ locator, message });
 
   const baseCourses = new Map(base.courses.map((c) => [c.courseId, c]));
+  // moduleIds are globally unique, so a module's base lesson count is looked up
+  // across all courses.
+  const baseModules = new Map(
+    base.courses.flatMap((c) => c.modules.map((m) => [m.moduleId, m] as const)),
+  );
   const seenCourses = new Set<string>();
   const seenModules = new Set<string>();
 
@@ -41,7 +46,9 @@ export function validate(base: Learning, draft: Learning): Problem[] {
       seenModules.add(mid);
       if (blank(m.title))
         add({ courseId: cid, moduleId: mid, field: "title" }, `Module "${mid}" needs a title.`);
-      if (m.lessons.length === 0)
+      const existed = baseModules.get(mid);
+      const mayBeEmpty = existed !== undefined && existed.lessons.length === 0;
+      if (m.lessons.length === 0 && !mayBeEmpty)
         add(
           { courseId: cid, moduleId: mid },
           `Module "${m.title || mid}" needs at least one lesson.`,
@@ -59,11 +66,6 @@ export function validate(base: Learning, draft: Learning): Problem[] {
           add(
             { courseId: cid, moduleId: mid, lessonId: l.id, field: "title" },
             `Lesson "${l.id}" needs a title.`,
-          );
-        if (blank(l.videoUrl))
-          add(
-            { courseId: cid, moduleId: mid, lessonId: l.id, field: "videoUrl" },
-            `Lesson "${l.title || l.id}" needs a video URL.`,
           );
       }
     }

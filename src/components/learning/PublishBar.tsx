@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { PublishOtpModal, usePublishOtp } from "@/lib/otpPublish";
 import { useLearning } from "@/lib/learning/LearningProvider";
+import { classifyPublishFailure, NOT_MIGRATED_MESSAGE } from "@/lib/learning/publishFailure";
 import { buildPublishPayload } from "@/lib/learning/store";
 import type { Locator } from "@/lib/learning/types";
 import { dangerBtn, secBtn } from "./styles";
@@ -23,7 +24,8 @@ export function PublishBar() {
       void L.publishDone();
     },
     (status, body) => {
-      if (status === 409 && body?.code === "LEARNING_STALE") {
+      const f = classifyPublishFailure(status, body);
+      if (f.kind === "stale") {
         // Someone else published first. Reload the server copy; the draft is
         // kept, now based on the old revision, so the bar blocks publishing
         // until the user rebases it onto the new one.
@@ -31,12 +33,13 @@ export function PublishBar() {
         void L.reload();
         return true;
       }
-      if (status === 400 && Array.isArray(body?.problems)) {
-        setServerProblems(
-          body.problems.map((p: unknown) =>
-            typeof p === "string" ? p : ((p as { message?: string })?.message ?? JSON.stringify(p)),
-          ),
-        );
+      if (f.kind === "not-migrated") {
+        // Nothing was written and the draft is untouched; not a stale draft.
+        toast.error(NOT_MIGRATED_MESSAGE);
+        return true;
+      }
+      if (f.kind === "problems") {
+        setServerProblems(f.problems);
         setOpen(true);
         return true;
       }

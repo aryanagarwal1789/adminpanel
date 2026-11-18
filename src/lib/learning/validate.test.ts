@@ -38,11 +38,33 @@ describe("validate", () => {
       field: "id",
     });
   });
-  it("module with no lessons", () => {
-    const d = learning([course("a", [mod("m1", [])])]);
-    const p = validate(d, d);
+  it("new module with no lessons needs one", () => {
+    const d = learning([
+      course("a", [mod("m1", [lesson("l1")]), mod("m2", [])]),
+      course("empty", []),
+    ]);
+    const p = validate(base(), d);
+    expect(p).toHaveLength(1);
+    expect(p[0].locator).toMatchObject({ courseId: "a", moduleId: "m2" });
+  });
+  it("existing module with 0 lessons may stay at 0", () => {
+    const b = learning([course("a", [mod("m1", [])])]);
+    expect(validate(b, b)).toEqual([]);
+  });
+  it("existing empty module matched across courses by moduleId", () => {
+    const b = learning([course("a", [mod("m1", [])]), course("b", [mod("m2", [lesson("l")])])]);
+    const d = learning([course("a", []), course("b", [mod("m2", [lesson("l")]), mod("m1", [])])]);
+    expect(validate(b, d).filter((x) => x.locator.moduleId === "m1")).toEqual([]);
+  });
+  it("module that had lessons cannot drop to 0", () => {
+    const d = learning([course("a", [mod("m1", [])]), course("empty", [])]);
+    const p = validate(base(), d);
     expect(p).toHaveLength(1);
     expect(p[0].locator).toMatchObject({ courseId: "a", moduleId: "m1" });
+  });
+  it("videoUrl is not required", () => {
+    const b = learning([course("a", [mod("m1", [lesson("l1", { videoUrl: "" })])])]);
+    expect(validate(b, b)).toEqual([]);
   });
   it("new course needs a module", () => {
     const d = learning([...base().courses, course("fresh", [])]);
@@ -65,10 +87,10 @@ describe("validate", () => {
     const fields = validate(base(), d)
       .map((x) => x.locator.field)
       .sort();
-    expect(fields).toEqual(["courseId", "title", "title", "title", "videoUrl"]);
+    expect(fields).toEqual(["courseId", "title", "title", "title"]);
   });
   it("messages are non-empty strings", () => {
     const d = learning([course("a", [mod("m1", [])])]);
-    expect(validate(d, d)[0].message.length).toBeGreaterThan(5);
+    expect(validate(base(), d)[0].message.length).toBeGreaterThan(5);
   });
 });
