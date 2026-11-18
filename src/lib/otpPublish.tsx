@@ -49,7 +49,15 @@ export interface PublishOtpState extends StagedWrite {
  * body from a successful /verify call (the same shape the old direct write
  * route used to return, e.g. { product } / { blog } / { course }).
  */
-export function usePublishOtp(onSuccess: (body: any, action: string) => void) {
+export function usePublishOtp(
+  onSuccess: (body: any, action: string) => void,
+  /**
+   * Optional. Called for action-specific failures at /verify: a 409 (e.g.
+   * learning.publish LEARNING_STALE) or a 400 carrying `problems`. Return true
+   * when handled: the modal then closes instead of showing a generic error.
+   */
+  onFailure?: (status: number, body: any, action: string) => boolean,
+) {
   const [state, setState] = useState<PublishOtpState | null>(null);
   const [otpInput, setOtpInput] = useState("");
 
@@ -128,6 +136,11 @@ export function usePublishOtp(onSuccess: (body: any, action: string) => void) {
             setOtpInput("");
             return;
           }
+          if ((res.status === 409 || (res.status === 400 && Array.isArray(d.problems))) && onFailure?.(res.status, d, cur.action)) {
+            setState(null);
+            setOtpInput("");
+            return;
+          }
           if (res.status === 400 && typeof d.attemptsRemaining === "number") {
             setState((s) => (s ? { ...s, submitting: false, error: `Invalid OTP — ${d.attemptsRemaining} attempt(s) left` } : s));
             return;
@@ -149,7 +162,7 @@ export function usePublishOtp(onSuccess: (body: any, action: string) => void) {
       })();
       return { ...cur, submitting: true, error: undefined };
     });
-  }, [otpInput, onSuccess]);
+  }, [otpInput, onSuccess, onFailure]);
 
   const cancel = useCallback(() => {
     setState(null);
