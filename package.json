@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "start": "node render-server.mjs",
     "lint": "eslint .",
+    "test": "vitest run",
     "format": "prettier --write .",
     "deploy:prep": "vite build && cp vercel.json dist/client/vercel.json && vercel link --cwd dist/client -p salescode-adminpanel --yes",
     "deploy": "npm run deploy:prep && vercel deploy --prod --cwd dist/client --yes",
