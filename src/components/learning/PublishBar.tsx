@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { PublishOtpModal, usePublishOtp } from "@/lib/otpPublish";
 import { useLearning } from "@/lib/learning/LearningProvider";
 import { classifyPublishFailure, NOT_MIGRATED_MESSAGE } from "@/lib/learning/publishFailure";
 import { buildPublishPayload } from "@/lib/learning/store";
+import { publishBarState } from "@/lib/learning/publishBarState";
 import type { Locator } from "@/lib/learning/types";
 import { dangerBtn, secBtn } from "./styles";
 
@@ -47,7 +48,18 @@ export function PublishBar() {
     },
   );
 
-  if (!L.draft || (L.changes.length === 0 && !L.stale && !staleNotice)) return null;
+  const vis = publishBarState({
+    hasDraft: !!L.draft,
+    changeCount: L.changes.length,
+    stale: L.stale,
+    staleNotice,
+  });
+  const { clearNotice } = vis;
+  useEffect(() => {
+    if (clearNotice) setStaleNotice(false);
+  }, [clearNotice]);
+
+  if (!vis.showBar) return null;
 
   const goTo = (loc: Locator) => {
     L.requestFocus(loc);
@@ -71,7 +83,7 @@ export function PublishBar() {
         boxShadow: "0 -4px 24px rgba(0,0,0,0.4)",
       }}
     >
-      {(L.stale || staleNotice) && (
+      {vis.showNotice && (
         <div
           style={{
             background: "#422006",
