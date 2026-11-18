@@ -25,6 +25,51 @@ describe("validate", () => {
       p.find((x) => x.locator.moduleId === "m1" && x.locator.courseId === "n")?.locator.field,
     ).toBe("moduleId");
   });
+  it("duplicate lesson ids across modules of one course", () => {
+    const d = learning([
+      course("a", [mod("m1", [lesson("l1")]), mod("m2", [lesson("l1")])]),
+      course("empty", []),
+    ]);
+    const p = validate(base(), d);
+    const hit = p.find(
+      (x) =>
+        x.locator.courseId === "a" &&
+        x.locator.moduleId === "m2" &&
+        x.locator.lessonId === "l1" &&
+        x.locator.field === "id",
+    );
+    expect(hit && /course/i.test(hit.message)).toBe(true);
+  });
+  it("same lesson id in different courses is fine", () => {
+    const d = learning([
+      course("a", [mod("m1", [lesson("l1")])]),
+      course("b", [mod("m2", [lesson("l1")])]),
+      course("empty", []),
+    ]);
+    expect(validate(base(), d)).toEqual([]);
+  });
+  it("blank moduleId", () => {
+    const d = learning([course("a", [mod("  ", [lesson("l1")])]), course("empty", [])]);
+    const p = validate(base(), d);
+    expect(
+      p.some(
+        (x) =>
+          x.locator.courseId === "a" &&
+          x.locator.field === "moduleId" &&
+          /required/i.test(x.message),
+      ),
+    ).toBe(true);
+  });
+  it("blank lesson id", () => {
+    const d = learning([course("a", [mod("m1", [lesson("")])]), course("empty", [])]);
+    const p = validate(base(), d);
+    expect(
+      p.some(
+        (x) =>
+          x.locator.moduleId === "m1" && x.locator.field === "id" && /required/i.test(x.message),
+      ),
+    ).toBe(true);
+  });
   it("moduleId equal to any courseId", () => {
     const d = learning([
       course("a", [mod("empty", [lesson("l1")])]),
@@ -41,18 +86,19 @@ describe("validate", () => {
       ),
     ).toBe(true);
   });
-  it("duplicate lesson ids within a module, same id across modules ok", () => {
+  it("duplicate lesson ids within a module and across modules are both flagged", () => {
     const d = learning([
       course("a", [mod("m1", [lesson("l1"), lesson("l1")]), mod("m2", [lesson("l1")])]),
     ]);
     const p = validate(d, d);
-    expect(p).toHaveLength(1);
+    expect(p).toHaveLength(2);
     expect(p[0].locator).toMatchObject({
       courseId: "a",
       moduleId: "m1",
       lessonId: "l1",
       field: "id",
     });
+    expect(p[1].locator).toMatchObject({ courseId: "a", moduleId: "m2", lessonId: "l1" });
   });
   it("new module with no lessons needs one", () => {
     const d = learning([

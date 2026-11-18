@@ -5,6 +5,10 @@ export type Draft = Learning;
 const renumberLessons = (lessons: LearningLesson[]): LearningLesson[] =>
   lessons.map((l, i) => (l.order === i ? l : { ...l, order: i }));
 
+// Array.prototype.sort is stable, so equal orders keep their stored sequence.
+const sortByOrder = (lessons: LearningLesson[]): LearningLesson[] =>
+  lessons.slice().sort((a, b) => a.order - b.order);
+
 const renumberCourses = (courses: LearningCourse[]): LearningCourse[] =>
   courses.map((c, i) => (c.order === i ? c : { ...c, order: i }));
 
@@ -45,7 +49,7 @@ export function fromServer(learning: Learning): Draft {
         ...c,
         modules: (c.modules ?? []).map((m) => ({
           ...m,
-          lessons: renumberLessons(m.lessons ?? []),
+          lessons: renumberLessons(sortByOrder(m.lessons ?? [])),
         })),
       })),
     ),

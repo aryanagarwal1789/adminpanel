@@ -37,9 +37,12 @@ export function validate(base: Learning, draft: Learning): Problem[] {
         add({ courseId: cid }, `Course "${c.title || cid}" needs at least one module.`);
     }
 
+    const seenLessons = new Set<string>();
     for (const m of c.modules) {
       const mid = m.moduleId;
-      if (seenModules.has(mid))
+      if (blank(mid))
+        add({ courseId: cid, moduleId: mid, field: "moduleId" }, "Module id is required.");
+      else if (seenModules.has(mid))
         add(
           { courseId: cid, moduleId: mid, field: "moduleId" },
           `Module id "${mid}" must be unique across all courses.`,
@@ -60,12 +63,16 @@ export function validate(base: Learning, draft: Learning): Problem[] {
           `Module "${m.title || mid}" needs at least one lesson.`,
         );
 
-      const seenLessons = new Set<string>();
       for (const l of m.lessons) {
-        if (seenLessons.has(l.id))
+        if (blank(l.id))
           add(
             { courseId: cid, moduleId: mid, lessonId: l.id, field: "id" },
-            `Lesson id "${l.id}" must be unique within its module.`,
+            "Lesson id is required.",
+          );
+        else if (seenLessons.has(l.id))
+          add(
+            { courseId: cid, moduleId: mid, lessonId: l.id, field: "id" },
+            `Lesson id "${l.id}" must be unique within its course.`,
           );
         seenLessons.add(l.id);
         if (blank(l.title))

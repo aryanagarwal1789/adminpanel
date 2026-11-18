@@ -37,6 +37,25 @@ describe("fromServer", () => {
   });
 });
 
+describe("fromServer lesson order", () => {
+  it("sorts lessons by order (stable) before renumbering to index", () => {
+    const src = learning([
+      course("a", [
+        mod("m1", [
+          lesson("x", { order: 2 }),
+          lesson("y", { order: 0 }),
+          lesson("z", { order: 1 }),
+          lesson("t1", { order: 5 }),
+          lesson("t2", { order: 5 }),
+        ]),
+      ]),
+    ]);
+    const lessons = fromServer(src).courses[0].modules[0].lessons;
+    expect(lessons.map((l) => l.id)).toEqual(["y", "z", "x", "t1", "t2"]);
+    expect(lessons.map((l) => l.order)).toEqual([0, 1, 2, 3, 4]);
+  });
+});
+
 describe("course ops", () => {
   it("addCourse appends with order, immutably", () => {
     const d = base();
