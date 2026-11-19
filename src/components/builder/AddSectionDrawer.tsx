@@ -136,6 +136,7 @@ const GROUPS: Group[] = [
     { type: "slick-rtai-stack",          label: "Route to AI — Your Stack", Icon: Layers },
     { type: "slick-rtai-products",       label: "Route to AI — Products", Icon: MonitorPlay },
     { type: "slick-rtai-register",       label: "Route to AI — Register", Icon: FileText },
+    { type: "slick-rtai-brand-strip",    label: "Route to AI — Brand Strip", Icon: Grid2x2 },
     { type: "slick-ab-mission-vision",   label: "About — Mission & Vision", Icon: BookOpen    },
     { type: "slick-ab-founder-banner", label: "About — Founder Banner", Icon: Star },
     { type: "slick-ab-team-experts", label: "About — Team & Investors", Icon: Users },

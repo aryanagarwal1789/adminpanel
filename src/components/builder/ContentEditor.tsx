@@ -4770,6 +4770,37 @@ function renderBlockFields(
       );
     }
 
+    case 'slick-rtai-brand-strip': {
+      type LogoField = { imageUrl: string; alt: string };
+      return (
+        <div className="space-y-4">
+          <RichFieldGroup label="Heading Pre" f={f} set={set} base="headingPre" segments={[{ key: 'headingPre' }]} />
+          <RichFieldGroup label="Heading Highlight (teal)" f={f} set={set} base="headingGradient" segments={[{ key: 'headingGradient' }]} />
+          <RichFieldGroup label="Heading Suffix" f={f} set={set} base="headingSuffix" segments={[{ key: 'headingSuffix' }]} />
+          <Textarea label="Subtitle (HTML)" value={f.subtitle as string ?? ''} onChange={(v) => set('subtitle', v)} />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <p className="text-xs text-slate-400">Logos — upload several at once with the button, then edit alt text below.</p>
+          <MultiImageUploadButton onUploaded={(urls) => set('logos', [...((f.logos as LogoField[]) ?? []), ...urls.map((u) => ({ imageUrl: u, alt: '' }))])} />
+          <Repeater<LogoField>
+            label="Logos"
+            items={(f.logos as LogoField[]) ?? []}
+            onChange={(v) => set('logos', v)}
+            newItem={() => ({ imageUrl: '', alt: 'Brand name' })}
+            itemPreview={(l) => l.alt || '(unnamed)'}
+            renderItem={(l, u) => (
+              <div className="space-y-2">
+                <ImageField label="Logo URL" {...imageI18nProps(l, "imageUrl", (p) => u({ ...l, ...p }))} />
+                <TextInput label="Alt text" value={l.alt} onChange={(x) => u({ ...l, alt: x })} />
+              </div>
+            )}
+          />
+          <div style={{ height: 1, background: '#1e293b', margin: '4px 0' }} />
+          <RichFieldGroup label="CTA label" f={f} set={set} base="ctaLabel" segments={[{ key: 'ctaLabel' }]} />
+          <TextInput label="CTA URL" value={f.ctaUrl as string ?? ''} onChange={(v) => set('ctaUrl', v)} />
+        </div>
+      );
+    }
+
     case 'slick-ab-founder-banner':
       return (
         <div className="space-y-4">
