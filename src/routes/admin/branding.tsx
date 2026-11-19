@@ -2,18 +2,11 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { UploadInput } from './upload-input';
 import { usePublishOtp, PublishOtpModal } from '@/lib/otpPublish';
+import { PORTALS, buildBrandingPayload, type Portal, type PortalBranding } from '@/lib/portalBranding';
 
 export const Route = createFileRoute('/admin/branding')({ component: BrandingPage });
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? 'https://salescode-marketplace.salescode.ai';
-const PORTAL = 'cokeworld';
-
-interface PortalBranding {
-  accent: string;
-  accentDark: string;
-  // Shown by default with the portal's built-in image; every field is optional.
-  banner?: { enabled?: boolean; image?: string; headline?: string; highlights?: string[]; tagline?: string };
-}
 
 const DEFAULT_ACCENT = '#F40009';
 const DEFAULT_ACCENT_DARK = '#D4000A';
@@ -39,6 +32,8 @@ function BrandingPage() {
   const [headline, setHeadline] = useState('');
   const [highlights, setHighlights] = useState<string[]>([]);
   const [tagline, setTagline] = useState('');
+  const [portal, setPortal] = useState<Portal>('cokeworld');
+  const [stored, setStored] = useState<PortalBranding | null>(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<Toast>(null);
 
@@ -47,11 +42,22 @@ function BrandingPage() {
   const otp = usePublishOtp(() => showToast({ type: 'success', message: 'Branding saved' }));
 
   useEffect(() => {
-    fetch(`${BACKEND}/site/portal-branding/${PORTAL}`)
+    let stale = false;
+    setLoading(true);
+    setStored(null);
+    setAccent(DEFAULT_ACCENT);
+    setAccentDark(DEFAULT_ACCENT_DARK);
+    setBannerOn(true);
+    setImage('');
+    setHeadline('');
+    setHighlights([]);
+    setTagline('');
+    fetch(`${BACKEND}/site/portal-branding/${portal}`)
       .then((r) => r.json())
       .then((d: { branding?: PortalBranding | null }) => {
         const b = d.branding;
-        if (!b) return;
+        if (stale || !b) return;
+        setStored(b);
         setAccent(b.accent || DEFAULT_ACCENT);
         setAccentDark(b.accentDark || DEFAULT_ACCENT_DARK);
         setBannerOn(b.banner?.enabled !== false);
@@ -60,26 +66,19 @@ function BrandingPage() {
         setHighlights(b.banner?.highlights ?? []);
         setTagline(b.banner?.tagline ?? '');
       })
-      .catch(() => showToast({ type: 'error', message: 'Failed to load branding' }))
-      .finally(() => setLoading(false));
-  }, []);
+      .catch(() => { if (!stale) showToast({ type: 'error', message: 'Failed to load branding' }); })
+      .finally(() => { if (!stale) setLoading(false); });
+    return () => { stale = true; };
+  }, [portal]);
 
   const save = () => {
-    const branding: PortalBranding = {
-      accent,
-      accentDark,
-      banner: {
-        enabled: bannerOn,
-        ...(image && { image }),
-        ...(headline.trim() && { headline: headline.trim() }),
-        ...(highlights.some((h) => h.trim()) && { highlights: highlights.map((h) => h.trim()).filter(Boolean) }),
-        ...(tagline.trim() && { tagline: tagline.trim() }),
-      },
-    };
-    otp.open('branding.update', { portal: PORTAL, branding });
+    const branding = buildBrandingPayload(portal, { accent, accentDark }, stored, {
+      enabled: bannerOn, image, headline, highlights, tagline,
+    });
+    otp.open('branding.update', { portal, branding });
   };
 
-  if (loading) return <div style={{ color: '#94a3b8', padding: 40, textAlign: 'center' }}>Loading…</div>;
+  const portalInfo = PORTALS.find((p) => p.value === portal)!;
 
   const colourField = (label: string, value: string, set: (v: string) => void) => (
     <div>
@@ -102,7 +101,7 @@ function BrandingPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
           <h1 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 700, margin: 0 }}>Portal branding</h1>
-          <p style={{ color: '#94a3b8', fontSize: 13, margin: '4px 0 0' }}>Colours and marketplace banner for the Coke platform portal</p>
+          <p style={{ color: '#94a3b8', fontSize: 13, margin: '4px 0 0' }}>{portalInfo.subtitle}</p>
         </div>
         <button style={saveBtn} onClick={save}>Save</button>
       </div>
@@ -110,12 +109,25 @@ function BrandingPage() {
       <PublishOtpModal otp={otp} title="Verify to save portal branding" />
 
       <div style={card}>
+        <label style={lbl}>Portal</label>
+        <select style={inp} value={portal} onChange={(e) => setPortal(e.target.value as Portal)}>
+          {PORTALS.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+        </select>
+      </div>
+
+      {loading ? (
+        <div style={{ color: '#94a3b8', padding: 40, textAlign: 'center' }}>Loading…</div>
+      ) : (
+      <>
+      {portal === 'cokeworld' && (
+      <div style={card}>
         <div style={cardTitle}>Colours</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
           {colourField('Accent', accent, setAccent)}
           {colourField('Accent (dark)', accentDark, setAccentDark)}
         </div>
       </div>
+      )}
 
       <div style={card}>
         <div style={cardTitle}>Marketplace banner</div>
@@ -146,6 +158,8 @@ function BrandingPage() {
           <input style={inp} value={tagline} onChange={(e) => setTagline(e.target.value)} />
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }
