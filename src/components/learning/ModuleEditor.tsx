@@ -244,6 +244,16 @@ function LessonFields({
         </button>
       </div>
       <div style={{ marginTop: 10 }}>
+        <label style={lbl}>
+          Workflow image (optional — replaces the steps in the feature dialog)
+        </label>
+        <UploadInput
+          value={l.workflowImage ?? ""}
+          onChange={(workflowImage) => patch({ workflowImage })}
+          accept="image/*"
+        />
+      </div>
+      <div style={{ marginTop: 10 }}>
         <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
           <input
             type="checkbox"
@@ -251,6 +261,16 @@ function LessonFields({
             onChange={(e) => patch({ builtForCoke: e.target.checked })}
           />
           Built for Coke (shown only on the Coke platform portal)
+        </label>
+      </div>
+      <div style={{ marginTop: 10 }}>
+        <label style={{ ...lbl, display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+          <input
+            type="checkbox"
+            checked={!!l.hideInfo}
+            onChange={(e) => patch({ hideInfo: e.target.checked })}
+          />
+          Hide info (ⓘ) button for this lesson
         </label>
       </div>
     </div>

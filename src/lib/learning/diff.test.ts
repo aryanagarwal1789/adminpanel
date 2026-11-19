@@ -10,6 +10,7 @@ import {
   reorderCourses,
   reorderLessons,
   reorderModules,
+  setHideFeatureInfo,
   updateCourse,
   updateLesson,
   updateModule,
@@ -112,6 +113,27 @@ describe("summarize", () => {
         locator: { courseId: "a", moduleId: "m1", lessonId: "l1" },
       },
     ]);
+  });
+  it("counts workflowImage and hideInfo lesson edits", () => {
+    const r = summarize(
+      base(),
+      updateLesson(base(), "a", "m1", "l1", { workflowImage: "u", hideInfo: true }),
+    );
+    expect(r).toHaveLength(1);
+    expect(r[0].label).toContain("workflowImage, hideInfo");
+  });
+  it("counts the global hideFeatureInfo switch", () => {
+    expect(summarize(base(), setHideFeatureInfo(base(), true))).toEqual([
+      {
+        kind: "edited",
+        entity: "settings",
+        label: "Hide feature info (ⓘ) buttons in all courses: on",
+        locator: { courseId: "" },
+      },
+    ]);
+    const on = setHideFeatureInfo(base(), true);
+    expect(summarize(on, setHideFeatureInfo(on, false))[0].label).toContain(": off");
+    expect(summarize(base(), setHideFeatureInfo(base(), false))).toEqual([]);
   });
   it("reorders", () => {
     expect(summarize(base(), reorderCourses(base(), 0, 1))).toEqual([

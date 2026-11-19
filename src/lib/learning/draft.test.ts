@@ -10,6 +10,7 @@ import {
   reorderCourses,
   reorderLessons,
   reorderModules,
+  setHideFeatureInfo,
   updateCourse,
   updateLesson,
   updateModule,
@@ -121,6 +122,24 @@ describe("lesson ops", () => {
   it("updateLesson patches", () => {
     const n = updateLesson(base(), "a", "m1", "l2", { title: "X", builtForCoke: true });
     expect(n.courses[0].modules[0].lessons[1]).toMatchObject({ title: "X", builtForCoke: true });
+  });
+  it("updateLesson carries workflowImage and hideInfo", () => {
+    const n = updateLesson(base(), "a", "m1", "l2", { workflowImage: "https://i/w.png", hideInfo: true });
+    expect(n.courses[0].modules[0].lessons[1]).toMatchObject({
+      workflowImage: "https://i/w.png",
+      hideInfo: true,
+    });
+  });
+  it("fromServer keeps the new lesson and root fields", () => {
+    const b = base();
+    b.hideFeatureInfo = true;
+    b.courses[0].modules[0].lessons[0].workflowImage = "u";
+    const d = fromServer(b);
+    expect(d.hideFeatureInfo).toBe(true);
+    expect(d.courses[0].modules[0].lessons[0].workflowImage).toBe("u");
+  });
+  it("setHideFeatureInfo sets the root flag", () => {
+    expect(setHideFeatureInfo(base(), true).hideFeatureInfo).toBe(true);
   });
   it("removeLesson drops and renumbers", () => {
     const n = removeLesson(base(), "a", "m1", "l1");

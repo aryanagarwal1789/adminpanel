@@ -3,7 +3,13 @@ import { useEffect, useState } from "react";
 import { usePublishOtp, PublishOtpModal } from "@/lib/otpPublish";
 import { LastUpdatedBy } from "@/lib/lastUpdated";
 import { BACKEND_OUTDATED_MESSAGE, useLearning } from "@/lib/learning/LearningProvider";
-import { addCourse, removeCourse, reorderCourses, updateCourse } from "@/lib/learning/draft";
+import {
+  addCourse,
+  removeCourse,
+  reorderCourses,
+  setHideFeatureInfo,
+  updateCourse,
+} from "@/lib/learning/draft";
 import { toId } from "@/lib/learning/ids";
 import { CATEGORIES } from "@/lib/learning/categories";
 import { blankCourse, courseIdProblem, newCourseId } from "@/lib/learning/store";
@@ -176,6 +182,19 @@ function CoursesPage() {
             onChange={(e) => setSubheading(e.target.value)}
             rows={2}
           />
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label
+            style={{ ...lbl, display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
+          >
+            <input
+              type="checkbox"
+              checked={!!L.draft?.hideFeatureInfo}
+              disabled={!L.draft}
+              onChange={(e) => L.edit((d) => setHideFeatureInfo(d, e.target.checked))}
+            />
+            Hide feature info (ⓘ) buttons in all courses (saved with Publish)
+          </label>
         </div>
         <button
           style={saveBtn}

@@ -77,6 +77,7 @@ async function fetchBase(): Promise<Learning> {
     heading: l.heading ?? "",
     subheading: l.subheading ?? "",
     revision: l.revision ?? 0,
+    hideFeatureInfo: !!l.hideFeatureInfo,
     courses: l.courses ?? [],
   });
 }

@@ -2,7 +2,7 @@ import type { Learning, LearningCourse, LearningLesson, LearningModule, Locator 
 
 export interface ChangeItem {
   kind: "added" | "edited" | "removed" | "reordered";
-  entity: "course" | "module" | "lesson";
+  entity: "course" | "module" | "lesson" | "settings";
   label: string;
   locator: Locator;
 }
@@ -57,6 +57,13 @@ export function summarize(base: Learning, draft: Learning): ChangeItem[] {
         locator: { courseId: c.courseId },
       });
   }
+  if (!!base.hideFeatureInfo !== !!draft.hideFeatureInfo)
+    out.push({
+      kind: "edited",
+      entity: "settings",
+      label: `Hide feature info (ⓘ) buttons in all courses: ${draft.hideFeatureInfo ? "on" : "off"}`,
+      locator: { courseId: "" },
+    });
   const movedCourse = firstMoved(
     base.courses.map((c) => c.courseId),
     draft.courses.map((c) => c.courseId),

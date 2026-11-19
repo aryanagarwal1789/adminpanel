@@ -87,10 +87,12 @@ export const rebaseDraft = (base: Learning, state: DraftState): DraftState => ({
 /** Body of the `learning.publish` OTP action. Heading/subheading are not part of it. */
 export function buildPublishPayload(state: DraftState): {
   baseRevision: number;
+  hideFeatureInfo: boolean;
   courses: LearningCourse[];
 } {
   return {
     baseRevision: state.draftBase,
+    hideFeatureInfo: !!state.draft.hideFeatureInfo,
     courses: JSON.parse(JSON.stringify(state.draft.courses)) as LearningCourse[],
   };
 }

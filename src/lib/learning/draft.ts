@@ -56,6 +56,11 @@ export function fromServer(learning: Learning): Draft {
   };
 }
 
+export const setHideFeatureInfo = (d: Draft, hide: boolean): Draft => ({
+  ...d,
+  hideFeatureInfo: hide,
+});
+
 // courses
 export const addCourse = (d: Draft, course: LearningCourse): Draft => ({
   ...d,

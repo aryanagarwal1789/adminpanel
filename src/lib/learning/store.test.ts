@@ -89,13 +89,25 @@ describe("resolveDraft", () => {
 });
 
 describe("buildPublishPayload", () => {
-  it("sends only baseRevision and a copy of the courses", () => {
+  it("sends baseRevision, hideFeatureInfo and a copy of the courses", () => {
     const state = { draft: base(), draftBase: 2 };
     const payload = buildPublishPayload(state);
-    expect(Object.keys(payload).sort()).toEqual(["baseRevision", "courses"]);
+    expect(Object.keys(payload).sort()).toEqual(["baseRevision", "courses", "hideFeatureInfo"]);
+    expect(payload.hideFeatureInfo).toBe(false);
     expect(payload.baseRevision).toBe(2);
     expect(payload.courses).toEqual(state.draft.courses);
     expect(payload.courses).not.toBe(state.draft.courses);
+  });
+});
+
+describe("buildPublishPayload new fields", () => {
+  it("carries hideFeatureInfo and lesson fields", () => {
+    const b = base();
+    b.hideFeatureInfo = true;
+    b.courses[0].modules[0].lessons[0].workflowImage = "u";
+    const p = buildPublishPayload({ draft: b, draftBase: 2 });
+    expect(p.hideFeatureInfo).toBe(true);
+    expect(p.courses[0].modules[0].lessons[0].workflowImage).toBe("u");
   });
 });
 
