@@ -59,3 +59,13 @@ export function buildBrandingPayload(
     },
   };
 }
+
+// Save replaces the whole stored object, so only allow it once the selected portal's branding has loaded.
+export function canSaveBranding(s: {
+  loading: boolean;
+  loadError: boolean;
+  loadedPortal: Portal | null;
+  selectedPortal: Portal;
+}): boolean {
+  return !s.loading && !s.loadError && s.loadedPortal === s.selectedPortal;
+}

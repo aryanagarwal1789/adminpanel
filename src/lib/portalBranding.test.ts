@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildBrandingPayload,
+  canSaveBranding,
   TEAL_ACCENT,
   TEAL_ACCENT_DARK,
   type BannerForm,
@@ -59,5 +60,22 @@ describe("buildBrandingPayload", () => {
       highlights: ["a", "b"],
       tagline: "t",
     });
+  });
+});
+
+describe("canSaveBranding", () => {
+  const ok = { loading: false, loadError: false, loadedPortal: "platform", selectedPortal: "platform" } as const;
+  it("allows save after a successful load of the selected portal", () => {
+    expect(canSaveBranding(ok)).toBe(true);
+  });
+  it("blocks while loading", () => {
+    expect(canSaveBranding({ ...ok, loading: true })).toBe(false);
+  });
+  it("blocks when the load failed", () => {
+    expect(canSaveBranding({ ...ok, loadError: true })).toBe(false);
+  });
+  it("blocks when the loaded portal is not the selected one", () => {
+    expect(canSaveBranding({ ...ok, loadedPortal: "cokeworld" })).toBe(false);
+    expect(canSaveBranding({ ...ok, loadedPortal: null })).toBe(false);
   });
 });

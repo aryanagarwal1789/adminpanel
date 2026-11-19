@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { UploadInput } from './upload-input';
 import { usePublishOtp, PublishOtpModal } from '@/lib/otpPublish';
-import { PORTALS, buildBrandingPayload, type Portal, type PortalBranding } from '@/lib/portalBranding';
+import { PORTALS, buildBrandingPayload, canSaveBranding, type Portal, type PortalBranding } from '@/lib/portalBranding';
 
 export const Route = createFileRoute('/admin/branding')({ component: BrandingPage });
 
@@ -35,6 +35,9 @@ function BrandingPage() {
   const [portal, setPortal] = useState<Portal>('cokeworld');
   const [stored, setStored] = useState<PortalBranding | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [loadedPortal, setLoadedPortal] = useState<Portal | null>(null);
+  const [reloadTick, setReloadTick] = useState(0);
   const [toast, setToast] = useState<Toast>(null);
 
   const showToast = (t: Toast) => { setToast(t); setTimeout(() => setToast(null), 3000); };
@@ -44,6 +47,8 @@ function BrandingPage() {
   useEffect(() => {
     let stale = false;
     setLoading(true);
+    setLoadError(false);
+    setLoadedPortal(null);
     setStored(null);
     setAccent(DEFAULT_ACCENT);
     setAccentDark(DEFAULT_ACCENT_DARK);
@@ -53,10 +58,12 @@ function BrandingPage() {
     setHighlights([]);
     setTagline('');
     fetch(`${BACKEND}/site/portal-branding/${portal}`)
-      .then((r) => r.json())
+      .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
       .then((d: { branding?: PortalBranding | null }) => {
+        if (stale) return;
+        setLoadedPortal(portal);
         const b = d.branding;
-        if (stale || !b) return;
+        if (!b) return;
         setStored(b);
         setAccent(b.accent || DEFAULT_ACCENT);
         setAccentDark(b.accentDark || DEFAULT_ACCENT_DARK);
@@ -66,12 +73,15 @@ function BrandingPage() {
         setHighlights(b.banner?.highlights ?? []);
         setTagline(b.banner?.tagline ?? '');
       })
-      .catch(() => { if (!stale) showToast({ type: 'error', message: 'Failed to load branding' }); })
+      .catch(() => { if (!stale) { setLoadError(true); showToast({ type: 'error', message: 'Failed to load branding' }); } })
       .finally(() => { if (!stale) setLoading(false); });
     return () => { stale = true; };
-  }, [portal]);
+  }, [portal, reloadTick]);
+
+  const canSave = canSaveBranding({ loading, loadError, loadedPortal, selectedPortal: portal });
 
   const save = () => {
+    if (!canSave) return;
     const branding = buildBrandingPayload(portal, { accent, accentDark }, stored, {
       enabled: bannerOn, image, headline, highlights, tagline,
     });
@@ -103,7 +113,7 @@ function BrandingPage() {
           <h1 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 700, margin: 0 }}>Portal branding</h1>
           <p style={{ color: '#94a3b8', fontSize: 13, margin: '4px 0 0' }}>{portalInfo.subtitle}</p>
         </div>
-        <button style={saveBtn} onClick={save}>Save</button>
+        <button style={{ ...saveBtn, ...(canSave ? {} : { opacity: 0.5, cursor: 'not-allowed' }) }} disabled={!canSave} onClick={save}>Save</button>
       </div>
 
       <PublishOtpModal otp={otp} title="Verify to save portal branding" />
@@ -117,6 +127,11 @@ function BrandingPage() {
 
       {loading ? (
         <div style={{ color: '#94a3b8', padding: 40, textAlign: 'center' }}>Loading…</div>
+      ) : loadError ? (
+        <div style={{ color: '#fca5a5', padding: 40, textAlign: 'center' }}>
+          Failed to load branding. Saving is disabled until it loads.{' '}
+          <button style={secBtn} onClick={() => setReloadTick((n) => n + 1)}>Retry</button>
+        </div>
       ) : (
       <>
       {portal === 'cokeworld' && (
