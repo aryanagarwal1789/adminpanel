@@ -385,10 +385,12 @@ export function ModuleRow({
                 id={lessonDomId(m.moduleId, l.id)}
                 {...lessonDrag.dragProps(li)}
                 style={{
-                  background: "#111c33",
+                  // An open lesson is tinted teal with a thick left accent so it never reads as a module.
+                  background: isOpen ? "#0b2530" : "#111c33",
                   borderRadius: 6,
                   marginBottom: 8,
-                  border: `1px solid ${lessonDrag.dragOver === li ? "#3b82f6" : "#334155"}`,
+                  border: `1px solid ${lessonDrag.dragOver === li ? "#3b82f6" : isOpen ? "#14b8a6" : "#334155"}`,
+                  borderLeft: isOpen ? "4px solid #14b8a6" : undefined,
                 }}
               >
                 <div
@@ -413,6 +415,21 @@ export function ModuleRow({
                   >
                     {isOpen ? "▼" : "▶"}
                   </button>
+                  {isOpen && (
+                    <span
+                      style={{
+                        color: "#5eead4",
+                        fontSize: 10,
+                        fontWeight: 700,
+                        letterSpacing: 1,
+                        border: "1px solid #14b8a6",
+                        borderRadius: 4,
+                        padding: "1px 6px",
+                      }}
+                    >
+                      LESSON
+                    </span>
+                  )}
                   <span style={{ color: "#475569", fontSize: 12, width: 20 }}>{li + 1}</span>
                   <span style={{ flex: 1, color: "#f1f5f9", fontSize: 13 }}>
                     {l.title || <span style={{ color: "#475569" }}>Untitled lesson</span>}
