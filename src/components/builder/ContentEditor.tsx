@@ -5290,7 +5290,7 @@ function renderBlockFields(
       type NavItem = { name: string; desc: string; href: string; iconKey: string; ai?: boolean; iconImage?: string; iconBg?: string };
       type NavCat = { key: string; label: string; sub: string; accent: string; iconKey: string; items: NavItem[]; flagship?: boolean };
       type PresenceItem = { name?: string; href?: string; desc?: string; iconEmoji?: string };
-      type NavMenuItem = { name: string; href: string; desc: string; iconKey: string };
+      type NavMenuItem = { name: string; href: string; desc: string; iconKey: string; badge?: string };
       type SidebarStat = { val: string; lbl: string };
       return (
         <div className="space-y-4">
@@ -5395,7 +5395,8 @@ function renderBlockFields(
                 <RichTextInput label="Name" {...richItemProps(c, 'name', u)} />
                 <RichTextInput label="Description" {...richItemProps(c, 'desc', u)} />
                 <PageLinkField label="Link URL" value={c.href ?? ''} onChange={(v) => u({ ...c, href: v })} />
-                <TextInput label="Icon key (cxo-main, cxo-2024, gallery)" value={c.iconKey ?? ''} onChange={(v) => u({ ...c, iconKey: v })} />
+                <TextInput label="Icon key (cxo-main, cxo-2024, gallery, pin)" value={c.iconKey ?? ''} onChange={(v) => u({ ...c, iconKey: v })} />
+                <TextInput label="Badge (e.g. New — blank for none)" value={c.badge ?? ''} onChange={(v) => u({ ...c, badge: v })} />
               </div>
             )}
           />
